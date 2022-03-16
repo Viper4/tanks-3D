@@ -99,41 +99,63 @@ public class TestBot : MonoBehaviour
 
     private void OnTriggerStay(Collider other)
     {
+        Vector3 dir = anchor.forward;
+    
         // Obstacle Avoidance
-        bool[] pathClear = { true, true, true };
-        float[] hitAngle = { 0, 0, 0 };
+        bool[] pathClear = { true, true, true, true };
+        float[] hitAngle = { 0, 0, 0, 0 };
         RaycastHit hit;
-        // Left
-        if(Physics.Raycast(anchor.position - anchor.right * 1.7f, -anchor.right, out hit, 3))
-        {
-            hitAngle[0] = Vector3.Angle(-anchor.right, hit.normal);
-            pathClear[0] = false;
-        }
         // Forward
         if(Physics.Raycast(anchor.position + anchor.forward * 1.7f, anchor.forward, out hit, 3))
         {
-            hitAngle[1] = Vector3.Angle(anchor.forward, hit.normal);
+            hitAngle[1] = Vector3.Dot(anchor.forward, hit.normal);
             pathClear[1] = false;
         }
-        // Right
-        if (Physics.Raycast(anchor.position + anchor.right * 1.7f, anchor.right, out hit, 3))
+        
+        if(!pathClear[1])
         {
-            hitAngle[2] = Vector3.Angle(anchor.right, hit.normal);
-            pathClear[2] = false;
-        }
-        switch(pathClear)
-        {
-            case { true, false, true }:
-                // If the obstacle is directly in front of tank, turn left or right randomly
-                if(hitAngle[1] == 0 || hitAngle[1] == 360)
-                {
-                    Vector3 dir = Random.Range(0, 2) == 0 ? -anchor.right : anchor.right;
-                }
-                else
-                {
-                    
-                }
-                break;
+            // Left
+            if(Physics.Raycast(anchor.position - anchor.right * 1.7f, -anchor.right, out hit, 3))
+            {
+                hitAngle[0] = Vector3.Dot(-anchor.right, hit.normal);
+                pathClear[0] = false;
+            }
+            // Right
+            if (Physics.Raycast(anchor.position + anchor.right * 1.7f, anchor.right, out hit, 3))
+            {
+                hitAngle[2] = Vector3.Dot(anchor.right, hit.normal);
+                pathClear[2] = false;
+            }
+            // Backward
+            if(Physics.Raycast(anchor.position - anchor.forward * 1.7f, -anchor.forward, out hit, 3))
+            {
+                hitAngle[3] = Vector3.Dot(-anchor.forward, hit.normal);
+                pathClear[3] = false;
+            }
+            switch (pathClear)
+            {
+                case { true, false, true, true }:
+                    // If the obstacle is directly in front of tank, turn left or right randomly
+                    if(hitAngle[1] == 0 || hitAngle[1] == 360)
+                    {
+                        dir = Random.Range(0, 2) == 0 ? -anchor.right : anchor.right;
+                    }
+                    else
+                    {
+                        // Turn left if obstacle is facing left
+                        dir = hitAngle[1] < 0 ? -anchor.right : anchor.right;
+                    }
+                    break;
+                case { false, false, true, true }:
+                    dir = anchor.right;
+                    break;
+                case { true, false, false, true }:
+                    dir = -anchor.right;
+                    break;
+                case { false, false, false, true }:
+                    dir = -anchor.forward;
+                    break;
+            }
         }
     }
 
