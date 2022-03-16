@@ -1,0 +1,172 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class BulletBehaviour : MonoBehaviour
+{
+    Rigidbody rb;
+
+    public Transform owner { get; set; }
+
+    public Transform explosionEffect;
+    public Transform sparkEffect;
+
+    public float speed = 32;
+    public float explosionRadius = 0;
+
+    public int pierceLevel = 0;
+    int pierces = 0;
+
+    public int ricochetLevel = 1;
+    int bounces = 0;
+
+    // Start is called before the first frame update
+    void Awake()
+    {
+        rb = GetComponent<Rigidbody>();
+
+        rb.velocity = transform.forward * speed;
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        transform.rotation = Quaternion.LookRotation(transform.forward);
+    }
+
+    private void OnCollisionEnter(Collision other)
+    {
+        switch (other.transform.tag)
+        {
+            case "Tank":
+                KillTarget(other.transform.parent);
+                break;
+            case "Penetrable":
+                // If can pierce, destroy the hit object, otherwise bounce off
+                if (pierceLevel != 0)
+                {
+                    if (pierces < pierceLevel)
+                    {
+                        pierces++;
+                        // Resetting velocity
+                        rb.velocity = transform.forward * speed;
+                    }
+                    else
+                    {
+                        DestroySelf();
+                    }
+                    // Playing destroy particles for hit object and destroying it
+                    other.transform.GetComponent<BreakParticleSystem>().PlayParticles();
+                    Destroy(other.gameObject);
+                }
+                else
+                {
+                    BounceOff(other);
+                }
+                break;
+            case "Kill Boundary":
+                // Kill self
+                DestroySelf();
+                break;
+            case "Bullet":
+                // Destroy bullet
+                KillTarget(other.transform);
+                break;
+            default:
+                BounceOff(other);
+                break;
+        }
+    }
+
+    void BounceOff(Collision hit)
+    {
+        if (bounces < ricochetLevel)
+        {
+            Instantiate(sparkEffect, transform.position, Quaternion.identity);
+            // Reflecting bullet across perpendicular vector of contact point
+            bounces++;
+            Vector3 reflection = Vector3.Reflect(transform.forward, hit.contacts[0].normal);
+            transform.forward = reflection;
+            // Resetting velocity
+            rb.velocity = transform.forward * speed;
+        }
+        else
+        {
+            DestroySelf();
+        }
+    }
+
+    void KillTarget(Transform target)
+    {
+        if (transform.name != "Rocket Bullet")
+        {
+            if (target != null)
+            {
+                if (target.CompareTag("Tank"))
+                {
+                    target.GetComponent<BaseTankLogic>().Explode();
+                }
+                else
+                {
+                    Destroy(target.gameObject);
+                }
+            }
+        }
+
+        DestroySelf();
+    }
+
+    void DestroySelf()
+    {
+        // Keeping track of how many bullets a tank has fired
+        if(owner != null)
+        {
+            owner.GetComponent<FireControl>().bulletsFired -= 1;
+        }
+
+        // Rockets have same explosion system as mines
+        if (transform.name == "Rocket Bullet")
+        {
+            // Getting all colliders within explosionRadius
+            Collider[] colliders = Physics.OverlapSphere(transform.position, explosionRadius);
+            // Iterating through every collider in explosionRadius
+            foreach (Collider collider in colliders)
+            {
+                // Checking tags of colliders
+                switch (collider.tag)
+                {
+                    case "Tank":
+                        // Blowing up tanks
+                        if (collider.transform.parent != null)
+                        {
+                            collider.transform.parent.GetComponent<BaseTankLogic>().Explode();
+                        }
+                        break;
+                    case "Penetrable":
+                        // Playing destroy particles for hit object and destroying it
+                        collider.transform.GetComponent<BreakParticleSystem>().PlayParticles();
+                        Destroy(collider.gameObject);
+                        break;
+                    case "Bullet":
+                        // Destroying bullets in explosion
+                        Destroy(collider.gameObject);
+                        break;
+                    case "Mine":
+                        // Explode mines
+                        collider.GetComponent<MineBehaviour>().Explode(new List<Transform>());
+                        break;
+                }
+
+                Rigidbody rb = collider.GetComponent<Rigidbody>();
+                // Applying explosion force if collider has rigid body
+                if (rb != null)
+                {
+                    rb.AddExplosionForce(8, transform.position, explosionRadius, 3);
+                }
+            }
+        }
+
+        Instantiate(explosionEffect, transform.position, Quaternion.Euler(-90, 0, 0));
+        Destroy(gameObject);
+    }
+}
