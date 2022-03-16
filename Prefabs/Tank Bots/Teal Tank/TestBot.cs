@@ -7,31 +7,36 @@ public class TestBot : MonoBehaviour
 {
     public Transform target;
     float dstToTarget;
-    Quaternion rotTowardsTarget;
+    Quaternion rotToTarget;
 
-    public LayerMask layerMasks;
+    [SerializeField] LayerMask targetLayerMasks;
 
     Transform turret;
     Transform barrel;
     Transform anchor;
 
-    public float shootRadius = 30;
+    public float shootRadius = 30f;
 
     public float[] reactionTime = { 0.3f, 0.45f };
 
     public float[] fireDelay = { 0.3f, 0.6f };
     float cooldown = 0;
 
-    public float turretRotSpeed = 50f;
-    public float barrelRotRangeX = 20;
+    Rigidbody rb;
 
-    public float tankRotSpeed = 10f;
+    [SerializeField] float turretRotSpeed = 50f;
+    [SerializeField] float barrelRotRangeX = 20f;
+
+    [SerializeField] float tankRotSpeed = 10f;
+    Vector3 desiredDir;
+    Vector3 lastEulerAngles;
+    
+    [SerializeField] float noiseScale = 1;
+    [SerializeField] float noiseSpeed = 1f;
+    [SerializeField] bool randomizeSeed = true;
+    [SerializeField] float seed = 0;
 
     public float speed = 5;
-
-    Vector3 lastEulerAngles;
-
-    Rigidbody rb;
 
     enum State
     {
@@ -49,13 +54,19 @@ public class TestBot : MonoBehaviour
             Debug.Log("The variable target of GreyBot has been defaulted to player's Camera Target");
             target = GameObject.Find("Player").transform.Find("Camera Target");
         }
-
-        rb = GetComponent<Rigidbody>();
+        
         turret = transform.Find("Turret");
         barrel = transform.Find("Barrel");
         anchor = transform.Find("Anchor");
 
+        rb = GetComponent<Rigidbody>();
+
         lastEulerAngles = anchor.eulerAngles;
+        
+        if(randomizeSeed)
+        {
+            seed = Random.Range(0f, 99.0f);
+        }
     }
 
     // Update is called once per frame
@@ -69,99 +80,44 @@ public class TestBot : MonoBehaviour
             // origin is offset forward by 1.7 to prevent ray from hitting this tank
             Vector3 origin = anchor.position + anchor.forward * 1.7f;
             // If nothing blocking player
-            if (!Physics.Raycast(origin, target.position - origin, dstToTarget, ~layerMasks))
+            if (!Physics.Raycast(origin, target.position - origin, dstToTarget, ~targetLayerMasks))
             {
                 StartCoroutine(Shoot());
             }
         }
-
-        if (rb != null && state == State.Idle)
+        
+        if (rb != null)
         {
-            rb.velocity = transform.forward * speed;
+            // Movement
+            if (state == State.Moving)
+            {
+                rb.velocity = transform.forward * speed; 
+            }
+            // Rotation
+            float noise = noiseScale * (Mathf.PerlinNoise(seed + Time.time * noiseSpeed, (seed + 1) + Time.time * noiseSpeed) - 0.5f);
+            Quaternion desiredTankRot = Quaternion.LookRotation(desiredDir * Quaternion.AngleAxis(noise, Vector3.up));
+            rb.MoveRotation(Quaternion.RotateTowards(transform.rotation, desiredTankRot, Time.deltaTime * tankRotSpeed));
         }
 
         // Correcting turret and barrel rotation to not depend on parent rotation
         turret.rotation = barrel.rotation = anchor.rotation *= Quaternion.Euler(lastEulerAngles - transform.eulerAngles);
 
         // Rotating turret and barrel towards target
-        Vector3 dir = target.position - anchor.position;
-        rotTowardsTarget = Quaternion.LookRotation(dir);
-        Quaternion desiredRot = anchor.rotation = barrel.rotation = Quaternion.RotateTowards(anchor.rotation, rotTowardsTarget, Time.deltaTime * turretRotSpeed);
+        Vector3 dirToTarget = target.position - anchor.position;
+        rotToTarget = Quaternion.LookRotation(dirToTarget);
+        Quaternion desiredTurretRot = anchor.rotation = barrel.rotation = Quaternion.RotateTowards(anchor.rotation, rotToTarget, Time.deltaTime * turretRotSpeed);
 
-        //Quaternion desiredRot = anchor.rotation = barrel.rotation = Quaternion.Lerp(anchor.rotation, rotTowardsTarget, Time.deltaTime * rotateSpeed);
         barrel.rotation *= Quaternion.Euler(-90, 0, 0);
 
-        turret.eulerAngles = new Vector3(-90, desiredRot.eulerAngles.y, desiredRot.eulerAngles.z);
+        turret.eulerAngles = new Vector3(-90, desiredTurretRot.eulerAngles.y, desiredTurretRot.eulerAngles.z);
         barrel.eulerAngles = new Vector3(Clamping.ClampAngle(barrel.eulerAngles.x, -90 - barrelRotRangeX, -90 + barrelRotRangeX), barrel.eulerAngles.y, barrel.eulerAngles.z);
 
         lastEulerAngles = transform.eulerAngles;
     }
 
     private void OnTriggerStay(Collider other)
-    {
-        Vector3 dir = anchor.forward;
-    
-        // Obstacle Avoidance
-        bool[] pathClear = { true, true, true, true };
-        float[] hitAngle = { 0, 0, 0, 0 };
-        RaycastHit hit;
-        // Forward
-        if(Physics.Raycast(anchor.position + anchor.forward * 1.7f, anchor.forward, out hit, 3))
-        {
-            hitAngle[1] = Vector3.Dot(anchor.forward, hit.normal);
-            pathClear[1] = false;
-        }
-        
-        if(!pathClear[1])
-        {
-            // Left
-            if(Physics.Raycast(anchor.position - anchor.right * 1.7f, -anchor.right, out hit, 3))
-            {
-                hitAngle[0] = Vector3.Dot(-anchor.right, hit.normal);
-                pathClear[0] = false;
-            }
-            // Right
-            if (Physics.Raycast(anchor.position + anchor.right * 1.7f, anchor.right, out hit, 3))
-            {
-                hitAngle[2] = Vector3.Dot(anchor.right, hit.normal);
-                pathClear[2] = false;
-            }
-            // Backward
-            if(Physics.Raycast(anchor.position - anchor.forward * 1.7f, -anchor.forward, out hit, 3))
-            {
-                hitAngle[3] = Vector3.Dot(-anchor.forward, hit.normal);
-                pathClear[3] = false;
-            }
-            switch (pathClear)
-            {
-                case { true, false, true, true }:
-                    // If the obstacle is directly in front of tank, turn left or right randomly
-                    if(hitAngle[1] == 0 || hitAngle[1] == 360)
-                    {
-                        dir = Random.Range(0, 2) == 0 ? -anchor.right : anchor.right;
-                    }
-                    else
-                    {
-                        // Turn left if obstacle is facing left
-                        dir = hitAngle[1] < 0 ? -anchor.right : anchor.right;
-                    }
-                    break;
-                case { false, false, true, true }:
-                    dir = anchor.right;
-                    break;
-                case { true, false, false, true }:
-                    dir = -anchor.right;
-                    break;
-                case { false, false, false, true }:
-                    dir = -anchor.forward;
-                    break;
-            }
-        }
-    }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        Vector3 dir;
+    {    
+        // Avoiding bullets, mines, and obstacles
         switch (other.tag)
         {
             case "Bullet":
@@ -171,19 +127,80 @@ public class TestBot : MonoBehaviour
                 {
                     if(hit.transform == transform)
                     {
-                        dir = Random.Range(0, 2) == 0 ? Rotate90CW(other.transform.position - anchor.position) : Rotate90CCW(other.transform.position - anchor.position);
-                        rb.MoveRotation(Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(dir), Time.deltaTime * tankRotSpeed));
+                        desiredDir = Random.Range(0, 2) == 0 ? Rotate90CW(other.transform.position - anchor.position) : Rotate90CCW(other.transform.position - anchor.position);
                     }
                 }
                 break;
             case "Mine":
                 // Move in opposite direction of mine
-                dir = anchor.position - other.transform.position;
-                rb.MoveRotation(Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(dir), Time.deltaTime * tankRotSpeed));
+                desiredDir = anchor.position - other.transform.position;
+                break;
+            default:
+                // Obstacle Avoidance
+                bool[] pathClear = { true, true, true };
+                float hitAngle = 0;
+                RaycastHit hit;
+                // Forward
+                if(Physics.Raycast(anchor.position + anchor.forward * 1.7f, anchor.forward, out hit, 3))
+                {
+                    // Dot product doesn't give absolute value of angle
+                    hitAngle = Vector3.Dot(anchor.forward, hit.normal);
+                    pathClear[1] = false;
+                }
+
+                if(!pathClear[1])
+                {
+                    // Checking Left
+                    if(Physics.Raycast(anchor.position - anchor.right * 1.7f, -anchor.right, out hit, 3))
+                    {
+                        pathClear[0] = false;
+                    }
+                    // Checking Right
+                    if (Physics.Raycast(anchor.position + anchor.right * 1.7f, anchor.right, out hit, 3))
+                    {
+                        pathClear[2] = false;
+                    }
+                    
+                    if (pathClear[0]) 
+                    {
+                        if (pathClear[2]) 
+                        {
+                            // If the obstacle is directly in front of tank, turn left or right randomly
+                            if(hitAngle == 0 || hitAngle == 360)
+                            {
+                                desiredDir = Random.Range(0, 2) == 0 ? -anchor.right : anchor.right;
+                            }
+                            else
+                            {
+                                // Turn left if obstacle is facing left
+                                desiredDir = hitAngle < 0 ? -anchor.right : anchor.right;
+                            }
+                        }
+                        else 
+                        {
+                            // Rotate left
+                            desiredDir = -anchor.right;
+                        }
+                    }
+                    else if (pathClear[2]) 
+                    {
+                        // Rotate right
+                        desiredDir = anchor.right;
+                    }
+                    else
+                    {
+                        // Rotate backward
+                        desiredDir = -anchor.forward;
+                    }
+                }
+                else 
+                {
+                    desiredDir = anchor.forward;
+                }
                 break;
         }
     }
-
+    
     IEnumerator Shoot()
     {
         state = State.Shooting;
