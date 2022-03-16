@@ -100,17 +100,40 @@ public class TestBot : MonoBehaviour
     private void OnTriggerStay(Collider other)
     {
         // Obstacle Avoidance
-        if(Physics.Raycast(anchor.position + anchor.forward * 1.7f, anchor.forward, 3))
+        bool[] pathClear = { true, true, true };
+        float[] hitAngle = { 0, 0, 0 };
+        RaycastHit hit;
+        // Left
+        if(Physics.Raycast(anchor.position - anchor.right * 1.7f, -anchor.right, out hit, 3))
         {
-
+            hitAngle[0] = Vector3.Angle(-anchor.right, hit.normal);
+            pathClear[0] = false;
         }
-        if(Physics.Raycast(anchor.position + anchor.right * 1.7f, anchor.right, 3))
+        // Forward
+        if(Physics.Raycast(anchor.position + anchor.forward * 1.7f, anchor.forward, out hit, 3))
         {
-
+            hitAngle[1] = Vector3.Angle(anchor.forward, hit.normal);
+            pathClear[1] = false;
         }
-        if (Physics.Raycast(anchor.position - anchor.right * 1.7f, -anchor.right, 3))
+        // Right
+        if (Physics.Raycast(anchor.position + anchor.right * 1.7f, anchor.right, out hit, 3))
         {
-
+            hitAngle[2] = Vector3.Angle(anchor.right, hit.normal);
+            pathClear[2] = false;
+        }
+        switch(pathClear)
+        {
+            case { true, false, true }:
+                // If the obstacle is directly in front of tank, turn left or right randomly
+                if(hitAngle[1] == 0 || hitAngle[1] == 360)
+                {
+                    Vector3 dir = Random.Range(0, 2) == 0 ? -anchor.right : anchor.right;
+                }
+                else
+                {
+                    
+                }
+                break;
         }
     }
 
@@ -185,7 +208,7 @@ public class TestBot : MonoBehaviour
 
         return origin;
     }
-
+    
     // clockwise
     Vector3 Rotate90CW(Vector3 aDir)
     {
