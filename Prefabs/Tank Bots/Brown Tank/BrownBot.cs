@@ -13,9 +13,9 @@ public class BrownBot : MonoBehaviour
 
     public float[] fireDelay = { 1, 3 };
 
-    public float rotateSpeed = 20;
+    [SerializeField] float turretRotSpeed = 20;
 
-    public Vector2 rotateRange = new Vector2(15, 45);
+    [SerializeField] Vector2 turretRotRange = new Vector2(15, 45);
 
     Vector3 turretStartEulers;
     Vector3 barrelStartEulers;
@@ -44,8 +44,8 @@ public class BrownBot : MonoBehaviour
     {
         dstToTarget = Vector3.Distance(transform.position, target.position);
 
-        float angleX = Mathf.PingPong(Time.time * rotateSpeed, rotateRange.x * 2) - rotateRange.x;
-        float angleY = Mathf.PingPong(Time.time * rotateSpeed, rotateRange.y * 2) - rotateRange.y;
+        float angleX = Mathf.PingPong(Time.time * turretRotSpeed, turretRotRange.x * 2) - turretRotRange.x;
+        float angleY = Mathf.PingPong(Time.time * turretRotSpeed, turretRotRange.y * 2) - turretRotRange.y;
 
         turret.eulerAngles = new Vector3(-90, turretStartEulers.y + angleY, 0);
         barrel.eulerAngles = anchor.eulerAngles = new Vector3(barrelStartEulers.x + angleX, barrelStartEulers.y + angleY, 0);
