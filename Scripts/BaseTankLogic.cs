@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class BaseTankLogic : MonoBehaviour
 {
-    public Transform explosionEffect;
+    [SerializeField] Transform explosionEffect;
 
     public void Explode()
     {

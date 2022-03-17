@@ -4,9 +4,10 @@ using UnityEngine;
 
 public class FireControl : MonoBehaviour
 {
-    public Transform projectileParent;
+    Transform projectileParent;
+    [SerializeField] Transform owner;
 
-    public Transform bullet;
+    [SerializeField] Transform bullet;
 
     Transform barrel;
 
@@ -18,6 +19,11 @@ public class FireControl : MonoBehaviour
     // Start is called before the first frame update
     void Awake()
     {
+        if(projectileParent == null)
+        {
+            projectileParent = GameObject.Find("Projectiles").transform;
+        }
+
         barrel = transform.Find("Barrel");
     }
 
@@ -34,7 +40,7 @@ public class FireControl : MonoBehaviour
 
             yield return new WaitWhile(() => bulletClone.GetComponent<BulletBehaviour>() == null);
 
-            bulletClone.GetComponent<BulletBehaviour>().owner = transform;
+            bulletClone.GetComponent<BulletBehaviour>().owner = owner;
 
             yield return new WaitForSeconds(fireCooldown);
             canFire = true;

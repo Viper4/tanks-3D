@@ -8,8 +8,8 @@ public class BulletBehaviour : MonoBehaviour
 
     public Transform owner { get; set; }
 
-    public Transform explosionEffect;
-    public Transform sparkEffect;
+    [SerializeField] Transform explosionEffect;
+    [SerializeField] Transform sparkEffect;
 
     public float speed = 32;
     public float explosionRadius = 0;
@@ -31,7 +31,7 @@ public class BulletBehaviour : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        transform.rotation = Quaternion.LookRotation(transform.forward);
+        //transform.rotation = Quaternion.LookRotation(transform.forward);
     }
 
     private void OnCollisionEnter(Collision other)
@@ -39,7 +39,7 @@ public class BulletBehaviour : MonoBehaviour
         switch (other.transform.tag)
         {
             case "Tank":
-                KillTarget(other.transform.parent);
+                KillTarget(other.transform);
                 break;
             case "Penetrable":
                 // If can pierce, destroy the hit object, otherwise bounce off
