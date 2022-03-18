@@ -37,6 +37,8 @@ public class TealBot : MonoBehaviour
     [SerializeField] float tankRotSeed = 0;
 
     public float speed = 5;
+    public float gravity = 5;
+    float velocityY = 0;
 
     float triggerRadius = 3.5f;
 
@@ -44,7 +46,7 @@ public class TealBot : MonoBehaviour
     {
         Idle,
         Move,
-        Shooting
+        Shoot
     }
     Mode mode = Mode.Move;
 
@@ -79,7 +81,7 @@ public class TealBot : MonoBehaviour
         cooldown = cooldown > 0 ? cooldown - Time.deltaTime : 0;
         dstToTarget = Vector3.Distance(transform.position, target.position);
 
-        if (dstToTarget < shootRadius && mode != Mode.Shooting && cooldown == 0)
+        if (dstToTarget < shootRadius && mode != Mode.Shoot && cooldown == 0)
         {
             // origin is offset forward by 1.7 to prevent ray from hitting this tank
             Vector3 origin = anchor.position + anchor.forward * 1.7f;
@@ -93,12 +95,20 @@ public class TealBot : MonoBehaviour
         if (rb != null)
         {
             // Movement
+            Vector3 velocity;
+            velocityY = Physics.Raycast(transform.position, -Vector3.up, 0.1f) ? 0 : velocityY - Time.deltaTime * gravity;
             if (mode == Mode.Move)
             {
-                rb.velocity = transform.forward * speed;
+                velocity = transform.forward * speed;
+            }
+            else
+            {
+                velocity = Vector3.zero;
             }
 
-            if (mode != Mode.Shooting)
+            rb.velocity = velocity + Vector3.up * velocityY;
+
+            if (mode != Mode.Shoot)
             {
                 // Rotation
                 float noise = tankRotNoiseScale * (Mathf.PerlinNoise(tankRotSeed + Time.time * tankRotNoiseSpeed, (tankRotSeed + 1) + Time.time * tankRotNoiseSpeed) - 0.5f);
@@ -186,7 +196,6 @@ public class TealBot : MonoBehaviour
                     }
                     Debug.DrawLine(origin + transform.right * 1.11f, anchor.position + transform.right * 3, Color.red, 0.1f);
 
-                    Debug.Log(dotProduct);
                     if (pathClear[0])
                     {
                         if (pathClear[2])
@@ -232,7 +241,7 @@ public class TealBot : MonoBehaviour
 
     IEnumerator Shoot()
     {
-        mode = Mode.Shooting;
+        mode = Mode.Shoot;
 
         // Waiting for tank to move forward a bit more
         yield return new WaitForSeconds(0.5f);
