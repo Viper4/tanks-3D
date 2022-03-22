@@ -82,38 +82,33 @@ public class ObjectCreation : MonoBehaviour
             // Generating level
             else 
             {
-                Vector3[] validDirections;
-                Vector3 dir = transform.forward;
-                for(int i = 0; i < 5; i++)
+                // Getting list of valid directions to instantiate
+                Vector3 direction;
+                List<Vector3> validDirections = { transform.forward, transform.right, -transform.forward, -transform.right, transform.up, -transform.up };
+                foreach(Vector3 direction in validDirections)
                 {
-                    if(i < 4)
+                    if(!boundsCollider.bounds.Contains(transform.position + direction * distanceAway))
                     {
-                        dir = Quaternion.AngleAxis(90, Vector3.up) * dir;
+                        validDirections.Remove(direction);
                     }
-                    else if (i == 4) 
-                    {
-                        dir = transform.up;
-                    }
-                    else if (i == 5)
-                    {
-                        dir = -transform.up;
-                    }
-                    else 
-                    {
-                        Debug.Log("No directions from " + transform.name + " are valid");
-                        break;
-                    }
-                    if(boundsCollider.bounds.Contains(transform.position + dir * distanceAway))
-                    {
-                        validDirections.Add(dir);
-                    }
+                }
+                
+                // Picking random direction from valid directions to instantiate
+                if(validDirections.Length != 0)
+                {
+                    direction = validDirections[Random.Range(0, validDirections.Length)]
+                    Instantiate(gameObject, transform.position + direction * dstAway, transform.rotation, transform.parent);
+                }
+                else
+                {
+                    Debug.log("No valid spawn position from " + transform.name);
                 }
             }
         }
         else
         {
             Debug.Log(transform.name + " out of bounds, choosing random origin");
-            
+            // Pick random origin
         }
     }
 }
