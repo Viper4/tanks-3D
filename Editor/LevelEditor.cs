@@ -5,6 +5,7 @@ using UnityEditor;
 [CustomEditor(typeof(ObjectCreation))]
 public class LevelEditor : Editor
 {
+    [SerializeField] GameObject boundingBox;
     [SerializeField] Vector3[] bounds;
     
     [SerializeField] int tankLimit;
@@ -41,7 +42,7 @@ public class LevelEditor : Editor
             
             if (GUILayout.Button("Generate Random"))
             {
-                objectCreation.GenerateRandom(tankLimit, tanks, obstacleLimit, obstacles, branchChance);
+                objectCreation.RandomGeneration(boundingBox, bounds, tankLimit, tanks, obstacleLimit, obstacles, branchChance);
             }
         }
         else if (targets.Length > 1)
@@ -76,10 +77,6 @@ public class LevelEditor : Editor
                     objectCreation.Undo();
                 }
             }
-        }
-        else
-        {
-            
         }
         
         GUILayout.EndHorizontal();
