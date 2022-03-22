@@ -41,9 +41,13 @@ public class ObjectCreation : MonoBehaviour
         }
     }
     
-    public void RandomGeneration(GameObject boundingBoxRef, Vector3[] bounds, int tankLimit, List<Transform> tanks, int obstacleLimit, List<Transform> obstacles, float branchChance)
+    public void RandomGeneration(GameObject boundingBoxRef, Vector3[] bounds, int tankLimit, List<Transform> tanks, int obstacleLimit, List<Transform> obstacles, float branchChance, bool distribute)
     {    
         // Generating bounding box between two points
+        // UnityEngine Transform, GameObject, and Vector3 documentation: https://docs.unity3d.com/ScriptReference/Transform.html, https://docs.unity3d.com/ScriptReference/GameObject.html, https://docs.unity3d.com/ScriptReference/Vector3.html
+        // Instantiate method from UnityEngine library: https://docs.unity3d.com/ScriptReference/Object.Instantiate.html
+        
+        // Generating stretched cube given two corner points: https://answers.unity.com/questions/52747/how-i-can-create-a-cube-with-specific-coordenates.html
         GameObject boundingBox = Instantiate(boundingBoxRef);
         Vector3 between = bounds[1] - bounds[0];
         float distance = between.magnitude;
@@ -51,9 +55,11 @@ public class ObjectCreation : MonoBehaviour
         boundingBox.position = bounds[0] + (between / 2.0);
         boundingBox.LookAt(bounds[1]);
         
+        // UnityEngine Collider documentation: https://docs.unity3d.com/ScriptReference/Collider.html
         Collider boundsCollider = boundingBox.GetComponent<Collider>();
 
         // Checking if origin is within bounds
+        // Bounds.Contains method from UnityEngine lib: https://docs.unity3d.com/ScriptReference/Bounds.Contains.html
         if (boundsCollider.bounds.Contains(transform.position))
         {
             Transform targetObstacle = null;
@@ -69,13 +75,14 @@ public class ObjectCreation : MonoBehaviour
             // If targetObstacle has not been selected
             if(targetObstacle == null)
             {
-                // If there is elements in the obstacle list select a random obstacle otherwise log error and stop the method
+                // If there are still elements in the obstacle list select a random one otherwise log error and stop the method
                 if(obstacles.Length != 0)
                 {
                     targetObstacle = obstacles[Random.Range(0, obstacles.Length)];
                 }
                 else
                 {
+                    // Debug class from UnityEngine library: https://docs.unity3d.com/ScriptReference/Debug.html
                     Debug.LogError("No obstacles to instantiate!");
                 }
             }
@@ -87,6 +94,7 @@ public class ObjectCreation : MonoBehaviour
                 List<Vector3> validDirections = { transform.forward, transform.right, -transform.forward, -transform.right, transform.up, -transform.up };
                 foreach(Vector3 direction in validDirections)
                 {
+                    // Bounds.Contains method from UnityEngine lib: https://docs.unity3d.com/ScriptReference/Bounds.Contains.html
                     if(!boundsCollider.bounds.Contains(transform.position + direction * distanceAway))
                     {
                         validDirections.Remove(direction);
@@ -97,7 +105,23 @@ public class ObjectCreation : MonoBehaviour
                 if(validDirections.Length != 0)
                 {
                     direction = validDirections[Random.Range(0, validDirections.Length)]
-                    Instantiate(gameObject, transform.position + direction * dstAway, transform.rotation, transform.parent);
+                    if (distribute)
+                    {
+                        int subtractA = Mathf.Floor(obstacleLimit / obstacles.Length);
+                        for(int i = 0; i < obstacles.Length; i++)
+                        {
+                            GenerateObject(obstacle[i], boundsCollider, direction, distanceAway, , branchChance);
+                        }
+                    }
+                    else
+                    {
+                        int times = obstacleLimit;
+                        foreach(Transform obstacle in obstacles)
+                        {
+                            times -= Random.Range(0, times);
+                            GenerateObject(obstacle, boundsCollider, direction, distanceAway, times, branchChance);
+                        }
+                    }
                 }
                 else
                 {
@@ -109,6 +133,31 @@ public class ObjectCreation : MonoBehaviour
         {
             Debug.Log(transform.name + " out of bounds, choosing random origin");
             // Pick random origin
+        }
+    }
+    
+    public void GenerateObject(GameObject prefab, Collider boundingCollider, Vector3 direction, float dst, int times, float branchChance)
+    {
+        GameObject clone = null;
+
+        for (int i = 0; i < times; i++)
+        {
+            Vector3 clonePosition = transform.position + direction * ((i+1) * dst));
+            // Bounds.Contains method from UnityEngine lib: https://docs.unity3d.com/ScriptReference/Bounds.Contains.html
+            if(boundsCollider.bounds.Contains(clonePosition)
+            {
+                // Instantiate method from UnityEngine library: https://docs.unity3d.com/ScriptReference/Object.Instantiate.html
+                clone = Instantiate(gameObject, clonePosition, transform.rotation, transform.parent);
+                if (Random.value <= branchChance)
+                {
+                    clone.GetComponent<ObjectCreation>().GenerateObject(prefab, boundingCollider, dst, i);
+                    break;
+                }
+            }
+        }
+        else
+        {
+            Debug.log("No valid spawn position from " + transform.name);
         }
     }
 }
