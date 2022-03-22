@@ -5,7 +5,6 @@ using UnityEditor;
 [CustomEditor(typeof(ObjectCreation))]
 public class LevelEditor : Editor
 {
-    [SerializeField] Transform origin;
     [SerializeField] Vector3[] bounds;
     
     [SerializeField] int tankLimit;
@@ -38,6 +37,11 @@ public class LevelEditor : Editor
             if (GUILayout.Button("Undo"))
             {
                 objectCreation.Undo();
+            }
+            
+            if (GUILayout.Button("Generate Random"))
+            {
+                objectCreation.GenerateRandom(tankLimit, tanks, obstacleLimit, obstacles, branchChance);
             }
         }
         else if (targets.Length > 1)
@@ -73,26 +77,9 @@ public class LevelEditor : Editor
                 }
             }
         }
-
-        if (GUILayout.Button("Generate Random"))
+        else
         {
-            // Midpoint between A and B
-            Vector3 boundingBoxCenter = (bounds[0] + bounds[1]) * 0.5f;
-            Vector3 boundsDir = bounds[0] - bounds[1]
-            // Distance between each axis coordinate: Mathf.Abs(A - B).x
-            Vector3 halfExtents = Mathf.Abs(boundsDir) * 0.5f;
-            // Checking if origin is within bounds
-            if (origin in Physics.BoxCastAll(boundingBoxCenter, halfExtents, Vector3.forward, Quaternion.identity))
-            {
-                foreach(Transform obstacle in obstacles)
-                {
-                    
-                }
-            }
-            else
-            {
-                Debug.LogWarning(origin.name + " out of bounds, choosing random origin");
-            }
+            
         }
         
         GUILayout.EndHorizontal();
