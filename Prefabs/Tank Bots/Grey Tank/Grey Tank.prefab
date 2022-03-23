@@ -169,7 +169,7 @@ GameObject:
   - component: {fileID: 211351361649562084}
   - component: {fileID: 7766225960865346620}
   - component: {fileID: 1771951314046201080}
-  - component: {fileID: 7472078026410681074}
+  - component: {fileID: 4330048158581545481}
   m_Layer: 6
   m_Name: Body
   m_TagString: Tank
@@ -242,8 +242,8 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &7472078026410681074
-BoxCollider:
+--- !u!64 &4330048158581545481
+MeshCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -252,9 +252,10 @@ BoxCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 2.1000001, y: 2.2000008, z: 0.86395425}
-  m_Center: {x: 0, y: -0.00000011920932, z: -0.04824811}
+  serializedVersion: 4
+  m_Convex: 1
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 2959467708922500008, guid: 5460aeb10bb94544886a6a579f2d15ac, type: 3}
 --- !u!1 &3895364332803062168
 GameObject:
   m_ObjectHideFlags: 0
@@ -418,6 +419,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   explosionEffect: {fileID: 3507901705876011728, guid: 8d9ad67b12c764e4387b9e13b552aa70, type: 3}
+  pitchRange:
+  - -45
+  - 45
+  rollRange:
+  - -45
+  - 45
 --- !u!114 &6089765290543581610
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -442,16 +449,17 @@ MonoBehaviour:
   - 0.3
   - 0.6
   inaccuracy: {x: 15, y: 30}
-  turretNoiseSpeed: 0.15
-  turretRotSpeed: 20
-  barrelRotRangeX: 20
-  tankRotSpeed: 250
-  tankRotNoiseScale: 5
-  tankRotNoiseSpeed: 0.5
   randomizeSeed: 1
+  turretRotSpeed: 20
+  turretNoiseSpeed: 0.15
+  turretRotSeed: 0
+  barrelRotRangeX: 20
+  tankRotSpeed: 150
+  tankRotNoiseScale: 5
+  tankRotNoiseSpeed: 1
   tankRotSeed: 0
   speed: 3
-  gravity: 12
+  gravity: 3
 --- !u!54 &-1444549703756494348
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -466,7 +474,7 @@ Rigidbody:
   m_UseGravity: 0
   m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 80
+  m_Constraints: 0
   m_CollisionDetection: 0
 --- !u!135 &7463317193408163035
 SphereCollider:

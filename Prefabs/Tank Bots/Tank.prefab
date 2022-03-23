@@ -41,7 +41,7 @@ GameObject:
   - component: {fileID: 5864286255247148983}
   - component: {fileID: 4056567799526924911}
   - component: {fileID: 5412134752811367083}
-  - component: {fileID: 3764684754896123041}
+  - component: {fileID: 4307595558851671517}
   m_Layer: 6
   m_Name: Body
   m_TagString: Tank
@@ -114,7 +114,7 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &3764684754896123041
+--- !u!65 &4307595558851671517
 BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -138,7 +138,7 @@ GameObject:
   - component: {fileID: 8015774000218417766}
   - component: {fileID: 7239095871577845978}
   - component: {fileID: -1708683654604279647}
-  - component: {fileID: 8072256219074837045}
+  - component: {fileID: 5844788160669333172}
   m_Layer: 6
   m_Name: Tank
   m_TagString: Tank
@@ -193,28 +193,28 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   explosionEffect: {fileID: 3507901705876011728, guid: 8d9ad67b12c764e4387b9e13b552aa70, type: 3}
---- !u!195 &8072256219074837045
-NavMeshAgent:
+  pitchRange:
+  - -45
+  - 45
+  rollRange:
+  - -45
+  - 45
+--- !u!54 &5844788160669333172
+Rigidbody:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7239095871577845980}
-  m_Enabled: 1
-  m_AgentTypeID: 0
-  m_Radius: 1.25
-  m_Speed: 3.5
-  m_Acceleration: 8
-  avoidancePriority: 50
-  m_AngularSpeed: 120
-  m_StoppingDistance: 0
-  m_AutoTraverseOffMeshLink: 1
-  m_AutoBraking: 1
-  m_AutoRepath: 1
-  m_Height: 1.6
-  m_BaseOffset: 0
-  m_WalkableMask: 4294967295
-  m_ObstacleAvoidanceType: 4
+  serializedVersion: 2
+  m_Mass: 10
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_UseGravity: 0
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1 &7314939320093077451
 GameObject:
   m_ObjectHideFlags: 0

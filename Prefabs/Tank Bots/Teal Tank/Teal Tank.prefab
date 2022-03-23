@@ -321,6 +321,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   explosionEffect: {fileID: 3507901705876011728, guid: 8d9ad67b12c764e4387b9e13b552aa70, type: 3}
+  pitchRange:
+  - -45
+  - 45
+  rollRange:
+  - -45
+  - 45
 --- !u!114 &5572134548717343361
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -344,15 +350,15 @@ MonoBehaviour:
   fireDelay:
   - 0.3
   - 0.6
+  randomizeSeed: 1
   turretRotSpeed: 50
   barrelRotRangeX: 20
   tankRotSpeed: 250
   tankRotNoiseScale: 5
   tankRotNoiseSpeed: 0.5
-  randomizeSeed: 1
   tankRotSeed: 0
   speed: 5
-  gravity: 12
+  gravity: 3
 --- !u!54 &-563639079389155497
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -367,7 +373,7 @@ Rigidbody:
   m_UseGravity: 0
   m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 80
+  m_Constraints: 0
   m_CollisionDetection: 0
 --- !u!135 &5480169899149344446
 SphereCollider:
@@ -393,7 +399,7 @@ GameObject:
   - component: {fileID: 4915463881591312242}
   - component: {fileID: 3251264644054133418}
   - component: {fileID: 6795614070258741870}
-  - component: {fileID: 2408235900008692836}
+  - component: {fileID: 9184913549024548865}
   m_Layer: 6
   m_Name: Body
   m_TagString: Tank
@@ -466,7 +472,7 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &2408235900008692836
+--- !u!65 &9184913549024548865
 BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

@@ -5,16 +5,6 @@ using UnityEditor;
 [CustomEditor(typeof(ObjectCreation))]
 public class LevelEditor : Editor
 {
-    [SerializeField] GameObject boundingBox;
-    [SerializeField] Vector3[] bounds;
-    
-    [SerializeField] int tankLimit;
-    [SerializeField] List<Transform> tanks = new List<Transform>();
-    
-    [SerializeField] int obstacleLimit;
-    [SerializeField] List<Transform> obstacles = new List<Transform>();
-    [SerializeField] float branchChance = 0.5f;
-
     public override void OnInspectorGUI()
     {
         base.OnInspectorGUI();
@@ -39,10 +29,10 @@ public class LevelEditor : Editor
             {
                 objectCreation.Undo();
             }
-            
+
             if (GUILayout.Button("Generate Random"))
             {
-                objectCreation.RandomGeneration(boundingBox, bounds, tankLimit, tanks, obstacleLimit, obstacles, branchChance);
+                GameObject.Find("Level").GetComponent<LevelGenerator>().Generate(objectCreation);
             }
         }
         else if (targets.Length > 1)

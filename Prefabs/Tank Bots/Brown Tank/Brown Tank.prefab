@@ -199,8 +199,8 @@ MonoBehaviour:
   fireDelay:
   - 1
   - 3
-  rotateSpeed: 20
-  rotateRange: {x: 10, y: 45}
+  turretRotSpeed: 20
+  turretRotRange: {x: 15, y: 45}
 --- !u!114 &-1282805828423814551
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -214,6 +214,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   explosionEffect: {fileID: 3507901705876011728, guid: 8d9ad67b12c764e4387b9e13b552aa70, type: 3}
+  pitchRange:
+  - -45
+  - 45
+  rollRange:
+  - -45
+  - 45
 --- !u!208 &5628307254226187211
 NavMeshObstacle:
   m_ObjectHideFlags: 0
@@ -352,7 +358,7 @@ GameObject:
   - component: {fileID: 7870465792782479864}
   - component: {fileID: 292858619094422560}
   - component: {fileID: 8592974007400254692}
-  - component: {fileID: 5409936714624585751}
+  - component: {fileID: 6848631753554542362}
   m_Layer: 6
   m_Name: Body
   m_TagString: Tank
@@ -425,8 +431,8 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &5409936714624585751
-BoxCollider:
+--- !u!64 &6848631753554542362
+MeshCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -435,9 +441,10 @@ BoxCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 2.1000001, y: 2.2000008, z: 0.86395425}
-  m_Center: {x: 0, y: -0.00000011920932, z: -0.04824811}
+  serializedVersion: 4
+  m_Convex: 1
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 2959467708922500008, guid: 5460aeb10bb94544886a6a579f2d15ac, type: 3}
 --- !u!1 &7414094940848981471
 GameObject:
   m_ObjectHideFlags: 0

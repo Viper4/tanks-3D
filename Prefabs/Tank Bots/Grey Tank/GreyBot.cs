@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class GreyBot : MonoBehaviour
 {
+    BaseTankLogic baseTankLogic;
+
     public Transform target;
     float dstToTarget;
     Quaternion rotToTarget;
@@ -23,20 +25,22 @@ public class GreyBot : MonoBehaviour
 
     Rigidbody rb;
 
-    float turretSeed;
     [SerializeField] Vector2 inaccuracy = new Vector2(10, 25);
-    [SerializeField] float turretNoiseSpeed = 0.15f;
+
+    [SerializeField] bool randomizeSeed = true;
+
     [SerializeField] float turretRotSpeed = 25f;
+    [SerializeField] float turretNoiseSpeed = 0.15f;
+    [SerializeField] float turretRotSeed = 0;
 
     [SerializeField] float barrelRotRangeX = 20;
 
     [SerializeField] float tankRotSpeed = 250f;
-    Vector3 lastEulerAngles;
-
     [SerializeField] float tankRotNoiseScale = 5;
     [SerializeField] float tankRotNoiseSpeed = 0.5f;
-    [SerializeField] bool randomizeSeed = true;
     [SerializeField] float tankRotSeed = 0;
+
+    Vector3 lastEulerAngles;
 
     public float speed = 3;
     public float gravity = 5;
@@ -51,18 +55,20 @@ public class GreyBot : MonoBehaviour
         Shoot,
         Avoid
     }
-    Mode mode = Mode.Idle;
+    Mode mode = Mode.Move;
 
     // Start is called before the first frame update
     void Awake()
     {
-        if(target == null)
+        baseTankLogic = GetComponent<BaseTankLogic>();
+
+        if (target == null)
         {
             Debug.Log("The variable target of GreyBot has been defaulted to player's Camera Target");
             target = GameObject.Find("Player").transform.Find("Camera Target");
         }
 
-        turretSeed = Random.Range(-99, 99);
+        turretRotSeed = Random.Range(-99, 99);
 
         turret = transform.Find("Turret");
         barrel = transform.Find("Barrel");
@@ -74,6 +80,7 @@ public class GreyBot : MonoBehaviour
 
         if (randomizeSeed)
         {
+            turretRotSeed = Random.Range(0f, 99.0f);
             tankRotSeed = Random.Range(0f, 99.0f);
         }
 
@@ -100,16 +107,11 @@ public class GreyBot : MonoBehaviour
         if (rb != null)
         {
             Vector3 velocity;
-            velocityY = Physics.Raycast(transform.position + Vector3.up * 0.05f, -Vector3.up, 0.1f, ~LayerMask.NameToLayer("Tank")) ? 0 : velocityY - Time.deltaTime * gravity;
+            velocityY = baseTankLogic.IsGrounded(transform.position + Vector3.up * 0.05f) ? 0 : velocityY - Time.deltaTime * gravity;
 
-            if (mode == Mode.Move)
+            if (mode == Mode.Move || mode == Mode.Avoid)
             {
                 velocity = transform.forward * speed;
-
-                // Adding noise to rotation
-                float noise = tankRotNoiseScale * (Mathf.PerlinNoise(tankRotSeed + Time.time * tankRotNoiseSpeed, (tankRotSeed + 1) + Time.time * tankRotNoiseSpeed) - 0.5f);
-                Quaternion desiredTankRot = Quaternion.LookRotation(Quaternion.AngleAxis(noise, Vector3.up) * transform.forward);
-                rb.MoveRotation(Quaternion.RotateTowards(transform.rotation, desiredTankRot, Time.deltaTime * tankRotSpeed));
             }
             else
             {
@@ -117,48 +119,61 @@ public class GreyBot : MonoBehaviour
             }
 
             rb.velocity = velocity + Vector3.up * velocityY;
+
+            if (mode == Mode.Move)
+            {
+                // Adding noise to rotation
+                float noise = tankRotNoiseScale * (Mathf.PerlinNoise(tankRotSeed + Time.time * tankRotNoiseSpeed, (tankRotSeed + 1) + Time.time * tankRotNoiseSpeed) - 0.5f);
+                Quaternion desiredTankRot = Quaternion.LookRotation(Quaternion.AngleAxis(noise, Vector3.up) * transform.forward);
+                rb.rotation = Quaternion.RotateTowards(transform.rotation, desiredTankRot, Time.deltaTime * tankRotSpeed);
+            }
         }
 
         // Inaccuracy to rotation with noise
-        float noiseX = inaccuracy.x * (Mathf.PerlinNoise(turretSeed + Time.time * turretNoiseSpeed, turretSeed + 1f + Time.time * turretNoiseSpeed) - 0.5f);
-        float noiseY = inaccuracy.y * (Mathf.PerlinNoise(turretSeed + 4f + Time.time * turretNoiseSpeed, turretSeed + 5f + Time.time * turretNoiseSpeed) - 0.5f);
+        float noiseX = inaccuracy.x * (Mathf.PerlinNoise(turretRotSeed + Time.time * turretNoiseSpeed, turretRotSeed + 1f + Time.time * turretNoiseSpeed) - 0.5f);
+        float noiseY = inaccuracy.y * (Mathf.PerlinNoise(turretRotSeed + 4f + Time.time * turretNoiseSpeed, turretRotSeed + 5f + Time.time * turretNoiseSpeed) - 0.5f);
 
         // Correcting turret and barrel rotation to not depend on parent rotation
-        turret.rotation = barrel.rotation = anchor.rotation *= Quaternion.Euler(lastEulerAngles - transform.eulerAngles);
+        turret.rotation = barrel.rotation = anchor.rotation *= Quaternion.AngleAxis(lastEulerAngles.y - transform.eulerAngles.y, Vector3.up);
 
         // Rotating turret and barrel towards player
         Vector3 targetDir = target.position - anchor.position;
         rotToTarget = Quaternion.LookRotation(targetDir);
-        Quaternion desiredTurretRot = anchor.rotation = barrel.rotation = Quaternion.RotateTowards(anchor.rotation, rotToTarget, Time.deltaTime * turretRotSpeed);
+        turret.rotation = anchor.rotation = barrel.rotation = Quaternion.RotateTowards(anchor.rotation, rotToTarget, Time.deltaTime * turretRotSpeed);
         barrel.rotation *= Quaternion.Euler(-90, 0, 0);
 
-        turret.eulerAngles = new Vector3(-90, desiredTurretRot.eulerAngles.y + noiseY, desiredTurretRot.eulerAngles.z);
-        barrel.eulerAngles = new Vector3(Clamping.ClampAngle(barrel.eulerAngles.x + noiseX, -90 - barrelRotRangeX, -90 + barrelRotRangeX), barrel.eulerAngles.y + noiseY, barrel.eulerAngles.z);
+        turret.localEulerAngles = new Vector3(-90, turret.localEulerAngles.y + noiseY, turret.localEulerAngles.z);
+        barrel.localEulerAngles = new Vector3(Clamping.ClampAngle(barrel.localEulerAngles.x + noiseX, -90 - barrelRotRangeX, -90 + barrelRotRangeX), barrel.localEulerAngles.y + noiseY, barrel.localEulerAngles.z);
 
         lastEulerAngles = transform.eulerAngles;
     }
 
     private void OnTriggerStay(Collider other)
     {
+        Vector3 desiredDir;
+
         // Obstacle Avoidance
         bool[] pathClear = { true, true, true };
-        float dotProduct = 0;
+        float dotProductY = 0;
         Vector3 origin = transform.position + Vector3.up * 0.7f;
 
         // Checking Forward
         RaycastHit forwardHit;
         if (Physics.Raycast(origin + transform.forward * 1.11f, transform.forward, out forwardHit, triggerRadius) || Physics.Raycast(origin + transform.forward * 1.11f + transform.right * 1, transform.forward, out forwardHit, triggerRadius) || Physics.Raycast(origin + transform.forward * 1.11f - transform.right * 1, transform.forward, out forwardHit, triggerRadius)) // testing forward from center, left, right
         {
-            // Cross product doesn't give absolute value of angle
-            dotProduct = Vector3.Dot(Vector3.Cross(transform.forward, forwardHit.normal), transform.up);
-            pathClear[1] = false;
+            // Avoid obstacle if the obstacle slant is <35 degrees
+            if (Mathf.Abs(forwardHit.transform.eulerAngles.x) < 35 && Mathf.Abs(forwardHit.transform.eulerAngles.z) < 35)
+            {
+                // Dot product doesn't give absolute value of angle
+                dotProductY = Vector3.Dot(Vector3.Cross(transform.forward, forwardHit.normal), transform.up);
+                pathClear[1] = false;
+            }
         }
         Debug.DrawLine(origin + transform.forward * 1.11f, origin + transform.forward * triggerRadius, Color.blue, 0.1f);
 
         if (!pathClear[1])
         {
             mode = Mode.Avoid;
-            Vector3 desiredDir;
 
             // Checking Left
             if (Physics.Raycast(anchor.position - transform.right * 1.11f, -transform.right, triggerRadius))
@@ -173,47 +188,53 @@ public class GreyBot : MonoBehaviour
             }
             Debug.DrawLine(origin + transform.right * 1.11f, anchor.position + transform.right * 3, Color.red, 0.1f);
 
+            // Over rotating on left and right to prevent jittering
             if (pathClear[0])
             {
                 if (pathClear[2])
                 {
                     // If the obstacle is directly in front of tank, turn left or right randomly
-                    if (dotProduct == 0)
+                    if (dotProductY == 0)
                     {
                         // Rotate left or right
-                        desiredDir = Random.Range(0, 2) == 0 ? -transform.right : transform.right;
+                        desiredDir = Random.Range(0, 2) == 0 ? Quaternion.AngleAxis(-10, Vector3.up) * -transform.right : Quaternion.AngleAxis(10, Vector3.up) * transform.right;
                     }
                     else
                     {
                         // Rotate left if obstacle is facing left
-                        desiredDir = dotProduct < 0 ? -transform.right : transform.right;
+                        desiredDir = dotProductY < 0 ? Quaternion.AngleAxis(-10, Vector3.up) * -transform.right : Quaternion.AngleAxis(10, Vector3.up) * transform.right;
                     }
                 }
                 else
                 {
                     // Rotate left
-                    desiredDir = -transform.right;
+                    desiredDir = Quaternion.AngleAxis(-10, Vector3.up) * -transform.right;
                 }
             }
             else if (pathClear[2])
             {
                 // Rotate right
-                desiredDir = transform.right;
+                desiredDir = Quaternion.AngleAxis(10, Vector3.up) * transform.right;
             }
             else
             {
-                // Rotate backward
-                desiredDir = -transform.forward;
+                // Go backward
+                speed = speed < 0 ? speed : -speed;
+                desiredDir = transform.forward;
             }
 
             // Applying rotation
-            rb.MoveRotation(Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(desiredDir), Time.deltaTime * tankRotSpeed));
+            rb.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(desiredDir), Time.deltaTime * tankRotSpeed);
         }
         else
         {
-            mode = Mode.Move;
+            // Go forward if going backward
+            speed = speed < 0 ? -speed : speed;
+            if (mode == Mode.Avoid)
+            {
+                mode = Mode.Move;
+            }
         }
-        
     }
 
     IEnumerator Shoot()
@@ -222,10 +243,9 @@ public class GreyBot : MonoBehaviour
         float angle = Quaternion.Angle(barrel.rotation, rotToTarget * Quaternion.Euler(-90, 0, 0));
         if (angle < 45)
         {
-            mode = Mode.Shoot;
-
             // Waiting for tank to move forward a bit more
             yield return new WaitForSeconds(0.5f);
+            mode = Mode.Shoot;
 
             // Reaction time from seeing player
             yield return new WaitForSeconds(Random.Range(reactionTime[0], reactionTime[1]));

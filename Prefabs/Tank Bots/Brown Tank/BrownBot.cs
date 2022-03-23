@@ -35,8 +35,8 @@ public class BrownBot : MonoBehaviour
         barrel = transform.Find("Barrel");
         turret = transform.Find("Turret");
 
-        barrelStartEulers = barrel.eulerAngles;
-        turretStartEulers = turret.eulerAngles;
+        barrelStartEulers = barrel.localEulerAngles;
+        turretStartEulers = turret.localEulerAngles;
     }
 
     // Update is called once per frame
@@ -47,8 +47,8 @@ public class BrownBot : MonoBehaviour
         float angleX = Mathf.PingPong(Time.time * turretRotSpeed, turretRotRange.x * 2) - turretRotRange.x;
         float angleY = Mathf.PingPong(Time.time * turretRotSpeed, turretRotRange.y * 2) - turretRotRange.y;
 
-        turret.eulerAngles = new Vector3(-90, turretStartEulers.y + angleY, 0);
-        barrel.eulerAngles = anchor.eulerAngles = new Vector3(barrelStartEulers.x + angleX, barrelStartEulers.y + angleY, 0);
+        turret.localEulerAngles = new Vector3(-90, turretStartEulers.y + angleY, 0);
+        barrel.localEulerAngles = anchor.localEulerAngles = new Vector3(barrelStartEulers.x + angleX, barrelStartEulers.y + angleY, 0);
         anchor.rotation *= Quaternion.Euler(90, 0, 0);
 
         // origin is offset forward by 1.7 to prevent ray from hitting this tank
