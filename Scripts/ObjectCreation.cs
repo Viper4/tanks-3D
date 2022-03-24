@@ -40,138 +40,63 @@ public class ObjectCreation : MonoBehaviour
             extendedObjects.RemoveAt(extendedObjects.Count - 1);
         }
     }
-
-    // UnityEngine Transform, GameObject, and Vector3 documentation: https://docs.unity3d.com/ScriptReference/Transform.html, https://docs.unity3d.com/ScriptReference/GameObject.html, https://docs.unity3d.com/ScriptReference/Vector3.html
-    public void RandomGeneration(GameObject boundingBox, int tankLimit, List<GameObject> tankList, int obstacleLimit, List<GameObject> obstacleList, float branchChance, bool distribute)
+    
+    public void GenerateRandomObstacle(Collider boundingBox, int obstacleLimit, List<GameObject> obstacleList, Vector3 inputDir, float branchChance, bool distribute, int times)
     {
-        // Cloning lists to not affect original lists
-        List<GameObject> tanks = tankList.ToList();
-        List<GameObject> obstacles = obstacleList.ToList();
-
-        // UnityEngine Collider documentation: https://docs.unity3d.com/ScriptReference/Collider.html
-        BoxCollider boundsCollider = boundingBox.GetComponent<BoxCollider>();
-
-        // Checking if origin is within bounds
-        // Bounds.Contains method from UnityEngine lib: https://docs.unity3d.com/ScriptReference/Bounds.Contains.html
-        if (boundsCollider.bounds.Contains(transform.position))
+        if(obstacleList.Count != 0)
         {
-            GameObject targetObstacle = null;
-            // Selecting a obstacle to instantiate in game
-            foreach(GameObject obstacle in obstacles.ToList())
-            {
-                // If the obstacle in list matches the selected obstacle then use it first for random generation
-                if(obstacle.name == transform.name)
-                {
-                    targetObstacle = obstacle;
-                }
-            }
-            // If targetObstacle has not been selected
-            if(targetObstacle == null)
-            {
-                // If there are still elements in the obstacle list select a random one otherwise log error and stop the method
-                if(obstacles.Count != 0)
-                {
-                    targetObstacle = obstacles[Random.Range(0, obstacles.Count)];
-                }
-                else
-                {
-                    // Debug class from UnityEngine library: https://docs.unity3d.com/ScriptReference/Debug.html
-                    Debug.Log("No obstacles found to instantiate");
-                    return;
-                }
-            }
-            obstacles.Remove(targetObstacle);
-
-            // Generating level
-            // Getting list of valid directions to instantiate
-            Vector3 direction;
-            List<Vector3> validDirections = new List<Vector3>{ transform.forward, transform.right, -transform.forward, -transform.right, transform.up, -transform.up };
-            foreach(Vector3 dir in validDirections.ToList())
-            {
-                // Bounds.Contains method from UnityEngine lib: https://docs.unity3d.com/ScriptReference/Bounds.Contains.html
-                if(!boundsCollider.bounds.Contains(transform.position + dir * distanceAway))
-                {
-                    validDirections.Remove(dir);
-                }
-            }
-                
-            // Picking random direction from valid directions to instantiate
-            if(validDirections.Count != 0)
-            {
-                direction = validDirections[Random.Range(0, validDirections.Count)];
-                // Generating first targetted obstacle
-                GenerateObject(targetObstacle, boundsCollider, direction, distanceAway, Mathf.FloorToInt(obstacleLimit / obstacles.Count), branchChance);
-
-                if (distribute)
-                {
-                    foreach(GameObject obstacle in obstacles)
-                    {
-                        GenerateObject(obstacle, boundsCollider, direction, distanceAway, Mathf.FloorToInt(obstacleLimit / obstacles.Count), branchChance);
-                    }
-                }
-                else
-                {
-                    int times = obstacleLimit;
-                    foreach(GameObject obstacle in obstacles)
-                    {
-                        times -= Random.Range(0, times);
-                        GenerateObject(obstacle, boundsCollider, direction, distanceAway, times, branchChance);
-                    }
-                }
-            }
-            else
-            {
-                Debug.Log("No valid spawn position from " + transform.name);
-            }
+            List<GameObject> obstacles = obstacleList.ToList();
+            int[] cloneAmounts;
+            Vector3 lastPosition = transform.position;
+            Vector3 targetDirection = inputDir;
             
+            foreach (GameObject obstacle in obstacles)
+            {
+                // Determining cloneAmounts for each obstacle
+                if(distribute)
+                {
+                    // distributing obstacleLimit as evenly as possible among each obstacle
+                    cloneAmount = Mathf.FloorToInt(obstacleLimit / obstacleList.Count);
+                }
+                else
+                {
+                    // Choosing random amount to clone from 0 to cloneAmount - 1
+                    cloneAmount -= Random.Range(0, cloneAmount - 1);
+                }
+                // Cloning the obstacle
+                for (int i = 0; i < cloneAmount; i++) 
+                {
+                    if (Random.value <= branchChance)
+                    {
+                        // Testing directions to the right, left, and back of inputDir
+                        List<Vector3> validDirections = new List<Vector3>();
+                        validDirections = TestValidDirections(lastPosition, {Quaternion.AngleAxis(90, Vector3.up) * inputDir, Quaternion.AngleAxis(-90, Vector3.up) * inputDir, Quaternion.AngleAxis(180, Vector3.up) * inputDir});
+
+                        targetDirection = validDirections[Random.Range(0, validDirections.Count)];
+                    }
+                    GameObject newClone = Instantiate(obstacle, lastPosition + targetDirection * distanceAway, transform.rotation);
+                    lastPosition = newClone.position;
+                }
+            }                 
         }
         else
         {
-            Debug.Log(transform.name + " out of bounds, choosing random origin");
-            // Pick random origin
+            Debug.LogWarning("No obstacles in obstacleList to instantiate");
         }
     }
     
-    public void GenerateObject(GameObject prefab, Collider boundsCollider, Vector3 direction, float dst, int times, float branchChance)
+    private List<Vector3> TestValidDirections(Vector3 origin, List<Vector3> testDirections)
     {
-        GameObject clone = null;
-
-        for (int i = 0; i < times; i++)
+        List<Vector3> validDirections = testDirections.ToList();
+        // Testing directions to the right, left, and back of inputDir
+        foreach(Vector3 testDirection in testDirections.ToList())
         {
-            Vector3 clonePosition = transform.position + direction * ((i+1) * dst);
-            // Bounds.Contains method from UnityEngine lib: https://docs.unity3d.com/ScriptReference/Bounds.Contains.html
-            if(boundsCollider.bounds.Contains(clonePosition))
+            Vector3 testPosition = origin + testDirection * distanceAway;
+            if (!boundingBox.bounds.Contains(testPosition) || Physics.CheckBox(testPosition, targetObstacle.localScale * 0.25f, Quaternion.identity))
             {
-                // Instantiate method from UnityEngine library: https://docs.unity3d.com/ScriptReference/Object.Instantiate.html
-                clone = Instantiate(prefab, clonePosition, transform.rotation, transform.parent);
-                if (Random.value <= branchChance)
-                {
-                    Vector3 newDir = direction;
-
-                    List<Vector3> validDirections = new List<Vector3> { clone.transform.forward, clone.transform.right, -clone.transform.forward, -clone.transform.right, clone.transform.up, -clone.transform.up };
-                    validDirections.Remove(direction);
-                    foreach (Vector3 dir in validDirections.ToList())
-                    {
-                        // Bounds.Contains method from UnityEngine lib: https://docs.unity3d.com/ScriptReference/Bounds.Contains.html
-                        if (!boundsCollider.bounds.Contains(transform.position + dir * distanceAway))
-                        {
-                            validDirections.Remove(dir);
-                        }
-                    }
-                    if(validDirections.Count != 0)
-                    {
-                        newDir = validDirections[Random.Range(0, validDirections.Count)];
-                    }
-                    clone.GetComponent<ObjectCreation>().GenerateObject(prefab, boundsCollider, newDir, dst, times - i, branchChance);
-
-                    return;
-                }
-            }
-            else if (clone != null)
-            {
-                Debug.Log("No valid spawn position from " + clone.name);
-                return;
+                validDirections.Remove(testDirection);
             }
         }
+        return validDirections;
     }
 }
