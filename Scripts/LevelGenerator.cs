@@ -17,6 +17,6 @@ public class LevelGenerator : MonoBehaviour
 
     public void Generate(ObjectCreation selectedObject)
     {
-        selectedObject.RandomGeneration(boundingBox, tankLimit, tanks, obstacleLimit, obstacles, branchChance, distribute); 
+        selectedObject.GenerateRandomObstacle(boundingBox.GetComponent<Collider>(), obstacleLimit, obstacles, branchChance, distribute); 
     }
 }
