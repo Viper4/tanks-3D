@@ -28,12 +28,6 @@ public class BulletBehaviour : MonoBehaviour
         rb.velocity = transform.forward * speed;
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        //transform.rotation = Quaternion.LookRotation(transform.forward);
-    }
-
     private void OnCollisionEnter(Collision other)
     {
         switch (other.transform.tag)
@@ -104,7 +98,15 @@ public class BulletBehaviour : MonoBehaviour
             {
                 if (target.CompareTag("Tank"))
                 {
-                    target.GetComponent<BaseTankLogic>().Explode();
+                    BaseTankLogic baseTankLogic = target.GetComponent<BaseTankLogic>();
+                    if(baseTankLogic != null)
+                    {
+                        baseTankLogic.Explode();
+                    }
+                    else
+                    {
+                        target.parent.GetComponent<BaseTankLogic>().Explode();
+                    }
                 }
                 else
                 {

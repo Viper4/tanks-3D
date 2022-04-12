@@ -4,8 +4,6 @@ using UnityEngine;
 
 public class GreyBot : MonoBehaviour
 {
-    BaseTankLogic baseTankLogic;
-
     public Transform target;
     float dstToTarget;
     Quaternion rotToTarget;
@@ -48,9 +46,10 @@ public class GreyBot : MonoBehaviour
 
     float triggerRadius = 3f;
 
+    Coroutine shootRoutine;
+
     enum Mode
     {
-        Idle,
         Move,
         Shoot,
         Avoid
@@ -60,8 +59,6 @@ public class GreyBot : MonoBehaviour
     // Start is called before the first frame update
     void Awake()
     {
-        baseTankLogic = GetComponent<BaseTankLogic>();
-
         if (target == null)
         {
             Debug.Log("The variable target of GreyBot has been defaulted to player's Camera Target");
@@ -92,22 +89,28 @@ public class GreyBot : MonoBehaviour
     {
         cooldown = cooldown > 0 ? cooldown - Time.deltaTime : 0;
         dstToTarget = Vector3.Distance(anchor.position, target.position);
+        // Origin is offset forward by 1.7 to prevent ray from hitting this tank
+        Vector3 rayOrigin = anchor.position + anchor.forward * 1.7f;
 
-        if(dstToTarget < shootRadius && mode != Mode.Shoot && cooldown == 0)
+        if (dstToTarget < shootRadius && mode != Mode.Shoot && cooldown == 0)
         {
-            // origin is offset forward by 1.7 to prevent ray from hitting this tank
-            Vector3 origin = anchor.position + anchor.forward * 1.7f;
             // If nothing blocking player
-            if (!Physics.Raycast(origin, target.position - origin, dstToTarget, ~targetLayerMasks))
+            if (!Physics.Raycast(rayOrigin, target.position - rayOrigin, dstToTarget, ~targetLayerMasks))
             {
                 StartCoroutine(Shoot());
             }
+        }
+        else if (shootRoutine != null && Physics.Raycast(rayOrigin, target.position - rayOrigin, dstToTarget, ~targetLayerMasks))
+        {
+            StopCoroutine(shootRoutine);
+            shootRoutine = null;
+            mode = Mode.Move;
         }
 
         if (rb != null)
         {
             Vector3 velocity;
-            velocityY = baseTankLogic.IsGrounded(transform.position + Vector3.up * 0.05f) ? 0 : velocityY - Time.deltaTime * gravity;
+            velocityY = Physics.Raycast(transform.position + Vector3.up * 0.05f, -Vector3.up, 0.1f) ? 0 : velocityY - Time.deltaTime * gravity;
 
             if (mode == Mode.Move || mode == Mode.Avoid)
             {
@@ -253,10 +256,12 @@ public class GreyBot : MonoBehaviour
             StartCoroutine(GetComponent<FireControl>().Shoot());
             yield return new WaitForSeconds(Random.Range(fireDelay[0], fireDelay[1]));
 
+            shootRoutine = null;
             mode = Mode.Move;
         }
         else
         {
+            shootRoutine = null;
             yield return null;
         }
     }

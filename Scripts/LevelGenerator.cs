@@ -1,10 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class LevelGenerator : MonoBehaviour
 {
-    [SerializeField] GameObject boundingBox;
+    [SerializeField] Collider boundingCollider;
 
     [SerializeField] int tankLimit;
     [SerializeField] List<GameObject> tanks;
@@ -12,11 +13,26 @@ public class LevelGenerator : MonoBehaviour
     [SerializeField] int obstacleLimit;
     [SerializeField] List<GameObject> obstacles;
 
+    [SerializeField] List<WeightedFloat> possibleDistances;
+    [SerializeField] bool rangedDistance = false;
+
+    [SerializeField] List<WeightedVector3> possibleDirections;
+    [SerializeField] bool logicalStructure;
+
     [SerializeField] float branchChance;
-    [SerializeField] bool distribute;
+    [SerializeField] float switchChance;
+    [SerializeField] int amountDeviationMin = 0;
+    [SerializeField] int amountDeviationMax = 0;
 
     public void Generate(ObjectCreation selectedObject)
     {
-        selectedObject.GenerateRandomObstacle(boundingBox.GetComponent<Collider>(), obstacleLimit, obstacles, branchChance, distribute); 
+        Dictionary<string, int> cloneAmounts = new Dictionary<string, int>();
+        int[] distribution = RandomExtension.Distribute(obstacleLimit, obstacles.Count, amountDeviationMin, amountDeviationMax);
+        for (int i = 0; i < obstacles.Count; i++)
+        {
+            cloneAmounts[obstacles[i].name] = distribution[i];
+        }
+
+        selectedObject.RandomObstacleGeneration(obstacles, new List<GameObject>(), switchChance, branchChance, cloneAmounts, selectedObject.transform.position, possibleDirections, logicalStructure, possibleDistances, rangedDistance, boundingCollider);
     }
 }

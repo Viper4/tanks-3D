@@ -15,7 +15,7 @@ public class BrownBot : MonoBehaviour
 
     [SerializeField] float turretRotSpeed = 20;
 
-    [SerializeField] Vector2 turretRotRange = new Vector2(15, 45);
+    [SerializeField] Vector2 turretRotRange = new Vector2(8, 45);
 
     Vector3 turretStartEulers;
     Vector3 barrelStartEulers;

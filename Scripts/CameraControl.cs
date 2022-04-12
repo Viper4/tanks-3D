@@ -27,6 +27,8 @@ public class CameraControl : MonoBehaviour
 
     public LayerMask ignoreLayerMasks;
 
+    Vector3 lastEulerAngles;
+
     float yaw;
     float pitch;
     bool lockTurret = false;
@@ -45,6 +47,8 @@ public class CameraControl : MonoBehaviour
         body = transform.parent.Find("Body");
         turret = transform.parent.Find("Turret");
         barrel = transform.parent.Find("Barrel");
+
+        lastEulerAngles = transform.eulerAngles;
 
         playerControl = transform.parent.GetComponent<PlayerControl>();
     }
@@ -72,6 +76,9 @@ public class CameraControl : MonoBehaviour
         // 1st person vs. 3rd person turret control
         if (!dead && Time.timeScale != 0)
         {
+            // Correcting turret and barrel rotation to not depend on parent rotation
+            turret.rotation = barrel.rotation *= Quaternion.Euler(lastEulerAngles - transform.eulerAngles);
+
             reticle.gameObject.SetActive(true);
             Cursor.visible = false;
             if (dstFromTarget == 0)
@@ -147,5 +154,6 @@ public class CameraControl : MonoBehaviour
                 transform.position = clippingHit.point - (transform.position - target.position).normalized;
             }
         }
+        lastEulerAngles = transform.parent.eulerAngles;
     }
 }

@@ -4,7 +4,8 @@ using UnityEngine;
 
 public class PlayerControl : MonoBehaviour
 {
-    CharacterController controller;
+    Rigidbody rb;
+    BaseTankLogic baseTankLogic;
     Transform mainCamera;
 
     Transform turret;
@@ -18,10 +19,10 @@ public class PlayerControl : MonoBehaviour
     public int lives = 3;
     public int kills = 0;
     public int deaths = 0;
-    public int highestRound = 1;
+    public int highestLevel = 0;
 
     public bool cheats = false;
-    public bool dead { get; set; } = false;
+    public bool Dead { get; set; } = false;
 
     public float gravity = -12;
     public float movementSpeed = 6;
@@ -37,7 +38,8 @@ public class PlayerControl : MonoBehaviour
     // Start is called before the first frame update
     void Awake()
     {
-        controller = GetComponent<CharacterController>();
+        rb = GetComponent<Rigidbody>();
+        baseTankLogic = GetComponent<BaseTankLogic>();
         mainCamera = Camera.main.transform;
 
         barrel = transform.Find("Barrel");
@@ -52,14 +54,14 @@ public class PlayerControl : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!dead)
+        if (!Dead)
         {
             // Firing bullets
             if (Input.GetKeyDown(keyBinds["Shoot"]))
             {
                 StartCoroutine(GetComponent<FireControl>().Shoot());
             }
-            else if (Input.GetKeyDown(keyBinds["Lay Mine"]) && controller.isGrounded)
+            else if (Input.GetKeyDown(keyBinds["Lay Mine"]) && baseTankLogic.IsGrounded())
             {
                 StartCoroutine(GetComponent<MineControl>().LayMine());
             }
@@ -85,10 +87,10 @@ public class PlayerControl : MonoBehaviour
 
             velocityY += Time.deltaTime * gravity;
             mainCamera.Find("Anchor").eulerAngles = new Vector3(0, mainCamera.eulerAngles.y, mainCamera.eulerAngles.z);
-            Vector3 velocity = mainCamera.right * inputDir.x * currentSpeed + mainCamera.Find("Anchor").forward * inputDir.y * currentSpeed + Vector3.up * velocityY;
-            controller.Move(velocity * Time.deltaTime);
+            Vector3 velocity = currentSpeed * inputDir.x * mainCamera.right + currentSpeed * inputDir.y * mainCamera.Find("Anchor").forward + Vector3.up * velocityY;
+            rb.velocity = velocity + Vector3.up * velocityY;
 
-            if (controller.isGrounded)
+            if (baseTankLogic.IsGrounded())
             {
                 velocityY = 0;
             }
@@ -97,7 +99,7 @@ public class PlayerControl : MonoBehaviour
             if (inputDir != Vector2.zero)
             {
                 float targetRotation = Mathf.Atan2(inputDir.x, inputDir.y) * Mathf.Rad2Deg + mainCamera.eulerAngles.y;
-                body.eulerAngles = Vector3.up * Mathf.SmoothDampAngle(body.eulerAngles.y, targetRotation, ref turnSmoothVelocity, GetModifiedSmoothTime(turnSmoothTime)) + new Vector3(-90, 0, 0);
+                rb.rotation = Quaternion.Euler(Vector3.up * Mathf.SmoothDampAngle(body.eulerAngles.y, targetRotation, ref turnSmoothVelocity, GetModifiedSmoothTime(turnSmoothTime)) + new Vector3(-90, 0, 0));
             }
         }
         else
@@ -106,9 +108,8 @@ public class PlayerControl : MonoBehaviour
             {
                 Debug.Log("Cheat Player Respawn");
                 Camera.main.GetComponent<CameraControl>().dead = false;
-                dead = false;
+                Dead = false;
 
-                GetComponent<CharacterController>().enabled = true;
                 barrel.gameObject.SetActive(true);
                 turret.gameObject.SetActive(true);
                 body.gameObject.SetActive(true);
@@ -118,7 +119,7 @@ public class PlayerControl : MonoBehaviour
 
     float GetModifiedSmoothTime(float smoothTime)
     {
-        if (controller.isGrounded)
+        if (baseTankLogic.IsGrounded())
         {
             return smoothTime;
         }
@@ -157,10 +158,17 @@ public class PlayerControl : MonoBehaviour
         return 0;
     }
 
-    public IEnumerator Restart()
+    public IEnumerator Respawn()
     {
         yield return new WaitForSeconds(3);
 
-        StartCoroutine(GameObject.Find("SceneLoader").GetComponent<SceneLoader>().LoadScene(0));
+        if (lives > 0)
+        {
+            StartCoroutine(GameObject.Find("SceneLoader").GetComponent<SceneLoader>().LoadScene(false));
+        }
+        else
+        {
+            StartCoroutine(GameObject.Find("SceneLoader").GetComponent<SceneLoader>().LoadScene(true, 0));
+        }
     }
 }

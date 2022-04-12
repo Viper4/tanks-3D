@@ -19,7 +19,7 @@ public static class SaveSystem
         public int lives;
         public int kills;
         public int deaths;
-        public int highestRound;
+        public int highestLevel;
     }
 
     public static void Init()
@@ -30,14 +30,14 @@ public static class SaveSystem
         }
     }
 
-    public static void SavePlayerData(string fileName, PlayerControl script)
+    public static void SavePlayerData(string fileName, PlayerControl script, int highestLevel = -1)
     {
         PlayerData playerData = new PlayerData
         {
             lives = script.lives,
             kills = script.kills,
             deaths = script.deaths,
-            highestRound = script.highestRound
+            highestLevel = highestLevel < 0 ? script.highestLevel : highestLevel
         };
 
         if (File.Exists(SAVE_FOLDER + fileName))
@@ -50,9 +50,9 @@ public static class SaveSystem
                 playerData.kills = script.kills + oldPlayerData.kills;
                 playerData.deaths = script.deaths + oldPlayerData.deaths;
 
-                if (script.highestRound > oldPlayerData.highestRound)
+                if (script.highestLevel > oldPlayerData.highestLevel)
                 {
-                    playerData.highestRound = script.highestRound;
+                    playerData.highestLevel = script.highestLevel;
                 }
             }
         }
@@ -74,11 +74,11 @@ public static class SaveSystem
                 script.lives = playerData.lives;
                 script.kills = playerData.kills;
                 script.deaths = playerData.deaths;
-                script.highestRound = playerData.highestRound;
+                script.highestLevel = playerData.highestLevel;
             }
             else
             {
-
+                Debug.LogWarning("Could not retrieve json data from file " + SAVE_FOLDER + fileName);
             }
         }
         else
