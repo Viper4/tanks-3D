@@ -2,20 +2,35 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
+/* Cites
+ * RandomExtension (class I created) 
+ *  Variables: WeightedVector3, WeightedFloat
+ *  Methods: Shuffle(), ChooseWeightedFloat(), ChooseWeightedVector3()
+ * System.Collections.Generic (built-in library) https://docs.microsoft.com/en-us/dotnet/api/system.collections.generic?view=net-6.0
+ *  Variables: List<type> https://docs.microsoft.com/en-us/dotnet/api/system.collections.generic.list-1?view=net-6.0
+ * System.Linq (built-in library) https://docs.microsoft.com/en-us/dotnet/api/system.linq?view=net-6.0
+ *  Methods: ToList() https://docs.microsoft.com/en-us/dotnet/api/system.linq.enumerable.tolist?view=net-6.0
+ * UnityEngine (built-in library) https://docs.unity3d.com/ScriptReference/
+ *  Variables: GameObject https://docs.unity3d.com/ScriptReference/GameObject-ctor.html, Transform https://docs.unity3d.com/ScriptReference/Transform.html, Vector3 https://docs.unity3d.com/ScriptReference/Vector3.html, Bounds https://docs.unity3d.com/ScriptReference/Bounds.html, RaycastHit https://docs.unity3d.com/ScriptReference/RaycastHit.html
+ *  Classes: MonoBehaviour https://docs.unity3d.com/ScriptReference/MonoBehaviour.html, Debug https://docs.unity3d.com/ScriptReference/Debug.html, Physics https://docs.unity3d.com/ScriptReference/Physics.html, Mathf https://docs.unity3d.com/ScriptReference/Mathf.html
+ */
 public class ObjectCreation : MonoBehaviour
 {
+    // Declaring global variables
     List<Transform> extendedObjects = new List<Transform>();
 
-    public Vector3 direction;
-    public float distanceAway;
-    public int times = 1;
-    public Vector3 eulerAngles;
-    public Vector3 scale = new Vector3(2, 2, 2);
+    [SerializeField] Vector3 direction;
+    [SerializeField] float distanceAway;
+    [SerializeField] int times = 1;
+    [SerializeField] Vector3 eulerAngles;
+    [SerializeField] Vector3 scale = new Vector3(2, 2, 2);
 
     public void Extend()
     {
+        // Iterate through all the times to clone this gameobject
         for (int i = 0; i < times; i++)
         {
+            // Instantiate this object at the given direction and distance away, reset its name and scale, and add the clone to the extendedObjects list
             Transform clone = Instantiate(transform, transform.position + direction * (distanceAway * (i + 1)), Quaternion.Euler(eulerAngles), transform.parent);
             clone.name = transform.name;
             clone.localScale = scale;
@@ -25,36 +40,25 @@ public class ObjectCreation : MonoBehaviour
 
     public void Delete()
     {
+        // Delete this game object
         DestroyImmediate(gameObject);
     }
 
     public void Undo()
     {
+        // If the there are extended objects
         if (extendedObjects.Count != 0)
         {
+            // If the most recent element in extendedObjects is not null delete it
             if (extendedObjects[extendedObjects.Count - 1] != null)
             {
                 DestroyImmediate(extendedObjects[extendedObjects.Count - 1].gameObject);
             }
-
+            // Remove most recent element in extendedObjects
             extendedObjects.RemoveAt(extendedObjects.Count - 1);
         }
     }
 
-    Dictionary<string, int> directionsChoosed = new Dictionary<string, int>();
-
-    /* Cites
-     * RandomExtension (class I created) 
-     *  Variables: WeightedVector3, WeightedFloat
-     *  Methods: Shuffle(), ChooseWeightedFloat(), ChooseWeightedVector3()
-     * System.Collections.Generic (built-in library) https://docs.microsoft.com/en-us/dotnet/api/system.collections.generic?view=net-6.0
-     *  Variables: List<type> https://docs.microsoft.com/en-us/dotnet/api/system.collections.generic.list-1?view=net-6.0
-     * System.Linq (built-in library) https://docs.microsoft.com/en-us/dotnet/api/system.linq?view=net-6.0
-     *  Methods: ToList() https://docs.microsoft.com/en-us/dotnet/api/system.linq.enumerable.tolist?view=net-6.0
-     * UnityEngine (built-in library) https://docs.unity3d.com/ScriptReference/
-     *  Variables: GameObject https://docs.unity3d.com/ScriptReference/GameObject-ctor.html, Vector3 https://docs.unity3d.com/ScriptReference/Vector3.html, Bounds https://docs.unity3d.com/ScriptReference/Bounds.html, RaycastHit https://docs.unity3d.com/ScriptReference/RaycastHit.html
-     *  Classes: Debug https://docs.unity3d.com/ScriptReference/Debug.html, Physics https://docs.unity3d.com/ScriptReference/Physics.html, Mathf https://docs.unity3d.com/ScriptReference/Mathf.html
-     */
     public void RandomObstacleGeneration(List<GameObject> obstacles, List<GameObject> clonedObstacles, float switchChance, float branchChance, Dictionary<string,int> cloneAmounts, 
         Vector3 lastPosition, List<WeightedVector3> directions, bool logicalStructure, List<WeightedFloat> distances, bool rangedDst, Collider boundingCollider)
     {
@@ -116,8 +120,8 @@ public class ObjectCreation : MonoBehaviour
                         // Going through previously cloned obstacles starting at the latest clone to find a valid spawn position
                         for (int k = clonedObstacles.Count - 1; k > -1; k--)
                         {
-                            // Testing valid directions in possible directions from this clone's position
-                            validDirections = TestValidDirections(boundingCollider, clonedObstacles[k].transform.position, directions, dstAway, logicalStructure).ToList();
+                            // Testing valid directions in possible directions dstAway from this clone's position
+                            validDirections = TestValidDirections(boundingCollider, clonedObstacles[k].transform.position, directions, dstAway).ToList();
 
                             // If a valid direction(s) has been found, randomely pick one based on weights (from my RandomExtension class), set the position to instantiate at, and break out of the loop
                             if (validDirections.Count != 0)
@@ -151,9 +155,10 @@ public class ObjectCreation : MonoBehaviour
                         else // When new position is not above ground then log warning and stop the recursion
                         {
                             Debug.LogWarning("No grounded clone position found from " + newPosition);
+                            return;
                         }
                     }
-                    else // If user wants to generate obstacles without gravity in mind
+                    else
                     {
                         // Instantiating obstacle at new position and updating last position
                         clonedObstacles.Add(Instantiate(obstacle, newPosition, transform.rotation, transform.parent));
@@ -175,25 +180,25 @@ public class ObjectCreation : MonoBehaviour
     private List<WeightedVector3> TestValidDirections(Collider boundingCollider, Vector3 origin, List<WeightedVector3> testDirections, float dst, bool logicalStructure)
     {
         List<WeightedVector3> validDirections = new List<WeightedVector3>();
-        // Testing directions to the right, left, and back of inputDir
+        // Iterating through each testDirection in the input directions
         foreach (WeightedVector3 testDirection in testDirections.ToList())
         {
             Vector3 testPosition = origin + testDirection.value * dst;
             // If testPosition is within bounds and unobstructed
             if (boundingCollider.bounds.Contains(testPosition) && !Physics.CheckSphere(testPosition, 0.1f))
             {
-                if (logicalStructure)
+                // If user wants to generate objects with gravity in mind
+                if (logicalStructure) 
                 {
-                    if (Physics.Raycast(origin, -Vector3.up, Mathf.Infinity))
+                    // If newPosition is above ground then add testDirection to validDirections
+                    if(Physics.Raycast(newPosition, -Vector3.up, out RaycastHit groundHit, Mathf.Infinity))
                     {
                         validDirections.Add(testDirection);
-                        break;
                     }
                 }
                 else
                 {
                     validDirections.Add(testDirection);
-                    break;
                 }
             }
         }
