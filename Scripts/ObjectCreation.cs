@@ -190,8 +190,8 @@ public class ObjectCreation : MonoBehaviour
                 // If user wants to generate objects with gravity in mind
                 if (logicalStructure) 
                 {
-                    // If newPosition is above ground then add testDirection to validDirections
-                    if(Physics.Raycast(newPosition, -Vector3.up, out RaycastHit groundHit, Mathf.Infinity))
+                    // If testPosition is above ground then add testDirection to validDirections
+                    if(Physics.Raycast(testPosition, -Vector3.up, out RaycastHit groundHit, Mathf.Infinity))
                     {
                         validDirections.Add(testDirection);
                     }
