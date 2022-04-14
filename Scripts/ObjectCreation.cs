@@ -115,13 +115,13 @@ public class ObjectCreation : MonoBehaviour
                     // If a random float from 0 to 1 is less than branchChance, or new position is out of bounds, or new position is obstructed then pick another direction
                     if (Random.value < branchChance || !boundingCollider.bounds.Contains(newPosition) || Physics.CheckSphere(newPosition, 0.1f))
                     {
-                        List<WeightedVector3> validDirections = new List<WeightedVector3>();
+                        List<WeightedVector3> validDirections = directions.ToList();
 
                         // Going through previously cloned obstacles starting at the latest clone to find a valid spawn position
                         for (int k = clonedObstacles.Count - 1; k > -1; k--)
                         {
                             // Testing valid directions in possible directions dstAway from this clone's position
-                            validDirections = TestValidDirections(boundingCollider, clonedObstacles[k].transform.position, directions, dstAway).ToList();
+                            validDirections = TestValidDirections(boundingCollider, clonedObstacles[k].transform.position, directions, dstAway, logicalStructure).ToList();
 
                             // If a valid direction(s) has been found, randomely pick one based on weights (from my RandomExtension class), set the position to instantiate at, and break out of the loop
                             if (validDirections.Count != 0)
@@ -136,7 +136,7 @@ public class ObjectCreation : MonoBehaviour
                         // If no valid direction has been found, log a warning and stop the method
                         if (validDirections.Count == 0)
                         {
-                            Debug.LogWarning("No unobstructed clone position found from " + lastPosition);
+                            Debug.LogWarning("No valid direction found from " + lastPosition);
                             return;
                         }
                     }
@@ -191,7 +191,7 @@ public class ObjectCreation : MonoBehaviour
                 if (logicalStructure) 
                 {
                     // If testPosition is above ground then add testDirection to validDirections
-                    if(Physics.Raycast(testPosition, -Vector3.up, out RaycastHit groundHit, Mathf.Infinity))
+                    if(Physics.Raycast(testPosition, -Vector3.up, Mathf.Infinity))
                     {
                         validDirections.Add(testDirection);
                     }
