@@ -168,7 +168,7 @@ public class BulletBehaviour : MonoBehaviour
             }
         }
 
-        Instantiate(explosionEffect, transform.position, Quaternion.Euler(-90, 0, 0));
+        Instantiate(explosionEffect, transform.position, Quaternion.identity);
         Destroy(gameObject);
     }
 }

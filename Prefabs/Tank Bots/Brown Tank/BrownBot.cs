@@ -7,7 +7,7 @@ public class BrownBot : MonoBehaviour
     public Transform target;
     float dstToTarget;
 
-    Transform anchor;
+    Transform body;
     Transform turret;
     Transform barrel;
 
@@ -27,11 +27,11 @@ public class BrownBot : MonoBehaviour
     {
         if (target == null)
         {
-            Debug.Log("The variable target of BrownBot has been defaulted to player's Camera Target");
-            target = GameObject.Find("Player").transform.Find("Camera Target");
+            Debug.Log("The variable target of BrownBot has been defaulted to the player");
+            target = GameObject.Find("Player").transform;
         }
 
-        anchor = transform.Find("Anchor");
+        body = transform.Find("Body");
         barrel = transform.Find("Barrel");
         turret = transform.Find("Turret");
 
@@ -47,15 +47,14 @@ public class BrownBot : MonoBehaviour
         float angleX = Mathf.PingPong(Time.time * turretRotSpeed, turretRotRange.x * 2) - turretRotRange.x;
         float angleY = Mathf.PingPong(Time.time * turretRotSpeed, turretRotRange.y * 2) - turretRotRange.y;
 
-        turret.localEulerAngles = new Vector3(-90, turretStartEulers.y + angleY, 0);
-        barrel.localEulerAngles = anchor.localEulerAngles = new Vector3(barrelStartEulers.x + angleX, barrelStartEulers.y + angleY, 0);
-        anchor.rotation *= Quaternion.Euler(90, 0, 0);
+        turret.localEulerAngles = new Vector3(0, turretStartEulers.y + angleY, 0);
+        barrel.localEulerAngles = new Vector3(barrelStartEulers.x + angleX, barrelStartEulers.y + angleY, 0);
 
         // origin is offset forward by 1.7 to prevent ray from hitting this tank
-        Vector3 origin = anchor.position + anchor.forward * 1.7f;
+        Vector3 origin = body.position + body.forward * 1.7f;
         // If player is in front of turret then fire
         RaycastHit hit;
-        if (!shooting && Physics.Raycast(origin, anchor.forward, out hit, dstToTarget))
+        if (!shooting && Physics.Raycast(origin, body.forward, out hit, dstToTarget))
         {
             if(hit.transform.gameObject.layer == LayerMask.NameToLayer("Player"))
             {

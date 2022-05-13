@@ -30,6 +30,11 @@ public class LevelEditor : Editor
                 objectCreation.Undo();
             }
 
+            if (GUILayout.Button("Clear"))
+            {
+                objectCreation.Clear();
+            }
+
             if (GUILayout.Button("Generate Random"))
             {
                 GameObject.Find("Level").GetComponent<LevelGenerator>().Generate(objectCreation);

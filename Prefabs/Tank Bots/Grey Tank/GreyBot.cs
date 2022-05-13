@@ -10,9 +10,9 @@ public class GreyBot : MonoBehaviour
 
     [SerializeField] LayerMask targetLayerMasks;
 
+    Transform body;
     Transform turret;
     Transform barrel;
-    Transform anchor;
 
     public float shootRadius = 30;
 
@@ -67,13 +67,13 @@ public class GreyBot : MonoBehaviour
 
         turretRotSeed = Random.Range(-99, 99);
 
+        body = transform.Find("Body");
         turret = transform.Find("Turret");
         barrel = transform.Find("Barrel");
-        anchor = transform.Find("Anchor");
 
         rb = GetComponent<Rigidbody>();
 
-        lastEulerAngles = anchor.eulerAngles;
+        lastEulerAngles = body.eulerAngles;
 
         if (randomizeSeed)
         {
@@ -88,9 +88,9 @@ public class GreyBot : MonoBehaviour
     void Update()
     {
         cooldown = cooldown > 0 ? cooldown - Time.deltaTime : 0;
-        dstToTarget = Vector3.Distance(anchor.position, target.position);
+        dstToTarget = Vector3.Distance(body.position, target.position);
         // Origin is offset forward by 1.7 to prevent ray from hitting this tank
-        Vector3 rayOrigin = anchor.position + anchor.forward * 1.7f;
+        Vector3 rayOrigin = body.position + body.forward * 1.7f;
 
         if (dstToTarget < shootRadius && mode != Mode.Shoot && cooldown == 0)
         {
@@ -136,17 +136,16 @@ public class GreyBot : MonoBehaviour
         float noiseX = inaccuracy.x * (Mathf.PerlinNoise(turretRotSeed + Time.time * turretNoiseSpeed, turretRotSeed + 1f + Time.time * turretNoiseSpeed) - 0.5f);
         float noiseY = inaccuracy.y * (Mathf.PerlinNoise(turretRotSeed + 4f + Time.time * turretNoiseSpeed, turretRotSeed + 5f + Time.time * turretNoiseSpeed) - 0.5f);
 
-        // Correcting turret and barrel rotation to not depend on parent rotation
-        turret.rotation = barrel.rotation = anchor.rotation *= Quaternion.AngleAxis(lastEulerAngles.y - transform.eulerAngles.y, Vector3.up);
+        // Correcting turret and barrel y rotation to not depend on the parent
+        turret.eulerAngles = barrel.eulerAngles = new Vector3(barrel.eulerAngles.x, barrel.eulerAngles.y + (lastEulerAngles.y - transform.eulerAngles.y), barrel.eulerAngles.z);
 
         // Rotating turret and barrel towards player
-        Vector3 targetDir = target.position - anchor.position;
+        Vector3 targetDir = target.position - body.position;
         rotToTarget = Quaternion.LookRotation(targetDir);
-        turret.rotation = anchor.rotation = barrel.rotation = Quaternion.RotateTowards(anchor.rotation, rotToTarget, Time.deltaTime * turretRotSpeed);
-        barrel.rotation *= Quaternion.Euler(-90, 0, 0);
+        turret.rotation = barrel.rotation = Quaternion.RotateTowards(turret.rotation, rotToTarget, Time.deltaTime * turretRotSpeed);
 
-        turret.localEulerAngles = new Vector3(-90, turret.localEulerAngles.y + noiseY, turret.localEulerAngles.z);
-        barrel.localEulerAngles = new Vector3(Clamping.ClampAngle(barrel.localEulerAngles.x + noiseX, -90 - barrelRotRangeX, -90 + barrelRotRangeX), barrel.localEulerAngles.y + noiseY, barrel.localEulerAngles.z);
+        turret.localEulerAngles = new Vector3(0, turret.localEulerAngles.y + noiseY, turret.localEulerAngles.z);
+        barrel.localEulerAngles = new Vector3(Clamping.ClampAngle(barrel.localEulerAngles.x + noiseX, barrelRotRangeX, barrelRotRangeX), barrel.localEulerAngles.y + noiseY, barrel.localEulerAngles.z);
 
         lastEulerAngles = transform.eulerAngles;
     }
@@ -161,8 +160,7 @@ public class GreyBot : MonoBehaviour
         Vector3 origin = transform.position + Vector3.up * 0.7f;
 
         // Checking Forward
-        RaycastHit forwardHit;
-        if (Physics.Raycast(origin + transform.forward * 1.11f, transform.forward, out forwardHit, triggerRadius) || Physics.Raycast(origin + transform.forward * 1.11f + transform.right * 1, transform.forward, out forwardHit, triggerRadius) || Physics.Raycast(origin + transform.forward * 1.11f - transform.right * 1, transform.forward, out forwardHit, triggerRadius)) // testing forward from center, left, right
+        if (Physics.Raycast(origin + transform.forward * 1.11f, transform.forward, out RaycastHit forwardHit, triggerRadius) || Physics.Raycast(origin + transform.forward * 1.11f + transform.right * 1, transform.forward, out forwardHit, triggerRadius) || Physics.Raycast(origin + transform.forward * 1.11f - transform.right * 1, transform.forward, out forwardHit, triggerRadius)) // testing forward from center, left, right
         {
             // Avoid obstacle if the obstacle slant is <35 degrees
             if (Mathf.Abs(forwardHit.transform.eulerAngles.x) < 35 && Mathf.Abs(forwardHit.transform.eulerAngles.z) < 35)
@@ -179,17 +177,17 @@ public class GreyBot : MonoBehaviour
             mode = Mode.Avoid;
 
             // Checking Left
-            if (Physics.Raycast(anchor.position - transform.right * 1.11f, -transform.right, triggerRadius))
+            if (Physics.Raycast(body.position - transform.right * 1.11f, -transform.right, triggerRadius))
             {
                 pathClear[0] = false;
             }
-            Debug.DrawLine(origin - transform.right * 1.11f, anchor.position - transform.right * 3, Color.red, 0.1f);
+            Debug.DrawLine(origin - transform.right * 1.11f, body.position - transform.right * 3, Color.red, 0.1f);
             // Checking Right
             if (Physics.Raycast(origin + transform.right * 1.11f, transform.right, triggerRadius))
             {
                 pathClear[2] = false;
             }
-            Debug.DrawLine(origin + transform.right * 1.11f, anchor.position + transform.right * 3, Color.red, 0.1f);
+            Debug.DrawLine(origin + transform.right * 1.11f, body.position + transform.right * 3, Color.red, 0.1f);
 
             // Over rotating on left and right to prevent jittering
             if (pathClear[0])

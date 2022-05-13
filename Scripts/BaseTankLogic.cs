@@ -32,12 +32,10 @@ public class BaseTankLogic : MonoBehaviour
         {
             PlayerControl playerControl = GetComponent<PlayerControl>();
 
-            Camera.main.GetComponent<CameraControl>().dead = true;
             playerControl.Dead = true;
             playerControl.lives--;
             playerControl.deaths++;
 
-            GetComponent<CharacterController>().enabled = false;
             transform.Find("Barrel").gameObject.SetActive(false);
             transform.Find("Turret").gameObject.SetActive(false);
             transform.Find("Body").gameObject.SetActive(false);
@@ -52,6 +50,7 @@ public class BaseTankLogic : MonoBehaviour
 
     public bool IsGrounded()
     {
-        return Physics.Raycast(transform.position, -Vector3.up, 0.05f, ~LayerMask.NameToLayer("Tank"));
+        Debug.DrawLine(transform.position + Vector3.up * 0.05f, transform.position - Vector3.up * 0.05f, Color.blue, 0.1f);
+        return Physics.Raycast(transform.position + Vector3.up * 0.05f, -Vector3.up, 0.1f, ~LayerMask.NameToLayer("Tank"));
     }
 }

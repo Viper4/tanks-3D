@@ -19,7 +19,7 @@ public class UIHandler : MonoBehaviour
 
     private void Awake()
     {
-        if(playerControl == null)
+        if (playerControl == null)
         {
             playerControl = GameObject.Find("Player").GetComponent<PlayerControl>();
         }
@@ -39,6 +39,7 @@ public class UIHandler : MonoBehaviour
             }
         }
         UIElements["PauseMenu"].Find("LabelBackground").GetChild(0).GetComponent<Text>().text = "Game Paused\nLevel " + (SceneManager.GetActiveScene().buildIndex + 1);
+        UIElements["InGame"].gameObject.SetActive(false);
     }
 
     private void Update()
@@ -83,6 +84,7 @@ public class UIHandler : MonoBehaviour
         UIElements["InGame"].gameObject.SetActive(false);
         UIElements["PauseMenu"].gameObject.SetActive(true);
         Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
         Time.timeScale = 0;
     }
 

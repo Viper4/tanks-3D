@@ -17,7 +17,7 @@ using UnityEngine;
 public class ObjectCreation : MonoBehaviour
 {
     // Declaring global variables
-    List<Transform> extendedObjects = new List<Transform>();
+    List<GameObject> extendedObjects = new List<GameObject>();
 
     [SerializeField] Vector3 direction;
     [SerializeField] float distanceAway;
@@ -34,7 +34,7 @@ public class ObjectCreation : MonoBehaviour
             Transform clone = Instantiate(transform, transform.position + direction * (distanceAway * (i + 1)), Quaternion.Euler(eulerAngles), transform.parent);
             clone.name = transform.name;
             clone.localScale = scale;
-            extendedObjects.Add(clone);
+            extendedObjects.Add(clone.gameObject);
         }
     }
 
@@ -52,10 +52,28 @@ public class ObjectCreation : MonoBehaviour
             // If the most recent element in extendedObjects is not null delete it
             if (extendedObjects[extendedObjects.Count - 1] != null)
             {
-                DestroyImmediate(extendedObjects[extendedObjects.Count - 1].gameObject);
+                DestroyImmediate(extendedObjects[extendedObjects.Count - 1]);
             }
             // Remove most recent element in extendedObjects
             extendedObjects.RemoveAt(extendedObjects.Count - 1);
+        }
+    }
+
+    public void Clear()
+    {
+        Debug.Log(transform.name + " cleared " + extendedObjects.Count + " obstacles.");
+
+        // If there are extended objects
+        if (extendedObjects.Count != 0)
+        {
+            // Iterate through each extendedObject and delete them
+            foreach(GameObject extendedObject in extendedObjects)
+            {
+                DestroyImmediate(extendedObject);
+            }
+
+            // Clear the list referencing the extendedObjects
+            extendedObjects.Clear();
         }
     }
 
@@ -86,7 +104,8 @@ public class ObjectCreation : MonoBehaviour
                             float startVal = RandomExtension.ChooseWeightedFloat(distances).value;
                             float endVal = RandomExtension.ChooseWeightedFloat(distances, startVal).value;
 
-                            dstAway = RandomExtension.ChooseWeightedFloat(distances, startVal, endVal).value;
+                            dstAway = Random.Range(startVal, endVal);
+                            Debug.Log(startVal + " - " + endVal + " : " + dstAway);
                         }
                         // If the user wants to select a single distance based on weights (from my RandomExtension class)
                         else
@@ -127,7 +146,7 @@ public class ObjectCreation : MonoBehaviour
                             if (validDirections.Count != 0)
                             {
                                 targetDirection = RandomExtension.ChooseWeightedVector3(validDirections);
-                                
+
                                 newPosition = clonedObstacles[k].transform.position + targetDirection.value * dstAway;
                                 break;
                             }
@@ -136,6 +155,7 @@ public class ObjectCreation : MonoBehaviour
                         // If no valid direction has been found, log a warning and stop the method
                         if (validDirections.Count == 0)
                         {
+
                             Debug.LogWarning("No valid direction found from " + lastPosition);
                             return;
                         }
@@ -170,11 +190,13 @@ public class ObjectCreation : MonoBehaviour
                 cloneAmounts[obstacle.name] = 0;
             }
         }
-        // If the user didn't input any obstacles then log a warning
-        else
+        else // If the user didn't input any obstacles then log a warning
         {
             Debug.LogWarning("No obstacles in obstacleList to instantiate");
         }
+
+        // Merging global extendedObjects list with clonedObstacles list
+        extendedObjects.AddRange(clonedObstacles);
     }
 
     private List<WeightedVector3> TestValidDirections(Collider boundingCollider, Vector3 origin, List<WeightedVector3> testDirections, float dst, bool logicalStructure)
@@ -191,7 +213,7 @@ public class ObjectCreation : MonoBehaviour
                 if (logicalStructure) 
                 {
                     // If testPosition is above ground then add testDirection to validDirections
-                    if(Physics.Raycast(testPosition, -Vector3.up, Mathf.Infinity))
+                    if (Physics.Raycast(testPosition, -Vector3.up, Mathf.Infinity))
                     {
                         validDirections.Add(testDirection);
                     }

@@ -21,12 +21,10 @@ public class PlayerControl : MonoBehaviour
     public int deaths = 0;
     public int highestLevel = 0;
 
-    public bool cheats = false;
+    [SerializeField] bool cheats = false;
     public bool Dead { get; set; } = false;
 
-    public float gravity = -12;
-    public float movementSpeed = 6;
-    float velocityY;
+    [SerializeField] float movementSpeed = 6;
 
     float currentSpeed;
     public float speedSmoothTime = 0.1f;
@@ -56,58 +54,56 @@ public class PlayerControl : MonoBehaviour
     {
         if (!Dead)
         {
-            // Firing bullets
-            if (Input.GetKeyDown(keyBinds["Shoot"]))
+            if (Time.timeScale != 0)
             {
-                StartCoroutine(GetComponent<FireControl>().Shoot());
-            }
-            else if (Input.GetKeyDown(keyBinds["Lay Mine"]) && baseTankLogic.IsGrounded())
-            {
-                StartCoroutine(GetComponent<MineControl>().LayMine());
-            }
-            else if (Input.GetKeyDown(KeyCode.Escape))
-            {
-                if (UIHandler.UIElements["PauseMenu"].gameObject.activeSelf)
+                // Firing bullets
+                if (Input.GetKeyDown(keyBinds["Shoot"]))
                 {
-                    UIHandler.Resume();
+                    StartCoroutine(GetComponent<FireControl>().Shoot());
                 }
-                else
+                else if (Input.GetKeyDown(keyBinds["Lay Mine"]) && baseTankLogic.IsGrounded())
                 {
-                    UIHandler.Pause();
+                    StartCoroutine(GetComponent<MineControl>().LayMine());
                 }
-            }
+                else if (Input.GetKeyDown(KeyCode.Escape))
+                {
+                    if (UIHandler.UIElements["PauseMenu"].gameObject.activeSelf)
+                    {
+                        UIHandler.Resume();
+                    }
+                    else
+                    {
+                        UIHandler.Pause();
+                    }
+                }
 
-            Vector2 input = new Vector2(GetInputAxis("Horizontal"), GetInputAxis("Vertical"));
-            Vector2 inputDir = input.normalized;
+                Vector2 input = new Vector2(GetInputAxis("Horizontal"), GetInputAxis("Vertical"));
+                Vector2 inputDir = input.normalized;
 
-            // Moving the tank with player input
-            float targetSpeed = movementSpeed / 2 * inputDir.magnitude;
+                // Moving the tank with player input
+                float targetSpeed = movementSpeed / 2 * inputDir.magnitude;
 
-            currentSpeed = Mathf.SmoothDamp(currentSpeed, targetSpeed, ref speedSmoothVelocity, GetModifiedSmoothTime(speedSmoothTime));
+                currentSpeed = Mathf.SmoothDamp(currentSpeed, targetSpeed, ref speedSmoothVelocity, GetModifiedSmoothTime(speedSmoothTime));
 
-            velocityY += Time.deltaTime * gravity;
-            mainCamera.Find("Anchor").eulerAngles = new Vector3(0, mainCamera.eulerAngles.y, mainCamera.eulerAngles.z);
-            Vector3 velocity = currentSpeed * inputDir.x * mainCamera.right + currentSpeed * inputDir.y * mainCamera.Find("Anchor").forward + Vector3.up * velocityY;
-            rb.velocity = velocity + Vector3.up * velocityY;
+                mainCamera.Find("Anchor").eulerAngles = new Vector3(0, mainCamera.eulerAngles.y, mainCamera.eulerAngles.z);
+                Vector3 velocity = currentSpeed * body.forward;
+                rb.velocity = velocity;
 
-            if (baseTankLogic.IsGrounded())
-            {
-                velocityY = 0;
-            }
-
-            // Rotating tank with movement
-            if (inputDir != Vector2.zero)
-            {
-                float targetRotation = Mathf.Atan2(inputDir.x, inputDir.y) * Mathf.Rad2Deg + mainCamera.eulerAngles.y;
-                rb.rotation = Quaternion.Euler(Vector3.up * Mathf.SmoothDampAngle(body.eulerAngles.y, targetRotation, ref turnSmoothVelocity, GetModifiedSmoothTime(turnSmoothTime)) + new Vector3(-90, 0, 0));
+                // Rotating tank with movement
+                if (inputDir != Vector2.zero)
+                {
+                    float targetRotation = Mathf.Atan2(inputDir.x, inputDir.y) * Mathf.Rad2Deg + mainCamera.eulerAngles.y;
+                    body.eulerAngles = new Vector3(body.eulerAngles.x, Mathf.SmoothDampAngle(body.eulerAngles.y, targetRotation, ref turnSmoothVelocity, GetModifiedSmoothTime(turnSmoothTime)), body.eulerAngles.z);
+                    //body.rotation = Quaternion.Euler(Vector3.up * Mathf.SmoothDampAngle(body.eulerAngles.y, targetRotation, ref turnSmoothVelocity, GetModifiedSmoothTime(turnSmoothTime)));
+                }
             }
         }
         else
         {
+            rb.velocity = Vector3.zero;
             if (cheats && Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.R))
             {
                 Debug.Log("Cheat Player Respawn");
-                Camera.main.GetComponent<CameraControl>().dead = false;
                 Dead = false;
 
                 barrel.gameObject.SetActive(true);

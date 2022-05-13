@@ -58,7 +58,6 @@ public static class RandomExtension
     {
         List<WeightedFloat> filteredWFs = new List<WeightedFloat>();
         float totalWeights = 0;
-
         foreach (WeightedFloat weightedFloat in weightedFloats)
         {
             if (valueMin == null && valueMax == null)
@@ -69,7 +68,7 @@ public static class RandomExtension
             }
             else if (valueMin != null && valueMax != null)
             {
-                if (weightedFloat.value > valueMin && weightedFloat.value < valueMax)
+                if (weightedFloat.value >= valueMin && weightedFloat.value <= valueMax)
                 {
                     totalWeights += weightedFloat.weight;
                     filteredWFs.Add(weightedFloat);
@@ -77,7 +76,7 @@ public static class RandomExtension
             }
             else if (valueMin != null)
             {
-                if (weightedFloat.value > valueMin)
+                if (weightedFloat.value >= valueMin)
                 {
                     totalWeights += weightedFloat.weight;
                     filteredWFs.Add(weightedFloat);
@@ -85,7 +84,7 @@ public static class RandomExtension
             }
             else if (valueMax != null)
             {
-                if (weightedFloat.value < valueMax)
+                if (weightedFloat.value <= valueMax)
                 {
                     totalWeights += weightedFloat.weight;
                     filteredWFs.Add(weightedFloat);
@@ -95,8 +94,6 @@ public static class RandomExtension
 
         float randomNumber = Random.Range(0, totalWeights);
 
-        // Shuffling list to get a random float if there are multiple values with the same weight
-        filteredWFs.Shuffle();
         WeightedFloat selectedWeightedVal = filteredWFs[0];
         foreach (WeightedFloat WeightedFloat in filteredWFs)
         {
@@ -114,7 +111,7 @@ public static class RandomExtension
     public static List<float> Values(this List<WeightedFloat> weightedFloats)
     {
         List<float> values = new List<float>();
-        foreach (WeightedFloat weightedFloat in weightedFloats.ToList())
+        foreach (WeightedFloat weightedFloat in weightedFloats)
         {
             values.Add(weightedFloat.value);
         }
@@ -134,8 +131,6 @@ public static class RandomExtension
 
         float randomNumber = Random.Range(0, totalWeights);
 
-        // Shuffling list to get a random Vector3 if there are multiple values with the same weight
-        //filteredWV3s.Shuffle();
         WeightedVector3 selectedWeightedVal = filteredWV3s[0];
         foreach (WeightedVector3 weightedVector3 in filteredWV3s)
         {

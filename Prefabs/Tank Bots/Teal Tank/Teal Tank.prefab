@@ -71,7 +71,7 @@ GameObject:
   - component: {fileID: 5714107077558805242}
   - component: {fileID: 1069808370206507889}
   - component: {fileID: 5367608962587421964}
-  - component: {fileID: 6378862173977374981}
+  - component: {fileID: 7415632710412045101}
   m_Layer: 6
   m_Name: Barrel
   m_TagString: Tank
@@ -86,14 +86,14 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7870586143288968191}
-  m_LocalRotation: {x: -0.7071068, y: 0, z: 0, w: 0.7071068}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 1.215, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 3288721941807516286}
   m_Father: {fileID: 8820478986772652707}
   m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: -90, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &1069808370206507889
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -145,7 +145,7 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &6378862173977374981
+--- !u!65 &7415632710412045101
 BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -156,8 +156,8 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 0.4272948, y: 1.0955629, z: 0.42200992}
-  m_Center: {x: -0.0000053942204, y: -1.1333181, z: -0.009514274}
+  m_Size: {x: 0.4272948, y: 0.42200983, z: 1.0955627}
+  m_Center: {x: 0.0000053942204, y: -0.009514272, z: -1.1333178}
 --- !u!1 &8130967180433581838
 GameObject:
   m_ObjectHideFlags: 0
@@ -169,7 +169,7 @@ GameObject:
   - component: {fileID: 1428688472867334711}
   - component: {fileID: 6725092904239861776}
   - component: {fileID: 4653960954150488459}
-  - component: {fileID: 7716387911359385298}
+  - component: {fileID: 2886550868862327159}
   m_Layer: 6
   m_Name: Turret
   m_TagString: Tank
@@ -184,13 +184,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8130967180433581838}
-  m_LocalRotation: {x: -0.7071068, y: 0, z: 0, w: 0.7071068}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 1.215, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 8820478986772652707}
   m_RootOrder: 3
-  m_LocalEulerAnglesHint: {x: -90, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &6725092904239861776
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -240,7 +240,7 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &7716387911359385298
+--- !u!65 &2886550868862327159
 BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -251,8 +251,8 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 1.1307571, y: 1.1671376, z: 0.6751649}
-  m_Center: {x: -0.000005066395, y: -0.0019680862, z: 0.003877283}
+  m_Size: {x: 1.1307571, y: 0.6751647, z: 1.1671374}
+  m_Center: {x: 0.000005066395, y: 0.0038772821, z: -0.0019680858}
 --- !u!1 &8152485418157340697
 GameObject:
   m_ObjectHideFlags: 0
@@ -399,7 +399,7 @@ GameObject:
   - component: {fileID: 4915463881591312242}
   - component: {fileID: 3251264644054133418}
   - component: {fileID: 6795614070258741870}
-  - component: {fileID: 9184913549024548865}
+  - component: {fileID: 4987401410249870464}
   m_Layer: 6
   m_Name: Body
   m_TagString: Tank
@@ -414,13 +414,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8445358296383594784}
-  m_LocalRotation: {x: -0.7071068, y: 0, z: 0, w: 0.7071068}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 8820478986772652707}
   m_RootOrder: 2
-  m_LocalEulerAnglesHint: {x: -90, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &3251264644054133418
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -472,7 +472,7 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &9184913549024548865
+--- !u!65 &4987401410249870464
 BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -483,5 +483,5 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 2.1000001, y: 2.2000008, z: 0.86395425}
-  m_Center: {x: 0, y: -0.00000011920932, z: -0.04824811}
+  m_Size: {x: 2.1000001, y: 0.86395407, z: 2.2000003}
+  m_Center: {x: 0, y: -0.048248097, z: -0.00000011920929}

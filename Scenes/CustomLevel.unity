@@ -425,7 +425,7 @@ GameObject:
   - component: {fileID: 67944505950703027}
   - component: {fileID: 67944505950703028}
   - component: {fileID: 67944505950703029}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Kill Boundary
   m_TagString: Kill Boundary
   m_Icon: {fileID: 0}
@@ -849,7 +849,7 @@ GameObject:
   - component: {fileID: 67944507447401958}
   - component: {fileID: 67944507447401959}
   - component: {fileID: 67944507447401960}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Kill Boundary
   m_TagString: Kill Boundary
   m_Icon: {fileID: 0}
@@ -882,7 +882,7 @@ GameObject:
   - component: {fileID: 67944507464811453}
   - component: {fileID: 67944507464811454}
   - component: {fileID: 67944507464811455}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Kill Boundary
   m_TagString: Kill Boundary
   m_Icon: {fileID: 0}
@@ -1039,7 +1039,7 @@ GameObject:
   - component: {fileID: 67944507516330450}
   - component: {fileID: 67944507516330451}
   - component: {fileID: 67944507516330452}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Kill Boundary
   m_TagString: Kill Boundary
   m_Icon: {fileID: 0}
@@ -1229,7 +1229,7 @@ GameObject:
   - component: {fileID: 67944507820204882}
   - component: {fileID: 67944507820204883}
   - component: {fileID: 67944507820204884}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Kill Boundary
   m_TagString: Kill Boundary
   m_Icon: {fileID: 0}
@@ -1324,7 +1324,7 @@ GameObject:
   - component: {fileID: 67944507833407408}
   - component: {fileID: 67944507833407409}
   - component: {fileID: 67944507833407410}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Kill Boundary
   m_TagString: Kill Boundary
   m_Icon: {fileID: 0}
@@ -1633,15 +1633,15 @@ MonoBehaviour:
   - {fileID: 6353959912858125971, guid: c9f541d7851ab9a47a33057f6c146edd, type: 3}
   - {fileID: 4033695715270616719, guid: 8c192097c6438ea419f6b4c11af8dd65, type: 3}
   - {fileID: 8152485418157340697, guid: a2089b8661e86fd4c99f5c815f926e03, type: 3}
-  obstacleLimit: 150
+  obstacleLimit: 50
   obstacles:
   - {fileID: 1789137517761687661, guid: 716ebcd9db95e4540a052e5f9f478e48, type: 3}
   - {fileID: 474112292520302916, guid: 966e4c9e2448c9846bfe93aec5074577, type: 3}
   possibleDistances:
   - value: 2
-    weight: 4
+    weight: 6
   - value: 6
-    weight: 3
+    weight: 4
   - value: 8
     weight: 2
   - value: 10
@@ -1656,11 +1656,13 @@ MonoBehaviour:
     weight: 1
   - value: {x: 0, y: 0, z: -1}
     weight: 1
-  logicalStructure: 0
+  - value: {x: 0, y: 1, z: 0}
+    weight: 1
+  logicalStructure: 1
   branchChance: 0.8
   switchChance: 0.5
-  amountDeviationMin: 0
-  amountDeviationMax: 0
+  amountDeviationMin: -10
+  amountDeviationMax: 10
 --- !u!1 &8989840856107799549
 GameObject:
   m_ObjectHideFlags: 0

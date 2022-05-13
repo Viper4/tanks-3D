@@ -7,6 +7,8 @@ using System.Runtime.Serialization.Formatters.Binary;
 
 public class SceneLoader : MonoBehaviour
 {
+    public static Transform sceneLoader;
+
     Transform loadingScreen;
     Transform progressBar;
     Transform label;
@@ -14,22 +16,39 @@ public class SceneLoader : MonoBehaviour
 
     void Awake()
     {
+        Debug.Log("Got here");
+
         SaveSystem.Init();
 
-        if (SceneManager.GetActiveScene().name != "CustomLevel")
+        if (sceneLoader == null)
         {
-            StartCoroutine(OnSceneLoad());
+            sceneLoader = transform;
+            DontDestroyOnLoad(transform);
+
+            loadingScreen = transform.Find("LoadingScreen");
+            progressBar = loadingScreen.Find("Progress Bar");
+            label = loadingScreen.Find("LabelBackground");
+            startButton = loadingScreen.Find("Start");
+
+            OnSceneLoad();
+        }
+        else if (sceneLoader != transform)
+        {
+            sceneLoader.GetComponent<SceneLoader>().OnSceneLoad();
+            Destroy(gameObject);
         }
     }
 
-    // Start is called before the first frame update
-    void Start()
+    public void OnSceneLoad()
     {
-        DontDestroyOnLoad(transform);
-        loadingScreen = transform.Find("LoadingScreen");
-        progressBar = loadingScreen.Find("Progress Bar");
-        label = loadingScreen.Find("LabelBackground");
-        startButton = loadingScreen.Find("Start");
+        Time.timeScale = 0;
+
+        progressBar.gameObject.SetActive(false);
+        startButton.gameObject.SetActive(true);
+
+        label.Find("Level").GetComponent<Text>().text = "Level " + (SceneManager.GetActiveScene().buildIndex + 1).ToString();
+        label.Find("Tanks").GetComponent<Text>().text = "Enemy tanks: " + GameObject.Find("Enemies").transform.childCount;
+        label.Find("Lives").GetComponent<Text>().text = "Lives: " + GameObject.Find("Player").GetComponent<PlayerControl>().lives;
     }
 
     public void LoadNextScene()
@@ -61,16 +80,9 @@ public class SceneLoader : MonoBehaviour
         startButton.gameObject.SetActive(false);
         progressBar.gameObject.SetActive(true);
 
-        label.Find("Level").GetComponent<Text>().text = "Level " + (sceneIndex + 1).ToString();
-        // Removing one for the player tank
-        label.Find("Tanks").GetComponent<Text>().text = "Enemy tanks: " + (GameObject.FindGameObjectsWithTag("Tank").Length - 1);
-        label.Find("Lives").GetComponent<Text>().text = "Lives: " + GameObject.Find("Player").GetComponent<PlayerControl>().lives;
-
-        //Changed !asyncLoad.isDone to progress because it doesn't let code run after the loop run
-        float progress = 0;
-        while (progress < 1)
+        while (!asyncLoad.isDone)
         {
-            progress = Mathf.Clamp01(asyncLoad.progress / .9f);
+            float progress = Mathf.Clamp01(asyncLoad.progress / .9f);
 
             progressBar.GetComponent<Slider>().value = progress;
             progressBar.Find("Text").GetComponent<Text>().text = progress * 100 + "%";
@@ -78,27 +90,10 @@ public class SceneLoader : MonoBehaviour
         }
     }
 
-    IEnumerator OnSceneLoad()
-    {
-        yield return new WaitForFixedUpdate();
-        // All coroutines are stopped on scene load, so we have to do this instead
-        if (SceneManager.GetActiveScene().name != "CustomLevel")
-        {
-            Time.timeScale = 0;
-
-            progressBar.gameObject.SetActive(false);
-            startButton.gameObject.SetActive(true);
-        }
-        else
-        {
-
-        }
-    }
-
     public void StartGame()
     {
         loadingScreen.gameObject.SetActive(false);
-        Time.timeScale = 1;
+        GameObject.Find("Player").transform.Find("UI").GetComponent<UIHandler>().Resume();
     }
 
     public bool CurrentSceneLoaded()

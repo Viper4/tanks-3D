@@ -35,7 +35,7 @@ public class FireControl : MonoBehaviour
             bulletsFired++;
 
             Transform bulletClone = null;
-            bulletClone = Instantiate(bullet, barrel.position + (barrel.Find("Anchor").forward * 2), Quaternion.LookRotation(barrel.Find("Anchor").forward), projectileParent);
+            bulletClone = Instantiate(bullet, barrel.position + barrel.forward * 2, Quaternion.LookRotation(barrel.forward), projectileParent);
             bulletClone.localScale = new Vector3(1, 1, 1);
 
             yield return new WaitWhile(() => bulletClone.GetComponent<BulletBehaviour>() == null);

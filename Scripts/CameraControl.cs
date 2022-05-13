@@ -5,7 +5,7 @@ using UnityEngine;
 public class CameraControl : MonoBehaviour
 {
     public float sensitivity = 15;
-    public Transform target;
+    [SerializeField] Transform target;
     public Transform reticle;
 
     PlayerControl playerControl;
@@ -14,26 +14,24 @@ public class CameraControl : MonoBehaviour
     Transform turret;
     Transform barrel;
 
-    public float dstFromTarget = 4;
+    [SerializeField] float dstFromTarget = 4;
 
-    public Vector2 pitchMinMaxN = new Vector2(-40, 80);
-    public Vector2 pitchMinMaxL = new Vector2(-20, 20);
+    [SerializeField] Vector2 pitchMinMaxN = new Vector2(-40, 80);
+    [SerializeField] Vector2 pitchMinMaxL = new Vector2(-20, 20);
 
     Vector2 pitchMinMax = new Vector2(-40, 80);
 
-    public float rotationSmoothTime = 0.1f;
+    [SerializeField] float rotationSmoothTime = 0.1f;
     Vector3 rotationSmoothVelocity;
     Vector3 currentRotation;
 
-    public LayerMask ignoreLayerMasks;
+    [SerializeField] LayerMask ignoreLayerMasks;
 
     Vector3 lastEulerAngles;
 
     float yaw;
     float pitch;
     bool lockTurret = false;
-
-    public bool dead { get; set; } = false;
 
     // Start is called before the first frame update
     void Awake()
@@ -48,9 +46,11 @@ public class CameraControl : MonoBehaviour
         turret = transform.parent.Find("Turret");
         barrel = transform.parent.Find("Barrel");
 
-        lastEulerAngles = transform.eulerAngles;
+        lastEulerAngles = transform.parent.eulerAngles;
 
         playerControl = transform.parent.GetComponent<PlayerControl>();
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
     }
 
     // Update is called once per frame
@@ -74,18 +74,12 @@ public class CameraControl : MonoBehaviour
         }
 
         // 1st person vs. 3rd person turret control
-        if (!dead && Time.timeScale != 0)
+        if (!playerControl.Dead && Time.timeScale != 0)
         {
-            // Correcting turret and barrel rotation to not depend on parent rotation
-            turret.rotation = barrel.rotation *= Quaternion.Euler(lastEulerAngles - transform.eulerAngles);
-
             reticle.gameObject.SetActive(true);
             Cursor.visible = false;
             if (dstFromTarget == 0)
             {
-                barrel.rotation = turret.rotation = target.rotation = Camera.main.transform.rotation;
-                barrel.rotation *= Quaternion.Euler(-90, 0, 0);
-
                 body.gameObject.GetComponent<MeshRenderer>().enabled = turret.gameObject.GetComponent<MeshRenderer>().enabled = barrel.gameObject.GetComponent<MeshRenderer>().enabled = false;
                 reticle.position = new Vector3(Screen.width * 0.5f, Screen.height * 0.5f, 0);
                 
@@ -103,37 +97,37 @@ public class CameraControl : MonoBehaviour
                 {
                     Ray mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
 
-                    RaycastHit mouseHit;
-                    int playerLayerMask = 1 << 7;
-                    if (Physics.Raycast(mouseRay, out mouseHit, Mathf.Infinity, ~playerLayerMask))
+                    if (Physics.Raycast(mouseRay, out RaycastHit mouseHit, Mathf.Infinity, ~ignoreLayerMasks))
                     {
                         // Rotating turret and barrel towards the mouseHit point
                         Vector3 dir = Vector3.RotateTowards(target.forward, mouseHit.point - target.position, Time.deltaTime * 3, 0);
                         Quaternion lookRotation = Quaternion.LookRotation(dir);
 
                         turret.rotation = barrel.rotation = target.rotation = lookRotation;
-                        barrel.rotation *= Quaternion.Euler(-90, 0, 0);
                     }
                     reticle.position = Input.mousePosition;
                 }
                 else
                 {
-                    RaycastHit turretHit;
-                    if(Physics.Raycast(target.position, turret.forward, out turretHit, Mathf.Infinity, ~ignoreLayerMasks))
+                    if (Physics.Raycast(target.position, barrel.forward, out RaycastHit barrelHit, Mathf.Infinity, ~ignoreLayerMasks))
                     {
-                        reticle.position = Camera.main.WorldToScreenPoint(turretHit.point);
+                        reticle.position = Camera.main.WorldToScreenPoint(barrelHit.point);
                     }
                 }
             }
 
-            // Locking turret x euler to -90 deg, and clamping barrel x euler between pitchMinMaxL
-            turret.eulerAngles = new Vector3(-90, turret.eulerAngles.y, turret.eulerAngles.z);
-            barrel.eulerAngles = new Vector3(Clamping.ClampAngle(barrel.eulerAngles.x, -90 + pitchMinMaxL.x, -90 + pitchMinMaxL.y), barrel.eulerAngles.y, barrel.eulerAngles.z);
+            // Correcting turret and barrel y rotation to not depend on the parent
+            turret.eulerAngles = barrel.eulerAngles = new Vector3(barrel.eulerAngles.x, barrel.eulerAngles.y + (lastEulerAngles.y - transform.parent.eulerAngles.y), barrel.eulerAngles.z);
+
+            // Locking turret x euler to 0 deg, and clamping barrel x euler between pitchMinMaxL
+            turret.localEulerAngles = new Vector3(0, turret.localEulerAngles.y, turret.localEulerAngles.z);
+            barrel.localEulerAngles = new Vector3(Clamping.ClampAngle(barrel.localEulerAngles.x, pitchMinMaxL.x, pitchMinMaxL.y), barrel.localEulerAngles.y, barrel.localEulerAngles.z);
         }
         else
         {
             reticle.position = Input.mousePosition;
         }
+
         // Translating inputs from mouse into smoothed rotation of camera
         yaw += Input.GetAxis("Mouse X") * sensitivity / 8;
         pitch -= Input.GetAxis("Mouse Y") * sensitivity / 8;
@@ -146,13 +140,9 @@ public class CameraControl : MonoBehaviour
         transform.position = target.position - transform.forward * dstFromTarget;
 
         // Prevent clipping of camera
-        RaycastHit clippingHit;
-        if (Physics.Raycast(target.position, (transform.position - target.position).normalized, out clippingHit, dstFromTarget, ~ignoreLayerMasks))
+        if (Physics.Raycast(target.position, (transform.position - target.position).normalized, out RaycastHit clippingHit, dstFromTarget, ~ignoreLayerMasks))
         {
-            if(clippingHit.transform.name != "Player")
-            {
-                transform.position = clippingHit.point - (transform.position - target.position).normalized;
-            }
+            transform.position = clippingHit.point - (transform.position - target.position).normalized;
         }
         lastEulerAngles = transform.parent.eulerAngles;
     }

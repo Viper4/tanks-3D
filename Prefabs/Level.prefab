@@ -159,11 +159,14 @@ MonoBehaviour:
   obstacles:
   - {fileID: 1789137517761687661, guid: 716ebcd9db95e4540a052e5f9f478e48, type: 3}
   - {fileID: 474112292520302916, guid: 966e4c9e2448c9846bfe93aec5074577, type: 3}
-  weightedDistances: []
+  possibleDistances: []
   rangedDistance: 0
+  possibleDirections: []
+  logicalStructure: 0
   branchChance: 0.5
   switchChance: 0
-  distributionRange: 0000000000000000
+  amountDeviationMin: 0
+  amountDeviationMax: 0
 --- !u!1 &2776129576637944534
 GameObject:
   m_ObjectHideFlags: 0
@@ -176,7 +179,7 @@ GameObject:
   - component: {fileID: 2776129576637944530}
   - component: {fileID: 2776129576637944533}
   - component: {fileID: 2776129576637944532}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Kill Boundary
   m_TagString: Kill Boundary
   m_Icon: {fileID: 0}
@@ -271,7 +274,7 @@ GameObject:
   - component: {fileID: 2776129576896281651}
   - component: {fileID: 2776129576896281650}
   - component: {fileID: 2776129576896281653}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Kill Boundary
   m_TagString: Kill Boundary
   m_Icon: {fileID: 0}
@@ -366,7 +369,7 @@ GameObject:
   - component: {fileID: 2776129576899512529}
   - component: {fileID: 2776129576899512528}
   - component: {fileID: 2776129576899512531}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Kill Boundary
   m_TagString: Kill Boundary
   m_Icon: {fileID: 0}
@@ -556,7 +559,7 @@ GameObject:
   - component: {fileID: 2776129577253568179}
   - component: {fileID: 2776129577253568178}
   - component: {fileID: 2776129577253568181}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Kill Boundary
   m_TagString: Kill Boundary
   m_Icon: {fileID: 0}
@@ -651,7 +654,7 @@ GameObject:
   - component: {fileID: 2776129577318285959}
   - component: {fileID: 2776129577318285958}
   - component: {fileID: 2776129577318285961}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Kill Boundary
   m_TagString: Kill Boundary
   m_Icon: {fileID: 0}
@@ -746,7 +749,7 @@ GameObject:
   - component: {fileID: 2776129577338363100}
   - component: {fileID: 2776129577338363103}
   - component: {fileID: 2776129577338363102}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Kill Boundary
   m_TagString: Kill Boundary
   m_Icon: {fileID: 0}
