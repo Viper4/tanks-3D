@@ -61,8 +61,8 @@ public class GreyBot : MonoBehaviour
     {
         if (target == null)
         {
-            Debug.Log("The variable target of GreyBot has been defaulted to player's Camera Target");
-            target = GameObject.Find("Player").transform.Find("Camera Target");
+            Debug.Log("The variable target of GreyBot has been defaulted to the player");
+            target = GameObject.Find("Player").transform;
         }
 
         turretRotSeed = Random.Range(-99, 99);
@@ -111,17 +111,25 @@ public class GreyBot : MonoBehaviour
         {
             Vector3 velocity;
             velocityY = Physics.Raycast(transform.position + Vector3.up * 0.05f, -Vector3.up, 0.1f) ? 0 : velocityY - Time.deltaTime * gravity;
-
+            
+            Vector3 targetDirection = transform.forward;
+            RaycastHit middleHit;
+            RaycastHit frontHit;
             if (mode == Mode.Move || mode == Mode.Avoid)
             {
-                velocity = transform.forward * speed;
+                if (Physics.Raycast(transform.position, -transform.up, out middleHit, 1) && Physics.Raycast(transform.position + transform.forward, -transform.up, out frontHit, 1))
+                {
+                    targetDirection = frontHit.point - middleHit.point;
+                }
             }
             else
             {
-                velocity = Vector3.zero;
+                targetDirection = Vector3.zero;
             }
-
-            rb.velocity = velocity + Vector3.up * velocityY;
+            
+            Vector3 velocity = targetDirection * speed + Vector3.up * velocityY;
+            
+            rb.velocity = velocity;
 
             if (mode == Mode.Move)
             {
@@ -137,15 +145,15 @@ public class GreyBot : MonoBehaviour
         float noiseY = inaccuracy.y * (Mathf.PerlinNoise(turretRotSeed + 4f + Time.time * turretNoiseSpeed, turretRotSeed + 5f + Time.time * turretNoiseSpeed) - 0.5f);
 
         // Correcting turret and barrel y rotation to not depend on the parent
-        turret.eulerAngles = barrel.eulerAngles = new Vector3(barrel.eulerAngles.x, barrel.eulerAngles.y + (lastEulerAngles.y - transform.eulerAngles.y), barrel.eulerAngles.z);
+        turret.rotation = barrel.rotation *= Quaternion.AngleAxis(lastEulerAngles.y - transform.eulerAngles.y, Vector3.up);
 
         // Rotating turret and barrel towards player
-        Vector3 targetDir = target.position - body.position;
+        Vector3 targetDir = target.position - turret.position;
         rotToTarget = Quaternion.LookRotation(targetDir);
         turret.rotation = barrel.rotation = Quaternion.RotateTowards(turret.rotation, rotToTarget, Time.deltaTime * turretRotSpeed);
-
-        turret.localEulerAngles = new Vector3(0, turret.localEulerAngles.y + noiseY, turret.localEulerAngles.z);
-        barrel.localEulerAngles = new Vector3(Clamping.ClampAngle(barrel.localEulerAngles.x + noiseX, barrelRotRangeX, barrelRotRangeX), barrel.localEulerAngles.y + noiseY, barrel.localEulerAngles.z);
+        
+        turret.localRotation *= Quaternion.AngleAxis(noiseY, Vector3.up);
+        barrel.localEulerAngles = new Vector3(Clamping.ClampAngle(barrel.localEulerAngles.x + noiseX, barrelRotRangeX, barrelRotRangeX), barrel.localEulerAngles.y + noiseY, 0);
 
         lastEulerAngles = transform.eulerAngles;
     }
