@@ -106,13 +106,18 @@ public class TealBot : MonoBehaviour
             // Movement
             Vector3 velocity;
             velocityY = Physics.Raycast(transform.position + Vector3.up * 0.05f, -Vector3.up, 0.1f) ? 0 : velocityY - Time.deltaTime * gravity;
+            Vector3 targetDirection = transform.forward;
+            
             if (mode == Mode.Move || mode == Mode.Avoid)
             {
-                velocity = transform.forward * speed;
+                if (Physics.Raycast(transform.position, -transform.up, out RaycastHit middleHit, 1) && Physics.Raycast(transform.position + transform.forward, -transform.up, out RaycastHit frontHit, 1))
+                {
+                    targetDirection = frontHit - middleHit;
+                }
             }
             else
             {
-                velocity = Vector3.zero;
+                targetDirection = Vector3.zero;
             }
 
             if (mode == Mode.Move)
@@ -122,22 +127,21 @@ public class TealBot : MonoBehaviour
                 Quaternion desiredTankRot = Quaternion.LookRotation(Quaternion.AngleAxis(noise, Vector3.up) * transform.forward);
                 rb.rotation = Quaternion.RotateTowards(transform.rotation, desiredTankRot, Time.deltaTime * tankRotSpeed);
             }
+            
+            velocity = targetDirection * speed + Vector3.up * velocityY;
 
-            rb.velocity = velocity + Vector3.up * velocityY;
+            rb.velocity = velocity;
         }
 
-        // Correcting turret and barrel rotation to not depend on parent rotation
-        turret.rotation = barrel.rotation = anchor.rotation *= Quaternion.Euler(lastEulerAngles - transform.eulerAngles);
+        // Correcting turret and barrel y rotation to not depend on parent rotation
+        turret.rotation = barrel.rotation *= Quaternion.AngleAxis(lastEulerAngles.y - transform.eulerAngles.y, Vector3.up);
 
         // Rotating turret and barrel towards target
-        Vector3 dirToTarget = target.position - anchor.position;
+        Vector3 dirToTarget = target.position - turret.position;
         rotToTarget = Quaternion.LookRotation(dirToTarget);
-        Quaternion desiredTurretRot = anchor.rotation = barrel.rotation = Quaternion.RotateTowards(anchor.rotation, rotToTarget, Time.deltaTime * turretRotSpeed);
+        Quaternion desiredTurretRot = barrel.rotation = Quaternion.RotateTowards(barrel.rotation, rotToTarget, Time.deltaTime * turretRotSpeed);
 
-        barrel.rotation *= Quaternion.Euler(-90, 0, 0);
-
-        turret.eulerAngles = new Vector3(-90, desiredTurretRot.eulerAngles.y, desiredTurretRot.eulerAngles.z);
-        barrel.eulerAngles = new Vector3(Clamping.ClampAngle(barrel.eulerAngles.x, -90 - barrelRotRangeX, -90 + barrelRotRangeX), barrel.eulerAngles.y, barrel.eulerAngles.z);
+        barrel.localEulerAngles = new Vector3(Clamping.ClampAngle(barrel.localEulerAngles.x, barrelRotRangeX, barrelRotRangeX), barrel.localEulerAngles.y, 0);
 
         lastEulerAngles = transform.eulerAngles;
     }
@@ -157,7 +161,7 @@ public class TealBot : MonoBehaviour
                     {
                         if (bulletHit.transform == transform)
                         {
-                            desiredDir = Random.Range(0, 2) == 0 ? Quaternion.AngleAxis(90, Vector3.up) * (other.transform.position - anchor.position) : Quaternion.AngleAxis(-90, Vector3.up) * (other.transform.position - anchor.position);
+                            desiredDir = Random.Range(0, 2) == 0 ? Quaternion.AngleAxis(90, Vector3.up) * (other.transform.position - turret.position) : Quaternion.AngleAxis(-90, Vector3.up) * (other.transform.position - turret.position);
 
                             // Applying rotation
                             rb.MoveRotation(Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(desiredDir), Time.deltaTime * tankRotSpeed * 1.4f));
@@ -166,7 +170,7 @@ public class TealBot : MonoBehaviour
                     break;
                 case "Mine":
                     // Move in opposite direction of mine
-                    desiredDir = anchor.position - other.transform.position;
+                    desiredDir = transform.position - other.transform.position;
 
                     // Applying rotation
                     rb.MoveRotation(Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(desiredDir), Time.deltaTime * tankRotSpeed * 1.2f));
