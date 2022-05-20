@@ -13,7 +13,22 @@ public class BaseTankLogic : MonoBehaviour
     [SerializeField] bool frozenRotation = true;
     [SerializeField] float alignRotationSpeed = 20;
     [SerializeField] LayerMask notSlopeLayerMask;
+    
+    public bool noisyRotation
+    [SerializeField] bool randomizeSeed = true;
+    [SerializeField] float tankRotSpeed = 250f;
+    [SerializeField] float tankRotNoiseScale = 5;
+    [SerializeField] float tankRotNoiseSpeed = 0.5f;
+    [SerializeField] float tankRotSeed = 0;
 
+    private void Awake() 
+    {
+        if (randomizeSeed) 
+        {
+            tankRotSeed = Random.Range(-99.0f, 99.0f);
+        }
+    }
+    
     private void Update()
     {
         if (frozenRotation)
@@ -29,6 +44,14 @@ public class BaseTankLogic : MonoBehaviour
         {
             // Ensuring tank doesn't flip over
             tankOrigin.eulerAngles = new Vector3(Clamping.ClampAngle(tankOrigin.eulerAngles.x, pitchRange[0], pitchRange[1]), tankOrigin.eulerAngles.y, Clamping.ClampAngle(tankOrigin.eulerAngles.z, rollRange[0], rollRange[1]));
+        }
+        
+        if (noisyRotation) 
+        {
+            // Adding noise to rotation
+            float noise = tankRotNoiseScale * (Mathf.PerlinNoise(tankRotSeed + Time.time * tankRotNoiseSpeed, (tankRotSeed + 1) + Time.time * tankRotNoiseSpeed) - 0.5f);
+            Quaternion desiredTankRot = Quaternion.LookRotation(Quaternion.AngleAxis(noise, Vector3.up) * transform.forward);
+            rb.rotation = Quaternion.RotateTowards(transform.rotation, desiredTankRot, Time.deltaTime * tankRotSpeed);
         }
     }
 
