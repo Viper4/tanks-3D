@@ -165,7 +165,7 @@ public class TealBot : MonoBehaviour
                             desiredDir = Random.Range(0, 2) == 0 ? other.transform.position - turret.position : other.transform.position - turret.position;
 
                             // Applying rotation
-                            RotateTo(desiredDir);
+                            baseTankLogic.RotateTo(desiredDir);
                         }
                     }
                     break;
@@ -174,7 +174,7 @@ public class TealBot : MonoBehaviour
                     desiredDir = transform.position - other.transform.position;
 
                     // Applying rotation
-                    RotateTo(desiredDir);
+                    baseTankLogic.RotateTo(desiredDir);
                     break;
             }
         }
@@ -241,7 +241,7 @@ public class TealBot : MonoBehaviour
             }
 
             // Applying rotation
-            RotateTo(desiredDir);
+            baseTankLogic.RotateTo(desiredDir);
         }
         else
         {
@@ -251,21 +251,6 @@ public class TealBot : MonoBehaviour
             }
         }
         Debug.DrawLine(body.position, body.position + transform.forward * triggerRadius, Color.blue, 0.1f);
-    }
-    
-    void RotateTo(Vector3 desiredDir)
-    {
-        float angle = Vector3.Angle(desiredDir, transform.forward);
-        angle = angle < 0 ? angle + 360 : angle;
-
-        if (angle > 170 && angle < 190)
-        {
-            transform.forward = -transform.forward;
-        }
-        else
-        {
-            rb.MoveRotation(Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(desiredDir), Time.deltaTime * tankRotSpeed));
-        }
     }
     
     IEnumerator Shoot()
