@@ -84,7 +84,7 @@ public class UIHandler : MonoBehaviour
             selectedKeyBind = null;
         }
     }
-
+    
     public void Resume()
     {
         UIElements["InGame"].gameObject.SetActive(true);
@@ -118,6 +118,12 @@ public class UIHandler : MonoBehaviour
 
     public void ChangeKeyBind(Transform keyBind)
     {
+        StartCoroutine(DelayChangeKeyBind());
+    }
+    
+    IEnumerator DelayChangeKeyBind(Transform keyBind)
+    {
+        yield return new WaitWhile(Input.GetMouseButtonDown(0));
         selectedKeyBind = keyBind;
     }
 
