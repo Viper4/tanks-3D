@@ -43,6 +43,9 @@ public class GreyBot : MonoBehaviour
     [SerializeField] float tankRotSeed = 0;
 
     Vector3 lastEulerAngles;
+    
+    [SerializeField] float moveSpeed = 3;
+    [SerializeField] float avoidSpeed = 1.5f;
 
     public float speed = 3;
     public float gravity = 10;
@@ -69,8 +72,6 @@ public class GreyBot : MonoBehaviour
             target = GameObject.Find("Player").transform;
         }
 
-        turretRotSeed = Random.Range(-99, 99);
-
         baseTankLogic = GetComponent<BaseTankLogic>();
 
         body = transform.Find("Body");
@@ -83,8 +84,8 @@ public class GreyBot : MonoBehaviour
 
         if (randomizeSeed)
         {
-            turretRotSeed = Random.Range(0f, 99.0f);
-            tankRotSeed = Random.Range(0f, 99.0f);
+            turretRotSeed = Random.Range(-99.0f, 99.0f);
+            tankRotSeed = Random.Range(-99.0f, 99.0f);
         }
 
         triggerRadius = GetComponent<SphereCollider>().radius;
@@ -96,15 +97,11 @@ public class GreyBot : MonoBehaviour
         cooldown = cooldown > 0 ? cooldown - Time.deltaTime : 0;
         dstToTarget = Vector3.Distance(body.position, target.position);
 
-        if (dstToTarget < shootRadius && mode != Mode.Shoot && cooldown == 0)
+        if (dstToTarget < shootRadius && mode != Mode.Shoot && cooldown == 0 && !Physics.Raycast(turret.position, target.position - turret.position, dstToTarget, ~targetLayerMasks))
         {
-            // If nothing blocking player
-            if (!Physics.Raycast(turret.position, target.position - turret.position, dstToTarget, ~targetLayerMasks))
-            {
-                StartCoroutine(Shoot());
-            }
+            StartCoroutine(Shoot());
         }
-        else if (shootRoutine != null && Physics.Raycast(turret.position, target.position - turret.position, dstToTarget, ~targetLayerMasks))
+        else if (shootRoutine != null)
         {
             StopCoroutine(shootRoutine);
             shootRoutine = null;
@@ -113,37 +110,38 @@ public class GreyBot : MonoBehaviour
 
         if (rb != null)
         {
-            Vector3 velocity;
-            velocityY = Physics.Raycast(transform.position + Vector3.up * 0.05f, -Vector3.up, 0.1f) ? 0 : velocityY - Time.deltaTime * gravity;
-            
             Vector3 targetDirection = transform.forward;
-            RaycastHit middleHit;
-            RaycastHit frontHit;
+            Vector3 velocity;
             velocityY = baseTankLogic.IsGrounded() ? 0 : velocityY - Time.deltaTime * gravity;
-
-            if (mode == Mode.Move || mode == Mode.Avoid)
+            
+            ObstacleAvoidance();
+            
+            switch (mode)
             {
-                if (Physics.Raycast(transform.position, -transform.up, out middleHit, 1) && Physics.Raycast(transform.position + transform.forward, -transform.up, out frontHit, 1))
-                {
-                    targetDirection = frontHit.point - middleHit.point;
-                }
-            }
-            else
-            {
-                targetDirection = Vector3.zero;
+                case Mode.Move:
+                    if (Physics.Raycast(transform.position, -transform.up, out RaycastHit middleHit, 1) && Physics.Raycast(transform.position + transform.forward, -transform.up, out RaycastHit frontHit, 1))
+                    {
+                        targetDirection = frontHit.point - middleHit.point;
+                    }
+                    
+                    // Adding noise to rotation
+                    float noise = tankRotNoiseScale * (Mathf.PerlinNoise(tankRotSeed + Time.time * tankRotNoiseSpeed, (tankRotSeed + 1) + Time.time * tankRotNoiseSpeed) - 0.5f);
+                    Quaternion desiredTankRot = Quaternion.LookRotation(Quaternion.AngleAxis(noise, Vector3.up) * transform.forward);
+                    rb.rotation = Quaternion.RotateTowards(transform.rotation, desiredTankRot, Time.deltaTime * tankRotSpeed);
+                    
+                    speed = moveSpeed;
+                    break;
+                case Mode.Avoid:
+                    speed = avoidSpeed;
+                    break;
+                default:
+                    speed = 0;
+                    break;
             }
             
             velocity = targetDirection * speed + Vector3.up * velocityY;
             
             rb.velocity = velocity;
-
-            if (mode == Mode.Move)
-            {
-                // Adding noise to rotation
-                float noise = tankRotNoiseScale * (Mathf.PerlinNoise(tankRotSeed + Time.time * tankRotNoiseSpeed, (tankRotSeed + 1) + Time.time * tankRotNoiseSpeed) - 0.5f);
-                Quaternion desiredTankRot = Quaternion.LookRotation(Quaternion.AngleAxis(noise, Vector3.up) * transform.forward);
-                rb.rotation = Quaternion.RotateTowards(transform.rotation, desiredTankRot, Time.deltaTime * tankRotSpeed);
-            }
         }
 
         // Inaccuracy to rotation with noise
@@ -166,84 +164,68 @@ public class GreyBot : MonoBehaviour
         lastEulerAngles = transform.eulerAngles;
     }
 
-    private void OnTriggerStay(Collider other)
+    void ObstacleAvoidance()
     {
-        Vector3 desiredDir;
-
-        // Obstacle Avoidance
-        bool[] pathClear = { true, true, true };
-        float dotProductY = 0;
-
-        // Checking Forward
+        // Checking Forward on the center, left, and right side
         RaycastHit forwardHit;
-        if (Physics.Raycast(body.position, transform.forward, out forwardHit, triggerRadius)) // center
+        if (Physics.Raycast(body.position, transform.forward, out forwardHit, triggerRadius) || Physics.Raycast(body.position + transform.right, transform.forward, out forwardHit, triggerRadius) || Physics.Raycast(body.position - transform.right, transform.forward, out forwardHit, triggerRadius))
         {
-            // Cross product doesn't give absolute value of angle
-            dotProductY = Vector3.Dot(Vector3.Cross(transform.forward, forwardHit.normal), transform.up);
-            pathClear[1] = false;
-        }
-        else if (Physics.Raycast(body.position + transform.right, transform.forward, out forwardHit, triggerRadius)) // left side
-        {
-            dotProductY = Vector3.Dot(Vector3.Cross(transform.forward, forwardHit.normal), transform.up);
-            pathClear[1] = false;
-        }
-        else if (Physics.Raycast(body.position - transform.right, transform.forward, out forwardHit, triggerRadius)) // right side
-        {
-            dotProductY = Vector3.Dot(Vector3.Cross(transform.forward, forwardHit.normal), transform.up);
-            pathClear[1] = false;
-        }
-        Debug.DrawLine(body.position, body.position + transform.forward * triggerRadius, Color.blue, 0.1f);
+            Debug.DrawLine(body.position, forwardHit.point, Color.red, 0.1f);
 
-        if (!pathClear[1])
-        {
+            Vector3 desiredDir;
+            bool[] pathClear = { true, true };
+
+            // Cross product doesn't give absolute value of angle
+            float dotProductY = Vector3.Dot(Vector3.Cross(transform.forward, forwardHit.normal), transform.up);
+            
             mode = Mode.Avoid;
 
             // Checking Left
-            if (Physics.Raycast(body.position - transform.right * 1.11f, -transform.right, triggerRadius))
+            if (Physics.Raycast(body.position, -transform.right, triggerRadius))
             {
                 pathClear[0] = false;
+                Debug.DrawLine(body.position, body.position - transform.right * 3, Color.red, 0.1f);
             }
-            Debug.DrawLine(body.position - transform.right * 1.11f, body.position - transform.right * 3, Color.red, 0.1f);
             // Checking Right
-            if (Physics.Raycast(body.position + transform.right * 1.11f, transform.right, triggerRadius))
+            if (Physics.Raycast(body.position, transform.right, triggerRadius))
             {
-                pathClear[2] = false;
+                pathClear[1] = false;
+                Debug.DrawLine(body.position, body.position + transform.right * 3, Color.red, 0.1f);
             }
-            Debug.DrawLine(body.position + transform.right * 1.11f, body.position + transform.right * 3, Color.red, 0.1f);
-
-            // Over rotating on left and right to prevent jittering back and forth
-            if (pathClear[0])
+            
+            // If the object is directly in front it's better to reverse than slowly turn around
+            if (dotProductY > -10 && dotProductY < 10)
             {
-                if (pathClear[2])
-                {
-                    // If the obstacle is directly in front of tank, turn left or right randomly
-                    if (dotProductY == 0)
-                    {
-                        // Rotate left or right
-                        desiredDir = Random.Range(0, 2) == 0 ? Quaternion.AngleAxis(-10, Vector3.up) * -transform.right : Quaternion.AngleAxis(10, Vector3.up) * transform.right;
-                    }
-                    else
-                    {
-                        // Rotate left if obstacle is facing left
-                        desiredDir = dotProductY < 0 ? Quaternion.AngleAxis(-10, Vector3.up) * -transform.right : Quaternion.AngleAxis(10, Vector3.up) * transform.right;
-                    }
-                }
-                else
-                {
-                    // Rotate left
-                    desiredDir = Quaternion.AngleAxis(-10, Vector3.up) * -transform.right;
-                }
-            }
-            else if (pathClear[2])
-            {
-                // Rotate right
-                desiredDir = Quaternion.AngleAxis(10, Vector3.up) * transform.right;
+                transform.forward = -transform.forward;
+                desiredDir = transform.forward;
             }
             else
             {
-                // Go backward
-                transform.forward = -transform.forward;
-                desiredDir = transform.forward;
+                // Over rotating on left and right to prevent jittering back and forth
+                if (pathClear[0])
+                {
+                    if (pathClear[1])
+                    {
+                        // Rotate left if obstacle is facing left, vice versa
+                        desiredDir = dotProductY < 0 ? Quaternion.AngleAxis(-10, Vector3.up) * -transform.right : Quaternion.AngleAxis(10, Vector3.up) * transform.right;
+                    }
+                    else
+                    {
+                        // Rotate left
+                        desiredDir = Quaternion.AngleAxis(-10, Vector3.up) * -transform.right;
+                    }
+                }
+                else if (pathClear[1])
+                {
+                    // Rotate right
+                    desiredDir = Quaternion.AngleAxis(10, Vector3.up) * transform.right;
+                }
+                else
+                {
+                    // Go backward
+                    transform.forward = -transform.forward;
+                    desiredDir = transform.forward;
+                }
             }
 
             // Applying rotation
@@ -251,8 +233,6 @@ public class GreyBot : MonoBehaviour
         }
         else
         {
-            // Go forward if going backward
-            speed = speed < 0 ? -speed : speed;
             if (mode == Mode.Avoid)
             {
                 mode = Mode.Move;
