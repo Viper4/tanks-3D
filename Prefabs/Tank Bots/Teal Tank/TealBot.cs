@@ -100,13 +100,15 @@ public class TealBot : MonoBehaviour
             shootRoutine = null;
             mode = Mode.Move;
         }
-
+        
         if (rb != null)
         {
             // Movement
             Vector3 velocity;
             velocityY = baseTankLogic.IsGrounded() ? 0 : velocityY - Time.deltaTime * gravity;
             Vector3 targetDirection = transform.forward;
+            
+            ObstacleAvoidance();
             
             switch(mode)
             {
@@ -117,10 +119,7 @@ public class TealBot : MonoBehaviour
                     }
                     speed = moveSpeed;
                     
-                    // Adding noise to rotation
-                    float noise = tankRotNoiseScale * (Mathf.PerlinNoise(tankRotSeed + Time.time * tankRotNoiseSpeed, (tankRotSeed + 1) + Time.time * tankRotNoiseSpeed) - 0.5f);
-                    Quaternion desiredTankRot = Quaternion.LookRotation(Quaternion.AngleAxis(noise, Vector3.up) * transform.forward);
-                    rb.rotation = Quaternion.RotateTowards(transform.rotation, desiredTankRot, Time.deltaTime * tankRotSpeed);
+                    
                     break;
                 case Mode.Avoid:
                     speed = avoidSpeed;
@@ -150,7 +149,7 @@ public class TealBot : MonoBehaviour
         lastEulerAngles = transform.eulerAngles;
     }
 
-    void ObstacleAvoidance()
+    void OnTriggerStay(Collider other)
     {
         if (mode != Mode.Shoot)
         {
@@ -168,7 +167,7 @@ public class TealBot : MonoBehaviour
                             desiredDir = Random.Range(0, 2) == 0 ? other.transform.position - turret.position : other.transform.position - turret.position;
 
                             // Applying rotation
-                            rb.MoveRotation(Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(desiredDir), Time.deltaTime * tankRotSpeed));
+                            RotateTo(desiredDir);
                         }
                     }
                     break;
@@ -177,106 +176,97 @@ public class TealBot : MonoBehaviour
                     desiredDir = transform.position - other.transform.position;
 
                     // Applying rotation
-                    rb.MoveRotation(Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(desiredDir), Time.deltaTime * tankRotSpeed));
-                    break;
-                default:
-                    // Obstacle Avoidance
-                    bool[] pathClear = { true, true, true };
-                    float dotProductY = 0;
-
-                    // Checking Forward
-                    RaycastHit forwardHit;
-                    if (Physics.Raycast(body.position, transform.forward, out forwardHit, triggerRadius)) // center
-                    {
-                        // Cross product doesn't give absolute value of angle
-                        dotProductY = Vector3.Dot(Vector3.Cross(transform.forward, forwardHit.normal), transform.up);
-                        pathClear[1] = false;
-                    }
-                    else if (Physics.Raycast(body.position + transform.right, transform.forward, out forwardHit, triggerRadius)) // left side
-                    {
-                        dotProductY = Vector3.Dot(Vector3.Cross(transform.forward, forwardHit.normal), transform.up);
-                        pathClear[1] = false;
-                    }
-                    else if (Physics.Raycast(body.position - transform.right, transform.forward, out forwardHit, triggerRadius)) // right side
-                    {
-                        dotProductY = Vector3.Dot(Vector3.Cross(transform.forward, forwardHit.normal), transform.up);
-                        pathClear[1] = false;
-                    }
-                    Debug.DrawLine(body.position, body.position + transform.forward * triggerRadius, Color.blue, 0.1f);
-
-                    if (!pathClear[1])
-                    {
-                        mode = Mode.Avoid;
-
-                        // Checking Left
-                        if (Physics.Raycast(body.position, -transform.right, triggerRadius))
-                        {
-                            pathClear[0] = false;
-                        }
-                        Debug.DrawLine(body.position, body.position - transform.right * 3, Color.red, 0.1f);
-                        // Checking Right
-                        if (Physics.Raycast(body.position, transform.right, triggerRadius))
-                        {
-                            pathClear[2] = false;
-                        }
-                        Debug.DrawLine(body.position, body.position + transform.right * 3, Color.red, 0.1f);
-
-                        // Over rotating on left and right to prevent jittering
-                        if (pathClear[0])
-                        {
-                            if (pathClear[2])
-                            {
-                                // If the obstacle is directly in front of tank, turn left or right randomly
-                                if (dotProductY == 0)
-                                {
-                                    // Rotate left or right
-                                    desiredDir = Random.Range(0, 2) == 0 ? Quaternion.AngleAxis(-10, Vector3.up) * -transform.right : Quaternion.AngleAxis(10, Vector3.up) * transform.right;
-                                }
-                                else
-                                {
-                                    // Rotate left if obstacle is facing left
-                                    desiredDir = dotProductY < 0 ? Quaternion.AngleAxis(-10, Vector3.up) * -transform.right : Quaternion.AngleAxis(10, Vector3.up) * transform.right;
-                                }
-                            }
-                            else
-                            {
-                                // Rotate left
-                                desiredDir = Quaternion.AngleAxis(-10, Vector3.up) * -transform.right;
-                            }
-                        }
-                        else if (pathClear[2])
-                        {
-                            // Rotate right
-                            desiredDir = Quaternion.AngleAxis(10, Vector3.up) * transform.right;
-                        }
-                        else
-                        {
-                            // Rotate backward
-                            desiredDir = -transform.forward;
-                        }
-
-                        // Applying rotation
-                        rb.MoveRotation(Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(desiredDir), Time.deltaTime * tankRotSpeed));
-                    }
-                    else
-                    {
-                        mode = Mode.Move;
-                    }
+                    RotateTo(desiredDir);
                     break;
             }
         }
     }
     
-    void RotateTo(Vector3 desiredDir, Vector3 currentDir)
+    void ObstacleAvoidance()
     {
-        float angle = Vector3.Angle(desiredDir, currentDir);
-        if (angle > -10 && angle < 10)
+        // Checking Forward
+        RaycastHit forwardHit;
+        if (Physics.Raycast(body.position, transform.forward, out forwardHit, triggerRadius) || Physics.Raycast(body.position + transform.right, transform.forward, out forwardHit, triggerRadius) || Physics.Raycast(body.position - transform.right, transform.forward, out forwardHit, triggerRadius))
         {
-            
+            bool[] pathClear = { true, true };
+
+            // Cross product doesn't give absolute value of angle
+            float dotProductY = Vector3.Dot(Vector3.Cross(transform.forward, forwardHit.normal), transform.up);
+
+            mode = Mode.Avoid;
+
+            // Checking Left
+            if (Physics.Raycast(body.position, -transform.right, triggerRadius))
+            {
+                pathClear[0] = false;
+            }
+            Debug.DrawLine(body.position, body.position - transform.right * 3, Color.red, 0.1f);
+            // Checking Right
+            if (Physics.Raycast(body.position, transform.right, triggerRadius))
+            {
+                pathClear[1] = false;
+            }
+            Debug.DrawLine(body.position, body.position + transform.right * 3, Color.red, 0.1f);
+
+            // Over rotating on left and right to prevent jittering
+            if (pathClear[0])
+            {
+                if (pathClear[1])
+                {
+                    // If the obstacle is directly in front of tank, turn left or right randomly
+                    if (dotProductY == 0)
+                    {
+                        // Rotate left or right
+                        desiredDir = Random.Range(0, 2) == 0 ? Quaternion.AngleAxis(-10, Vector3.up) * -transform.right : Quaternion.AngleAxis(10, Vector3.up) * transform.right;
+                    }
+                    else
+                    {
+                        // Rotate left if obstacle is facing left
+                        desiredDir = dotProductY < 0 ? Quaternion.AngleAxis(-10, Vector3.up) * -transform.right : Quaternion.AngleAxis(10, Vector3.up) * transform.right;
+                    }
+                }
+                else
+                {
+                    // Rotate left
+                    desiredDir = Quaternion.AngleAxis(-10, Vector3.up) * -transform.right;
+                }
+            }
+            else if (pathClear[1])
+            {
+                // Rotate right
+                desiredDir = Quaternion.AngleAxis(10, Vector3.up) * transform.right;
+            }
+            else
+            {
+                // Rotate backward
+                desiredDir = -transform.forward;
+            }
+
+            // Applying rotation
+            RotateTo(desiredDir);
         }
         else
         {
-            
+            if (mode == Mode.Avoid)
+            {
+                mode = Mode.Move;
+            }
+        }
+        Debug.DrawLine(body.position, body.position + transform.forward * triggerRadius, Color.blue, 0.1f);
+    }
+    
+    void RotateTo(Vector3 desiredDir)
+    {
+        float angle = Vector3.Angle(desiredDir, transform.forward);
+        angle = angle < 0 ? angle + 360 : angle;
+
+        if (angle > 170 && angle < 190)
+        {
+            transform.forward = -transform.forward;
+        }
+        else
+        {
+            rb.MoveRotation(Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(desiredDir), Time.deltaTime * tankRotSpeed));
         }
     }
     
