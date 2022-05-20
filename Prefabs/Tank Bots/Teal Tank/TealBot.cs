@@ -29,13 +29,7 @@ public class TealBot : MonoBehaviour
     [SerializeField] bool randomizeSeed = true;
 
     [SerializeField] float turretRotSpeed = 25f;
-
     [SerializeField] float[] turretRangeX = { -20, 20 };
-
-    [SerializeField] float tankRotSpeed = 250f;
-    [SerializeField] float tankRotNoiseScale = 5;
-    [SerializeField] float tankRotNoiseSpeed = 0.5f;
-    [SerializeField] float tankRotSeed = 0;
 
     Vector3 lastEulerAngles;
     
@@ -119,13 +113,17 @@ public class TealBot : MonoBehaviour
                     }
                     speed = moveSpeed;
                     
-                    
+                    baseTankLogic.noisyRotation = true;
                     break;
                 case Mode.Avoid:
                     speed = avoidSpeed;
+                    
+                    baseTankLogic.noisyRotation = false;
                     break;
                 default:
                     speed = 0;
+                    
+                    baseTankLogic.noisyRotation = false;
                     break;
             }
 
@@ -272,16 +270,13 @@ public class TealBot : MonoBehaviour
     
     IEnumerator Shoot()
     {
-        mode = Mode.Shoot;
-
-        // Waiting for tank to move forward a bit more
-        yield return new WaitForSeconds(0.5f);
-
-        // Reaction time from seeing player
+        // Keeps moving until reaction time from seeing player is reached
         yield return new WaitForSeconds(Random.Range(reactionTime[0], reactionTime[1]));
+        // Stops moving and delay in firing
+        mode = Mode.Shoot;
+        yield return new WaitForSeconds(Random.Range(fireDelay[0], fireDelay[1]));
         cooldown = GetComponent<FireControl>().fireCooldown;
         StartCoroutine(GetComponent<FireControl>().Shoot());
-        yield return new WaitForSeconds(Random.Range(fireDelay[0], fireDelay[1]));
 
         shootRoutine = null;
         mode = Mode.Move;
