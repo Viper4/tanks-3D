@@ -22,7 +22,9 @@ public class BrownBot : MonoBehaviour
 
     bool shooting = false;
 
-    // Start is called before the first frame update
+    [SerializeField] LayerMask playerLayerMask;
+
+    // Start is called before the first frame Update
     void Awake()
     {
         if (target == null)
@@ -51,12 +53,11 @@ public class BrownBot : MonoBehaviour
         barrel.localEulerAngles = new Vector3(barrelStartEulers.x + angleX, barrelStartEulers.y + angleY, 0);
 
         // origin is offset forward by 1.7 to prevent ray from hitting this tank
-        Vector3 origin = body.position + body.forward * 1.7f;
+        Vector3 origin = barrel.position + barrel.forward * 1.7f;
         // If player is in front of turret then fire
-        RaycastHit hit;
-        if (!shooting && Physics.Raycast(origin, body.forward, out hit, dstToTarget))
+        if (!shooting && Physics.Raycast(origin, barrel.forward, out RaycastHit hit, dstToTarget))
         {
-            if(hit.transform.gameObject.layer == LayerMask.NameToLayer("Player"))
+            if((1 << hit.transform.gameObject.layer) == playerLayerMask)
             {
                 StartCoroutine(Shoot());
             }

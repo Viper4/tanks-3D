@@ -23,7 +23,7 @@ public class MineBehaviour : MonoBehaviour
     {
         activateDelay -= Time.deltaTime * 1;
 
-        if(activateDelay <= 0)
+        if (activateDelay <= 0)
         {
             timer -= Time.deltaTime * 1;
 
@@ -45,16 +45,19 @@ public class MineBehaviour : MonoBehaviour
 
     private void OnTriggerStay(Collider other)
     {
-        if(activateDelay <= 0 && timer > 1.5f)
+        if (activateDelay <= 0 && timer > 1.5f)
         {
             switch (other.tag)
             {
                 case "Tank":
-                    timer = 1.5f;
+                    if (timer > 2)
+                    {
+                        timer = 2;
+                    }
                     break;
                 case "Bullet":
-                    // Exploding if bullet is hitting the mine
-                    if(Vector3.Distance(transform.position, other.transform.position) < transform.localScale.x)
+                    // Exploding if bullet hits the mine
+                    if (Vector3.Distance(transform.position, other.transform.position) < transform.localScale.x)
                     {
                         Explode(new List<Transform>());
                     }
@@ -87,6 +90,12 @@ public class MineBehaviour : MonoBehaviour
         {
             switch (collider.tag)
             {
+                case "Player":
+                    if (collider.transform.root != null)
+                    {
+                        collider.transform.root.GetComponent<BaseTankLogic>().Explode();
+                    }
+                    break;
                 case "Tank":
                     // Blowing up tanks
                     if (collider.transform.parent != null)
@@ -101,7 +110,7 @@ public class MineBehaviour : MonoBehaviour
                     break;
                 case "Bullet":
                     // Destroying bullets in explosion
-                    Destroy(collider.gameObject);
+                    collider.GetComponent<BulletBehaviour>().SafeDestroy();
                     break;
                 case "Mine":
                     // Explode other mines not in mine chain

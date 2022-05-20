@@ -10,11 +10,14 @@ public class GreyBot : MonoBehaviour
 
     [SerializeField] LayerMask targetLayerMasks;
 
+    BaseTankLogic baseTankLogic;
+
     Transform body;
     Transform turret;
     Transform barrel;
 
     public float shootRadius = 30;
+    [SerializeField] float maxShootAngle = 30;
 
     public float[] reactionTime = { 0.7f, 1.25f };
 
@@ -30,8 +33,9 @@ public class GreyBot : MonoBehaviour
     [SerializeField] float turretRotSpeed = 25f;
     [SerializeField] float turretNoiseSpeed = 0.15f;
     [SerializeField] float turretRotSeed = 0;
+    Quaternion turretAnchor;
 
-    [SerializeField] float barrelRotRangeX = 20;
+    [SerializeField] float[] turretRangeX = { -20, 20 };
 
     [SerializeField] float tankRotSpeed = 250f;
     [SerializeField] float tankRotNoiseScale = 5;
@@ -41,7 +45,7 @@ public class GreyBot : MonoBehaviour
     Vector3 lastEulerAngles;
 
     public float speed = 3;
-    public float gravity = 5;
+    public float gravity = 10;
     float velocityY = 0;
 
     float triggerRadius = 3f;
@@ -56,7 +60,7 @@ public class GreyBot : MonoBehaviour
     }
     Mode mode = Mode.Move;
 
-    // Start is called before the first frame update
+    // Start is called before the first frame Update
     void Awake()
     {
         if (target == null)
@@ -66,6 +70,8 @@ public class GreyBot : MonoBehaviour
         }
 
         turretRotSeed = Random.Range(-99, 99);
+
+        baseTankLogic = GetComponent<BaseTankLogic>();
 
         body = transform.Find("Body");
         turret = transform.Find("Turret");
@@ -89,18 +95,16 @@ public class GreyBot : MonoBehaviour
     {
         cooldown = cooldown > 0 ? cooldown - Time.deltaTime : 0;
         dstToTarget = Vector3.Distance(body.position, target.position);
-        // Origin is offset forward by 1.7 to prevent ray from hitting this tank
-        Vector3 rayOrigin = body.position + body.forward * 1.7f;
 
         if (dstToTarget < shootRadius && mode != Mode.Shoot && cooldown == 0)
         {
             // If nothing blocking player
-            if (!Physics.Raycast(rayOrigin, target.position - rayOrigin, dstToTarget, ~targetLayerMasks))
+            if (!Physics.Raycast(turret.position, target.position - turret.position, dstToTarget, ~targetLayerMasks))
             {
                 StartCoroutine(Shoot());
             }
         }
-        else if (shootRoutine != null && Physics.Raycast(rayOrigin, target.position - rayOrigin, dstToTarget, ~targetLayerMasks))
+        else if (shootRoutine != null && Physics.Raycast(turret.position, target.position - turret.position, dstToTarget, ~targetLayerMasks))
         {
             StopCoroutine(shootRoutine);
             shootRoutine = null;
@@ -115,6 +119,8 @@ public class GreyBot : MonoBehaviour
             Vector3 targetDirection = transform.forward;
             RaycastHit middleHit;
             RaycastHit frontHit;
+            velocityY = baseTankLogic.IsGrounded() ? 0 : velocityY - Time.deltaTime * gravity;
+
             if (mode == Mode.Move || mode == Mode.Avoid)
             {
                 if (Physics.Raycast(transform.position, -transform.up, out middleHit, 1) && Physics.Raycast(transform.position + transform.forward, -transform.up, out frontHit, 1))
@@ -127,7 +133,7 @@ public class GreyBot : MonoBehaviour
                 targetDirection = Vector3.zero;
             }
             
-            Vector3 velocity = targetDirection * speed + Vector3.up * velocityY;
+            velocity = targetDirection * speed + Vector3.up * velocityY;
             
             rb.velocity = velocity;
 
@@ -145,15 +151,17 @@ public class GreyBot : MonoBehaviour
         float noiseY = inaccuracy.y * (Mathf.PerlinNoise(turretRotSeed + 4f + Time.time * turretNoiseSpeed, turretRotSeed + 5f + Time.time * turretNoiseSpeed) - 0.5f);
 
         // Correcting turret and barrel y rotation to not depend on the parent
-        turret.rotation = barrel.rotation *= Quaternion.AngleAxis(lastEulerAngles.y - transform.eulerAngles.y, Vector3.up);
+        turret.eulerAngles = new Vector3(turret.eulerAngles.x, turret.eulerAngles.y + lastEulerAngles.y - transform.eulerAngles.y, turret.eulerAngles.z);
+        barrel.eulerAngles = new Vector3(barrel.eulerAngles.x, barrel.eulerAngles.y + lastEulerAngles.y - transform.eulerAngles.y, barrel.eulerAngles.z);
 
         // Rotating turret and barrel towards player
         Vector3 targetDir = target.position - turret.position;
         rotToTarget = Quaternion.LookRotation(targetDir);
-        turret.rotation = barrel.rotation = Quaternion.RotateTowards(turret.rotation, rotToTarget, Time.deltaTime * turretRotSpeed);
-        
-        turret.localRotation *= Quaternion.AngleAxis(noiseY, Vector3.up);
-        barrel.localEulerAngles = new Vector3(Clamping.ClampAngle(barrel.localEulerAngles.x + noiseX, barrelRotRangeX, barrelRotRangeX), barrel.localEulerAngles.y + noiseY, 0);
+        turret.rotation = barrel.rotation = turretAnchor = Quaternion.RotateTowards(turretAnchor, rotToTarget, Time.deltaTime * turretRotSpeed);
+
+        // Zeroing x and z eulers of turret and clamping barrel x euler
+        turret.localEulerAngles = new Vector3(0, turret.localEulerAngles.y + noiseY, 0);
+        barrel.localEulerAngles = new Vector3(Clamping.ClampAngle(barrel.localEulerAngles.x + noiseX, turretRangeX[0], turretRangeX[1]), barrel.localEulerAngles.y + noiseY, 0);
 
         lastEulerAngles = transform.eulerAngles;
     }
@@ -165,20 +173,26 @@ public class GreyBot : MonoBehaviour
         // Obstacle Avoidance
         bool[] pathClear = { true, true, true };
         float dotProductY = 0;
-        Vector3 origin = transform.position + Vector3.up * 0.7f;
 
         // Checking Forward
-        if (Physics.Raycast(origin + transform.forward * 1.11f, transform.forward, out RaycastHit forwardHit, triggerRadius) || Physics.Raycast(origin + transform.forward * 1.11f + transform.right * 1, transform.forward, out forwardHit, triggerRadius) || Physics.Raycast(origin + transform.forward * 1.11f - transform.right * 1, transform.forward, out forwardHit, triggerRadius)) // testing forward from center, left, right
+        RaycastHit forwardHit;
+        if (Physics.Raycast(body.position, transform.forward, out forwardHit, triggerRadius)) // center
         {
-            // Avoid obstacle if the obstacle slant is <35 degrees
-            if (Mathf.Abs(forwardHit.transform.eulerAngles.x) < 35 && Mathf.Abs(forwardHit.transform.eulerAngles.z) < 35)
-            {
-                // Dot product doesn't give absolute value of angle
-                dotProductY = Vector3.Dot(Vector3.Cross(transform.forward, forwardHit.normal), transform.up);
-                pathClear[1] = false;
-            }
+            // Cross product doesn't give absolute value of angle
+            dotProductY = Vector3.Dot(Vector3.Cross(transform.forward, forwardHit.normal), transform.up);
+            pathClear[1] = false;
         }
-        Debug.DrawLine(origin + transform.forward * 1.11f, origin + transform.forward * triggerRadius, Color.blue, 0.1f);
+        else if (Physics.Raycast(body.position + transform.right, transform.forward, out forwardHit, triggerRadius)) // left side
+        {
+            dotProductY = Vector3.Dot(Vector3.Cross(transform.forward, forwardHit.normal), transform.up);
+            pathClear[1] = false;
+        }
+        else if (Physics.Raycast(body.position - transform.right, transform.forward, out forwardHit, triggerRadius)) // right side
+        {
+            dotProductY = Vector3.Dot(Vector3.Cross(transform.forward, forwardHit.normal), transform.up);
+            pathClear[1] = false;
+        }
+        Debug.DrawLine(body.position, body.position + transform.forward * triggerRadius, Color.blue, 0.1f);
 
         if (!pathClear[1])
         {
@@ -189,15 +203,15 @@ public class GreyBot : MonoBehaviour
             {
                 pathClear[0] = false;
             }
-            Debug.DrawLine(origin - transform.right * 1.11f, body.position - transform.right * 3, Color.red, 0.1f);
+            Debug.DrawLine(body.position - transform.right * 1.11f, body.position - transform.right * 3, Color.red, 0.1f);
             // Checking Right
-            if (Physics.Raycast(origin + transform.right * 1.11f, transform.right, triggerRadius))
+            if (Physics.Raycast(body.position + transform.right * 1.11f, transform.right, triggerRadius))
             {
                 pathClear[2] = false;
             }
-            Debug.DrawLine(origin + transform.right * 1.11f, body.position + transform.right * 3, Color.red, 0.1f);
+            Debug.DrawLine(body.position + transform.right * 1.11f, body.position + transform.right * 3, Color.red, 0.1f);
 
-            // Over rotating on left and right to prevent jittering
+            // Over rotating on left and right to prevent jittering back and forth
             if (pathClear[0])
             {
                 if (pathClear[2])
@@ -228,12 +242,12 @@ public class GreyBot : MonoBehaviour
             else
             {
                 // Go backward
-                speed = speed < 0 ? speed : -speed;
+                transform.forward = -transform.forward;
                 desiredDir = transform.forward;
             }
 
             // Applying rotation
-            rb.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(desiredDir), Time.deltaTime * tankRotSpeed);
+            rb.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(desiredDir), tankRotSpeed * Time.deltaTime);
         }
         else
         {
@@ -248,9 +262,9 @@ public class GreyBot : MonoBehaviour
 
     IEnumerator Shoot()
     {
-        // When angle between barrel and target is less than minAngle degrees, then stop and fire
-        float angle = Quaternion.Angle(barrel.rotation, rotToTarget * Quaternion.Euler(-90, 0, 0));
-        if (angle < 45)
+        // When angle between barrel and target is less than maxShootAngle, then stop and fire
+        float angle = Quaternion.Angle(barrel.rotation, rotToTarget);
+        if (angle < maxShootAngle)
         {
             // Waiting for tank to move forward a bit more
             yield return new WaitForSeconds(0.5f);

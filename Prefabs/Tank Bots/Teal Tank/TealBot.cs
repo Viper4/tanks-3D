@@ -11,9 +11,12 @@ public class TealBot : MonoBehaviour
 
     [SerializeField] LayerMask targetLayerMasks;
 
+    BaseTankLogic baseTankLogic;
+
+    Transform body;
     Transform turret;
     Transform barrel;
-    Transform anchor;
+    Quaternion turretAnchor;
 
     public float shootRadius = 99f;
 
@@ -28,7 +31,7 @@ public class TealBot : MonoBehaviour
 
     [SerializeField] float turretRotSpeed = 25f;
 
-    [SerializeField] float barrelRotRangeX = 20;
+    [SerializeField] float[] turretRangeX = { -20, 20 };
 
     [SerializeField] float tankRotSpeed = 250f;
     [SerializeField] float tankRotNoiseScale = 5;
@@ -37,8 +40,8 @@ public class TealBot : MonoBehaviour
 
     Vector3 lastEulerAngles;
 
-    public float speed = 5;
-    public float gravity = 5;
+    public float speed = 3;
+    public float gravity = 10;
     float velocityY = 0;
 
     float triggerRadius = 3.5f;
@@ -53,7 +56,7 @@ public class TealBot : MonoBehaviour
     }
     Mode mode = Mode.Move;
 
-    // Start is called before the first frame update
+    // Start is called before the first frame Update
     void Awake()
     {
         if (target == null)
@@ -62,13 +65,15 @@ public class TealBot : MonoBehaviour
             target = GameObject.Find("Player").transform.Find("Camera Target");
         }
 
+        baseTankLogic = GetComponent<BaseTankLogic>();
+
+        body = transform.Find("Body");
         turret = transform.Find("Turret");
         barrel = transform.Find("Barrel");
-        anchor = transform.Find("Anchor");
 
         rb = GetComponent<Rigidbody>();
 
-        lastEulerAngles = anchor.eulerAngles;
+        lastEulerAngles = transform.eulerAngles;
 
         if (randomizeSeed)
         {
@@ -83,18 +88,16 @@ public class TealBot : MonoBehaviour
     {
         cooldown = cooldown > 0 ? cooldown - Time.deltaTime : 0;
         dstToTarget = Vector3.Distance(transform.position, target.position);
-        // origin is offset forward by 1.7 to prevent ray from hitting this tank
-        Vector3 rayOrigin = anchor.position + anchor.forward * 1.7f;
 
         if (dstToTarget < shootRadius && mode != Mode.Shoot && cooldown == 0)
         {
             // If nothing blocking player
-            if (!Physics.Raycast(rayOrigin, target.position - rayOrigin, dstToTarget, ~targetLayerMasks))
+            if (!Physics.Raycast(turret.position, target.position - turret.position, dstToTarget, ~targetLayerMasks))
             {
                 shootRoutine = StartCoroutine(Shoot());
             }
         }
-        else if(shootRoutine != null && Physics.Raycast(rayOrigin, target.position - rayOrigin, dstToTarget, ~targetLayerMasks))
+        else if (shootRoutine != null && Physics.Raycast(turret.position, target.position - turret.position, dstToTarget, ~targetLayerMasks))
         {
             StopCoroutine(shootRoutine);
             shootRoutine = null;
@@ -105,20 +108,24 @@ public class TealBot : MonoBehaviour
         {
             // Movement
             Vector3 velocity;
-            velocityY = Physics.Raycast(transform.position + Vector3.up * 0.05f, -Vector3.up, 0.1f) ? 0 : velocityY - Time.deltaTime * gravity;
+            velocityY = baseTankLogic.IsGrounded() ? 0 : velocityY - Time.deltaTime * gravity;
             Vector3 targetDirection = transform.forward;
-            
+
             if (mode == Mode.Move || mode == Mode.Avoid)
             {
                 if (Physics.Raycast(transform.position, -transform.up, out RaycastHit middleHit, 1) && Physics.Raycast(transform.position + transform.forward, -transform.up, out RaycastHit frontHit, 1))
                 {
-                    targetDirection = frontHit - middleHit;
+                    targetDirection = frontHit.point - middleHit.point;
                 }
             }
             else
             {
                 targetDirection = Vector3.zero;
             }
+
+            velocity = targetDirection * speed + Vector3.up * velocityY;
+
+            rb.velocity = velocity;
 
             if (mode == Mode.Move)
             {
@@ -127,22 +134,20 @@ public class TealBot : MonoBehaviour
                 Quaternion desiredTankRot = Quaternion.LookRotation(Quaternion.AngleAxis(noise, Vector3.up) * transform.forward);
                 rb.rotation = Quaternion.RotateTowards(transform.rotation, desiredTankRot, Time.deltaTime * tankRotSpeed);
             }
-            
-            velocity = targetDirection * speed + Vector3.up * velocityY;
-
-            rb.velocity = velocity;
         }
 
-        // Correcting turret and barrel y rotation to not depend on parent rotation
-        turret.rotation = barrel.rotation *= Quaternion.AngleAxis(lastEulerAngles.y - transform.eulerAngles.y, Vector3.up);
+        // Correcting turret and barrel y rotation to not depend on the parent
+        turret.eulerAngles = new Vector3(turret.eulerAngles.x, turret.eulerAngles.y + lastEulerAngles.y - transform.eulerAngles.y, turret.eulerAngles.z);
+        barrel.eulerAngles = new Vector3(barrel.eulerAngles.x, barrel.eulerAngles.y + lastEulerAngles.y - transform.eulerAngles.y, barrel.eulerAngles.z);
 
-        // Rotating turret and barrel towards target
-        Vector3 dirToTarget = target.position - turret.position;
-        rotToTarget = Quaternion.LookRotation(dirToTarget);
-        Quaternion desiredTurretRot = barrel.rotation = Quaternion.RotateTowards(barrel.rotation, rotToTarget, Time.deltaTime * turretRotSpeed);
+        // Rotating turret and barrel towards player
+        Vector3 targetDir = target.position - turret.position;
+        rotToTarget = Quaternion.LookRotation(targetDir);
+        turret.rotation = barrel.rotation = turretAnchor = Quaternion.RotateTowards(turretAnchor, rotToTarget, Time.deltaTime * turretRotSpeed);
 
-        barrel.localEulerAngles = new Vector3(Clamping.ClampAngle(barrel.localEulerAngles.x, barrelRotRangeX, barrelRotRangeX), barrel.localEulerAngles.y, 0);
-
+        // Zeroing x and z eulers of turret and clamping barrel x euler
+        turret.localEulerAngles = new Vector3(0, turret.localEulerAngles.y, 0);
+        barrel.localEulerAngles = new Vector3(Clamping.ClampAngle(barrel.localEulerAngles.x, turretRangeX[0], turretRangeX[1]), barrel.localEulerAngles.y, 0);
         lastEulerAngles = transform.eulerAngles;
     }
 
@@ -178,45 +183,44 @@ public class TealBot : MonoBehaviour
                 default:
                     // Obstacle Avoidance
                     bool[] pathClear = { true, true, true };
-                    float dotProduct = 0;
-                    Vector3 origin = transform.position + Vector3.up * 0.7f;
+                    float dotProductY = 0;
 
                     // Checking Forward
                     RaycastHit forwardHit;
-                    if (Physics.Raycast(origin + transform.forward * 1.11f, transform.forward, out forwardHit, triggerRadius)) // center
+                    if (Physics.Raycast(body.position, transform.forward, out forwardHit, triggerRadius)) // center
                     {
                         // Cross product doesn't give absolute value of angle
-                        dotProduct = Vector3.Dot(Vector3.Cross(transform.forward, forwardHit.normal), transform.up);
+                        dotProductY = Vector3.Dot(Vector3.Cross(transform.forward, forwardHit.normal), transform.up);
                         pathClear[1] = false;
                     }
-                    else if (Physics.Raycast(origin + transform.forward * 1.11f + transform.right * 1, transform.forward, out forwardHit, triggerRadius)) // left side
+                    else if (Physics.Raycast(body.position + transform.right, transform.forward, out forwardHit, triggerRadius)) // left side
                     {
-                        dotProduct = Vector3.Dot(Vector3.Cross(transform.forward, forwardHit.normal), transform.up);
+                        dotProductY = Vector3.Dot(Vector3.Cross(transform.forward, forwardHit.normal), transform.up);
                         pathClear[1] = false;
                     }
-                    else if (Physics.Raycast(origin + transform.forward * 1.11f - transform.right * 1, transform.forward, out forwardHit, triggerRadius)) // right side
+                    else if (Physics.Raycast(body.position - transform.right, transform.forward, out forwardHit, triggerRadius)) // right side
                     {
-                        dotProduct = Vector3.Dot(Vector3.Cross(transform.forward, forwardHit.normal), transform.up);
+                        dotProductY = Vector3.Dot(Vector3.Cross(transform.forward, forwardHit.normal), transform.up);
                         pathClear[1] = false;
                     }
-                    Debug.DrawLine(origin + transform.forward * 1.11f, origin + transform.forward * triggerRadius, Color.blue, 0.1f);
+                    Debug.DrawLine(body.position, body.position + transform.forward * triggerRadius, Color.blue, 0.1f);
 
                     if (!pathClear[1])
                     {
                         mode = Mode.Avoid;
 
                         // Checking Left
-                        if (Physics.Raycast(anchor.position - transform.right * 1.11f, -transform.right, triggerRadius))
+                        if (Physics.Raycast(body.position, -transform.right, triggerRadius))
                         {
                             pathClear[0] = false;
                         }
-                        Debug.DrawLine(origin - transform.right * 1.11f, anchor.position - transform.right * 3, Color.red, 0.1f);
+                        Debug.DrawLine(body.position, body.position - transform.right * 3, Color.red, 0.1f);
                         // Checking Right
-                        if (Physics.Raycast(origin + transform.right * 1.11f, transform.right, triggerRadius))
+                        if (Physics.Raycast(body.position, transform.right, triggerRadius))
                         {
                             pathClear[2] = false;
                         }
-                        Debug.DrawLine(origin + transform.right * 1.11f, anchor.position + transform.right * 3, Color.red, 0.1f);
+                        Debug.DrawLine(body.position, body.position + transform.right * 3, Color.red, 0.1f);
 
                         // Over rotating on left and right to prevent jittering
                         if (pathClear[0])
@@ -224,7 +228,7 @@ public class TealBot : MonoBehaviour
                             if (pathClear[2])
                             {
                                 // If the obstacle is directly in front of tank, turn left or right randomly
-                                if (dotProduct == 0)
+                                if (dotProductY == 0)
                                 {
                                     // Rotate left or right
                                     desiredDir = Random.Range(0, 2) == 0 ? Quaternion.AngleAxis(-10, Vector3.up) * -transform.right : Quaternion.AngleAxis(10, Vector3.up) * transform.right;
@@ -232,7 +236,7 @@ public class TealBot : MonoBehaviour
                                 else
                                 {
                                     // Rotate left if obstacle is facing left
-                                    desiredDir = dotProduct < 0 ? Quaternion.AngleAxis(-10, Vector3.up) * -transform.right : Quaternion.AngleAxis(10, Vector3.up) * transform.right;
+                                    desiredDir = dotProductY < 0 ? Quaternion.AngleAxis(-10, Vector3.up) * -transform.right : Quaternion.AngleAxis(10, Vector3.up) * transform.right;
                                 }
                             }
                             else

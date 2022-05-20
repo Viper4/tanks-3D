@@ -8,9 +8,7 @@ public class PlayerControl : MonoBehaviour
     BaseTankLogic baseTankLogic;
     Transform mainCamera;
 
-    Transform turret;
-    Transform barrel;
-    Transform body;
+    Transform tankOrigin;
 
     UIHandler UIHandler;
 
@@ -33,19 +31,27 @@ public class PlayerControl : MonoBehaviour
     public float turnSmoothTime = 0.2f;
     float turnSmoothVelocity;
 
-    // Start is called before the first frame update
+    public float gravity = 10;
+    float velocityY = 0;
+
+    [SerializeField] LayerMask ignoreLayerMasks;
+
+    // Start is called before the first frame Update
     void Awake()
     {
         rb = GetComponent<Rigidbody>();
+
         baseTankLogic = GetComponent<BaseTankLogic>();
         mainCamera = Camera.main.transform;
 
-        barrel = transform.Find("Barrel");
-        turret = transform.Find("Turret");
-        body = transform.Find("Body");
+        tankOrigin = transform.Find("Tank Origin");
+        body = tankOrigin.Find("Body");
 
         UIHandler = GameObject.Find("UI").GetComponent<UIHandler>();
+    }
 
+    void Start()
+    {
         SaveSystem.LoadSettings("settings.json");
     }
 
@@ -77,8 +83,16 @@ public class PlayerControl : MonoBehaviour
                     }
                 }
 
-                Vector2 input = new Vector2(GetInputAxis("Horizontal"), GetInputAxis("Vertical"));
-                Vector2 inputDir = input.normalized;
+                if (baseTankLogic.IsGrounded())
+                {
+                    velocityY = 0;
+                }
+                else
+                {
+                    velocityY -= gravity * Time.deltaTime;
+                }
+
+                Vector2 inputDir = new Vector2(GetInputAxis("Horizontal"), GetInputAxis("Vertical")).normalized;
 
                 // Moving the tank with player input
                 float targetSpeed = movementSpeed / 2 * inputDir.magnitude;
@@ -86,29 +100,54 @@ public class PlayerControl : MonoBehaviour
                 currentSpeed = Mathf.SmoothDamp(currentSpeed, targetSpeed, ref speedSmoothVelocity, GetModifiedSmoothTime(speedSmoothTime));
 
                 mainCamera.Find("Anchor").eulerAngles = new Vector3(0, mainCamera.eulerAngles.y, mainCamera.eulerAngles.z);
-                Vector3 velocity = currentSpeed * body.forward;
+
+                Vector3 velocityDir = tankOrigin.forward;
+
+                RaycastHit middleHit;
+                RaycastHit frontHit;
+                if (Physics.Raycast(tankOrigin.position + tankOrigin.up * 1.22f, -tankOrigin.up, out middleHit, 3, ~ignoreLayerMasks) && Physics.Raycast(tankOrigin.position + tankOrigin.up * 1.22f + tankOrigin.forward, -tankOrigin.up, out frontHit, 3, ~ignoreLayerMasks))
+                {
+                    velocityDir = frontHit.point - middleHit.point;
+                }
+
+                Vector3 velocity = currentSpeed * velocityDir + Vector3.up * velocityY;
+
                 rb.velocity = velocity;
 
                 // Rotating tank with movement
                 if (inputDir != Vector2.zero)
                 {
                     float targetRotation = Mathf.Atan2(inputDir.x, inputDir.y) * Mathf.Rad2Deg + mainCamera.eulerAngles.y;
-                    body.eulerAngles = new Vector3(body.eulerAngles.x, Mathf.SmoothDampAngle(body.eulerAngles.y, targetRotation, ref turnSmoothVelocity, GetModifiedSmoothTime(turnSmoothTime)), body.eulerAngles.z);
-                    //body.rotation = Quaternion.Euler(Vector3.up * Mathf.SmoothDampAngle(body.eulerAngles.y, targetRotation, ref turnSmoothVelocity, GetModifiedSmoothTime(turnSmoothTime)));
+                    tankOrigin.eulerAngles = new Vector3(tankOrigin.eulerAngles.x, Mathf.SmoothDampAngle(tankOrigin.eulerAngles.y, targetRotation, ref turnSmoothVelocity, GetModifiedSmoothTime(turnSmoothTime)), tankOrigin.eulerAngles.z);
                 }
             }
         }
         else
         {
             rb.velocity = Vector3.zero;
-            if (cheats && Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.R))
-            {
-                Debug.Log("Cheat Player Respawn");
-                Dead = false;
+        }
 
-                barrel.gameObject.SetActive(true);
-                turret.gameObject.SetActive(true);
-                body.gameObject.SetActive(true);
+        if (cheats)
+        {
+            if (Input.GetKey(KeyCode.LeftAlt))
+            {
+                if (Input.GetKeyDown(KeyCode.N))
+                {
+                    Debug.Log("Cheat Next Level");
+                    SceneLoader.sceneLoader.LoadNextScene(3);
+                }
+                else if (Input.GetKeyDown(KeyCode.R))
+                {
+                    Debug.Log("Cheat Reload");
+                    SceneLoader.sceneLoader.LoadScene(false, -1, 3);
+                }
+                else if (Input.GetKeyDown(KeyCode.B))
+                {
+                    Debug.Log("Cheat Reset");
+                    Dead = false;
+
+                    tankOrigin.gameObject.SetActive(true);
+                }
             }
         }
     }
@@ -154,17 +193,15 @@ public class PlayerControl : MonoBehaviour
         return 0;
     }
 
-    public IEnumerator Respawn()
+    public void Respawn()
     {
-        yield return new WaitForSeconds(3);
-
         if (lives > 0)
         {
-            StartCoroutine(GameObject.Find("SceneLoader").GetComponent<SceneLoader>().LoadScene(false));
+            StartCoroutine(SceneLoader.sceneLoader.LoadScene(false, -1, 3));
         }
         else
         {
-            StartCoroutine(GameObject.Find("SceneLoader").GetComponent<SceneLoader>().LoadScene(true, 0));
+            StartCoroutine(SceneLoader.sceneLoader.LoadScene(true, 0, 3));
         }
     }
 }

@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using System.Runtime.Serialization.Formatters.Binary;
 
 public class SceneLoader : MonoBehaviour
 {
-    public static Transform sceneLoader;
+    public static SceneLoader sceneLoader;
 
     Transform loadingScreen;
     Transform progressBar;
@@ -16,13 +15,11 @@ public class SceneLoader : MonoBehaviour
 
     void Awake()
     {
-        Debug.Log("Got here");
-
         SaveSystem.Init();
 
         if (sceneLoader == null)
         {
-            sceneLoader = transform;
+            sceneLoader = this;
             DontDestroyOnLoad(transform);
 
             loadingScreen = transform.Find("LoadingScreen");
@@ -32,10 +29,13 @@ public class SceneLoader : MonoBehaviour
 
             OnSceneLoad();
         }
-        else if (sceneLoader != transform)
+        else if (sceneLoader != this)
         {
-            sceneLoader.GetComponent<SceneLoader>().OnSceneLoad();
             Destroy(gameObject);
+        }
+        else
+        {
+            sceneLoader.OnSceneLoad();
         }
     }
 
@@ -51,16 +51,14 @@ public class SceneLoader : MonoBehaviour
         label.Find("Lives").GetComponent<Text>().text = "Lives: " + GameObject.Find("Player").GetComponent<PlayerControl>().lives;
     }
 
-    public void LoadNextScene()
+    public void LoadNextScene(float delay = 0)
     {
         int activeSceneIndex = SceneManager.GetActiveScene().buildIndex;
 
-        SaveSystem.SavePlayerData("PlayerData.json", GameObject.Find("Player").GetComponent<PlayerControl>(), activeSceneIndex + 1);
-
-        StartCoroutine(LoadScene(false, activeSceneIndex + 1));
+        StartCoroutine(LoadScene(true, activeSceneIndex + 1, delay));
     }
 
-    public IEnumerator LoadScene(bool save, int sceneIndex = -1)
+    public IEnumerator LoadScene(bool save, int sceneIndex = -1, float delay = 0)
     {
         Debug.Log("LoadScene called");
 
@@ -73,6 +71,8 @@ public class SceneLoader : MonoBehaviour
         {
             SaveSystem.SavePlayerData("PlayerData.json", GameObject.Find("Player").GetComponent<PlayerControl>(), sceneIndex);
         }
+
+        yield return new WaitForSecondsRealtime(delay);
 
         AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneIndex);
 

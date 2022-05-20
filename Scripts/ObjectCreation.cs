@@ -122,7 +122,7 @@ public class ObjectCreation : MonoBehaviour
                     // Setting newPosition to instantiate at
                     Vector3 newPosition = lastPosition + targetDirection.value * dstAway;
 
-                    // If a random float from 0 to 1 is less than switchChance, then update this obstacle's amount left to clone, recall this function with a shuffled obstacles list, and stop this method
+                    // If a random float from 0 to 1 is less than switchChance, then Update this obstacle's amount left to clone, recall this function with a shuffled obstacles list, and stop this method
                     if (Random.value < switchChance)
                     {
                         cloneAmounts[obstacle.name] -= i;
@@ -165,7 +165,7 @@ public class ObjectCreation : MonoBehaviour
                     if (logicalStructure)
                     {
                         // Checking if the new position is above ground
-                        if(Physics.Raycast(newPosition, -Vector3.up, out RaycastHit groundHit, Mathf.Infinity))
+                        if(Physics.Raycast(newPosition, Vector3.down, out RaycastHit groundHit, Mathf.Infinity))
                         {
                             // Setting new position to the distance to ground, instantiating the object, and updating last position
                             newPosition -= Vector3.up * (groundHit.distance - obstacle.GetComponent<Renderer>().bounds.size.y * 0.5f);
@@ -213,7 +213,7 @@ public class ObjectCreation : MonoBehaviour
                 if (logicalStructure) 
                 {
                     // If testPosition is above ground then add testDirection to validDirections
-                    if (Physics.Raycast(testPosition, -Vector3.up, Mathf.Infinity))
+                    if (Physics.Raycast(testPosition, Vector3.down, Mathf.Infinity))
                     {
                         validDirections.Add(testDirection);
                     }

@@ -20,7 +20,7 @@ public class BulletBehaviour : MonoBehaviour
     public int ricochetLevel = 1;
     int bounces = 0;
 
-    // Start is called before the first frame update
+    // Start is called before the first frame Update
     void Awake()
     {
         rb = GetComponent<Rigidbody>();
@@ -118,6 +118,17 @@ public class BulletBehaviour : MonoBehaviour
         DestroySelf();
     }
 
+    public void SafeDestroy()
+    {
+        // Keeping track of how many bullets a tank has fired
+        if (owner != null)
+        {
+            owner.GetComponent<FireControl>().bulletsFired -= 1;
+        }
+
+        Destroy(gameObject);
+    }
+
     void DestroySelf()
     {
         // Keeping track of how many bullets a tank has fired
@@ -151,7 +162,7 @@ public class BulletBehaviour : MonoBehaviour
                         break;
                     case "Bullet":
                         // Destroying bullets in explosion
-                        Destroy(collider.gameObject);
+                        collider.GetComponent<BulletBehaviour>().SafeDestroy();
                         break;
                     case "Mine":
                         // Explode mines

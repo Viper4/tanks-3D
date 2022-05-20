@@ -10,9 +10,12 @@ public class CameraControl : MonoBehaviour
 
     PlayerControl playerControl;
 
+    Transform tankOrigin;
     Transform body;
-    Transform turret;
+    public Transform turret;
     Transform barrel;
+
+    Vector3 lastEulerAngles;
 
     [SerializeField] float dstFromTarget = 4;
 
@@ -27,13 +30,11 @@ public class CameraControl : MonoBehaviour
 
     [SerializeField] LayerMask ignoreLayerMasks;
 
-    Vector3 lastEulerAngles;
-
     float yaw;
     float pitch;
     bool lockTurret = false;
 
-    // Start is called before the first frame update
+    // Start is called before the first frame Update
     void Awake()
     {
         // If target is not set, automatically set it to the parent
@@ -42,15 +43,16 @@ public class CameraControl : MonoBehaviour
             target = transform.parent;
         }
 
-        body = transform.parent.Find("Body");
-        turret = transform.parent.Find("Turret");
-        barrel = transform.parent.Find("Barrel");
-
-        lastEulerAngles = transform.parent.eulerAngles;
+        tankOrigin = transform.parent.Find("Tank Origin");
+        body = tankOrigin.Find("Body");
+        turret = tankOrigin.Find("Turret");
+        barrel = tankOrigin.Find("Barrel");
 
         playerControl = transform.parent.GetComponent<PlayerControl>();
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
+
+        lastEulerAngles = tankOrigin.eulerAngles;
     }
 
     // Update is called once per frame
@@ -76,22 +78,27 @@ public class CameraControl : MonoBehaviour
         // 1st person vs. 3rd person turret control
         if (!playerControl.Dead && Time.timeScale != 0)
         {
+            // Unlinking y eulers of turret, barrel, and target from parent
+            turret.eulerAngles = new Vector3(turret.eulerAngles.x, turret.eulerAngles.y + lastEulerAngles.y - tankOrigin.eulerAngles.y, turret.eulerAngles.z);
+            barrel.eulerAngles = target.eulerAngles = new Vector3(barrel.eulerAngles.x, barrel.eulerAngles.y + lastEulerAngles.y - tankOrigin.eulerAngles.y, barrel.eulerAngles.z);
+
             reticle.gameObject.SetActive(true);
             Cursor.visible = false;
             if (dstFromTarget == 0)
             {
-                body.gameObject.GetComponent<MeshRenderer>().enabled = turret.gameObject.GetComponent<MeshRenderer>().enabled = barrel.gameObject.GetComponent<MeshRenderer>().enabled = false;
-                reticle.position = new Vector3(Screen.width * 0.5f, Screen.height * 0.5f, 0);
-                
                 Cursor.lockState = CursorLockMode.Locked;
                 pitchMinMax = pitchMinMaxL;
-            }
-            else
-            {
-                body.gameObject.GetComponent<MeshRenderer>().enabled = turret.gameObject.GetComponent<MeshRenderer>().enabled = barrel.gameObject.GetComponent<MeshRenderer>().enabled = true;
 
+                turret.rotation = barrel.rotation = Camera.main.transform.rotation;
+                body.gameObject.GetComponent<MeshRenderer>().enabled = turret.gameObject.GetComponent<MeshRenderer>().enabled = barrel.gameObject.GetComponent<MeshRenderer>().enabled = false;
+                reticle.position = new Vector3(Screen.width * 0.5f, Screen.height * 0.5f, 0);
+            }
+            else 
+            {
                 Cursor.lockState = CursorLockMode.Confined;
                 pitchMinMax = pitchMinMaxN;
+
+                body.gameObject.GetComponent<MeshRenderer>().enabled = turret.gameObject.GetComponent<MeshRenderer>().enabled = barrel.gameObject.GetComponent<MeshRenderer>().enabled = true;
 
                 if (!lockTurret)
                 {
@@ -99,11 +106,13 @@ public class CameraControl : MonoBehaviour
 
                     if (Physics.Raycast(mouseRay, out RaycastHit mouseHit, Mathf.Infinity, ~ignoreLayerMasks))
                     {
+                        Debug.DrawLine(transform.position, mouseHit.point, Color.red, 0.1f);
                         // Rotating turret and barrel towards the mouseHit point
                         Vector3 dir = Vector3.RotateTowards(target.forward, mouseHit.point - target.position, Time.deltaTime * 3, 0);
-                        Quaternion lookRotation = Quaternion.LookRotation(dir);
+                        Quaternion lookRotation = Quaternion.LookRotation(dir, tankOrigin.up);
 
-                        turret.rotation = barrel.rotation = target.rotation = lookRotation;
+                        turret.rotation = Quaternion.AngleAxis(lookRotation.eulerAngles.y, Vector3.up);
+                        barrel.rotation = target.rotation = lookRotation;
                     }
                     reticle.position = Input.mousePosition;
                 }
@@ -116,12 +125,11 @@ public class CameraControl : MonoBehaviour
                 }
             }
 
-            // Correcting turret and barrel y rotation to not depend on the parent
-            turret.eulerAngles = barrel.eulerAngles = new Vector3(barrel.eulerAngles.x, barrel.eulerAngles.y + (lastEulerAngles.y - transform.parent.eulerAngles.y), barrel.eulerAngles.z);
+            // Zeroing x and z eulers of turret and clamping barrel x euler
+            turret.localEulerAngles = new Vector3(0, turret.localEulerAngles.y, 0);
+            barrel.localEulerAngles = new Vector3(Clamping.ClampAngle(barrel.localEulerAngles.x, pitchMinMaxL.x, pitchMinMaxL.y), barrel.localEulerAngles.y, 0);
 
-            // Locking turret x euler to 0 deg, and clamping barrel x euler between pitchMinMaxL
-            turret.localEulerAngles = new Vector3(0, turret.localEulerAngles.y, turret.localEulerAngles.z);
-            barrel.localEulerAngles = new Vector3(Clamping.ClampAngle(barrel.localEulerAngles.x, pitchMinMaxL.x, pitchMinMaxL.y), barrel.localEulerAngles.y, barrel.localEulerAngles.z);
+            lastEulerAngles = tankOrigin.eulerAngles;
         }
         else
         {
@@ -129,8 +137,8 @@ public class CameraControl : MonoBehaviour
         }
 
         // Translating inputs from mouse into smoothed rotation of camera
-        yaw += Input.GetAxis("Mouse X") * sensitivity / 8;
-        pitch -= Input.GetAxis("Mouse Y") * sensitivity / 8;
+        yaw += Input.GetAxis("Mouse X") * sensitivity / 4;
+        pitch -= Input.GetAxis("Mouse Y") * sensitivity / 4;
         pitch = Mathf.Clamp(pitch, pitchMinMax.x, pitchMinMax.y);
 
         currentRotation = Vector3.SmoothDamp(currentRotation, new Vector3(pitch, yaw), ref rotationSmoothVelocity, rotationSmoothTime);
@@ -144,6 +152,5 @@ public class CameraControl : MonoBehaviour
         {
             transform.position = clippingHit.point - (transform.position - target.position).normalized;
         }
-        lastEulerAngles = transform.parent.eulerAngles;
     }
 }

@@ -16,15 +16,22 @@ public class FireControl : MonoBehaviour
     public float fireCooldown = 1f;
     bool canFire = true;
 
-    // Start is called before the first frame update
+    // Start is called before the first frame Update
     void Awake()
     {
-        if(projectileParent == null)
+        if (projectileParent == null)
         {
             projectileParent = GameObject.Find("Projectiles").transform;
         }
 
-        barrel = transform.Find("Barrel");
+        if (transform.name != "Player")
+        {
+            barrel = transform.Find("Barrel");
+        }
+        else
+        {
+            barrel = transform.Find("Tank Origin").Find("Barrel");
+        }
     }
 
     public IEnumerator Shoot()
@@ -40,7 +47,14 @@ public class FireControl : MonoBehaviour
 
             yield return new WaitWhile(() => bulletClone.GetComponent<BulletBehaviour>() == null);
 
-            bulletClone.GetComponent<BulletBehaviour>().owner = owner;
+            if (bulletClone != null)
+            {
+                bulletClone.GetComponent<BulletBehaviour>().owner = owner;
+            }
+            else
+            {
+                bulletsFired--;
+            }
 
             yield return new WaitForSeconds(fireCooldown);
             canFire = true;

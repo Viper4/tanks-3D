@@ -4,29 +4,37 @@ using UnityEngine;
 
 public class BaseTankLogic : MonoBehaviour
 {
+    [SerializeField] Transform tankOrigin;
     [SerializeField] Transform explosionEffect;
 
     [SerializeField] float[] pitchRange = { -45, 45 };
     [SerializeField] float[] rollRange = { -45, 45 };
 
-    Rigidbody rb;
-
-    private void Awake()
-    {
-        rb = GetComponent<Rigidbody>();
-    }
+    [SerializeField] bool frozenRotation = true;
+    [SerializeField] float alignRotationSpeed = 20;
+    [SerializeField] LayerMask notSlopeLayerMask;
 
     private void Update()
     {
-        if(rb != null)
+        if (frozenRotation)
         {
-            rb.rotation = Quaternion.Euler(new Vector3(Clamping.ClampAngle(rb.rotation.eulerAngles.x, pitchRange[0], pitchRange[1]), rb.rotation.eulerAngles.y, Clamping.ClampAngle(rb.rotation.eulerAngles.z, rollRange[0], rollRange[1])));
+            if (Physics.Raycast(tankOrigin.position, Vector3.down, out RaycastHit hit, 1, ~notSlopeLayerMask))
+            {
+                // Rotating to align with slope
+                Quaternion alignedRotation = Quaternion.FromToRotation(tankOrigin.up, hit.normal);
+                tankOrigin.rotation = Quaternion.Slerp(tankOrigin.rotation, alignedRotation * tankOrigin.rotation, alignRotationSpeed * Time.deltaTime);
+            }
+        }
+        else
+        {
+            // Ensuring tank doesn't flip over
+            tankOrigin.eulerAngles = new Vector3(Clamping.ClampAngle(tankOrigin.eulerAngles.x, pitchRange[0], pitchRange[1]), tankOrigin.eulerAngles.y, Clamping.ClampAngle(tankOrigin.eulerAngles.z, rollRange[0], rollRange[1]));
         }
     }
 
     public void Explode()
     {
-        Instantiate(explosionEffect, transform.position, Quaternion.Euler(-90, 0, 0));
+        Instantiate(explosionEffect, tankOrigin.position, Quaternion.Euler(-90, 0, 0));
 
         if (transform.name == "Player")
         {
@@ -36,21 +44,23 @@ public class BaseTankLogic : MonoBehaviour
             playerControl.lives--;
             playerControl.deaths++;
 
-            transform.Find("Barrel").gameObject.SetActive(false);
-            transform.Find("Turret").gameObject.SetActive(false);
-            transform.Find("Body").gameObject.SetActive(false);
+            tankOrigin.gameObject.SetActive(false);
 
-            StartCoroutine(playerControl.Respawn());
+            playerControl.Respawn();
         }
         else
         {
+            if (transform.root.childCount == 1)
+            {
+                SceneLoader.sceneLoader.LoadNextScene(3);
+            }
+
             Destroy(gameObject);
         }
     }
 
     public bool IsGrounded()
     {
-        Debug.DrawLine(transform.position + Vector3.up * 0.05f, transform.position - Vector3.up * 0.05f, Color.blue, 0.1f);
-        return Physics.Raycast(transform.position + Vector3.up * 0.05f, -Vector3.up, 0.1f, ~LayerMask.NameToLayer("Tank"));
+        return Physics.Raycast(tankOrigin.position + Vector3.up * 0.05f, -tankOrigin.up, 0.1f, ~LayerMask.NameToLayer("Tank"));
     }
 }
