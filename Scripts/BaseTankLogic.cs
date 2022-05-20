@@ -14,12 +14,15 @@ public class BaseTankLogic : MonoBehaviour
     [SerializeField] float alignRotationSpeed = 20;
     [SerializeField] LayerMask notSlopeLayerMask;
     
+    [SerializeField] float tankRotSpeed = 250f;
+    
     public bool noisyRotation
     [SerializeField] bool randomizeSeed = true;
-    [SerializeField] float tankRotSpeed = 250f;
     [SerializeField] float tankRotNoiseScale = 5;
     [SerializeField] float tankRotNoiseSpeed = 0.5f;
     [SerializeField] float tankRotSeed = 0;
+    
+    RigidBody rb;
 
     private void Awake() 
     {
@@ -27,6 +30,8 @@ public class BaseTankLogic : MonoBehaviour
         {
             tankRotSeed = Random.Range(-99.0f, 99.0f);
         }
+        
+        rb = GetComponent<RigidBody>();
     }
     
     private void Update()
@@ -54,7 +59,22 @@ public class BaseTankLogic : MonoBehaviour
             rb.rotation = Quaternion.RotateTowards(transform.rotation, desiredTankRot, Time.deltaTime * tankRotSpeed);
         }
     }
+    
+    public void RotateTo(Vector3 desiredDir)
+    {
+        float angle = Vector3.Angle(desiredDir, tankOrigin.forward);
+        angle = angle < 0 ? angle + 360 : angle;
 
+        if (angle > 170 && angle < 190)
+        {
+            tankOrigin.forward = -tankOrigin.forward;
+        }
+        else
+        {
+            rb.MoveRotation(Quaternion.RotateTowards(tankOrigin.rotation, Quaternion.LookRotation(desiredDir), Time.deltaTime * tankRotSpeed));
+        }
+    }
+    
     public void Explode()
     {
         Instantiate(explosionEffect, tankOrigin.position, Quaternion.Euler(-90, 0, 0));
