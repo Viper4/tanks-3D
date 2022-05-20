@@ -37,11 +37,6 @@ public class GreyBot : MonoBehaviour
 
     [SerializeField] float[] turretRangeX = { -20, 20 };
 
-    [SerializeField] float tankRotSpeed = 250f;
-    [SerializeField] float tankRotNoiseScale = 5;
-    [SerializeField] float tankRotNoiseSpeed = 0.5f;
-    [SerializeField] float tankRotSeed = 0;
-
     Vector3 lastEulerAngles;
     
     [SerializeField] float moveSpeed = 3;
@@ -85,7 +80,6 @@ public class GreyBot : MonoBehaviour
         if (randomizeSeed)
         {
             turretRotSeed = Random.Range(-99.0f, 99.0f);
-            tankRotSeed = Random.Range(-99.0f, 99.0f);
         }
 
         triggerRadius = GetComponent<SphereCollider>().radius;
@@ -123,19 +117,20 @@ public class GreyBot : MonoBehaviour
                     {
                         targetDirection = frontHit.point - middleHit.point;
                     }
-                    
-                    // Adding noise to rotation
-                    float noise = tankRotNoiseScale * (Mathf.PerlinNoise(tankRotSeed + Time.time * tankRotNoiseSpeed, (tankRotSeed + 1) + Time.time * tankRotNoiseSpeed) - 0.5f);
-                    Quaternion desiredTankRot = Quaternion.LookRotation(Quaternion.AngleAxis(noise, Vector3.up) * transform.forward);
-                    rb.rotation = Quaternion.RotateTowards(transform.rotation, desiredTankRot, Time.deltaTime * tankRotSpeed);
-                    
+                                        
                     speed = moveSpeed;
+                    
+                    baseTankLogic.noisyRotation = true;
                     break;
                 case Mode.Avoid:
                     speed = avoidSpeed;
+                    
+                    baseTankLogic.noisyRotation = false;
                     break;
                 default:
                     speed = 0;
+                    
+                    baseTankLogic.noisyRotation = false;
                     break;
             }
             
@@ -223,13 +218,12 @@ public class GreyBot : MonoBehaviour
                 else
                 {
                     // Go backward
-                    transform.forward = -transform.forward;
-                    desiredDir = transform.forward;
+                    desiredDir = -transform.forward;
                 }
             }
 
             // Applying rotation
-            rb.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(desiredDir), tankRotSpeed * Time.deltaTime);
+            baseTankLogic.RotateTo(desiredDir);
         }
         else
         {
@@ -246,15 +240,14 @@ public class GreyBot : MonoBehaviour
         float angle = Quaternion.Angle(barrel.rotation, rotToTarget);
         if (angle < maxShootAngle)
         {
-            // Waiting for tank to move forward a bit more
-            yield return new WaitForSeconds(0.5f);
-            mode = Mode.Shoot;
 
-            // Reaction time from seeing player
+            // Keeps moving until reaction time from seeing player is reached
             yield return new WaitForSeconds(Random.Range(reactionTime[0], reactionTime[1]));
+            // Tank stops and delay in firing
+            mode = Mode.Shoot;
+            yield return new WaitForSeconds(Random.Range(fireDelay[0], fireDelay[1]));
             cooldown = GetComponent<FireControl>().fireCooldown;
             StartCoroutine(GetComponent<FireControl>().Shoot());
-            yield return new WaitForSeconds(Random.Range(fireDelay[0], fireDelay[1]));
 
             shootRoutine = null;
             mode = Mode.Move;
