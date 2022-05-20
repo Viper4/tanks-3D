@@ -15,14 +15,16 @@ public class BrownBot : MonoBehaviour
 
     [SerializeField] float turretRotSpeed = 20;
 
-    [SerializeField] Vector2 turretRotRange = new Vector2(8, 45);
+    [SerializeField] Vector2 turretScanRange = new Vector2(8, 45);
+    [SerializeField] float[] scanChangeDelay = { 3, 6 };
+    float scanOffset = 0;
 
     Vector3 turretStartEulers;
     Vector3 barrelStartEulers;
 
     bool shooting = false;
 
-    [SerializeField] LayerMask playerLayerMask;
+    [SerializeField] LayerMask ignoreLayerMask;
 
     // Start is called before the first frame Update
     void Awake()
@@ -36,9 +38,8 @@ public class BrownBot : MonoBehaviour
         body = transform.Find("Body");
         barrel = transform.Find("Barrel");
         turret = transform.Find("Turret");
-
-        barrelStartEulers = barrel.localEulerAngles;
-        turretStartEulers = turret.localEulerAngles;
+        
+        StartCoroutine(ChangeScan());
     }
 
     // Update is called once per frame
@@ -46,21 +47,18 @@ public class BrownBot : MonoBehaviour
     {
         dstToTarget = Vector3.Distance(transform.position, target.position);
 
-        float angleX = Mathf.PingPong(Time.time * turretRotSpeed, turretRotRange.x * 2) - turretRotRange.x;
-        float angleY = Mathf.PingPong(Time.time * turretRotSpeed, turretRotRange.y * 2) - turretRotRange.y;
+        float angleX = Mathf.PingPong(Time.time * turretRotSpeed, turretScanRange.x * 2) - turretScanRange.x;
+        float angleY = Mathf.PingPong(Time.time * turretRotSpeed, turretScanRange.y * 2) - turretScanRange.y;
 
-        turret.localEulerAngles = new Vector3(0, turretStartEulers.y + angleY, 0);
-        barrel.localEulerAngles = new Vector3(barrelStartEulers.x + angleX, barrelStartEulers.y + angleY, 0);
+        float targetEulerY = Mathf.Lerp(turret.localEulerAngles.y, scanOffset + angleY, turretRotSpeed * Time.deltaTime);
 
-        // origin is offset forward by 1.7 to prevent ray from hitting this tank
-        Vector3 origin = barrel.position + barrel.forward * 1.7f;
-        // If player is in front of turret then fire
-        if (!shooting && Physics.Raycast(origin, barrel.forward, out RaycastHit hit, dstToTarget))
+        turret.localEulerAngles = new Vector3(0, targetEulerY, 0);
+        barrel.localEulerAngles = new Vector3(angleX, targetEulerY, 0);
+
+        // If nothing blocking the player from barrel then fire
+        if (!shooting && !Physics.Raycast(origin, barrel.position, dstToTarget, ~ignoreLayerMask))
         {
-            if((1 << hit.transform.gameObject.layer) == playerLayerMask)
-            {
-                StartCoroutine(Shoot());
-            }
+            StartCoroutine(Shoot());
         }
     }
 
@@ -72,5 +70,13 @@ public class BrownBot : MonoBehaviour
         StartCoroutine(GetComponent<FireControl>().Shoot());
 
         shooting = false;
+    }
+    
+    IEnumerator ChangeScan()
+    {
+        yield return new WaitForSeconds(Random.Range(scanChangeDelay[0], scanChangeDelay[1]));
+        scanOffset = Random.Range(0, 360.0f)
+        
+        StartCoroutine(ChangeScan());
     }
 }
