@@ -57,7 +57,7 @@ public class MineBehaviour : MonoBehaviour
                     break;
                 case "Bullet":
                     // Exploding if bullet hits the mine
-                    if (Vector3.Distance(transform.position, other.transform.position) < transform.localScale.x)
+                    if (Vector3.Distance(transform.position, other.transform.position) <= GetComponent<SphereCollider>().radius)
                     {
                         Explode(new List<Transform>());
                     }
