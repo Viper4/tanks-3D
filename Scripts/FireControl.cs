@@ -15,6 +15,8 @@ public class FireControl : MonoBehaviour
     public int bulletsFired { get; set; } = 0;
     public float fireCooldown = 1f;
     bool canFire = true;
+    
+    [SerializeField] LayerMask nonSolidLayerMask;
 
     // Start is called before the first frame Update
     void Awake()
@@ -39,25 +41,37 @@ public class FireControl : MonoBehaviour
         if (canFire && bulletsFired < bulletLimit && Time.timeScale != 0)
         {
             canFire = false;
-            bulletsFired++;
 
             Transform bulletClone = null;
-            bulletClone = Instantiate(bullet, barrel.position + barrel.forward * 2, Quaternion.LookRotation(barrel.forward), projectileParent);
-            bulletClone.localScale = new Vector3(1, 1, 1);
-
-            yield return new WaitWhile(() => bulletClone.GetComponent<BulletBehaviour>() == null);
-
-            if (bulletClone != null)
+            Vector3 clonePosition = barrel.position + barrel.forward * 2;
+            Quaternion cloneRotation = Quaternion.LookRotation(barrel.forward, Vector3.up);
+            // Checking if the clone spot is not blocked
+            if (!Physics.CheckBox(clonePosition, bullet.GetComponent<Collider>().bounds.size, cloneRotation, ~nonSolidLayerMask))
             {
-                bulletClone.GetComponent<BulletBehaviour>().owner = owner;
+                bulletsFired++;
+                bulletClone = Instantiate(bullet, origin, cloneRotation, projectileParent);
+                bulletClone.localScale = new Vector3(1, 1, 1);
+
+                yield return new WaitWhile(() => bulletClone.GetComponent<BulletBehaviour>() == null);
+
+                if (bulletClone != null)
+                {
+                    bulletClone.GetComponent<BulletBehaviour>().owner = owner;
+                }
+                else
+                {
+                    bulletsFired--;
+                }
+                
+                yield return new WaitForSeconds(fireCooldown);
+                canFire = true;
             }
             else
             {
-                bulletsFired--;
+                Debug.Log("Bullet position was blocked");
+                canFire = true;
+                yield return null;
             }
-
-            yield return new WaitForSeconds(fireCooldown);
-            canFire = true;
         }
     }
 }
