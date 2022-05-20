@@ -8,7 +8,7 @@ public class GreyBot : MonoBehaviour
     float dstToTarget;
     Quaternion rotToTarget;
 
-    [SerializeField] LayerMask targetLayerMasks;
+    [SerializeField] LayerMask ignoreLayerMask;
 
     BaseTankLogic baseTankLogic;
 
@@ -91,7 +91,7 @@ public class GreyBot : MonoBehaviour
         cooldown = cooldown > 0 ? cooldown - Time.deltaTime : 0;
         dstToTarget = Vector3.Distance(body.position, target.position);
 
-        if (dstToTarget < shootRadius && mode != Mode.Shoot && cooldown == 0 && !Physics.Raycast(turret.position, target.position - turret.position, dstToTarget, ~targetLayerMasks))
+        if (dstToTarget < shootRadius && mode != Mode.Shoot && cooldown == 0 && !Physics.Raycast(turret.position, target.position - turret.position, dstToTarget, ~ignoreLayerMask))
         {
             StartCoroutine(Shoot());
         }
