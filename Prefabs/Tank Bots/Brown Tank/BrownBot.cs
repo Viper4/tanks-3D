@@ -7,7 +7,6 @@ public class BrownBot : MonoBehaviour
     public Transform target;
     float dstToTarget;
 
-    Transform body;
     Transform turret;
     Transform barrel;
 
@@ -18,13 +17,11 @@ public class BrownBot : MonoBehaviour
     [SerializeField] Vector2 turretScanRange = new Vector2(8, 45);
     [SerializeField] float[] scanChangeDelay = { 3, 6 };
     float scanOffset = 0;
-
-    Vector3 turretStartEulers;
-    Vector3 barrelStartEulers;
+    float currentScanOffset = 0;
 
     bool shooting = false;
 
-    [SerializeField] LayerMask ignoreLayerMask;
+    [SerializeField] LayerMask targetLayerMask;
 
     // Start is called before the first frame Update
     void Awake()
@@ -35,7 +32,6 @@ public class BrownBot : MonoBehaviour
             target = GameObject.Find("Player").transform;
         }
 
-        body = transform.Find("Body");
         barrel = transform.Find("Barrel");
         turret = transform.Find("Turret");
         
@@ -50,15 +46,19 @@ public class BrownBot : MonoBehaviour
         float angleX = Mathf.PingPong(Time.time * turretRotSpeed, turretScanRange.x * 2) - turretScanRange.x;
         float angleY = Mathf.PingPong(Time.time * turretRotSpeed, turretScanRange.y * 2) - turretScanRange.y;
 
-        float targetEulerY = Mathf.Lerp(turret.localEulerAngles.y, scanOffset + angleY, turretRotSpeed * Time.deltaTime);
+        currentScanOffset += (scanOffset + angleY - currentScanOffset) * (Time.deltaTime * turretRotSpeed / 20);
 
-        turret.localEulerAngles = new Vector3(0, targetEulerY, 0);
-        barrel.localEulerAngles = new Vector3(angleX, targetEulerY, 0);
+        turret.localEulerAngles = new Vector3(0, currentScanOffset, 0);
+        barrel.localEulerAngles = new Vector3(angleX, currentScanOffset, 0);
 
-        // If nothing blocking the player from barrel then fire
-        if (!shooting && !Physics.Raycast(origin, barrel.position, dstToTarget, ~ignoreLayerMask))
+        // If target is in front of barrel then fire
+        if (!shooting && Physics.Raycast(barrel.position + barrel.forward, barrel.forward, out RaycastHit hit, dstToTarget))
         {
-            StartCoroutine(Shoot());
+            // If hit layer is in targetLayerMask
+            if(targetLayerMask == (targetLayerMask | (1 << hit.transform.gameObject.layer)))
+            {
+                StartCoroutine(Shoot());
+            }
         }
     }
 
@@ -75,7 +75,7 @@ public class BrownBot : MonoBehaviour
     IEnumerator ChangeScan()
     {
         yield return new WaitForSeconds(Random.Range(scanChangeDelay[0], scanChangeDelay[1]));
-        scanOffset = Random.Range(0, 360.0f)
+        scanOffset = Random.Range(-180.0f, 180.0f);
         
         StartCoroutine(ChangeScan());
     }

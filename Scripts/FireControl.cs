@@ -16,7 +16,7 @@ public class FireControl : MonoBehaviour
     public float fireCooldown = 1f;
     bool canFire = true;
     
-    [SerializeField] LayerMask nonSolidLayerMask;
+    [SerializeField] LayerMask solidLayerMask;
 
     // Start is called before the first frame Update
     void Awake()
@@ -46,10 +46,10 @@ public class FireControl : MonoBehaviour
             Vector3 clonePosition = barrel.position + barrel.forward * 2;
             Quaternion cloneRotation = Quaternion.LookRotation(barrel.forward, Vector3.up);
             // Checking if the clone spot is not blocked
-            if (!Physics.CheckBox(clonePosition, bullet.GetComponent<Collider>().bounds.size, cloneRotation, ~nonSolidLayerMask))
+            if (!Physics.CheckBox(clonePosition, bullet.GetComponent<Collider>().bounds.size, cloneRotation, solidLayerMask))
             {
                 bulletsFired++;
-                bulletClone = Instantiate(bullet, origin, cloneRotation, projectileParent);
+                bulletClone = Instantiate(bullet, clonePosition, cloneRotation, projectileParent);
                 bulletClone.localScale = new Vector3(1, 1, 1);
 
                 yield return new WaitWhile(() => bulletClone.GetComponent<BulletBehaviour>() == null);

@@ -45,9 +45,10 @@ public class PlayerControl : MonoBehaviour
         mainCamera = Camera.main.transform;
 
         tankOrigin = transform.Find("Tank Origin");
-        body = tankOrigin.Find("Body");
 
         UIHandler = GameObject.Find("UI").GetComponent<UIHandler>();
+
+        SceneLoader.sceneLoader.OnSceneLoad();
     }
 
     void Start()

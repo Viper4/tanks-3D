@@ -90,17 +90,19 @@ public class MineBehaviour : MonoBehaviour
         {
             switch (collider.tag)
             {
-                case "Player":
-                    if (collider.transform.root != null)
-                    {
-                        collider.transform.root.GetComponent<BaseTankLogic>().Explode();
-                    }
-                    break;
                 case "Tank":
                     // Blowing up tanks
                     if (collider.transform.parent != null)
                     {
-                        collider.transform.parent.GetComponent<BaseTankLogic>().Explode();
+                        // Tank bots are children of "Enemies" while Player has no parent
+                        try
+                        {
+                            collider.transform.parent.GetComponent<BaseTankLogic>().Explode();
+                        }
+                        catch
+                        {
+                            collider.transform.root.GetComponent<BaseTankLogic>().Explode();
+                        }
                     }
                     break;
                 case "Penetrable":

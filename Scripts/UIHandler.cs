@@ -62,11 +62,6 @@ public class UIHandler : MonoBehaviour
             rt.sizeDelta = new Vector2(rt.sizeDelta.x / 1.25f, rt.sizeDelta.y / 1.25f);
         }
 
-        if (selectedKeyBind != null)
-        {
-            Debug.Log(selectedKeyBind.name);
-        }
-
         Event currentEvent = new Event();
 
         if (selectedKeyBind != null && Event.PopEvent(currentEvent))
@@ -118,12 +113,12 @@ public class UIHandler : MonoBehaviour
 
     public void ChangeKeyBind(Transform keyBind)
     {
-        StartCoroutine(DelayChangeKeyBind());
+        StartCoroutine(DelayChangeKeyBind(keyBind));
     }
     
     IEnumerator DelayChangeKeyBind(Transform keyBind)
     {
-        yield return new WaitWhile(Input.GetMouseButtonDown(0));
+        yield return new WaitWhile(() => Input.GetMouseButtonDown(0));
         selectedKeyBind = keyBind;
     }
 

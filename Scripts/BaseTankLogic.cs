@@ -6,6 +6,7 @@ public class BaseTankLogic : MonoBehaviour
 {
     [SerializeField] Transform tankOrigin;
     [SerializeField] Transform explosionEffect;
+    [SerializeField] Transform deathMarker;
 
     [SerializeField] float[] pitchRange = { -45, 45 };
     [SerializeField] float[] rollRange = { -45, 45 };
@@ -15,14 +16,14 @@ public class BaseTankLogic : MonoBehaviour
     [SerializeField] LayerMask notSlopeLayerMask;
     
     [SerializeField] float tankRotSpeed = 250f;
-    
-    public bool noisyRotation
+
+    public bool noisyRotation;
     [SerializeField] bool randomizeSeed = true;
     [SerializeField] float tankRotNoiseScale = 5;
     [SerializeField] float tankRotNoiseSpeed = 0.5f;
     [SerializeField] float tankRotSeed = 0;
     
-    RigidBody rb;
+    Rigidbody rb;
 
     private void Awake() 
     {
@@ -31,7 +32,7 @@ public class BaseTankLogic : MonoBehaviour
             tankRotSeed = Random.Range(-99.0f, 99.0f);
         }
         
-        rb = GetComponent<RigidBody>();
+        rb = GetComponent<Rigidbody>();
     }
     
     private void Update()
@@ -71,13 +72,14 @@ public class BaseTankLogic : MonoBehaviour
         }
         else
         {
-            rb.MoveRotation(Quaternion.RotateTowards(tankOrigin.rotation, Quaternion.LookRotation(desiredDir), Time.deltaTime * tankRotSpeed));
+            rb.MoveRotation(Quaternion.RotateTowards(tankOrigin.rotation, Quaternion.LookRotation(desiredDir), Time.deltaTime * tankRotSpeed * 2));
         }
     }
     
     public void Explode()
     {
         Instantiate(explosionEffect, tankOrigin.position, Quaternion.Euler(-90, 0, 0));
+        Instantiate(deathMarker, tankOrigin.position + tankOrigin.up * 0.05f, Quaternion.Euler(new Vector3(tankOrigin.eulerAngles.x, 45, tankOrigin.eulerAngles.z)));
 
         if (transform.name == "Player")
         {

@@ -17,8 +17,6 @@ public class TealBot : MonoBehaviour
     Transform barrel;
     Quaternion turretAnchor;
 
-    public float shootRadius = 99f;
-
     public float[] reactionTime = { 0.3f, 0.45f };
 
     public float[] fireDelay = { 0.3f, 0.6f };
@@ -26,17 +24,16 @@ public class TealBot : MonoBehaviour
 
     Rigidbody rb;
 
-    [SerializeField] bool randomizeSeed = true;
-
     [SerializeField] float turretRotSpeed = 25f;
     [SerializeField] float[] turretRangeX = { -20, 20 };
 
     Vector3 lastEulerAngles;
     
-    [SerializeField] float moveSpeed = 3;
-    [SerializeField] float avoidSpeed = 1.5f;
-    public float speed = 3;
-    public float gravity = 10;
+    [SerializeField] float moveSpeed = 4f;
+    [SerializeField] float avoidSpeed = 2f;
+
+    float speed = 4;
+    float gravity = 10;
     float velocityY = 0;
 
     float triggerRadius = 3.5f;
@@ -70,11 +67,6 @@ public class TealBot : MonoBehaviour
 
         lastEulerAngles = transform.eulerAngles;
 
-        if (randomizeSeed)
-        {
-            tankRotSeed = Random.Range(-99.0f, 99.0f);
-        }
-
         triggerRadius = GetComponent<SphereCollider>().radius;
     }
 
@@ -84,7 +76,7 @@ public class TealBot : MonoBehaviour
         cooldown = cooldown > 0 ? cooldown - Time.deltaTime : 0;
         dstToTarget = Vector3.Distance(transform.position, target.position);
 
-        if (dstToTarget < shootRadius && mode != Mode.Shoot && cooldown == 0 && !Physics.Raycast(turret.position, target.position - turret.position, dstToTarget, ~targetLayerMasks))
+        if (mode != Mode.Shoot && cooldown == 0 && !Physics.Raycast(turret.position, target.position - turret.position, dstToTarget, ~targetLayerMasks, QueryTriggerInteraction.Ignore))
         {
             shootRoutine = StartCoroutine(Shoot());
         }
@@ -186,7 +178,10 @@ public class TealBot : MonoBehaviour
         RaycastHit forwardHit;
         if (Physics.Raycast(body.position, transform.forward, out forwardHit, triggerRadius) || Physics.Raycast(body.position + transform.right, transform.forward, out forwardHit, triggerRadius) || Physics.Raycast(body.position - transform.right, transform.forward, out forwardHit, triggerRadius))
         {
+            Debug.DrawLine(body.position, forwardHit.point, Color.red, 0.1f);
+
             bool[] pathClear = { true, true };
+            Vector3 desiredDir;
 
             // Cross product doesn't give absolute value of angle
             float dotProductY = Vector3.Dot(Vector3.Cross(transform.forward, forwardHit.normal), transform.up);
@@ -206,40 +201,30 @@ public class TealBot : MonoBehaviour
             }
             Debug.DrawLine(body.position, body.position + transform.right * 3, Color.red, 0.1f);
 
-            // Over rotating on left and right to prevent jittering
             if (pathClear[0])
             {
                 if (pathClear[1])
                 {
-                    // If the obstacle is directly in front of tank, turn left or right randomly
-                    if (dotProductY == 0)
-                    {
-                        // Rotate left or right
-                        desiredDir = Random.Range(0, 2) == 0 ? Quaternion.AngleAxis(-10, Vector3.up) * -transform.right : Quaternion.AngleAxis(10, Vector3.up) * transform.right;
-                    }
-                    else
-                    {
-                        // Rotate left if obstacle is facing left
-                        desiredDir = dotProductY < 0 ? Quaternion.AngleAxis(-10, Vector3.up) * -transform.right : Quaternion.AngleAxis(10, Vector3.up) * transform.right;
-                    }
+                    // Rotate left if obstacle is facing left
+                    desiredDir = dotProductY < 0 ? -transform.right : transform.right;
                 }
                 else
                 {
                     // Rotate left
-                    desiredDir = Quaternion.AngleAxis(-10, Vector3.up) * -transform.right;
+                    desiredDir = -transform.right;
                 }
             }
             else if (pathClear[1])
             {
                 // Rotate right
-                desiredDir = Quaternion.AngleAxis(10, Vector3.up) * transform.right;
+                desiredDir = transform.right;
             }
             else
             {
                 // Rotate backward
                 desiredDir = -transform.forward;
             }
-
+            
             // Applying rotation
             baseTankLogic.RotateTo(desiredDir);
         }
@@ -250,7 +235,6 @@ public class TealBot : MonoBehaviour
                 mode = Mode.Move;
             }
         }
-        Debug.DrawLine(body.position, body.position + transform.forward * triggerRadius, Color.blue, 0.1f);
     }
     
     IEnumerator Shoot()

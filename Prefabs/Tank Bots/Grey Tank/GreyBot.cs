@@ -16,7 +16,6 @@ public class GreyBot : MonoBehaviour
     Transform turret;
     Transform barrel;
 
-    public float shootRadius = 30;
     [SerializeField] float maxShootAngle = 30;
 
     public float[] reactionTime = { 0.7f, 1.25f };
@@ -39,11 +38,11 @@ public class GreyBot : MonoBehaviour
 
     Vector3 lastEulerAngles;
     
-    [SerializeField] float moveSpeed = 3;
-    [SerializeField] float avoidSpeed = 1.5f;
+    [SerializeField] float moveSpeed = 4f;
+    [SerializeField] float avoidSpeed = 2f;
 
-    public float speed = 3;
-    public float gravity = 10;
+    float speed = 4;
+    float gravity = 10;
     float velocityY = 0;
 
     float triggerRadius = 3f;
@@ -91,7 +90,7 @@ public class GreyBot : MonoBehaviour
         cooldown = cooldown > 0 ? cooldown - Time.deltaTime : 0;
         dstToTarget = Vector3.Distance(body.position, target.position);
 
-        if (dstToTarget < shootRadius && mode != Mode.Shoot && cooldown == 0 && !Physics.Raycast(turret.position, target.position - turret.position, dstToTarget, ~ignoreLayerMask))
+        if (mode != Mode.Shoot && cooldown == 0 && !Physics.Raycast(turret.position, target.position - turret.position, dstToTarget, ~ignoreLayerMask, QueryTriggerInteraction.Ignore))
         {
             StartCoroutine(Shoot());
         }
@@ -167,8 +166,8 @@ public class GreyBot : MonoBehaviour
         {
             Debug.DrawLine(body.position, forwardHit.point, Color.red, 0.1f);
 
-            Vector3 desiredDir;
             bool[] pathClear = { true, true };
+            Vector3 desiredDir;
 
             // Cross product doesn't give absolute value of angle
             float dotProductY = Vector3.Dot(Vector3.Cross(transform.forward, forwardHit.normal), transform.up);
@@ -188,38 +187,28 @@ public class GreyBot : MonoBehaviour
                 Debug.DrawLine(body.position, body.position + transform.right * 3, Color.red, 0.1f);
             }
             
-            // If the object is directly in front it's better to reverse than slowly turn around
-            if (dotProductY > -10 && dotProductY < 10)
+            if (pathClear[0])
             {
-                transform.forward = -transform.forward;
-                desiredDir = transform.forward;
-            }
-            else
-            {
-                // Over rotating on left and right to prevent jittering back and forth
-                if (pathClear[0])
+                if (pathClear[1])
                 {
-                    if (pathClear[1])
-                    {
-                        // Rotate left if obstacle is facing left, vice versa
-                        desiredDir = dotProductY < 0 ? Quaternion.AngleAxis(-10, Vector3.up) * -transform.right : Quaternion.AngleAxis(10, Vector3.up) * transform.right;
-                    }
-                    else
-                    {
-                        // Rotate left
-                        desiredDir = Quaternion.AngleAxis(-10, Vector3.up) * -transform.right;
-                    }
-                }
-                else if (pathClear[1])
-                {
-                    // Rotate right
-                    desiredDir = Quaternion.AngleAxis(10, Vector3.up) * transform.right;
+                    // Rotate left if obstacle is facing left, vice versa
+                    desiredDir = dotProductY < 0 ? -transform.right : transform.right;
                 }
                 else
                 {
-                    // Go backward
-                    desiredDir = -transform.forward;
+                    // Rotate left
+                    desiredDir = -transform.right;
                 }
+            }
+            else if (pathClear[1])
+            {
+                // Rotate right
+                desiredDir = transform.right;
+            }
+            else
+            {
+                // Go backward
+                desiredDir = -transform.forward;
             }
 
             // Applying rotation
@@ -243,7 +232,7 @@ public class GreyBot : MonoBehaviour
 
             // Keeps moving until reaction time from seeing player is reached
             yield return new WaitForSeconds(Random.Range(reactionTime[0], reactionTime[1]));
-            // Tank stops and delay in firing
+            // Stops moving and delay in firing
             mode = Mode.Shoot;
             yield return new WaitForSeconds(Random.Range(fireDelay[0], fireDelay[1]));
             cooldown = GetComponent<FireControl>().fireCooldown;

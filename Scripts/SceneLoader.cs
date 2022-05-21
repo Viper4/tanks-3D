@@ -33,10 +33,6 @@ public class SceneLoader : MonoBehaviour
         {
             Destroy(gameObject);
         }
-        else
-        {
-            sceneLoader.OnSceneLoad();
-        }
     }
 
     public void OnSceneLoad()
