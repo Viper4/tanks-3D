@@ -7,59 +7,61 @@ public class BrownBot : MonoBehaviour
     public Transform target;
     float dstToTarget;
 
-    Transform anchor;
     Transform turret;
     Transform barrel;
 
     public float[] fireDelay = { 1, 3 };
 
-    public float rotateSpeed = 20;
+    [SerializeField] float turretRotSpeed = 20;
 
-    public Vector2 rotateRange = new Vector2(15, 45);
-
-    Vector3 turretStartEulers;
-    Vector3 barrelStartEulers;
+    [SerializeField] Vector2 turretScanRange = new Vector2(8, 45);
+    [SerializeField] float[] scanChangeDelay = { 3, 6 };
+    float scanOffset = 0;
+    float currentScanOffset = 0;
 
     bool shooting = false;
 
-    // Start is called before the first frame update
+    BaseTankLogic baseTankLogic;
+
+    // Start is called before the first frame Update
     void Awake()
     {
         if (target == null)
         {
-            Debug.Log("The variable target of BrownBot has been defaulted to player's Camera Target");
-            target = GameObject.Find("Player").transform.Find("Camera Target");
+            Debug.Log("The variable target of BrownBot has been defaulted to the player");
+            target = GameObject.Find("Player").transform;
         }
 
-        anchor = transform.Find("Anchor");
         barrel = transform.Find("Barrel");
         turret = transform.Find("Turret");
 
-        barrelStartEulers = barrel.eulerAngles;
-        turretStartEulers = turret.eulerAngles;
+        baseTankLogic = GetComponent<BaseTankLogic>();
+        
+        StartCoroutine(ChangeScan());
     }
 
     // Update is called once per frame
     void Update()
     {
-        dstToTarget = Vector3.Distance(transform.position, target.position);
-
-        float angleX = Mathf.PingPong(Time.time * rotateSpeed, rotateRange.x * 2) - rotateRange.x;
-        float angleY = Mathf.PingPong(Time.time * rotateSpeed, rotateRange.y * 2) - rotateRange.y;
-
-        turret.eulerAngles = new Vector3(-90, turretStartEulers.y + angleY, 0);
-        barrel.eulerAngles = anchor.eulerAngles = new Vector3(barrelStartEulers.x + angleX, barrelStartEulers.y + angleY, 0);
-        anchor.rotation *= Quaternion.Euler(90, 0, 0);
-
-        // origin is offset forward by 1.7 to prevent ray from hitting this tank
-        Vector3 origin = anchor.position + anchor.forward * 1.7f;
-        // If player is in front of turret then fire
-        RaycastHit hit;
-        if (!shooting && Physics.Raycast(origin, anchor.forward, out hit, dstToTarget))
+        if (!SceneLoader.frozen && Time.timeScale != 0)
         {
-            if(hit.transform.gameObject.layer == LayerMask.NameToLayer("Player"))
+            dstToTarget = Vector3.Distance(transform.position, target.position);
+
+            float angleX = Mathf.PingPong(Time.time * turretRotSpeed, turretScanRange.x * 2) - turretScanRange.x;
+            float angleY = Mathf.PingPong(Time.time * turretRotSpeed, turretScanRange.y * 2) - turretScanRange.y;
+
+            currentScanOffset += (scanOffset + angleY - currentScanOffset) * (Time.deltaTime * turretRotSpeed / 20);
+
+            turret.localEulerAngles = new Vector3(0, currentScanOffset, 0);
+            barrel.localEulerAngles = new Vector3(angleX, currentScanOffset, 0);
+
+            // If target is in front of barrel then fire
+            if (!shooting && Physics.Raycast(barrel.position + barrel.forward, barrel.forward, out RaycastHit hit, dstToTarget))
             {
-                StartCoroutine(Shoot());
+                if (hit.transform.root.name == "Player")
+                {
+                    StartCoroutine(Shoot());
+                }
             }
         }
     }
@@ -72,5 +74,13 @@ public class BrownBot : MonoBehaviour
         StartCoroutine(GetComponent<FireControl>().Shoot());
 
         shooting = false;
+    }
+    
+    IEnumerator ChangeScan()
+    {
+        yield return new WaitForSeconds(Random.Range(scanChangeDelay[0], scanChangeDelay[1]));
+        scanOffset = Random.Range(-180.0f, 180.0f);
+        
+        StartCoroutine(ChangeScan());
     }
 }

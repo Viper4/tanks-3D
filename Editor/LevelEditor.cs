@@ -8,7 +8,7 @@ public class LevelEditor : Editor
     public override void OnInspectorGUI()
     {
         base.OnInspectorGUI();
-
+        
         GUILayout.BeginHorizontal();
 
         if (targets.Length == 1)
@@ -29,12 +29,22 @@ public class LevelEditor : Editor
             {
                 objectCreation.Undo();
             }
-        }
-        else
-        {
-            ObjectCreation[] objectCreations = new ObjectCreation[targets.Length - 1];
 
-            for (int i = 0; i < targets.Length - 1; i++)
+            if (GUILayout.Button("Clear"))
+            {
+                objectCreation.Clear();
+            }
+
+            if (GUILayout.Button("Generate Random"))
+            {
+                GameObject.Find("Level").GetComponent<LevelGenerator>().Generate(objectCreation);
+            }
+        }
+        else if (targets.Length > 1)
+        {
+            ObjectCreation[] objectCreations = new ObjectCreation[targets.Length];
+
+            for (int i = 0; i < targets.Length; i++)
             {
                 objectCreations[i] = (ObjectCreation)targets[i];
             }
@@ -63,7 +73,7 @@ public class LevelEditor : Editor
                 }
             }
         }
-
+        
         GUILayout.EndHorizontal();
     }
 }

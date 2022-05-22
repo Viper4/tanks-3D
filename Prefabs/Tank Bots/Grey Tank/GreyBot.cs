@@ -1,188 +1,200 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.AI;
 
 public class GreyBot : MonoBehaviour
 {
     public Transform target;
     float dstToTarget;
-    Quaternion rotTowardsTarget;
+    Quaternion rotToTarget;
 
-    public LayerMask layerMasks;
+    [SerializeField] LayerMask ignoreLayerMask;
 
+    BaseTankLogic baseTankLogic;
+
+    Transform body;
     Transform turret;
     Transform barrel;
-    Transform anchor;
 
-    public float[] wanderRadius = { 2, 5 };
-    public float shootRadius = 30;
+    [SerializeField] float maxShootAngle = 30;
 
     public float[] reactionTime = { 0.7f, 1.25f };
 
     public float[] fireDelay = { 0.3f, 0.6f };
     float cooldown = 0;
 
-    float noiseSeed;
-    public Vector2 inaccuracy = new Vector2(10, 25);
-    public float noiseSpeed = 0.15f;
-    public float rotateSpeed = 0.5f;
+    Rigidbody rb;
 
-    public float rotateRangeX = 20;
+    [SerializeField] Vector2 inaccuracy = new Vector2(10, 25);
+
+    [SerializeField] bool randomizeSeed = true;
+
+    [SerializeField] float turretRotSpeed = 25f;
+    [SerializeField] float turretNoiseSpeed = 0.15f;
+    [SerializeField] float turretRotSeed = 0;
+    Quaternion turretAnchor;
+
+    [SerializeField] float[] turretRangeX = { -20, 20 };
 
     Vector3 lastEulerAngles;
+    
+    [SerializeField] float moveSpeed = 4f;
+    [SerializeField] float avoidSpeed = 2f;
 
-    enum State
+    float speed = 4;
+    [SerializeField] float gravity = 8;
+    float velocityY = 0;
+
+    float triggerRadius = 3f;
+
+    Coroutine shootRoutine;
+
+    enum Mode
     {
-        Idle,
-        Moving,
-        Shooting
+        Move,
+        Shoot,
+        Avoid
     }
-    State state = State.Idle;
+    Mode mode = Mode.Move;
 
-    NavMeshAgent agent;
-
-    // Start is called before the first frame update
+    // Start is called before the first frame Update
     void Awake()
     {
-        if(target == null)
+        if (target == null)
         {
-            Debug.Log("The variable target of GreyBot has been defaulted to player's Camera Target");
-            target = GameObject.Find("Player").transform.Find("Camera Target");
+            Debug.Log("The variable target of GreyBot has been defaulted to the player");
+            target = GameObject.Find("Player").transform;
         }
 
-        noiseSeed = Random.Range(-99, 99);
+        baseTankLogic = GetComponent<BaseTankLogic>();
 
-        agent = GetComponent<NavMeshAgent>();
+        body = transform.Find("Body");
         turret = transform.Find("Turret");
         barrel = transform.Find("Barrel");
-        anchor = transform.Find("Anchor");
 
-        lastEulerAngles = anchor.eulerAngles;
+        turretAnchor = turret.rotation;
+
+        rb = GetComponent<Rigidbody>();
+
+        lastEulerAngles = body.eulerAngles;
+
+        if (randomizeSeed)
+        {
+            turretRotSeed = Random.Range(-99.0f, 99.0f);
+        }
+
+        triggerRadius = GetComponent<SphereCollider>().radius;
     }
 
     // Update is called once per frame
     void Update()
     {
-        cooldown = cooldown > 0 ? cooldown - Time.deltaTime : 0;
-        dstToTarget = Vector3.Distance(transform.position, target.position);
-
-        if(dstToTarget < shootRadius && state != State.Shooting && cooldown == 0)
+        if (!SceneLoader.frozen && Time.timeScale != 0)
         {
-            // origin is offset forward by 1.7 to prevent ray from hitting this tank
-            Vector3 origin = anchor.position + anchor.forward * 1.7f;
-            // If nothing blocking player
-            if (!Physics.Raycast(origin, target.position - origin, dstToTarget, ~layerMasks))
-            {
-                //Debug.DrawLine(origin, origin + target.position - origin, Color.blue);
+            cooldown = cooldown > 0 ? cooldown - Time.deltaTime : 0;
+            dstToTarget = Vector3.Distance(body.position, target.position);
 
+            if (mode != Mode.Shoot && cooldown == 0 && !Physics.Raycast(turret.position, target.position - turret.position, dstToTarget, ~ignoreLayerMask, QueryTriggerInteraction.Ignore))
+            {
                 StartCoroutine(Shoot());
             }
+            else if (shootRoutine != null)
+            {
+                StopCoroutine(shootRoutine);
+                shootRoutine = null;
+                mode = Mode.Move;
+            }
+
+            if (rb != null)
+            {
+                Vector3 targetDirection = transform.forward;
+                Vector3 velocity;
+                velocityY = baseTankLogic.IsGrounded() ? 0 : velocityY - Time.deltaTime * gravity;
+
+                // Checking Forward on the center, left, and right side
+                RaycastHit forwardHit;
+                if (Physics.Raycast(body.position, transform.forward, out forwardHit, 2) || Physics.Raycast(body.position + transform.right, transform.forward, out forwardHit, 2) || Physics.Raycast(body.position - transform.right, transform.forward, out forwardHit, 2))
+                {
+                    mode = Mode.Avoid;
+                    baseTankLogic.ObstacleAvoidance(forwardHit, triggerRadius);
+                }
+                else if (mode == Mode.Avoid)
+                {
+                    mode = Mode.Move;
+                }
+
+                switch (mode)
+                {
+                    case Mode.Move:
+                        if (Physics.Raycast(transform.position, -transform.up, out RaycastHit middleHit, 1) && Physics.Raycast(transform.position + transform.forward, -transform.up, out RaycastHit frontHit, 1))
+                        {
+                            targetDirection = frontHit.point - middleHit.point;
+                        }
+
+                        speed = moveSpeed;
+
+                        baseTankLogic.noisyRotation = true;
+                        break;
+                    case Mode.Avoid:
+                        speed = avoidSpeed;
+
+                        baseTankLogic.noisyRotation = false;
+                        break;
+                    default:
+                        speed = 0;
+
+                        baseTankLogic.noisyRotation = false;
+                        break;
+                }
+
+                velocity = targetDirection * speed + Vector3.up * velocityY;
+
+                rb.velocity = velocity;
+            }
+
+            // Inaccuracy to rotation with noise
+            float noiseX = inaccuracy.x * (Mathf.PerlinNoise(turretRotSeed + Time.time * turretNoiseSpeed, turretRotSeed + 1f + Time.time * turretNoiseSpeed) - 0.5f);
+            float noiseY = inaccuracy.y * (Mathf.PerlinNoise(turretRotSeed + 4f + Time.time * turretNoiseSpeed, turretRotSeed + 5f + Time.time * turretNoiseSpeed) - 0.5f);
+
+            // Correcting turret and barrel y rotation to not depend on the parent
+            turret.eulerAngles = new Vector3(turret.eulerAngles.x, turret.eulerAngles.y + lastEulerAngles.y - transform.eulerAngles.y, turret.eulerAngles.z);
+            barrel.eulerAngles = new Vector3(barrel.eulerAngles.x, barrel.eulerAngles.y + lastEulerAngles.y - transform.eulerAngles.y, barrel.eulerAngles.z);
+
+            // Rotating turret and barrel towards player
+            Vector3 targetDir = target.position - turret.position;
+            rotToTarget = Quaternion.LookRotation(targetDir);
+            turret.rotation = barrel.rotation = turretAnchor = Quaternion.RotateTowards(turretAnchor, rotToTarget, Time.deltaTime * turretRotSpeed);
+
+            // Zeroing x and z eulers of turret and clamping barrel x euler
+            turret.localEulerAngles = new Vector3(0, turret.localEulerAngles.y + noiseY, 0);
+            barrel.localEulerAngles = new Vector3(Clamping.ClampAngle(barrel.localEulerAngles.x + noiseX, turretRangeX[0], turretRangeX[1]), barrel.localEulerAngles.y + noiseY, 0);
+
+            lastEulerAngles = transform.eulerAngles;
         }
-
-        if (agent != null && state == State.Idle)
-        {
-            StartCoroutine(Wander());
-        }
-
-        // Inaccuracy to rotation with noise
-        float noiseX = inaccuracy.x * (Mathf.PerlinNoise(noiseSeed + Time.time * noiseSpeed, noiseSeed + 1f + Time.time * noiseSpeed) - 0.5f);
-        float noiseY = inaccuracy.y * (Mathf.PerlinNoise(noiseSeed + 4f + Time.time * noiseSpeed, noiseSeed + 5f + Time.time * noiseSpeed) - 0.5f);
-
-        // Correcting turret and barrel rotation to not depend on parent rotation
-        turret.rotation = barrel.rotation = anchor.rotation *= Quaternion.Euler(lastEulerAngles - transform.eulerAngles);
-
-        // Rotating turret and barrel towards player
-        Vector3 dir = target.position - anchor.position;
-        rotTowardsTarget = Quaternion.LookRotation(dir);
-        Quaternion desiredRot = anchor.rotation = barrel.rotation = Quaternion.RotateTowards(anchor.rotation, rotTowardsTarget, Time.deltaTime * rotateSpeed);
-        //Quaternion desiredRot = anchor.rotation = barrel.rotation = Quaternion.Lerp(anchor.rotation, rotTowardsTarget, Time.deltaTime * rotateSpeed);
-        barrel.rotation *= Quaternion.Euler(-90, 0, 0);
-
-        turret.eulerAngles = new Vector3(-90, desiredRot.eulerAngles.y + noiseY, desiredRot.eulerAngles.z);
-        barrel.eulerAngles = new Vector3(Clamping.ClampAngle(barrel.eulerAngles.x + noiseX, -90 - rotateRangeX, -90 + rotateRangeX), barrel.eulerAngles.y + noiseY, barrel.eulerAngles.z);
-
-        lastEulerAngles = transform.eulerAngles;
-    }
-
-    // Seeks out random position 
-    IEnumerator Wander()
-    {
-        state = State.Moving;
-
-        agent.SetDestination(GetRandomPoint(anchor.position, transform.forward, wanderRadius[0], wanderRadius[1], 90));
-        
-        yield return new WaitUntil(AtEndOfPath);
-
-        state = State.Idle;
     }
 
     IEnumerator Shoot()
     {
-        // When angle between barrel and target is less than minAngle degrees, then stop and fire
-        float angle = Quaternion.Angle(barrel.rotation, rotTowardsTarget * Quaternion.Euler(-90, 0, 0));
-        if (angle < 45)
+        // When angle between barrel and target is less than maxShootAngle, then stop and fire
+        float angle = Quaternion.Angle(barrel.rotation, rotToTarget);
+        if (angle < maxShootAngle)
         {
-            state = State.Shooting;
 
-            // Waiting for tank to move forward a bit more
-            yield return new WaitForSeconds(0.5f);
-
-            // Pausing agent movement
-            agent.isStopped = true;
-            // Reaction time from seeing player
+            // Keeps moving until reaction time from seeing player is reached
             yield return new WaitForSeconds(Random.Range(reactionTime[0], reactionTime[1]));
+            // Stops moving and delay in firing
+            mode = Mode.Shoot;
+            yield return new WaitForSeconds(Random.Range(fireDelay[0], fireDelay[1]));
             cooldown = GetComponent<FireControl>().fireCooldown;
             StartCoroutine(GetComponent<FireControl>().Shoot());
-            yield return new WaitForSeconds(Random.Range(fireDelay[0], fireDelay[1]));
 
-            agent.isStopped = false;
-
-            state = State.Idle;
+            shootRoutine = null;
+            mode = Mode.Move;
         }
         else
         {
+            shootRoutine = null;
             yield return null;
         }
-    }
-
-    Vector3 GetRandomPoint(Vector3 origin, Vector3 dir, float minRadius, float maxRadius, float angle)
-    {
-        float randomDst = Random.Range(minRadius, maxRadius);
-
-        // When 15 points are genned and dont get a valid position, return the origin position
-        for (int i = 0; i < 16; i++)
-        {
-            // Random angle from -angle/2 and angle/2
-            float randomAngle = Random.Range(angle * -0.5f, angle * 0.5f);
-
-            // Generating random direction along y axis rotation within randomAngle from dir vector
-            Vector3 randomDir = Quaternion.AngleAxis(randomAngle, Vector3.up) * dir;
-
-            if(i > 8)
-            {
-                // Reversing direction after 8 failed tries to get position forward
-                randomDir *= -1;
-            }
-
-            // Checking if point is reachable on navmesh and getting in game point on navmesh
-            NavMeshHit hit;
-            if (NavMesh.SamplePosition(origin + (randomDir * randomDst), out hit, maxRadius, 1))
-            {
-                return hit.position;
-            }
-        }
-        
-        return origin;
-    }
-
-    bool AtEndOfPath()
-    {
-        if (agent.remainingDistance <= agent.stoppingDistance)
-        {
-            return true;
-        }
-
-        return false;
     }
 }

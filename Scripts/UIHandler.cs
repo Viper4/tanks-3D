@@ -17,9 +17,11 @@ public class UIHandler : MonoBehaviour
 
     public bool silhouettes = true;
 
+    readonly KeyCode[] mouseKeyCodes = { KeyCode.Mouse0, KeyCode.Mouse1, KeyCode.Mouse2, KeyCode.Mouse3, KeyCode.Mouse4, KeyCode.Mouse5, KeyCode.Mouse6 };
+
     private void Awake()
     {
-        if(playerControl == null)
+        if (playerControl == null)
         {
             playerControl = GameObject.Find("Player").GetComponent<PlayerControl>();
         }
@@ -33,12 +35,13 @@ public class UIHandler : MonoBehaviour
         {
             UIElements[child.name] = child;
 
-            if(child.name != "InGame")
+            if (child.name != "InGame")
             {
                 child.gameObject.SetActive(false);
             }
         }
         UIElements["PauseMenu"].Find("LabelBackground").GetChild(0).GetComponent<Text>().text = "Game Paused\nLevel " + (SceneManager.GetActiveScene().buildIndex + 1);
+        UIElements["InGame"].gameObject.SetActive(false);
     }
 
     private void Update()
@@ -48,29 +51,35 @@ public class UIHandler : MonoBehaviour
             selectedKeyBind = null;
         }
 
-        if (Input.GetKeyDown(playerControl.keyBinds["Shoot"]) || Input.GetMouseButtonDown(0))
+        if (Input.GetKeyDown(playerControl.keyBinds["Shoot"]))
         {
             RectTransform rt = UIElements["InGame"].Find("Reticle").GetComponent<RectTransform>();
             rt.sizeDelta = new Vector2(rt.sizeDelta.x * 1.25f, rt.sizeDelta.y * 1.25f);
         }
-        else if (Input.GetKeyUp(playerControl.keyBinds["Shoot"]) || Input.GetMouseButtonUp(0))
+        else if (Input.GetKeyUp(playerControl.keyBinds["Shoot"]))
         {
             RectTransform rt = UIElements["InGame"].Find("Reticle").GetComponent<RectTransform>();
             rt.sizeDelta = new Vector2(rt.sizeDelta.x / 1.25f, rt.sizeDelta.y / 1.25f);
         }
-    }
 
-    void OnGUI()
-    {
-        Event e = Event.current;
-        if (selectedKeyBind != null && e.isKey)
+        Event currentEvent = new Event();
+
+        if (selectedKeyBind != null && Event.PopEvent(currentEvent))
         {
-            transform.parent.GetComponent<PlayerControl>().keyBinds[selectedKeyBind.name] = e.keyCode;
-            selectedKeyBind.Find("Button").GetChild(0).GetComponent<Text>().text = e.keyCode.ToString();
+            if (currentEvent.isKey)
+            {
+                transform.parent.GetComponent<PlayerControl>().keyBinds[selectedKeyBind.name] = currentEvent.keyCode;
+                selectedKeyBind.Find("Button").GetChild(0).GetComponent<Text>().text = currentEvent.keyCode.ToString();
+            }
+            else if (currentEvent.isMouse)
+            {
+                transform.parent.GetComponent<PlayerControl>().keyBinds[selectedKeyBind.name] = mouseKeyCodes[currentEvent.button];
+                selectedKeyBind.Find("Button").GetChild(0).GetComponent<Text>().text = mouseKeyCodes[currentEvent.button].ToString();
+            }
             selectedKeyBind = null;
         }
     }
-
+    
     public void Resume()
     {
         UIElements["InGame"].gameObject.SetActive(true);
@@ -83,6 +92,7 @@ public class UIHandler : MonoBehaviour
         UIElements["InGame"].gameObject.SetActive(false);
         UIElements["PauseMenu"].gameObject.SetActive(true);
         Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
         Time.timeScale = 0;
     }
 
@@ -103,12 +113,19 @@ public class UIHandler : MonoBehaviour
 
     public void ChangeKeyBind(Transform keyBind)
     {
+        StartCoroutine(DelayChangeKeyBind(keyBind));
+    }
+    
+    IEnumerator DelayChangeKeyBind(Transform keyBind)
+    {
+        yield return new WaitWhile(() => Input.GetMouseButtonDown(0));
         selectedKeyBind = keyBind;
     }
 
     public void ChangeSensitivity(Slider slider)
     {
         cameraControl.sensitivity = slider.value;
+        slider.transform.Find("Value Text").GetComponent<Text>().text = slider.value.ToString();
     }
 
     public void ToggleSilhouettes(Toggle toggle)

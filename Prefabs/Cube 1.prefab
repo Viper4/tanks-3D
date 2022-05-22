@@ -13,7 +13,6 @@ GameObject:
   - component: {fileID: 2890519733058000576}
   - component: {fileID: 2442843482674849076}
   - component: {fileID: 7793545425043403058}
-  - component: {fileID: 6243641272924653903}
   m_Layer: 0
   m_Name: Cube 1
   m_TagString: Untagged
@@ -114,19 +113,3 @@ MonoBehaviour:
   times: 0
   eulerAngles: {x: 0, y: 0, z: 0}
   scale: {x: 0, y: 0, z: 0}
---- !u!208 &6243641272924653903
-NavMeshObstacle:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1789137517761687661}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Shape: 1
-  m_Extents: {x: 1, y: 0.5, z: 1}
-  m_MoveThreshold: 0.1
-  m_Carve: 1
-  m_CarveOnlyStationary: 1
-  m_Center: {x: 0, y: 0, z: 0}
-  m_TimeToStationary: 0.5

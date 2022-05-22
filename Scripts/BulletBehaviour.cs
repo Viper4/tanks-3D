@@ -8,8 +8,8 @@ public class BulletBehaviour : MonoBehaviour
 
     public Transform owner { get; set; }
 
-    public Transform explosionEffect;
-    public Transform sparkEffect;
+    [SerializeField] Transform explosionEffect;
+    [SerializeField] Transform sparkEffect;
 
     public float speed = 32;
     public float explosionRadius = 0;
@@ -20,7 +20,7 @@ public class BulletBehaviour : MonoBehaviour
     public int ricochetLevel = 1;
     int bounces = 0;
 
-    // Start is called before the first frame update
+    // Start is called before the first frame Update
     void Awake()
     {
         rb = GetComponent<Rigidbody>();
@@ -28,18 +28,12 @@ public class BulletBehaviour : MonoBehaviour
         rb.velocity = transform.forward * speed;
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        transform.rotation = Quaternion.LookRotation(transform.forward);
-    }
-
     private void OnCollisionEnter(Collision other)
     {
         switch (other.transform.tag)
         {
             case "Tank":
-                KillTarget(other.transform.parent);
+                KillTarget(other.transform);
                 break;
             case "Penetrable":
                 // If can pierce, destroy the hit object, otherwise bounce off
@@ -70,7 +64,8 @@ public class BulletBehaviour : MonoBehaviour
                 break;
             case "Bullet":
                 // Destroy bullet
-                KillTarget(other.transform);
+                Destroy(other.gameObject);
+                DestroySelf();
                 break;
             default:
                 BounceOff(other);
@@ -98,22 +93,31 @@ public class BulletBehaviour : MonoBehaviour
 
     void KillTarget(Transform target)
     {
-        if (transform.name != "Rocket Bullet")
+        if (transform.name != "Rocket Bullet" && target != null && target.CompareTag("Tank"))
         {
-            if (target != null)
+            BaseTankLogic baseTankLogic = target.GetComponent<BaseTankLogic>();
+            if (baseTankLogic != null)
             {
-                if (target.CompareTag("Tank"))
+                baseTankLogic.Explode();
+                if (owner.name == "Player")
                 {
-                    target.GetComponent<BaseTankLogic>().Explode();
-                }
-                else
-                {
-                    Destroy(target.gameObject);
+                    owner.GetComponent<PlayerControl>().kills++;
                 }
             }
         }
 
         DestroySelf();
+    }
+
+    public void SafeDestroy()
+    {
+        // Keeping track of how many bullets a tank has fired
+        if (owner != null)
+        {
+            owner.GetComponent<FireControl>().bulletsFired -= 1;
+        }
+
+        Destroy(gameObject);
     }
 
     void DestroySelf()
@@ -140,6 +144,10 @@ public class BulletBehaviour : MonoBehaviour
                         if (collider.transform.parent != null)
                         {
                             collider.transform.parent.GetComponent<BaseTankLogic>().Explode();
+                            if (owner.name == "Player")
+                            {
+                                owner.GetComponent<PlayerControl>().kills++;
+                            }
                         }
                         break;
                     case "Penetrable":
@@ -149,7 +157,7 @@ public class BulletBehaviour : MonoBehaviour
                         break;
                     case "Bullet":
                         // Destroying bullets in explosion
-                        Destroy(collider.gameObject);
+                        collider.GetComponent<BulletBehaviour>().SafeDestroy();
                         break;
                     case "Mine":
                         // Explode mines
@@ -166,7 +174,7 @@ public class BulletBehaviour : MonoBehaviour
             }
         }
 
-        Instantiate(explosionEffect, transform.position, Quaternion.Euler(-90, 0, 0));
+        Instantiate(explosionEffect, transform.position, Quaternion.identity);
         Destroy(gameObject);
     }
 }
