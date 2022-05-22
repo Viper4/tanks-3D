@@ -98,6 +98,10 @@ public class MineBehaviour : MonoBehaviour
                         try
                         {
                             collider.transform.parent.GetComponent<BaseTankLogic>().Explode();
+                            if(owner.name == "Player")
+                            {
+                                owner.GetComponent<PlayerControl>().kills++;
+                            }
                         }
                         catch
                         {

@@ -8,7 +8,7 @@ public class TealBot : MonoBehaviour
     float dstToTarget;
     Quaternion rotToTarget;
 
-    [SerializeField] LayerMask targetLayerMasks;
+    [SerializeField] LayerMask ignoreLayerMask;
 
     BaseTankLogic baseTankLogic;
 
@@ -33,9 +33,9 @@ public class TealBot : MonoBehaviour
     [SerializeField] float avoidSpeed = 2f;
 
     float speed = 4;
-    float gravity = 10;
+    [SerializeField] float gravity = 10;
     float velocityY = 0;
-
+     
     float triggerRadius = 3.5f;
 
     Coroutine shootRoutine;
@@ -63,6 +63,8 @@ public class TealBot : MonoBehaviour
         turret = transform.Find("Turret");
         barrel = transform.Find("Barrel");
 
+        turretAnchor = turret.rotation;
+
         rb = GetComponent<Rigidbody>();
 
         lastEulerAngles = transform.eulerAngles;
@@ -73,70 +75,86 @@ public class TealBot : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        cooldown = cooldown > 0 ? cooldown - Time.deltaTime : 0;
-        dstToTarget = Vector3.Distance(transform.position, target.position);
+        if(!SceneLoader.frozen && Time.timeScale != 0)
+        {
+            cooldown = cooldown > 0 ? cooldown - Time.deltaTime : 0;
+            dstToTarget = Vector3.Distance(transform.position, target.position);
 
-        if (mode != Mode.Shoot && cooldown == 0 && !Physics.Raycast(turret.position, target.position - turret.position, dstToTarget, ~targetLayerMasks, QueryTriggerInteraction.Ignore))
-        {
-            shootRoutine = StartCoroutine(Shoot());
-        }
-        else if (shootRoutine != null)
-        {
-            StopCoroutine(shootRoutine);
-            shootRoutine = null;
-            mode = Mode.Move;
-        }
-        
-        if (rb != null)
-        {
-            // Movement
-            Vector3 velocity;
-            velocityY = baseTankLogic.IsGrounded() ? 0 : velocityY - Time.deltaTime * gravity;
-            Vector3 targetDirection = transform.forward;
-            
-            ObstacleAvoidance();
-            
-            switch(mode)
+            if (mode != Mode.Shoot && cooldown == 0 && Physics.Raycast(barrel.position, barrel.forward, out RaycastHit barrelHit, dstToTarget, ~ignoreLayerMask, QueryTriggerInteraction.Ignore))
             {
-                case Mode.Move:
-                    if (Physics.Raycast(transform.position, -transform.up, out RaycastHit middleHit, 1) && Physics.Raycast(transform.position + transform.forward, -transform.up, out RaycastHit frontHit, 1))
-                    {
-                        targetDirection = frontHit.point - middleHit.point;
-                    }
-                    speed = moveSpeed;
-                    
-                    baseTankLogic.noisyRotation = true;
-                    break;
-                case Mode.Avoid:
-                    speed = avoidSpeed;
-                    
-                    baseTankLogic.noisyRotation = false;
-                    break;
-                default:
-                    speed = 0;
-                    
-                    baseTankLogic.noisyRotation = false;
-                    break;
+                if (barrelHit.transform.root.name == "Player")
+                {
+                    shootRoutine = StartCoroutine(Shoot());
+                }
+            }
+            else if (shootRoutine != null)
+            {
+                StopCoroutine(shootRoutine);
+                shootRoutine = null;
+                mode = Mode.Move;
             }
 
-            velocity = targetDirection * speed + Vector3.up * velocityY;
+            if (rb != null)
+            {
+                // Movement
+                Vector3 velocity;
+                velocityY = baseTankLogic.IsGrounded() ? 0 : velocityY - Time.deltaTime * gravity;
+                Vector3 targetDirection = transform.forward;
 
-            rb.velocity = velocity;
+                // Checking Forward on the center, left, and right side
+                RaycastHit forwardHit;
+                if (Physics.Raycast(body.position, transform.forward, out forwardHit, triggerRadius) || Physics.Raycast(body.position + transform.right, transform.forward, out forwardHit, triggerRadius) || Physics.Raycast(body.position - transform.right, transform.forward, out forwardHit, triggerRadius))
+                {
+                    mode = Mode.Avoid;
+                    baseTankLogic.ObstacleAvoidance(forwardHit, triggerRadius);
+                }
+                else if (mode == Mode.Avoid)
+                {
+                    mode = Mode.Move;
+                }
+
+                switch (mode)
+                {
+                    case Mode.Move:
+                        if (Physics.Raycast(transform.position, -transform.up, out RaycastHit middleHit, 1) && Physics.Raycast(transform.position + transform.forward, -transform.up, out RaycastHit frontHit, 1))
+                        {
+                            targetDirection = frontHit.point - middleHit.point;
+                        }
+                        speed = moveSpeed;
+
+                        baseTankLogic.noisyRotation = true;
+                        break;
+                    case Mode.Avoid:
+                        speed = avoidSpeed;
+
+                        baseTankLogic.noisyRotation = false;
+                        break;
+                    default:
+                        speed = 0;
+
+                        baseTankLogic.noisyRotation = false;
+                        break;
+                }
+
+                velocity = targetDirection * speed + Vector3.up * velocityY;
+
+                rb.velocity = velocity;
+            }
+
+            // Correcting turret and barrel y rotation to not depend on the parent
+            turret.eulerAngles = new Vector3(turret.eulerAngles.x, turret.eulerAngles.y + lastEulerAngles.y - transform.eulerAngles.y, turret.eulerAngles.z);
+            barrel.eulerAngles = new Vector3(barrel.eulerAngles.x, barrel.eulerAngles.y + lastEulerAngles.y - transform.eulerAngles.y, barrel.eulerAngles.z);
+
+            // Rotating turret and barrel towards player
+            Vector3 targetDir = target.position - turret.position;
+            rotToTarget = Quaternion.LookRotation(targetDir);
+            turret.rotation = barrel.rotation = turretAnchor = Quaternion.RotateTowards(turretAnchor, rotToTarget, Time.deltaTime * turretRotSpeed);
+
+            // Zeroing x and z eulers of turret and clamping barrel x euler
+            turret.localEulerAngles = new Vector3(0, turret.localEulerAngles.y, 0);
+            barrel.localEulerAngles = new Vector3(Clamping.ClampAngle(barrel.localEulerAngles.x, turretRangeX[0], turretRangeX[1]), barrel.localEulerAngles.y, 0);
+            lastEulerAngles = transform.eulerAngles;
         }
-
-        // Correcting turret and barrel y rotation to not depend on the parent
-        turret.eulerAngles = new Vector3(turret.eulerAngles.x, turret.eulerAngles.y + lastEulerAngles.y - transform.eulerAngles.y, turret.eulerAngles.z);
-        barrel.eulerAngles = new Vector3(barrel.eulerAngles.x, barrel.eulerAngles.y + lastEulerAngles.y - transform.eulerAngles.y, barrel.eulerAngles.z);
-
-        // Rotating turret and barrel towards player
-        Vector3 targetDir = target.position - turret.position;
-        rotToTarget = Quaternion.LookRotation(targetDir);
-        turret.rotation = barrel.rotation = turretAnchor = Quaternion.RotateTowards(turretAnchor, rotToTarget, Time.deltaTime * turretRotSpeed);
-
-        // Zeroing x and z eulers of turret and clamping barrel x euler
-        turret.localEulerAngles = new Vector3(0, turret.localEulerAngles.y, 0);
-        barrel.localEulerAngles = new Vector3(Clamping.ClampAngle(barrel.localEulerAngles.x, turretRangeX[0], turretRangeX[1]), barrel.localEulerAngles.y, 0);
-        lastEulerAngles = transform.eulerAngles;
     }
 
     void OnTriggerStay(Collider other)
@@ -157,7 +175,7 @@ public class TealBot : MonoBehaviour
                             desiredDir = Random.Range(0, 2) == 0 ? other.transform.position - turret.position : other.transform.position - turret.position;
 
                             // Applying rotation
-                            baseTankLogic.RotateTo(desiredDir);
+                            baseTankLogic.RotateToVector(desiredDir);
                         }
                     }
                     break;
@@ -166,73 +184,8 @@ public class TealBot : MonoBehaviour
                     desiredDir = transform.position - other.transform.position;
 
                     // Applying rotation
-                    baseTankLogic.RotateTo(desiredDir);
+                    baseTankLogic.RotateToVector(desiredDir);
                     break;
-            }
-        }
-    }
-    
-    void ObstacleAvoidance()
-    {
-        // Checking Forward
-        RaycastHit forwardHit;
-        if (Physics.Raycast(body.position, transform.forward, out forwardHit, triggerRadius) || Physics.Raycast(body.position + transform.right, transform.forward, out forwardHit, triggerRadius) || Physics.Raycast(body.position - transform.right, transform.forward, out forwardHit, triggerRadius))
-        {
-            Debug.DrawLine(body.position, forwardHit.point, Color.red, 0.1f);
-
-            bool[] pathClear = { true, true };
-            Vector3 desiredDir;
-
-            // Cross product doesn't give absolute value of angle
-            float dotProductY = Vector3.Dot(Vector3.Cross(transform.forward, forwardHit.normal), transform.up);
-
-            mode = Mode.Avoid;
-
-            // Checking Left
-            if (Physics.Raycast(body.position, -transform.right, triggerRadius))
-            {
-                pathClear[0] = false;
-            }
-            Debug.DrawLine(body.position, body.position - transform.right * 3, Color.red, 0.1f);
-            // Checking Right
-            if (Physics.Raycast(body.position, transform.right, triggerRadius))
-            {
-                pathClear[1] = false;
-            }
-            Debug.DrawLine(body.position, body.position + transform.right * 3, Color.red, 0.1f);
-
-            if (pathClear[0])
-            {
-                if (pathClear[1])
-                {
-                    // Rotate left if obstacle is facing left
-                    desiredDir = dotProductY < 0 ? -transform.right : transform.right;
-                }
-                else
-                {
-                    // Rotate left
-                    desiredDir = -transform.right;
-                }
-            }
-            else if (pathClear[1])
-            {
-                // Rotate right
-                desiredDir = transform.right;
-            }
-            else
-            {
-                // Rotate backward
-                desiredDir = -transform.forward;
-            }
-            
-            // Applying rotation
-            baseTankLogic.RotateTo(desiredDir);
-        }
-        else
-        {
-            if (mode == Mode.Avoid)
-            {
-                mode = Mode.Move;
             }
         }
     }
@@ -247,7 +200,8 @@ public class TealBot : MonoBehaviour
         cooldown = GetComponent<FireControl>().fireCooldown;
         StartCoroutine(GetComponent<FireControl>().Shoot());
 
-        shootRoutine = null;
         mode = Mode.Move;
+
+        shootRoutine = null;
     }
 }

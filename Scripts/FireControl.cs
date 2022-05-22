@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class FireControl : MonoBehaviour
 {
-    Transform projectileParent;
     [SerializeField] Transform owner;
 
     [SerializeField] Transform bullet;
@@ -21,11 +20,6 @@ public class FireControl : MonoBehaviour
     // Start is called before the first frame Update
     void Awake()
     {
-        if (projectileParent == null)
-        {
-            projectileParent = GameObject.Find("Projectiles").transform;
-        }
-
         if (transform.name != "Player")
         {
             barrel = transform.Find("Barrel");
@@ -49,7 +43,7 @@ public class FireControl : MonoBehaviour
             if (!Physics.CheckBox(clonePosition, bullet.GetComponent<Collider>().bounds.size, cloneRotation, solidLayerMask))
             {
                 bulletsFired++;
-                bulletClone = Instantiate(bullet, clonePosition, cloneRotation, projectileParent);
+                bulletClone = Instantiate(bullet, clonePosition, cloneRotation);
                 bulletClone.localScale = new Vector3(1, 1, 1);
 
                 yield return new WaitWhile(() => bulletClone.GetComponent<BulletBehaviour>() == null);

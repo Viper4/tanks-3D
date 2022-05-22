@@ -116,6 +116,20 @@ public static class SaveSystem
         if (File.Exists(SAVE_FOLDER + fileName))
         {
             string json = File.ReadAllText(SAVE_FOLDER + fileName);
+
+            Camera.main.GetComponent<CameraControl>().sensitivity = 15;
+
+            playerControl.keyBinds.Add("Forward", KeyCode.W);
+            playerControl.keyBinds.Add("Left", KeyCode.A);
+            playerControl.keyBinds.Add("Backward", KeyCode.S);
+            playerControl.keyBinds.Add("Right", KeyCode.D);
+            playerControl.keyBinds.Add("Shoot", KeyCode.Mouse0);
+            playerControl.keyBinds.Add("Lay Mine", KeyCode.Space);
+            playerControl.keyBinds.Add("Lock Turret", KeyCode.LeftControl);
+            playerControl.keyBinds.Add("Lock Camera", KeyCode.LeftShift);
+
+            UIHandler.silhouettes = true;
+
             if (json != null)
             {
                 Settings settings = JsonConvert.DeserializeObject<Settings>(json);
@@ -126,20 +140,6 @@ public static class SaveSystem
                     playerControl.keyBinds[key] = settings.keyBinds[key];
                 }
                 UIHandler.silhouettes = settings.silhouettes;
-            }
-            else
-            {
-                Camera.main.GetComponent<CameraControl>().sensitivity = 15;
-
-                playerControl.keyBinds.Add("Forward", KeyCode.W);
-                playerControl.keyBinds.Add("Left", KeyCode.A);
-                playerControl.keyBinds.Add("Backward", KeyCode.S);
-                playerControl.keyBinds.Add("Right", KeyCode.D);
-                playerControl.keyBinds.Add("Shoot", KeyCode.Mouse0);
-                playerControl.keyBinds.Add("Lay Mine", KeyCode.Space);
-                playerControl.keyBinds.Add("Lock Turret", KeyCode.LeftControl);
-
-                UIHandler.silhouettes = true;
             }
         }
         else

@@ -59,7 +59,7 @@ public class PlayerControl : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!Dead)
+        if (!Dead && !SceneLoader.frozen)
         {
             if (Time.timeScale != 0)
             {
@@ -119,7 +119,16 @@ public class PlayerControl : MonoBehaviour
                 if (inputDir != Vector2.zero)
                 {
                     float targetRotation = Mathf.Atan2(inputDir.x, inputDir.y) * Mathf.Rad2Deg + mainCamera.eulerAngles.y;
-                    tankOrigin.eulerAngles = new Vector3(tankOrigin.eulerAngles.x, Mathf.SmoothDampAngle(tankOrigin.eulerAngles.y, targetRotation, ref turnSmoothVelocity, GetModifiedSmoothTime(turnSmoothTime)), tankOrigin.eulerAngles.z);
+                    float angle = tankOrigin.eulerAngles.y - targetRotation;
+                    angle = angle < 0 ? angle + 360 : angle;
+                    if (angle > 180 - baseTankLogic.flipAngleThreshold && angle < 180 + baseTankLogic.flipAngleThreshold)
+                    {
+                        tankOrigin.forward = -tankOrigin.forward;
+                    }
+                    else
+                    {
+                        tankOrigin.eulerAngles = new Vector3(tankOrigin.eulerAngles.x, Mathf.SmoothDampAngle(tankOrigin.eulerAngles.y, targetRotation, ref turnSmoothVelocity, GetModifiedSmoothTime(turnSmoothTime)), tankOrigin.eulerAngles.z);
+                    }
                 }
             }
         }
@@ -140,14 +149,16 @@ public class PlayerControl : MonoBehaviour
                 else if (Input.GetKeyDown(KeyCode.R))
                 {
                     Debug.Log("Cheat Reload");
-                    SceneLoader.sceneLoader.LoadScene(false, -1, 3);
+                    StartCoroutine(SceneLoader.sceneLoader.LoadScene(false, -1, 3));
                 }
                 else if (Input.GetKeyDown(KeyCode.B))
                 {
                     Debug.Log("Cheat Reset");
                     Dead = false;
 
-                    tankOrigin.gameObject.SetActive(true);
+                    tankOrigin.Find("Body").gameObject.SetActive(false);
+                    tankOrigin.Find("Turret").gameObject.SetActive(false);
+                    tankOrigin.Find("Barrel").gameObject.SetActive(false);
                 }
             }
         }

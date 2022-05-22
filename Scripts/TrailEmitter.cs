@@ -1,12 +1,9 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class TrailEmitter : MonoBehaviour
 {
-    [SerializeField] BaseTankLogic baseTankLogic;
-
     [SerializeField] Transform trackMarks;
+    [SerializeField] BaseTankLogic baseTankLogic;
 
     // Start is called before the first frame update
     void Awake()

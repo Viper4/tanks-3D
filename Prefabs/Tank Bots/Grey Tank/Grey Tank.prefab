@@ -72,7 +72,7 @@ TrailRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Time: 20
+  m_Time: 50
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 0.5
@@ -174,8 +174,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6dd208702654b75488b856b2664059db, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  baseTankLogic: {fileID: 4306979400757749490}
   trackMarks: {fileID: 4544845528916168414}
+  baseTankLogic: {fileID: 4306979400757749490}
 --- !u!1 &3161547620119240041
 GameObject:
   m_ObjectHideFlags: 0
@@ -556,6 +556,7 @@ MonoBehaviour:
   tankRotNoiseScale: 5
   tankRotNoiseSpeed: 0.5
   tankRotSeed: 0
+  flipAngleThreshold: 20
 --- !u!114 &6089765290543581610
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -589,6 +590,7 @@ MonoBehaviour:
   - 20
   moveSpeed: 3
   avoidSpeed: 2
+  gravity: 8
 --- !u!54 &-1444549703756494348
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -704,7 +706,7 @@ TrailRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Time: 20
+  m_Time: 50
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 0.5

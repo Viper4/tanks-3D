@@ -8,6 +8,8 @@ public class SceneLoader : MonoBehaviour
 {
     public static SceneLoader sceneLoader;
 
+    public static bool frozen;
+
     Transform loadingScreen;
     Transform progressBar;
     Transform label;
@@ -38,6 +40,7 @@ public class SceneLoader : MonoBehaviour
     public void OnSceneLoad()
     {
         Time.timeScale = 0;
+        frozen = true;
 
         progressBar.gameObject.SetActive(false);
         startButton.gameObject.SetActive(true);
@@ -89,7 +92,14 @@ public class SceneLoader : MonoBehaviour
     public void StartGame()
     {
         loadingScreen.gameObject.SetActive(false);
+        StartCoroutine(DelayedStart());
+    }
+
+    IEnumerator DelayedStart()
+    {
         GameObject.Find("Player").transform.Find("UI").GetComponent<UIHandler>().Resume();
+        yield return new WaitForSecondsRealtime(3);
+        frozen = false;
     }
 
     public bool CurrentSceneLoaded()

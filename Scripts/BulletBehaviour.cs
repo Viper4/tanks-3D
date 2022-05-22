@@ -64,7 +64,8 @@ public class BulletBehaviour : MonoBehaviour
                 break;
             case "Bullet":
                 // Destroy bullet
-                KillTarget(other.transform);
+                Destroy(other.gameObject);
+                DestroySelf();
                 break;
             default:
                 BounceOff(other);
@@ -92,25 +93,15 @@ public class BulletBehaviour : MonoBehaviour
 
     void KillTarget(Transform target)
     {
-        if (transform.name != "Rocket Bullet")
+        if (transform.name != "Rocket Bullet" && target != null && target.CompareTag("Tank"))
         {
-            if (target != null)
+            BaseTankLogic baseTankLogic = target.GetComponent<BaseTankLogic>();
+            if (baseTankLogic != null)
             {
-                if (target.CompareTag("Tank"))
+                baseTankLogic.Explode();
+                if (owner.name == "Player")
                 {
-                    BaseTankLogic baseTankLogic = target.GetComponent<BaseTankLogic>();
-                    if(baseTankLogic != null)
-                    {
-                        baseTankLogic.Explode();
-                    }
-                    else
-                    {
-                        target.parent.GetComponent<BaseTankLogic>().Explode();
-                    }
-                }
-                else
-                {
-                    Destroy(target.gameObject);
+                    owner.GetComponent<PlayerControl>().kills++;
                 }
             }
         }
@@ -153,6 +144,10 @@ public class BulletBehaviour : MonoBehaviour
                         if (collider.transform.parent != null)
                         {
                             collider.transform.parent.GetComponent<BaseTankLogic>().Explode();
+                            if (owner.name == "Player")
+                            {
+                                owner.GetComponent<PlayerControl>().kills++;
+                            }
                         }
                         break;
                     case "Penetrable":

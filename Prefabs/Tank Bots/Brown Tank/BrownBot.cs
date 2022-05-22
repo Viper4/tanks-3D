@@ -21,7 +21,7 @@ public class BrownBot : MonoBehaviour
 
     bool shooting = false;
 
-    [SerializeField] LayerMask targetLayerMask;
+    BaseTankLogic baseTankLogic;
 
     // Start is called before the first frame Update
     void Awake()
@@ -34,6 +34,8 @@ public class BrownBot : MonoBehaviour
 
         barrel = transform.Find("Barrel");
         turret = transform.Find("Turret");
+
+        baseTankLogic = GetComponent<BaseTankLogic>();
         
         StartCoroutine(ChangeScan());
     }
@@ -41,23 +43,25 @@ public class BrownBot : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        dstToTarget = Vector3.Distance(transform.position, target.position);
-
-        float angleX = Mathf.PingPong(Time.time * turretRotSpeed, turretScanRange.x * 2) - turretScanRange.x;
-        float angleY = Mathf.PingPong(Time.time * turretRotSpeed, turretScanRange.y * 2) - turretScanRange.y;
-
-        currentScanOffset += (scanOffset + angleY - currentScanOffset) * (Time.deltaTime * turretRotSpeed / 20);
-
-        turret.localEulerAngles = new Vector3(0, currentScanOffset, 0);
-        barrel.localEulerAngles = new Vector3(angleX, currentScanOffset, 0);
-
-        // If target is in front of barrel then fire
-        if (!shooting && Physics.Raycast(barrel.position + barrel.forward, barrel.forward, out RaycastHit hit, dstToTarget))
+        if (!SceneLoader.frozen && Time.timeScale != 0)
         {
-            // If hit layer is in targetLayerMask
-            if(targetLayerMask == (targetLayerMask | (1 << hit.transform.gameObject.layer)))
+            dstToTarget = Vector3.Distance(transform.position, target.position);
+
+            float angleX = Mathf.PingPong(Time.time * turretRotSpeed, turretScanRange.x * 2) - turretScanRange.x;
+            float angleY = Mathf.PingPong(Time.time * turretRotSpeed, turretScanRange.y * 2) - turretScanRange.y;
+
+            currentScanOffset += (scanOffset + angleY - currentScanOffset) * (Time.deltaTime * turretRotSpeed / 20);
+
+            turret.localEulerAngles = new Vector3(0, currentScanOffset, 0);
+            barrel.localEulerAngles = new Vector3(angleX, currentScanOffset, 0);
+
+            // If target is in front of barrel then fire
+            if (!shooting && Physics.Raycast(barrel.position + barrel.forward, barrel.forward, out RaycastHit hit, dstToTarget))
             {
-                StartCoroutine(Shoot());
+                if (hit.transform.root.name == "Player")
+                {
+                    StartCoroutine(Shoot());
+                }
             }
         }
     }

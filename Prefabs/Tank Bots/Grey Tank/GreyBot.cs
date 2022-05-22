@@ -42,7 +42,7 @@ public class GreyBot : MonoBehaviour
     [SerializeField] float avoidSpeed = 2f;
 
     float speed = 4;
-    float gravity = 10;
+    [SerializeField] float gravity = 8;
     float velocityY = 0;
 
     float triggerRadius = 3f;
@@ -72,6 +72,8 @@ public class GreyBot : MonoBehaviour
         turret = transform.Find("Turret");
         barrel = transform.Find("Barrel");
 
+        turretAnchor = turret.rotation;
+
         rb = GetComponent<Rigidbody>();
 
         lastEulerAngles = body.eulerAngles;
@@ -87,139 +89,87 @@ public class GreyBot : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        cooldown = cooldown > 0 ? cooldown - Time.deltaTime : 0;
-        dstToTarget = Vector3.Distance(body.position, target.position);
-
-        if (mode != Mode.Shoot && cooldown == 0 && !Physics.Raycast(turret.position, target.position - turret.position, dstToTarget, ~ignoreLayerMask, QueryTriggerInteraction.Ignore))
+        if (!SceneLoader.frozen && Time.timeScale != 0)
         {
-            StartCoroutine(Shoot());
-        }
-        else if (shootRoutine != null)
-        {
-            StopCoroutine(shootRoutine);
-            shootRoutine = null;
-            mode = Mode.Move;
-        }
+            cooldown = cooldown > 0 ? cooldown - Time.deltaTime : 0;
+            dstToTarget = Vector3.Distance(body.position, target.position);
 
-        if (rb != null)
-        {
-            Vector3 targetDirection = transform.forward;
-            Vector3 velocity;
-            velocityY = baseTankLogic.IsGrounded() ? 0 : velocityY - Time.deltaTime * gravity;
-            
-            ObstacleAvoidance();
-            
-            switch (mode)
+            if (mode != Mode.Shoot && cooldown == 0 && !Physics.Raycast(turret.position, target.position - turret.position, dstToTarget, ~ignoreLayerMask, QueryTriggerInteraction.Ignore))
             {
-                case Mode.Move:
-                    if (Physics.Raycast(transform.position, -transform.up, out RaycastHit middleHit, 1) && Physics.Raycast(transform.position + transform.forward, -transform.up, out RaycastHit frontHit, 1))
-                    {
-                        targetDirection = frontHit.point - middleHit.point;
-                    }
-                                        
-                    speed = moveSpeed;
-                    
-                    baseTankLogic.noisyRotation = true;
-                    break;
-                case Mode.Avoid:
-                    speed = avoidSpeed;
-                    
-                    baseTankLogic.noisyRotation = false;
-                    break;
-                default:
-                    speed = 0;
-                    
-                    baseTankLogic.noisyRotation = false;
-                    break;
+                StartCoroutine(Shoot());
             }
-            
-            velocity = targetDirection * speed + Vector3.up * velocityY;
-            
-            rb.velocity = velocity;
-        }
-
-        // Inaccuracy to rotation with noise
-        float noiseX = inaccuracy.x * (Mathf.PerlinNoise(turretRotSeed + Time.time * turretNoiseSpeed, turretRotSeed + 1f + Time.time * turretNoiseSpeed) - 0.5f);
-        float noiseY = inaccuracy.y * (Mathf.PerlinNoise(turretRotSeed + 4f + Time.time * turretNoiseSpeed, turretRotSeed + 5f + Time.time * turretNoiseSpeed) - 0.5f);
-
-        // Correcting turret and barrel y rotation to not depend on the parent
-        turret.eulerAngles = new Vector3(turret.eulerAngles.x, turret.eulerAngles.y + lastEulerAngles.y - transform.eulerAngles.y, turret.eulerAngles.z);
-        barrel.eulerAngles = new Vector3(barrel.eulerAngles.x, barrel.eulerAngles.y + lastEulerAngles.y - transform.eulerAngles.y, barrel.eulerAngles.z);
-
-        // Rotating turret and barrel towards player
-        Vector3 targetDir = target.position - turret.position;
-        rotToTarget = Quaternion.LookRotation(targetDir);
-        turret.rotation = barrel.rotation = turretAnchor = Quaternion.RotateTowards(turretAnchor, rotToTarget, Time.deltaTime * turretRotSpeed);
-
-        // Zeroing x and z eulers of turret and clamping barrel x euler
-        turret.localEulerAngles = new Vector3(0, turret.localEulerAngles.y + noiseY, 0);
-        barrel.localEulerAngles = new Vector3(Clamping.ClampAngle(barrel.localEulerAngles.x + noiseX, turretRangeX[0], turretRangeX[1]), barrel.localEulerAngles.y + noiseY, 0);
-
-        lastEulerAngles = transform.eulerAngles;
-    }
-
-    void ObstacleAvoidance()
-    {
-        // Checking Forward on the center, left, and right side
-        RaycastHit forwardHit;
-        if (Physics.Raycast(body.position, transform.forward, out forwardHit, triggerRadius) || Physics.Raycast(body.position + transform.right, transform.forward, out forwardHit, triggerRadius) || Physics.Raycast(body.position - transform.right, transform.forward, out forwardHit, triggerRadius))
-        {
-            Debug.DrawLine(body.position, forwardHit.point, Color.red, 0.1f);
-
-            bool[] pathClear = { true, true };
-            Vector3 desiredDir;
-
-            // Cross product doesn't give absolute value of angle
-            float dotProductY = Vector3.Dot(Vector3.Cross(transform.forward, forwardHit.normal), transform.up);
-            
-            mode = Mode.Avoid;
-
-            // Checking Left
-            if (Physics.Raycast(body.position, -transform.right, triggerRadius))
+            else if (shootRoutine != null)
             {
-                pathClear[0] = false;
-                Debug.DrawLine(body.position, body.position - transform.right * 3, Color.red, 0.1f);
-            }
-            // Checking Right
-            if (Physics.Raycast(body.position, transform.right, triggerRadius))
-            {
-                pathClear[1] = false;
-                Debug.DrawLine(body.position, body.position + transform.right * 3, Color.red, 0.1f);
-            }
-            
-            if (pathClear[0])
-            {
-                if (pathClear[1])
-                {
-                    // Rotate left if obstacle is facing left, vice versa
-                    desiredDir = dotProductY < 0 ? -transform.right : transform.right;
-                }
-                else
-                {
-                    // Rotate left
-                    desiredDir = -transform.right;
-                }
-            }
-            else if (pathClear[1])
-            {
-                // Rotate right
-                desiredDir = transform.right;
-            }
-            else
-            {
-                // Go backward
-                desiredDir = -transform.forward;
-            }
-
-            // Applying rotation
-            baseTankLogic.RotateTo(desiredDir);
-        }
-        else
-        {
-            if (mode == Mode.Avoid)
-            {
+                StopCoroutine(shootRoutine);
+                shootRoutine = null;
                 mode = Mode.Move;
             }
+
+            if (rb != null)
+            {
+                Vector3 targetDirection = transform.forward;
+                Vector3 velocity;
+                velocityY = baseTankLogic.IsGrounded() ? 0 : velocityY - Time.deltaTime * gravity;
+
+                // Checking Forward on the center, left, and right side
+                RaycastHit forwardHit;
+                if (Physics.Raycast(body.position, transform.forward, out forwardHit, 2) || Physics.Raycast(body.position + transform.right, transform.forward, out forwardHit, 2) || Physics.Raycast(body.position - transform.right, transform.forward, out forwardHit, 2))
+                {
+                    mode = Mode.Avoid;
+                    baseTankLogic.ObstacleAvoidance(forwardHit, triggerRadius);
+                }
+                else if (mode == Mode.Avoid)
+                {
+                    mode = Mode.Move;
+                }
+
+                switch (mode)
+                {
+                    case Mode.Move:
+                        if (Physics.Raycast(transform.position, -transform.up, out RaycastHit middleHit, 1) && Physics.Raycast(transform.position + transform.forward, -transform.up, out RaycastHit frontHit, 1))
+                        {
+                            targetDirection = frontHit.point - middleHit.point;
+                        }
+
+                        speed = moveSpeed;
+
+                        baseTankLogic.noisyRotation = true;
+                        break;
+                    case Mode.Avoid:
+                        speed = avoidSpeed;
+
+                        baseTankLogic.noisyRotation = false;
+                        break;
+                    default:
+                        speed = 0;
+
+                        baseTankLogic.noisyRotation = false;
+                        break;
+                }
+
+                velocity = targetDirection * speed + Vector3.up * velocityY;
+
+                rb.velocity = velocity;
+            }
+
+            // Inaccuracy to rotation with noise
+            float noiseX = inaccuracy.x * (Mathf.PerlinNoise(turretRotSeed + Time.time * turretNoiseSpeed, turretRotSeed + 1f + Time.time * turretNoiseSpeed) - 0.5f);
+            float noiseY = inaccuracy.y * (Mathf.PerlinNoise(turretRotSeed + 4f + Time.time * turretNoiseSpeed, turretRotSeed + 5f + Time.time * turretNoiseSpeed) - 0.5f);
+
+            // Correcting turret and barrel y rotation to not depend on the parent
+            turret.eulerAngles = new Vector3(turret.eulerAngles.x, turret.eulerAngles.y + lastEulerAngles.y - transform.eulerAngles.y, turret.eulerAngles.z);
+            barrel.eulerAngles = new Vector3(barrel.eulerAngles.x, barrel.eulerAngles.y + lastEulerAngles.y - transform.eulerAngles.y, barrel.eulerAngles.z);
+
+            // Rotating turret and barrel towards player
+            Vector3 targetDir = target.position - turret.position;
+            rotToTarget = Quaternion.LookRotation(targetDir);
+            turret.rotation = barrel.rotation = turretAnchor = Quaternion.RotateTowards(turretAnchor, rotToTarget, Time.deltaTime * turretRotSpeed);
+
+            // Zeroing x and z eulers of turret and clamping barrel x euler
+            turret.localEulerAngles = new Vector3(0, turret.localEulerAngles.y + noiseY, 0);
+            barrel.localEulerAngles = new Vector3(Clamping.ClampAngle(barrel.localEulerAngles.x + noiseX, turretRangeX[0], turretRangeX[1]), barrel.localEulerAngles.y + noiseY, 0);
+
+            lastEulerAngles = transform.eulerAngles;
         }
     }
 

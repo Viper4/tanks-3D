@@ -33,6 +33,7 @@ public class CameraControl : MonoBehaviour
     float yaw;
     float pitch;
     bool lockTurret = false;
+    bool lockCamera = false;
 
     // Start is called before the first frame Update
     void Awake()
@@ -73,6 +74,10 @@ public class CameraControl : MonoBehaviour
         if (Input.GetKeyDown(playerControl.keyBinds["Lock Turret"]))
         {
             lockTurret = !lockTurret;
+        }
+        else if (Input.GetKeyDown(playerControl.keyBinds["Lock Camera"]))
+        {
+            lockCamera = !lockCamera;
         }
 
         // 1st person vs. 3rd person turret control
@@ -136,15 +141,17 @@ public class CameraControl : MonoBehaviour
             reticle.position = Input.mousePosition;
         }
 
-        // Translating inputs from mouse into smoothed rotation of camera
-        yaw += Input.GetAxis("Mouse X") * sensitivity / 4;
-        pitch -= Input.GetAxis("Mouse Y") * sensitivity / 4;
-        pitch = Mathf.Clamp(pitch, pitchMinMax.x, pitchMinMax.y);
+        if (!lockCamera)
+        {
+            // Translating inputs from mouse into smoothed rotation of camera
+            yaw += Input.GetAxis("Mouse X") * sensitivity / 4;
+            pitch -= Input.GetAxis("Mouse Y") * sensitivity / 4;
+            pitch = Mathf.Clamp(pitch, pitchMinMax.x, pitchMinMax.y);
 
-        currentRotation = Vector3.SmoothDamp(currentRotation, new Vector3(pitch, yaw), ref rotationSmoothVelocity, rotationSmoothTime);
-        // Setting rotation and position of camera on previous params and target and dstFromTarget
-        transform.eulerAngles = currentRotation;
-
+            currentRotation = Vector3.SmoothDamp(currentRotation, new Vector3(pitch, yaw), ref rotationSmoothVelocity, rotationSmoothTime);
+            // Setting rotation and position of camera on previous params and target and dstFromTarget
+            transform.eulerAngles = currentRotation;
+        }
         transform.position = target.position - transform.forward * dstFromTarget;
 
         // Prevent clipping of camera
