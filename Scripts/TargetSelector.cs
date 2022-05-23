@@ -40,8 +40,7 @@ public class TargetSelector : MonoBehaviour
         foreach (Transform tank in tankParent)
         {
             Transform tankTurret = tank.transform.Find("Turret");
-
-            if (Physics.Raycast(tankTurret.position, turret.position - tankTurret.position, out RaycastHit hit, Mathf.Infinity, ~ignoreLayerMask))
+            if (Physics.Raycast(tankTurret.position, turret.position - tankTurret.position, out RaycastHit hit, Mathf.Infinity, ~ignoreLayerMask, QueryTriggerInteraction.Ignore))
             {
                 if (hit.transform == transform)
                 {
