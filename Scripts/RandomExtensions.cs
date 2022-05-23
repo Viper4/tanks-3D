@@ -165,6 +165,32 @@ public static class RandomExtensions
         ) + collider.bounds.center;
         return collider.transform.TransformPoint(point);
     }
+    
+    public static Vector3 SpawnPointInCollider(Collider collider, Vector3 direction, LayerMask ignoreLayers, Transform spawnObject = null, Quaternion spawnRotation = null)
+    {
+        for (int i = 0; i < 10; i++)
+        {
+            if (Physics.Raycast(RandomExtensions.RandomPointInCollider(collider), direction, out RaycastHit hit, Mathf.Infinity, ~ignoreLayers))
+            {
+                if (spawnObject != null)
+                {
+                    Vector3 spawnPosition = hit.point + Vector3.up * (spawnObject.localPosition.y + 0.1f);
+                    Quaternion rotation = spawnRotation == null ? spawnObject.rotation : spawnRotation;
+                    if (!Physics.CheckBox(spawnPosition, spawnObject.GetComponent<BoxCollider>().size / 2, rotation, ~ignoreLayers))
+                    {
+                        return spawnPosition;
+                    }
+                }
+                else
+                {
+                    return hit.point;
+                }
+            }
+        }
+        
+        Debug.LogWarning("Could not find a valid spawn point in " + collider.name);
+        return null;
+    }
 }
 
 [System.Serializable]
