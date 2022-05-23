@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class BrownBot : MonoBehaviour
 {
-    public Transform target;
     float dstToTarget;
 
     Transform turret;
@@ -21,22 +20,19 @@ public class BrownBot : MonoBehaviour
 
     bool shooting = false;
 
-    BaseTankLogic baseTankLogic;
+    TargetSelector targetSelector;
 
     // Start is called before the first frame Update
     void Awake()
     {
-        if (target == null)
-        {
-            Debug.Log("The variable target of BrownBot has been defaulted to the player");
-            target = GameObject.Find("Player").transform;
-        }
-
         barrel = transform.Find("Barrel");
         turret = transform.Find("Turret");
 
-        baseTankLogic = GetComponent<BaseTankLogic>();
-        
+        if (GetComponent<TargetSelector>() != null)
+        {
+            targetSelector = GetComponent<TargetSelector>();
+        }
+
         StartCoroutine(ChangeScan());
     }
 
@@ -45,7 +41,7 @@ public class BrownBot : MonoBehaviour
     {
         if (!SceneLoader.frozen && Time.timeScale != 0)
         {
-            dstToTarget = Vector3.Distance(transform.position, target.position);
+            dstToTarget = Vector3.Distance(transform.position, targetSelector.target.position);
 
             float angleX = Mathf.PingPong(Time.time * turretRotSpeed, turretScanRange.x * 2) - turretScanRange.x;
             float angleY = Mathf.PingPong(Time.time * turretRotSpeed, turretScanRange.y * 2) - turretScanRange.y;
@@ -58,7 +54,7 @@ public class BrownBot : MonoBehaviour
             // If target is in front of barrel then fire
             if (!shooting && Physics.Raycast(barrel.position + barrel.forward, barrel.forward, out RaycastHit hit, dstToTarget))
             {
-                if (hit.transform.root.name == "Player")
+                if (hit.transform.root.name == targetSelector.target.root.name)
                 {
                     StartCoroutine(Shoot());
                 }

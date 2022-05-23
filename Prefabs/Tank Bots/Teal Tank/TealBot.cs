@@ -4,11 +4,12 @@ using UnityEngine;
 
 public class TealBot : MonoBehaviour
 {
-    public Transform target;
+    TargetSelector targetSelector;
     float dstToTarget;
     Quaternion rotToTarget;
 
-    [SerializeField] LayerMask ignoreLayerMask;
+    [SerializeField] LayerMask transparentLayerMask;
+    [SerializeField] LayerMask barrierLayerMask;
 
     BaseTankLogic baseTankLogic;
 
@@ -16,29 +17,26 @@ public class TealBot : MonoBehaviour
     Transform turret;
     Transform barrel;
     Quaternion turretAnchor;
+    Vector3 lastEulerAngles;
 
     public float[] reactionTime = { 0.3f, 0.45f };
-
     public float[] fireDelay = { 0.3f, 0.6f };
-    float cooldown = 0;
 
     Rigidbody rb;
 
     [SerializeField] float turretRotSpeed = 25f;
     [SerializeField] float[] turretRangeX = { -20, 20 };
-
-    Vector3 lastEulerAngles;
     
     [SerializeField] float moveSpeed = 4f;
     [SerializeField] float avoidSpeed = 2f;
-
     float speed = 4;
+
     [SerializeField] float gravity = 10;
     float velocityY = 0;
      
     float triggerRadius = 3.5f;
 
-    Coroutine shootRoutine;
+    FireControl fireControl;
 
     enum Mode
     {
@@ -51,25 +49,21 @@ public class TealBot : MonoBehaviour
     // Start is called before the first frame Update
     void Awake()
     {
-        if (target == null)
-        {
-            Debug.Log("The variable target of TealBot has been defaulted to the player");
-            target = GameObject.Find("Player").transform;
-        }
+        targetSelector = GetComponent<TargetSelector>();
 
         baseTankLogic = GetComponent<BaseTankLogic>();
 
         body = transform.Find("Body");
         turret = transform.Find("Turret");
         barrel = transform.Find("Barrel");
-
         turretAnchor = turret.rotation;
+        lastEulerAngles = transform.eulerAngles;
 
         rb = GetComponent<Rigidbody>();
 
-        lastEulerAngles = transform.eulerAngles;
-
         triggerRadius = GetComponent<SphereCollider>().radius;
+
+        fireControl = GetComponent<FireControl>();
     }
 
     // Update is called once per frame
@@ -77,21 +71,14 @@ public class TealBot : MonoBehaviour
     {
         if(!SceneLoader.frozen && Time.timeScale != 0)
         {
-            cooldown = cooldown > 0 ? cooldown - Time.deltaTime : 0;
-            dstToTarget = Vector3.Distance(transform.position, target.position);
+            dstToTarget = Vector3.Distance(transform.position, targetSelector.target.position);
 
-            if (mode != Mode.Shoot && cooldown == 0 && Physics.Raycast(barrel.position, barrel.forward, out RaycastHit barrelHit, dstToTarget, ~ignoreLayerMask, QueryTriggerInteraction.Ignore))
+            if (fireControl.canFire && mode != Mode.Shoot && Physics.Raycast(barrel.position, barrel.forward, out RaycastHit barrelHit, dstToTarget, ~transparentLayerMask, QueryTriggerInteraction.Ignore))
             {
-                if (barrelHit.transform.root.name == "Player")
+                if (barrelHit.transform.root.name == targetSelector.target.root.name)
                 {
-                    shootRoutine = StartCoroutine(Shoot());
+                    StartCoroutine(Shoot());
                 }
-            }
-            else if (shootRoutine != null)
-            {
-                StopCoroutine(shootRoutine);
-                shootRoutine = null;
-                mode = Mode.Move;
             }
 
             if (rb != null)
@@ -103,10 +90,10 @@ public class TealBot : MonoBehaviour
 
                 // Checking Forward on the center, left, and right side
                 RaycastHit forwardHit;
-                if (Physics.Raycast(body.position, transform.forward, out forwardHit, triggerRadius) || Physics.Raycast(body.position + transform.right, transform.forward, out forwardHit, triggerRadius) || Physics.Raycast(body.position - transform.right, transform.forward, out forwardHit, triggerRadius))
+                if (Physics.Raycast(body.position, transform.forward, out forwardHit, triggerRadius, barrierLayerMask) || Physics.Raycast(body.position + transform.right, transform.forward, out forwardHit, triggerRadius, barrierLayerMask) || Physics.Raycast(body.position - transform.right, transform.forward, out forwardHit, triggerRadius, barrierLayerMask))
                 {
                     mode = Mode.Avoid;
-                    baseTankLogic.ObstacleAvoidance(forwardHit, triggerRadius);
+                    baseTankLogic.ObstacleAvoidance(forwardHit, triggerRadius, barrierLayerMask);
                 }
                 else if (mode == Mode.Avoid)
                 {
@@ -146,7 +133,7 @@ public class TealBot : MonoBehaviour
             barrel.eulerAngles = new Vector3(barrel.eulerAngles.x, barrel.eulerAngles.y + lastEulerAngles.y - transform.eulerAngles.y, barrel.eulerAngles.z);
 
             // Rotating turret and barrel towards player
-            Vector3 targetDir = target.position - turret.position;
+            Vector3 targetDir = targetSelector.target.position - turret.position;
             rotToTarget = Quaternion.LookRotation(targetDir);
             turret.rotation = barrel.rotation = turretAnchor = Quaternion.RotateTowards(turretAnchor, rotToTarget, Time.deltaTime * turretRotSpeed);
 
@@ -162,7 +149,7 @@ public class TealBot : MonoBehaviour
         if (mode != Mode.Shoot)
         {
             Vector3 desiredDir;
-            // Avoiding bullets, mines, and obstacles
+            // Avoiding bullets and mines
             switch (other.tag)
             {
                 case "Bullet":
@@ -180,11 +167,14 @@ public class TealBot : MonoBehaviour
                     }
                     break;
                 case "Mine":
-                    // Move in opposite direction of mine
-                    desiredDir = transform.position - other.transform.position;
+                    if(other.GetComponent<MineBehaviour>().owner.name != targetSelector.target.root.name)
+                    {
+                        // Move in opposite direction of mine
+                        desiredDir = transform.position - other.transform.position;
 
-                    // Applying rotation
-                    baseTankLogic.RotateToVector(desiredDir);
+                        // Applying rotation
+                        baseTankLogic.RotateToVector(desiredDir);
+                    }
                     break;
             }
         }
@@ -197,11 +187,8 @@ public class TealBot : MonoBehaviour
         // Stops moving and delay in firing
         mode = Mode.Shoot;
         yield return new WaitForSeconds(Random.Range(fireDelay[0], fireDelay[1]));
-        cooldown = GetComponent<FireControl>().fireCooldown;
         StartCoroutine(GetComponent<FireControl>().Shoot());
 
         mode = Mode.Move;
-
-        shootRoutine = null;
     }
 }

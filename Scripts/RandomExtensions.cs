@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public static class RandomExtension
+public static class RandomExtensions
 {
     // Array
     public static T[] Shuffle<T>(this T[] array)
@@ -153,6 +153,17 @@ public static class RandomExtension
             values.Add(weightedVector3.value);
         }
         return values;
+    }
+
+    public static Vector3 RandomPointInCollider(Collider collider)
+    {
+        Vector3 extents = collider.bounds.size / 2;
+        Vector3 point = new Vector3(
+            Random.Range(-extents.x, extents.x),
+            Random.Range(-extents.y, extents.y),
+            Random.Range(-extents.z, extents.z)
+        ) + collider.bounds.center;
+        return collider.transform.TransformPoint(point);
     }
 }
 

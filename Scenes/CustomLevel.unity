@@ -214,7 +214,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 67944506115181071}
-  m_RootOrder: 13
+  m_RootOrder: 12
   m_LocalEulerAnglesHint: {x: 80, y: -50, z: 0}
 --- !u!1001 &1996547594
 PrefabInstance:
@@ -455,8 +455,8 @@ Transform:
   - {fileID: 67944507833407411}
   - {fileID: 67944507464811424}
   - {fileID: 67944507516330453}
-  - {fileID: 7285461157802915322}
   - {fileID: 1023683586}
+  - {fileID: 7285461157802915322}
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -1614,7 +1614,7 @@ Transform:
   m_LocalScale: {x: 2, y: 2, z: 2}
   m_Children: []
   m_Father: {fileID: 67944506115181071}
-  m_RootOrder: 12
+  m_RootOrder: 13
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &8400414648969919327
 MonoBehaviour:
@@ -1634,19 +1634,17 @@ MonoBehaviour:
   - {fileID: 6353959912858125971, guid: c9f541d7851ab9a47a33057f6c146edd, type: 3}
   - {fileID: 4033695715270616719, guid: 8c192097c6438ea419f6b4c11af8dd65, type: 3}
   - {fileID: 8152485418157340697, guid: a2089b8661e86fd4c99f5c815f926e03, type: 3}
-  obstacleLimit: 50
+  obstacleLimit: 150
   obstacles:
   - {fileID: 1789137517761687661, guid: 716ebcd9db95e4540a052e5f9f478e48, type: 3}
   - {fileID: 474112292520302916, guid: 966e4c9e2448c9846bfe93aec5074577, type: 3}
   possibleDistances:
   - value: 2
-    weight: 6
-  - value: 6
-    weight: 4
+    weight: 10
   - value: 8
-    weight: 2
+    weight: 4
   - value: 10
-    weight: 1
+    weight: 2
   rangedDistance: 0
   possibleDirections:
   - value: {x: 1, y: 0, z: 0}
@@ -1660,8 +1658,8 @@ MonoBehaviour:
   - value: {x: 0, y: 1, z: 0}
     weight: 1
   logicalStructure: 1
-  branchChance: 0.8
-  switchChance: 0.5
+  branchChance: 0.2
+  switchChance: 0.4
   amountDeviationMin: -10
   amountDeviationMax: 10
 --- !u!1 &8989840856107799549

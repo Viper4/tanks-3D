@@ -88,37 +88,42 @@ public class BaseTankLogic : MonoBehaviour
 
         if (transform.name == "Player")
         {
-            SceneLoader.frozen = true;
-
             PlayerControl playerControl = GetComponent<PlayerControl>();
 
-            playerControl.Dead = true;
-            playerControl.lives--;
-            playerControl.deaths++;
+            if (!playerControl.godMode)
+            {
+                SceneLoader.frozen = true;
 
-            tankOrigin.Find("Body").gameObject.SetActive(false);
-            tankOrigin.Find("Turret").gameObject.SetActive(false);
-            tankOrigin.Find("Barrel").gameObject.SetActive(false);
+                playerControl.Dead = true;
+                playerControl.lives--;
+                playerControl.deaths++;
 
-            playerControl.Respawn();
+                tankOrigin.Find("Body").gameObject.SetActive(false);
+                tankOrigin.Find("Turret").gameObject.SetActive(false);
+                tankOrigin.Find("Barrel").gameObject.SetActive(false);
+
+                playerControl.Respawn();
+            }
         }
         else
         {
-            Transform trackMarks = tankOrigin.Find("TrackMarks");
-
             if (transform.root.childCount == 1)
             {
                 SceneLoader.frozen = true;
                 SceneLoader.sceneLoader.LoadNextScene(3);
             }
 
+            Debug.Log("Cleared parent");
+            Transform trackMarks = tankOrigin.Find("TrackMarks");
+
             trackMarks.parent = null;
+
             Destroy(trackMarks.GetComponent<TrailEmitter>());
             Destroy(gameObject);
         }
     }
 
-    public void ObstacleAvoidance(RaycastHit forwardHit, float maxDistance)
+    public void ObstacleAvoidance(RaycastHit forwardHit, float maxDistance, LayerMask barrierLayers)
     {
         Debug.DrawLine(tankOrigin.position, forwardHit.point, Color.red, 0.1f);
 
@@ -129,13 +134,13 @@ public class BaseTankLogic : MonoBehaviour
         float dotProductY = Vector3.Dot(Vector3.Cross(transform.forward, forwardHit.normal), transform.up);
 
         // Checking Left
-        if (Physics.Raycast(tankOrigin.position, -transform.right, maxDistance))
+        if (Physics.Raycast(tankOrigin.position, -transform.right, maxDistance, barrierLayers))
         {
             pathClear[0] = false;
             Debug.DrawLine(tankOrigin.position, tankOrigin.position - transform.right * 2, Color.red, 0.1f);
         }
         // Checking Right
-        if (Physics.Raycast(tankOrigin.position, transform.right, maxDistance))
+        if (Physics.Raycast(tankOrigin.position, transform.right, maxDistance, barrierLayers))
         {
             pathClear[1] = false;
             Debug.DrawLine(tankOrigin.position, tankOrigin.position + transform.right * 2, Color.red, 0.1f);
@@ -171,6 +176,6 @@ public class BaseTankLogic : MonoBehaviour
 
     public bool IsGrounded()
     {
-        return Physics.Raycast(tankOrigin.position + Vector3.up * 0.05f, -tankOrigin.up, 0.1f, ~LayerMask.NameToLayer("Tank"));
+        return Physics.Raycast(tankOrigin.position + Vector3.up * 0.05f, -tankOrigin.up, 0.1f, ~notSlopeLayerMask);
     }
 }

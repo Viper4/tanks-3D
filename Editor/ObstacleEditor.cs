@@ -2,8 +2,8 @@ using UnityEngine;
 using UnityEditor;
 
 [CanEditMultipleObjects]
-[CustomEditor(typeof(ObjectCreation))]
-public class LevelEditor : Editor
+[CustomEditor(typeof(ObstacleGeneration))]
+public class ObstacleEditor : Editor
 {
     public override void OnInspectorGUI()
     {
@@ -13,63 +13,63 @@ public class LevelEditor : Editor
 
         if (targets.Length == 1)
         {
-            ObjectCreation objectCreation = (ObjectCreation)target;
+            ObstacleGeneration obstacle = (ObstacleGeneration)target;
 
             if (GUILayout.Button("Extend"))
             {
-                objectCreation.Extend();
+                obstacle.Extend();
             }
 
             if (GUILayout.Button("Delete"))
             {
-                objectCreation.Delete();
+                obstacle.Delete();
             }
 
             if (GUILayout.Button("Undo"))
             {
-                objectCreation.Undo();
+                obstacle.Undo();
             }
 
             if (GUILayout.Button("Clear"))
             {
-                objectCreation.Clear();
+                obstacle.Clear();
             }
 
             if (GUILayout.Button("Generate Random"))
             {
-                GameObject.Find("Level").GetComponent<LevelGenerator>().Generate(objectCreation);
+                GameObject.Find("Level").GetComponent<LevelGenerator>().GenerateObstacles(obstacle);
             }
         }
         else if (targets.Length > 1)
         {
-            ObjectCreation[] objectCreations = new ObjectCreation[targets.Length];
+            ObstacleGeneration[] obstacles = new ObstacleGeneration[targets.Length];
 
             for (int i = 0; i < targets.Length; i++)
             {
-                objectCreations[i] = (ObjectCreation)targets[i];
+                obstacles[i] = (ObstacleGeneration)targets[i];
             }
 
             if (GUILayout.Button("Extend"))
             {
-                foreach (ObjectCreation objectCreation in objectCreations)
+                foreach (ObstacleGeneration obstacle in obstacles)
                 {
-                    objectCreation.Extend();
+                    obstacle.Extend();
                 }
             }
 
             if (GUILayout.Button("Delete"))
             {
-                foreach (ObjectCreation objectCreation in objectCreations)
+                foreach (ObstacleGeneration obstacle in obstacles)
                 {
-                    objectCreation.Delete();
+                    obstacle.Delete();
                 }
             }
 
             if (GUILayout.Button("Undo"))
             {
-                foreach (ObjectCreation objectCreation in objectCreations)
+                foreach (ObstacleGeneration obstacle in obstacles)
                 {
-                    objectCreation.Undo();
+                    obstacle.Undo();
                 }
             }
         }

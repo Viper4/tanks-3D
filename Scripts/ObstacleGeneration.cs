@@ -3,7 +3,7 @@ using System.Linq;
 using UnityEngine;
 
 /* Cites
- * RandomExtension (class I created) 
+ * RandomExtensions (class I created) 
  *  Variables: WeightedVector3, WeightedFloat
  *  Methods: Shuffle(), ChooseWeightedFloat(), ChooseWeightedVector3()
  * System.Collections.Generic (built-in library) https://docs.microsoft.com/en-us/dotnet/api/system.collections.generic?view=net-6.0
@@ -14,10 +14,10 @@ using UnityEngine;
  *  Variables: GameObject https://docs.unity3d.com/ScriptReference/GameObject-ctor.html, Transform https://docs.unity3d.com/ScriptReference/Transform.html, Vector3 https://docs.unity3d.com/ScriptReference/Vector3.html, Bounds https://docs.unity3d.com/ScriptReference/Bounds.html, RaycastHit https://docs.unity3d.com/ScriptReference/RaycastHit.html
  *  Classes: MonoBehaviour https://docs.unity3d.com/ScriptReference/MonoBehaviour.html, Debug https://docs.unity3d.com/ScriptReference/Debug.html, Physics https://docs.unity3d.com/ScriptReference/Physics.html, Mathf https://docs.unity3d.com/ScriptReference/Mathf.html
  */
-public class ObjectCreation : MonoBehaviour
+public class ObstacleGeneration : MonoBehaviour
 {
     // Declaring global variables
-    List<GameObject> extendedObjects = new List<GameObject>();
+    List<GameObject> clonedObjects = new List<GameObject>();
 
     [SerializeField] Vector3 direction;
     [SerializeField] float distanceAway;
@@ -30,11 +30,11 @@ public class ObjectCreation : MonoBehaviour
         // Iterate through all the times to clone this gameobject
         for (int i = 0; i < times; i++)
         {
-            // Instantiate this object at the given direction and distance away, reset its name and scale, and add the clone to the extendedObjects list
+            // Instantiate this object at the given direction and distance away, reset its name and scale, and add the clone to the clonedObjects list
             Transform clone = Instantiate(transform, transform.position + direction * (distanceAway * (i + 1)), Quaternion.Euler(eulerAngles), transform.parent);
             clone.name = transform.name;
             clone.localScale = scale;
-            extendedObjects.Add(clone.gameObject);
+            clonedObjects.Add(clone.gameObject);
         }
     }
 
@@ -47,33 +47,33 @@ public class ObjectCreation : MonoBehaviour
     public void Undo()
     {
         // If the there are extended objects
-        if (extendedObjects.Count != 0)
+        if (clonedObjects.Count != 0)
         {
-            // If the most recent element in extendedObjects is not null delete it
-            if (extendedObjects[extendedObjects.Count - 1] != null)
+            // If the most recent element in clonedObjects is not null delete it
+            if (clonedObjects[clonedObjects.Count - 1] != null)
             {
-                DestroyImmediate(extendedObjects[extendedObjects.Count - 1]);
+                DestroyImmediate(clonedObjects[clonedObjects.Count - 1]);
             }
-            // Remove most recent element in extendedObjects
-            extendedObjects.RemoveAt(extendedObjects.Count - 1);
+            // Remove most recent element in clonedObjects
+            clonedObjects.RemoveAt(clonedObjects.Count - 1);
         }
     }
 
     public void Clear()
     {
-        Debug.Log(transform.name + " cleared " + extendedObjects.Count + " obstacles.");
+        Debug.Log(transform.name + " cleared " + clonedObjects.Count + " obstacles.");
 
-        // If there are extended objects
-        if (extendedObjects.Count != 0)
+        // If there are cloned objects
+        if (clonedObjects.Count != 0)
         {
-            // Iterate through each extendedObject and delete them
-            foreach(GameObject extendedObject in extendedObjects)
+            // Iterate through each clonedObject and delete them
+            foreach (GameObject clonedObject in clonedObjects)
             {
-                DestroyImmediate(extendedObject);
+                DestroyImmediate(clonedObject);
             }
 
-            // Clear the list referencing the extendedObjects
-            extendedObjects.Clear();
+            // Clear the list referencing the clonedObjects
+            clonedObjects.Clear();
         }
     }
 
@@ -84,7 +84,7 @@ public class ObjectCreation : MonoBehaviour
         if(obstacles.Count != 0)
         {
             // Select random direction from input possible directions
-            WeightedVector3 targetDirection = RandomExtension.ChooseWeightedVector3(directions);
+            WeightedVector3 targetDirection = RandomExtensions.ChooseWeightedVector3(directions);
 
             // Iterating through each obstacle in input obstacles
             foreach (GameObject obstacle in obstacles.ToList())
@@ -100,17 +100,17 @@ public class ObjectCreation : MonoBehaviour
                         // If the user wants a range of distances
                         if (rangedDst && distances.Count > 1)
                         {
-                            // Picks random startVal, picks random endVal from  startVal to the end of the values, and sets dstAway to a random value between startVal and endVal (from my RandomExtension class)
-                            float startVal = RandomExtension.ChooseWeightedFloat(distances).value;
-                            float endVal = RandomExtension.ChooseWeightedFloat(distances, startVal).value;
+                            // Picks random startVal, picks random endVal from  startVal to the end of the values, and sets dstAway to a random value between startVal and endVal (from my RandomExtensions class)
+                            float startVal = RandomExtensions.ChooseWeightedFloat(distances).value;
+                            float endVal = RandomExtensions.ChooseWeightedFloat(distances, startVal).value;
 
                             dstAway = Random.Range(startVal, endVal);
                             Debug.Log(startVal + " - " + endVal + " : " + dstAway);
                         }
-                        // If the user wants to select a single distance based on weights (from my RandomExtension class)
+                        // If the user wants to select a single distance based on weights (from my RandomExtensions class)
                         else
                         {
-                            dstAway = RandomExtension.ChooseWeightedFloat(distances).value;
+                            dstAway = RandomExtensions.ChooseWeightedFloat(distances).value;
                         }
                     }
                     // If the user did not input distances away to generate each obstacle set it to the global variable distanceAway
@@ -142,10 +142,10 @@ public class ObjectCreation : MonoBehaviour
                             // Testing valid directions in possible directions dstAway from this clone's position
                             validDirections = TestValidDirections(boundingCollider, clonedObstacles[k].transform.position, directions, dstAway, logicalStructure).ToList();
 
-                            // If a valid direction(s) has been found, randomely pick one based on weights (from my RandomExtension class), set the position to instantiate at, and break out of the loop
+                            // If a valid direction(s) has been found, randomely pick one based on weights (from my RandomExtensions class), set the position to instantiate at, and break out of the loop
                             if (validDirections.Count != 0)
                             {
-                                targetDirection = RandomExtension.ChooseWeightedVector3(validDirections);
+                                targetDirection = RandomExtensions.ChooseWeightedVector3(validDirections);
 
                                 newPosition = clonedObstacles[k].transform.position + targetDirection.value * dstAway;
                                 break;
@@ -195,8 +195,8 @@ public class ObjectCreation : MonoBehaviour
             Debug.LogWarning("No obstacles in obstacleList to instantiate");
         }
 
-        // Merging global extendedObjects list with clonedObstacles list
-        extendedObjects.AddRange(clonedObstacles);
+        // Merging global clonedObjects list with clonedObstacles list
+        clonedObjects.AddRange(clonedObstacles);
     }
 
     private List<WeightedVector3> TestValidDirections(Collider boundingCollider, Vector3 origin, List<WeightedVector3> testDirections, float dst, bool logicalStructure)

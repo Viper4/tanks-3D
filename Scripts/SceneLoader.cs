@@ -46,7 +46,7 @@ public class SceneLoader : MonoBehaviour
         startButton.gameObject.SetActive(true);
 
         label.Find("Level").GetComponent<Text>().text = "Level " + (SceneManager.GetActiveScene().buildIndex + 1).ToString();
-        label.Find("Tanks").GetComponent<Text>().text = "Enemy tanks: " + GameObject.Find("Enemies").transform.childCount;
+        label.Find("Tanks").GetComponent<Text>().text = "Enemy tanks: " + GameObject.Find("Tanks").transform.childCount;
         label.Find("Lives").GetComponent<Text>().text = "Lives: " + GameObject.Find("Player").GetComponent<PlayerControl>().lives;
     }
 

@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GreyBot : MonoBehaviour
+public class YellowBot : MonoBehaviour
 {
     TargetSelector targetSelector;
     float dstToTarget;
@@ -20,22 +20,24 @@ public class GreyBot : MonoBehaviour
     Vector3 lastEulerAngles;
 
     [SerializeField] float maxShootAngle = 30;
-    public float[] reactionTime = { 0.7f, 1.25f };
+    public float[] reactionTime = { 0.3f, 0.45f };
     public float[] fireDelay = { 0.3f, 0.6f };
+
+    public float[] layDelay = { 0.3f, 0.6f };
 
     Rigidbody rb;
 
     [SerializeField] bool randomizeSeed = true;
 
-    [SerializeField] Vector2 inaccuracy = new Vector2(10, 25);
-    [SerializeField] float turretRotSpeed = 25f;
+    [SerializeField] Vector2 inaccuracy = new Vector2(8, 35);
+    [SerializeField] float turretRotSpeed = 35f;
     [SerializeField] float turretNoiseSpeed = 0.15f;
     [SerializeField] float turretRotSeed = 0;
 
     [SerializeField] float[] turretRangeX = { -20, 20 };
-    
-    [SerializeField] float moveSpeed = 4f;
-    [SerializeField] float avoidSpeed = 2f;
+
+    [SerializeField] float moveSpeed = 6f;
+    [SerializeField] float avoidSpeed = 4f;
     float speed = 4;
 
     [SerializeField] float gravity = 8;
@@ -44,12 +46,15 @@ public class GreyBot : MonoBehaviour
     float triggerRadius = 3f;
 
     FireControl fireControl;
+    bool layingMine;
+    MineControl mineControl;
 
     enum Mode
     {
         Move,
         Shoot,
-        Avoid
+        Avoid,
+        Lay
     }
     Mode mode = Mode.Move;
 
@@ -63,12 +68,10 @@ public class GreyBot : MonoBehaviour
         body = transform.Find("Body");
         turret = transform.Find("Turret");
         barrel = transform.Find("Barrel");
-
         turretAnchor = turret.rotation;
+        lastEulerAngles = body.eulerAngles;
 
         rb = GetComponent<Rigidbody>();
-
-        lastEulerAngles = body.eulerAngles;
 
         if (randomizeSeed)
         {
@@ -78,6 +81,7 @@ public class GreyBot : MonoBehaviour
         triggerRadius = GetComponent<SphereCollider>().radius;
 
         fireControl = GetComponent<FireControl>();
+        mineControl = GetComponent<MineControl>();
     }
 
     // Update is called once per frame
@@ -87,12 +91,17 @@ public class GreyBot : MonoBehaviour
         {
             dstToTarget = Vector3.Distance(body.position, targetSelector.target.position);
 
-            if (fireControl.canFire && mode != Mode.Shoot && Physics.Raycast(turret.position, targetSelector.target.position - turret.position, out RaycastHit barrelHit, dstToTarget, ~transparentLayerMask, QueryTriggerInteraction.Ignore))
+            if (fireControl.canFire && mode != Mode.Shoot && Physics.Raycast(barrel.position, targetSelector.target.position - barrel.position, out RaycastHit barrelHit, dstToTarget, ~transparentLayerMask, QueryTriggerInteraction.Ignore))
             {
-                if(barrelHit.transform.root.name == targetSelector.target.root.name)
+                if (barrelHit.transform.root.name == targetSelector.target.root.name)
                 {
                     StartCoroutine(Shoot());
                 }
+            }
+
+            if (mineControl.canLay && !layingMine && mode != Mode.Lay && mode != Mode.Avoid)
+            {
+                StartCoroutine(LayMine());
             }
 
             if (rb != null)
@@ -163,6 +172,21 @@ public class GreyBot : MonoBehaviour
         }
     }
 
+    private void OnTriggerStay(Collider other)
+    {
+        Vector3 desiredDir;
+        switch (other.tag)
+        {
+            case "Mine":
+                // Move in opposite direction of mine
+                desiredDir = transform.position - other.transform.position;
+
+                // Applying rotation
+                baseTankLogic.RotateToVector(desiredDir);
+                break;
+        }
+    }
+
     IEnumerator Shoot()
     {
         // When angle between barrel and target is less than maxShootAngle, then stop and fire
@@ -182,5 +206,20 @@ public class GreyBot : MonoBehaviour
         {
             yield return null;
         }
+    }
+
+    IEnumerator LayMine()
+    {
+        layingMine = true;
+        yield return new WaitForSeconds(Random.Range(layDelay[0], layDelay[1]));
+        mode = Mode.Lay;
+        yield return new WaitForSeconds(Random.Range(fireDelay[0], fireDelay[1]));
+        StartCoroutine(GetComponent<MineControl>().LayMine());
+        Vector3 desiredDir = Quaternion.AngleAxis(Random.Range(-180.0f, 180.0f), Vector3.up) * transform.forward;
+        rb.rotation = Quaternion.LookRotation(desiredDir);
+        
+        transform.position += transform.forward * 0.1f;
+        mode = Mode.Move;
+        layingMine = false;
     }
 }

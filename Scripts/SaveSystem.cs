@@ -119,14 +119,15 @@ public static class SaveSystem
 
             Camera.main.GetComponent<CameraControl>().sensitivity = 15;
 
-            playerControl.keyBinds.Add("Forward", KeyCode.W);
-            playerControl.keyBinds.Add("Left", KeyCode.A);
-            playerControl.keyBinds.Add("Backward", KeyCode.S);
-            playerControl.keyBinds.Add("Right", KeyCode.D);
-            playerControl.keyBinds.Add("Shoot", KeyCode.Mouse0);
-            playerControl.keyBinds.Add("Lay Mine", KeyCode.Space);
-            playerControl.keyBinds.Add("Lock Turret", KeyCode.LeftControl);
-            playerControl.keyBinds.Add("Lock Camera", KeyCode.LeftShift);
+            AddKeybind(playerControl, "Forward", KeyCode.W);
+            AddKeybind(playerControl, "Left", KeyCode.A);
+            AddKeybind(playerControl, "Backward", KeyCode.S);
+            AddKeybind(playerControl, "Right", KeyCode.D);
+            AddKeybind(playerControl, "Shoot", KeyCode.Mouse0);
+            AddKeybind(playerControl, "Lay Mine", KeyCode.Space);
+            AddKeybind(playerControl, "Lock Turret", KeyCode.LeftControl);
+            AddKeybind(playerControl, "Lock Camera", KeyCode.LeftShift);
+            AddKeybind(playerControl, "Switch Camera", KeyCode.Tab);
 
             UIHandler.silhouettes = true;
 
@@ -150,5 +151,13 @@ public static class SaveSystem
         }
 
         UIHandler.UpdateSettingsUI();
+    }
+
+    private static void AddKeybind(PlayerControl script, string key, KeyCode value)
+    {
+        if (!script.keyBinds.ContainsKey(key))
+        {
+            script.keyBinds.Add(key, value);
+        }
     }
 }

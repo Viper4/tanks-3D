@@ -10,7 +10,7 @@ public class MineControl : MonoBehaviour
     [SerializeField] int mineLimit = 2;
     public int minesLaid { get; set; } = 0;
     [SerializeField] float layCooldown = 2;
-    bool canLay = true;
+    public bool canLay = true;
 
     public IEnumerator LayMine()
     {

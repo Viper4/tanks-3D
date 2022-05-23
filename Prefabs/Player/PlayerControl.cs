@@ -20,6 +20,7 @@ public class PlayerControl : MonoBehaviour
     public int highestLevel = 0;
 
     [SerializeField] bool cheats = false;
+    public bool godMode = false;
     public bool Dead { get; set; } = false;
 
     [SerializeField] float movementSpeed = 6;
@@ -144,12 +145,12 @@ public class PlayerControl : MonoBehaviour
                 if (Input.GetKeyDown(KeyCode.N))
                 {
                     Debug.Log("Cheat Next Level");
-                    SceneLoader.sceneLoader.LoadNextScene(3);
+                    SceneLoader.sceneLoader.LoadNextScene();
                 }
                 else if (Input.GetKeyDown(KeyCode.R))
                 {
                     Debug.Log("Cheat Reload");
-                    StartCoroutine(SceneLoader.sceneLoader.LoadScene(false, -1, 3));
+                    StartCoroutine(SceneLoader.sceneLoader.LoadScene(false));
                 }
                 else if (Input.GetKeyDown(KeyCode.B))
                 {
@@ -159,6 +160,12 @@ public class PlayerControl : MonoBehaviour
                     tankOrigin.Find("Body").gameObject.SetActive(false);
                     tankOrigin.Find("Turret").gameObject.SetActive(false);
                     tankOrigin.Find("Barrel").gameObject.SetActive(false);
+                }
+                else if (Input.GetKeyDown(KeyCode.G))
+                {
+                    Debug.Log("God Mode Toggled");
+
+                    godMode = !godMode;
                 }
             }
         }

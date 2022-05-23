@@ -24,15 +24,27 @@ public class LevelGenerator : MonoBehaviour
     [SerializeField] int amountDeviationMin = 0;
     [SerializeField] int amountDeviationMax = 0;
 
-    public void Generate(ObjectCreation selectedObject)
+    public void GenerateObstacles(ObstacleGeneration selectedObject)
     {
         Dictionary<string, int> cloneAmounts = new Dictionary<string, int>();
-        int[] distribution = RandomExtension.Distribute(obstacleLimit, obstacles.Count, amountDeviationMin, amountDeviationMax);
+        int[] distribution = RandomExtensions.Distribute(obstacleLimit, obstacles.Count, amountDeviationMin, amountDeviationMax);
         for (int i = 0; i < obstacles.Count; i++)
         {
             cloneAmounts[obstacles[i].name] = distribution[i];
         }
 
         selectedObject.RandomObstacleGeneration(obstacles, new List<GameObject>(), switchChance, branchChance, cloneAmounts, selectedObject.transform.position, possibleDirections, logicalStructure, possibleDistances, rangedDistance, boundingCollider);
+    }
+
+    public void GenerateTanks(TankGeneration selectedObject)
+    {
+        Dictionary<string, int> cloneAmounts = new Dictionary<string, int>();
+        int[] distribution = RandomExtensions.Distribute(tankLimit, tanks.Count, amountDeviationMin, amountDeviationMax);
+        for (int i = 0; i < tanks.Count; i++)
+        {
+            cloneAmounts[tanks[i].name] = distribution[i];
+        }
+
+        selectedObject.RandomTankGeneration(tanks, cloneAmounts, boundingCollider);
     }
 }

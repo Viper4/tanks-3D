@@ -12,8 +12,8 @@ public class FireControl : MonoBehaviour
 
     public int bulletLimit = 5;
     public int bulletsFired { get; set; } = 0;
-    public float fireCooldown = 1f;
-    bool canFire = true;
+    [SerializeField] float fireCooldown = 4f;
+    public bool canFire = true;
     
     [SerializeField] LayerMask solidLayerMask;
 

@@ -379,6 +379,7 @@ GameObject:
   - component: {fileID: 8820478986772652707}
   - component: {fileID: 8152485418157340703}
   - component: {fileID: 9015243663734650980}
+  - component: {fileID: -4089808789469299082}
   - component: {fileID: 5572134548717343361}
   - component: {fileID: -563639079389155497}
   - component: {fileID: 7576510698517756716}
@@ -423,7 +424,8 @@ MonoBehaviour:
   owner: {fileID: 8820478986772652707}
   bullet: {fileID: 439779918157275786, guid: e82b6db23e6ee9f45931e68f161c1c36, type: 3}
   bulletLimit: 1
-  fireCooldown: 3
+  fireCooldown: 4
+  canFire: 1
   solidLayerMask:
     serializedVersion: 2
     m_Bits: 1
@@ -460,6 +462,25 @@ MonoBehaviour:
   tankRotNoiseSpeed: 0.5
   tankRotSeed: 0
   flipAngleThreshold: 20
+--- !u!114 &-4089808789469299082
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8152485418157340697}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 42b2840cfbe33ae41a58aa074894804d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  target: {fileID: 0}
+  findTarget: 0
+  turret: {fileID: 1428688472867334711}
+  ignoreLayerMask:
+    serializedVersion: 2
+    m_Bits: 1838
+  tankParent: {fileID: 0}
 --- !u!114 &5572134548717343361
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -472,17 +493,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c7dbdec69b05c094db6f48db62ed0b8d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  target: {fileID: 0}
-  targetLayerMasks:
+  transparentLayerMask:
     serializedVersion: 2
-    m_Bits: 128
+    m_Bits: 1854
+  barrierLayerMask:
+    serializedVersion: 2
+    m_Bits: 705
   reactionTime:
   - 0.3
   - 0.45
   fireDelay:
   - 0.3
   - 0.6
-  turretRotSpeed: 50
+  turretRotSpeed: 60
   turretRangeX:
   - -20
   - 20
