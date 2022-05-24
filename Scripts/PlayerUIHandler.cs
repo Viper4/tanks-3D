@@ -2,22 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.SceneManagement;
-using UnityEngine.Rendering.Universal;
 
-public class UIHandler : MonoBehaviour
+public class PlayerUIHandler : MonoBehaviour
 {
     public Dictionary<string, Transform> UIElements = new Dictionary<string, Transform>();
     [SerializeField] PlayerControl playerControl;
-    [SerializeField] CameraControl cameraControl;
-
-    Transform selectedKeyBind;
-
-    [SerializeField] ForwardRendererData forwardRenderer;
-
-    public bool silhouettes = true;
-
-    readonly KeyCode[] mouseKeyCodes = { KeyCode.Mouse0, KeyCode.Mouse1, KeyCode.Mouse2, KeyCode.Mouse3, KeyCode.Mouse4, KeyCode.Mouse5, KeyCode.Mouse6 };
 
     private void Awake()
     {
@@ -69,10 +58,5 @@ public class UIHandler : MonoBehaviour
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
         Time.timeScale = 0;
-    }
-
-    public void Exit()
-    {
-        Application.Quit();
     }
 }
