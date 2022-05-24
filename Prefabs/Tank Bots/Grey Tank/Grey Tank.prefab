@@ -72,7 +72,7 @@ TrailRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Time: 50
+  m_Time: 1e+20
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 0.5
@@ -480,8 +480,7 @@ GameObject:
   - component: {fileID: 6089765290543581610}
   - component: {fileID: -1444549703756494348}
   - component: {fileID: 3746023654145071983}
-  - component: {fileID: 2671638271335866726}
-  m_Layer: 2
+  m_Layer: 6
   m_Name: Grey Tank
   m_TagString: Tank
   m_Icon: {fileID: 0}
@@ -520,6 +519,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   owner: {fileID: 4373347413315304501}
   bullet: {fileID: 4307626717143694363, guid: de9dbd5b8f77ecb4a866f8d8cf75c17d, type: 3}
+  shootEffect: {fileID: 7275907135579404139, guid: 71b07424ffcb49a41830ab0761db5c07, type: 3}
   bulletLimit: 1
   fireCooldown: 4
   canFire: 1
@@ -549,10 +549,16 @@ MonoBehaviour:
   - 45
   frozenRotation: 1
   alignRotationSpeed: 20
-  notSlopeLayerMask:
+  nonSlopeLayers:
     serializedVersion: 2
-    m_Bits: 1996
-  tankRotSpeed: 250
+    m_Bits: 2030
+  transparentLayers:
+    serializedVersion: 2
+    m_Bits: 1806
+  barrierLayers:
+    serializedVersion: 2
+    m_Bits: 705
+  tankRotSpeed: 300
   noisyRotation: 1
   randomizeSeed: 1
   tankRotNoiseScale: 5
@@ -590,12 +596,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5d1852787a94817418cfe8b3330619f3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  transparentLayerMask:
-    serializedVersion: 2
-    m_Bits: 1854
-  barrierLayerMask:
-    serializedVersion: 2
-    m_Bits: 705
   maxShootAngle: 15
   reactionTime:
   - 0.6
@@ -643,19 +643,6 @@ CapsuleCollider:
   m_Radius: 0.55
   m_Height: 1.6
   m_Direction: 1
-  m_Center: {x: 0, y: 0.8, z: 0}
---- !u!135 &2671638271335866726
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4033695715270616719}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 3
   m_Center: {x: 0, y: 0.8, z: 0}
 --- !u!1 &5288833942699506504
 GameObject:
@@ -729,7 +716,7 @@ TrailRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Time: 50
+  m_Time: 1e+20
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 0.5

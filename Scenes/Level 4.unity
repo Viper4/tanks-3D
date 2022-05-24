@@ -250,6 +250,67 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1.55, y: 10, z: 1}
   m_Center: {x: 0.000000059604645, y: 0, z: -0.00000008940697}
+--- !u!1001 &43871095
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 3149388286793973794, guid: 85a5b7f330200974ebf4d3e1f9d4b23d, type: 3}
+      propertyPath: m_RootOrder
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 3149388286793973794, guid: 85a5b7f330200974ebf4d3e1f9d4b23d, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3149388286793973794, guid: 85a5b7f330200974ebf4d3e1f9d4b23d, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3149388286793973794, guid: 85a5b7f330200974ebf4d3e1f9d4b23d, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3149388286793973794, guid: 85a5b7f330200974ebf4d3e1f9d4b23d, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3149388286793973794, guid: 85a5b7f330200974ebf4d3e1f9d4b23d, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3149388286793973794, guid: 85a5b7f330200974ebf4d3e1f9d4b23d, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3149388286793973794, guid: 85a5b7f330200974ebf4d3e1f9d4b23d, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3149388286793973794, guid: 85a5b7f330200974ebf4d3e1f9d4b23d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3149388286793973794, guid: 85a5b7f330200974ebf4d3e1f9d4b23d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3149388286793973794, guid: 85a5b7f330200974ebf4d3e1f9d4b23d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3149388286793973795, guid: 85a5b7f330200974ebf4d3e1f9d4b23d, type: 3}
+      propertyPath: m_Name
+      value: SceneLoader
+      objectReference: {fileID: 0}
+    - target: {fileID: 9018274562240278948, guid: 85a5b7f330200974ebf4d3e1f9d4b23d, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 85a5b7f330200974ebf4d3e1f9d4b23d, type: 3}
 --- !u!1 &71665438
 GameObject:
   m_ObjectHideFlags: 0
@@ -2020,6 +2081,14 @@ PrefabInstance:
       propertyPath: m_Constraints
       value: 116
       objectReference: {fileID: 0}
+    - target: {fileID: 348678474553284728, guid: 8c192097c6438ea419f6b4c11af8dd65, type: 3}
+      propertyPath: target
+      value: 
+      objectReference: {fileID: 1721215681}
+    - target: {fileID: 348678474553284728, guid: 8c192097c6438ea419f6b4c11af8dd65, type: 3}
+      propertyPath: tankParent
+      value: 
+      objectReference: {fileID: 1086283073}
     - target: {fileID: 4033695715270616719, guid: 8c192097c6438ea419f6b4c11af8dd65, type: 3}
       propertyPath: m_Name
       value: Grey Tank (1)
@@ -2339,6 +2408,14 @@ PrefabInstance:
       propertyPath: m_Constraints
       value: 116
       objectReference: {fileID: 0}
+    - target: {fileID: 348678474553284728, guid: 8c192097c6438ea419f6b4c11af8dd65, type: 3}
+      propertyPath: target
+      value: 
+      objectReference: {fileID: 1721215681}
+    - target: {fileID: 348678474553284728, guid: 8c192097c6438ea419f6b4c11af8dd65, type: 3}
+      propertyPath: tankParent
+      value: 
+      objectReference: {fileID: 1086283073}
     - target: {fileID: 4033695715270616719, guid: 8c192097c6438ea419f6b4c11af8dd65, type: 3}
       propertyPath: m_Name
       value: Grey Tank
@@ -2400,6 +2477,14 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1086283073}
     m_Modifications:
+    - target: {fileID: -7805956923958026188, guid: c9f541d7851ab9a47a33057f6c146edd, type: 3}
+      propertyPath: target
+      value: 
+      objectReference: {fileID: 1721215681}
+    - target: {fileID: -7805956923958026188, guid: c9f541d7851ab9a47a33057f6c146edd, type: 3}
+      propertyPath: tankParent
+      value: 
+      objectReference: {fileID: 1086283073}
     - target: {fileID: 2164580800702390093, guid: c9f541d7851ab9a47a33057f6c146edd, type: 3}
       propertyPath: m_Constraints
       value: 4
@@ -2719,6 +2804,14 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1086283073}
     m_Modifications:
+    - target: {fileID: -7805956923958026188, guid: c9f541d7851ab9a47a33057f6c146edd, type: 3}
+      propertyPath: target
+      value: 
+      objectReference: {fileID: 1721215681}
+    - target: {fileID: -7805956923958026188, guid: c9f541d7851ab9a47a33057f6c146edd, type: 3}
+      propertyPath: tankParent
+      value: 
+      objectReference: {fileID: 1086283073}
     - target: {fileID: 2164580800702390093, guid: c9f541d7851ab9a47a33057f6c146edd, type: 3}
       propertyPath: m_Constraints
       value: 4
@@ -8163,6 +8256,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 92f2a0c1234d9594ea6006b7ea7a55c6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ignoreLayerMask:
+    serializedVersion: 2
+    m_Bits: 0
+  obstacleParent: {fileID: 0}
+  tankParent: {fileID: 0}
   boundingCollider: {fileID: 0}
   tankLimit: 5
   tanks:

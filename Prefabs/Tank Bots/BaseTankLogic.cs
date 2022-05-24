@@ -13,8 +13,10 @@ public class BaseTankLogic : MonoBehaviour
 
     [SerializeField] bool frozenRotation = true;
     [SerializeField] float alignRotationSpeed = 20;
-    [SerializeField] LayerMask notSlopeLayerMask;
-    
+    [SerializeField] LayerMask nonSlopeLayers;
+    public LayerMask transparentLayers;
+    public LayerMask barrierLayers;
+
     [SerializeField] float tankRotSpeed = 250f;
 
     public bool noisyRotation;
@@ -43,7 +45,7 @@ public class BaseTankLogic : MonoBehaviour
         {
             if (frozenRotation)
             {
-                if (Physics.Raycast(tankOrigin.position, Vector3.down, out RaycastHit hit, 1, ~notSlopeLayerMask))
+                if (Physics.Raycast(tankOrigin.position, Vector3.down, out RaycastHit hit, 1, ~nonSlopeLayers))
                 {
                     // Rotating to align with slope
                     Quaternion alignedRotation = Quaternion.FromToRotation(tankOrigin.up, hit.normal);
@@ -107,18 +109,30 @@ public class BaseTankLogic : MonoBehaviour
         }
         else
         {
-            if (transform.root.childCount == 1)
-            {
-                SceneLoader.frozen = true;
-                SceneLoader.sceneLoader.LoadNextScene(3);
-            }
-
-            Debug.Log("Cleared parent");
             Transform trackMarks = tankOrigin.Find("TrackMarks");
 
-            trackMarks.parent = null;
+            if (trackMarks != null)
+            {
+                trackMarks.parent = null;
+                Destroy(trackMarks.GetComponent<TrailEmitter>());
+            }
 
-            Destroy(trackMarks.GetComponent<TrailEmitter>());
+            if (!SceneLoader.autoPlay)
+            {
+                if (transform.root.childCount <= 1)
+                {
+                    SceneLoader.frozen = true;
+                    SceneLoader.sceneLoader.LoadNextScene(3);
+                }
+            }
+            else
+            {
+                if (transform.root.childCount <= 2)
+                {
+                    Time.timeScale = 0.2f;
+                    SceneLoader.sceneLoader.LoadScene(false, -1, 3f);
+                }
+            }
             Destroy(gameObject);
         }
     }
@@ -176,6 +190,6 @@ public class BaseTankLogic : MonoBehaviour
 
     public bool IsGrounded()
     {
-        return Physics.Raycast(tankOrigin.position + Vector3.up * 0.05f, -tankOrigin.up, 0.1f, ~notSlopeLayerMask);
+        return Physics.Raycast(tankOrigin.position + Vector3.up * 0.05f, -tankOrigin.up, 0.1f, ~nonSlopeLayers);
     }
 }

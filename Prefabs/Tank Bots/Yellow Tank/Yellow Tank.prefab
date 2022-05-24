@@ -72,7 +72,7 @@ TrailRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Time: 20
+  m_Time: 1e+20
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 0.5
@@ -329,6 +329,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   owner: {fileID: 5021525065886696642}
   bullet: {fileID: 4307626717143694363, guid: de9dbd5b8f77ecb4a866f8d8cf75c17d, type: 3}
+  shootEffect: {fileID: 7275907135579404139, guid: 71b07424ffcb49a41830ab0761db5c07, type: 3}
   bulletLimit: 1
   fireCooldown: 8
   canFire: 1
@@ -375,10 +376,16 @@ MonoBehaviour:
   - 45
   frozenRotation: 1
   alignRotationSpeed: 20
-  notSlopeLayerMask:
+  nonSlopeLayers:
     serializedVersion: 2
-    m_Bits: 1996
-  tankRotSpeed: 250
+    m_Bits: 2030
+  transparentLayers:
+    serializedVersion: 2
+    m_Bits: 1806
+  barrierLayers:
+    serializedVersion: 2
+    m_Bits: 1729
+  tankRotSpeed: 400
   noisyRotation: 1
   randomizeSeed: 1
   tankRotNoiseScale: 5
@@ -416,12 +423,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: abae368852036a446af28bde5078d203, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  transparentLayerMask:
-    serializedVersion: 2
-    m_Bits: 1854
-  barrierLayerMask:
-    serializedVersion: 2
-    m_Bits: 1729
   maxShootAngle: 15
   reactionTime:
   - 0.5
@@ -484,7 +485,7 @@ SphereCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 3
+  m_Radius: 4
   m_Center: {x: 0, y: 0.8, z: 0}
 --- !u!1 &5696586256643670383
 GameObject:
@@ -750,7 +751,7 @@ TrailRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Time: 20
+  m_Time: 1e+20
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 0.5

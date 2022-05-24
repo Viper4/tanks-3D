@@ -155,7 +155,7 @@ public static class RandomExtensions
         return values;
     }
 
-    public static Vector3 RandomPointInCollider(Collider collider)
+    public static Vector3 GetPointInCollider(Collider collider)
     {
         Vector3 extents = collider.bounds.size / 2;
         Vector3 point = new Vector3(
@@ -166,17 +166,17 @@ public static class RandomExtensions
         return collider.transform.TransformPoint(point);
     }
     
-    public static Vector3 SpawnPointInCollider(Collider collider, Vector3 direction, LayerMask ignoreLayers, Transform spawnObject = null, Quaternion spawnRotation = null)
+    public static Vector3 GetSpawnPointInCollider(Collider collider, Vector3 direction, LayerMask ignoreLayers, Collider spawnCollider = null, Quaternion? spawnRotation = null)
     {
         for (int i = 0; i < 10; i++)
         {
-            if (Physics.Raycast(RandomExtensions.RandomPointInCollider(collider), direction, out RaycastHit hit, Mathf.Infinity, ~ignoreLayers))
+            if (Physics.Raycast(GetPointInCollider(collider), direction, out RaycastHit hit, Mathf.Infinity, ~ignoreLayers))
             {
-                if (spawnObject != null)
+                if (spawnCollider != null)
                 {
-                    Vector3 spawnPosition = hit.point + Vector3.up * (spawnObject.localPosition.y + 0.1f);
-                    Quaternion rotation = spawnRotation == null ? spawnObject.rotation : spawnRotation;
-                    if (!Physics.CheckBox(spawnPosition, spawnObject.GetComponent<BoxCollider>().size / 2, rotation, ~ignoreLayers))
+                    Vector3 spawnPosition = hit.point + Vector3.up * (spawnCollider.bounds.size.y / 2 + 0.1f);
+                    Quaternion rotation = spawnRotation == null ? spawnCollider.transform.rotation : (Quaternion)spawnRotation;
+                    if (!Physics.CheckBox(spawnPosition, spawnCollider.bounds.size / 2, rotation, ~ignoreLayers))
                     {
                         return spawnPosition;
                     }
@@ -188,8 +188,8 @@ public static class RandomExtensions
             }
         }
         
-        Debug.LogWarning("Could not find a valid spawn point in " + collider.name);
-        return null;
+        Debug.Log("No valid spawn point found in " + collider.name + "; returning Vector3.zero.");
+        return Vector3.zero;
     }
 }
 

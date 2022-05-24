@@ -8,7 +8,6 @@ public class HoleRegion : MonoBehaviour
     {
         if (other.CompareTag("Tank") && other.name == "Body")
         {
-            Debug.Log(other.name);
             if(other.transform.root.name == "Tanks")
             {
                 other.transform.parent.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezePositionY | RigidbodyConstraints.FreezeRotation;
@@ -24,7 +23,6 @@ public class HoleRegion : MonoBehaviour
     {
         if (other.CompareTag("Tank") && other.name == "Body")
         {
-            Debug.Log(other.name);
             if (other.transform.root.name == "Tanks")
             {
                 other.transform.parent.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeRotation;

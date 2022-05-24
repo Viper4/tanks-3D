@@ -7,6 +7,7 @@ public class FireControl : MonoBehaviour
     [SerializeField] Transform owner;
 
     [SerializeField] Transform bullet;
+    [SerializeField] Transform shootEffect;
 
     Transform barrel;
 
@@ -45,6 +46,7 @@ public class FireControl : MonoBehaviour
                 bulletsFired++;
                 bulletClone = Instantiate(bullet, clonePosition, cloneRotation);
                 bulletClone.localScale = new Vector3(1, 1, 1);
+                Instantiate(shootEffect, clonePosition, cloneRotation);
 
                 yield return new WaitWhile(() => bulletClone.GetComponent<BulletBehaviour>() == null);
 
@@ -62,7 +64,6 @@ public class FireControl : MonoBehaviour
             }
             else
             {
-                Debug.Log("Bullet position was blocked");
                 canFire = true;
                 yield return null;
             }

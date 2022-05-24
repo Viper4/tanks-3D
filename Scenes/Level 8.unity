@@ -1562,6 +1562,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: Yellow Tank
       objectReference: {fileID: 0}
+    - target: {fileID: 8514043713273510450, guid: a6e3c718b071f3840ab0fe546320d584, type: 3}
+      propertyPath: target
+      value: 
+      objectReference: {fileID: 86522438}
+    - target: {fileID: 8514043713273510450, guid: a6e3c718b071f3840ab0fe546320d584, type: 3}
+      propertyPath: tankParent
+      value: 
+      objectReference: {fileID: 956739717}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: a6e3c718b071f3840ab0fe546320d584, type: 3}
 --- !u!1 &329471733
@@ -1812,6 +1820,14 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 956739717}
     m_Modifications:
+    - target: {fileID: -4089808789469299082, guid: a2089b8661e86fd4c99f5c815f926e03, type: 3}
+      propertyPath: target
+      value: 
+      objectReference: {fileID: 86522438}
+    - target: {fileID: -4089808789469299082, guid: a2089b8661e86fd4c99f5c815f926e03, type: 3}
+      propertyPath: tankParent
+      value: 
+      objectReference: {fileID: 956739717}
     - target: {fileID: 5572134548717343361, guid: a2089b8661e86fd4c99f5c815f926e03, type: 3}
       propertyPath: target
       value: 
@@ -4175,6 +4191,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: Yellow Tank (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 8514043713273510450, guid: a6e3c718b071f3840ab0fe546320d584, type: 3}
+      propertyPath: target
+      value: 
+      objectReference: {fileID: 86522438}
+    - target: {fileID: 8514043713273510450, guid: a6e3c718b071f3840ab0fe546320d584, type: 3}
+      propertyPath: tankParent
+      value: 
+      objectReference: {fileID: 956739717}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: a6e3c718b071f3840ab0fe546320d584, type: 3}
 --- !u!4 &766922223 stripped
@@ -10656,6 +10680,14 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 956739717}
     m_Modifications:
+    - target: {fileID: -4089808789469299082, guid: a2089b8661e86fd4c99f5c815f926e03, type: 3}
+      propertyPath: target
+      value: 
+      objectReference: {fileID: 86522438}
+    - target: {fileID: -4089808789469299082, guid: a2089b8661e86fd4c99f5c815f926e03, type: 3}
+      propertyPath: tankParent
+      value: 
+      objectReference: {fileID: 956739717}
     - target: {fileID: 5572134548717343361, guid: a2089b8661e86fd4c99f5c815f926e03, type: 3}
       propertyPath: target
       value: 
@@ -11147,6 +11179,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: Yellow Tank (2)
       objectReference: {fileID: 0}
+    - target: {fileID: 8514043713273510450, guid: a6e3c718b071f3840ab0fe546320d584, type: 3}
+      propertyPath: target
+      value: 
+      objectReference: {fileID: 86522438}
+    - target: {fileID: 8514043713273510450, guid: a6e3c718b071f3840ab0fe546320d584, type: 3}
+      propertyPath: tankParent
+      value: 
+      objectReference: {fileID: 956739717}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: a6e3c718b071f3840ab0fe546320d584, type: 3}
 --- !u!4 &1637447743 stripped
@@ -11410,6 +11450,67 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1670977395}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1001 &1681548399
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 3149388286793973794, guid: 85a5b7f330200974ebf4d3e1f9d4b23d, type: 3}
+      propertyPath: m_RootOrder
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 3149388286793973794, guid: 85a5b7f330200974ebf4d3e1f9d4b23d, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3149388286793973794, guid: 85a5b7f330200974ebf4d3e1f9d4b23d, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3149388286793973794, guid: 85a5b7f330200974ebf4d3e1f9d4b23d, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3149388286793973794, guid: 85a5b7f330200974ebf4d3e1f9d4b23d, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3149388286793973794, guid: 85a5b7f330200974ebf4d3e1f9d4b23d, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3149388286793973794, guid: 85a5b7f330200974ebf4d3e1f9d4b23d, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3149388286793973794, guid: 85a5b7f330200974ebf4d3e1f9d4b23d, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3149388286793973794, guid: 85a5b7f330200974ebf4d3e1f9d4b23d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3149388286793973794, guid: 85a5b7f330200974ebf4d3e1f9d4b23d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3149388286793973794, guid: 85a5b7f330200974ebf4d3e1f9d4b23d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3149388286793973795, guid: 85a5b7f330200974ebf4d3e1f9d4b23d, type: 3}
+      propertyPath: m_Name
+      value: SceneLoader
+      objectReference: {fileID: 0}
+    - target: {fileID: 9018274562240278948, guid: 85a5b7f330200974ebf4d3e1f9d4b23d, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 85a5b7f330200974ebf4d3e1f9d4b23d, type: 3}
 --- !u!1 &1698492482
 GameObject:
   m_ObjectHideFlags: 0
@@ -13863,6 +13964,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 92f2a0c1234d9594ea6006b7ea7a55c6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ignoreLayerMask:
+    serializedVersion: 2
+    m_Bits: 0
+  obstacleParent: {fileID: 0}
+  tankParent: {fileID: 0}
   boundingCollider: {fileID: 0}
   tankLimit: 5
   tanks:

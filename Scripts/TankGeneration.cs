@@ -22,7 +22,14 @@ public class TankGeneration : MonoBehaviour
             // Iterate through each clonedObject and delete them
             foreach (GameObject clonedObject in clonedObjects)
             {
-                DestroyImmediate(clonedObject);
+                try
+                {
+                    DestroyImmediate(clonedObject);
+                }
+                catch
+                {
+                    Destroy(clonedObject);
+                }
             }
 
             // Clear the list referencing the clonedObjects
@@ -38,19 +45,13 @@ public class TankGeneration : MonoBehaviour
             {
                 for (int j = 0; j < loopTimeout; j++)
                 {
-                    if (Physics.Raycast(RandomExtensions.RandomPointInCollider(boundingCollider), Vector3.down, out RaycastHit hit, Mathf.Infinity, ~ignoreLayerMask))
+                    Quaternion rotation = randomYRotation ? Quaternion.AngleAxis(Random.Range(-180.0f, 180.0f), Vector3.up) : tank.transform.rotation;
+                    
+                    Vector3 spawnPosition = RandomExtensions.GetSpawnPointInCollider(boundingCollider, Vector3.down, ignoreLayerMask, tank.transform.Find("Body").GetComponent<Collider>(), rotation);
+                    if (spawnPosition != Vector3.zero)
                     {
-                        Quaternion rotation = tank.transform.rotation;
-                        if (randomYRotation)
-                        {
-                            rotation = Quaternion.AngleAxis(Random.Range(-180.0f, 180.0f), Vector3.up);
-                        }
-
-                        if (!Physics.CheckBox(hit.point + Vector3.up * (tank.transform.Find("Body").localPosition.y + 0.1f), tank.transform.Find("Body").GetComponent<BoxCollider>().size / 2, rotation))
-                        {
-                            clonedObjects.Add(Instantiate(tank, hit.point, rotation, tankParent));
-                            break;
-                        }
+                        clonedObjects.Add(Instantiate(tank, spawnPosition, rotation, tankParent));
+                        break;
                     }
                 }
             }

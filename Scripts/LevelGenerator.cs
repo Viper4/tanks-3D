@@ -1,10 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 public class LevelGenerator : MonoBehaviour
 {
+    [SerializeField] LayerMask ignoreLayerMask;
+    [SerializeField] Transform obstacleParent;
+    [SerializeField] Transform tankParent;
+
     [SerializeField] Collider boundingCollider;
 
     [SerializeField] int tankLimit;
@@ -23,6 +26,13 @@ public class LevelGenerator : MonoBehaviour
     [SerializeField] float switchChance;
     [SerializeField] int amountDeviationMin = 0;
     [SerializeField] int amountDeviationMax = 0;
+
+    public void GenerateLevel()
+    {
+        GameObject obstacle = Instantiate(obstacles[0], RandomExtensions.GetSpawnPointInCollider(boundingCollider, Vector3.down, ignoreLayerMask, obstacles[0].GetComponent<Collider>()), obstacles[0].transform.rotation, obstacleParent);
+        GenerateObstacles(obstacle.GetComponent<ObstacleGeneration>());
+        GenerateTanks(tankParent.GetComponent<TankGeneration>());
+    }
 
     public void GenerateObstacles(ObstacleGeneration selectedObject)
     {

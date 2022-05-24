@@ -133,7 +133,7 @@ public class BulletBehaviour : MonoBehaviour
             if (baseTankLogic != null)
             {
                 baseTankLogic.Explode();
-                if (owner.name == "Player")
+                if (owner != null && owner.name == "Player")
                 {
                     owner.GetComponent<PlayerControl>().kills++;
                 }
@@ -178,7 +178,7 @@ public class BulletBehaviour : MonoBehaviour
                         if (collider.transform.parent != null)
                         {
                             collider.transform.parent.GetComponent<BaseTankLogic>().Explode();
-                            if (owner.name == "Player")
+                            if (owner != null && owner.name == "Player")
                             {
                                 owner.GetComponent<PlayerControl>().kills++;
                             }

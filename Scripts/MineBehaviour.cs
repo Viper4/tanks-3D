@@ -43,7 +43,7 @@ public class MineBehaviour : MonoBehaviour
         }
     }
 
-    private void OnTriggerStay(Collider other)
+    private void OnTriggerEnter(Collider other)
     {
         if (activateDelay <= 0 && timer > 1.5f)
         {
@@ -91,15 +91,13 @@ public class MineBehaviour : MonoBehaviour
             switch (collider.tag)
             {
                 case "Tank":
-                    Debug.Log(collider.name);
-
                     if(collider != null && collider.transform.parent.name != "Tanks")
                     {
                         // Blowing up tanks
                         if (collider.transform.root.name != "Player")
                         {
                             collider.transform.parent.GetComponent<BaseTankLogic>().Explode();
-                            if (owner.name == "Player")
+                            if (owner != null && owner.name == "Player")
                             {
                                 owner.GetComponent<PlayerControl>().kills++;
                             }

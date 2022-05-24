@@ -48,11 +48,9 @@ public class PlayerControl : MonoBehaviour
         tankOrigin = transform.Find("Tank Origin");
 
         UIHandler = GameObject.Find("UI").GetComponent<UIHandler>();
-
-        SceneLoader.sceneLoader.OnSceneLoad();
     }
 
-    void Start()
+    private void Start()
     {
         SaveSystem.LoadSettings("settings.json");
     }
@@ -150,7 +148,7 @@ public class PlayerControl : MonoBehaviour
                 else if (Input.GetKeyDown(KeyCode.R))
                 {
                     Debug.Log("Cheat Reload");
-                    StartCoroutine(SceneLoader.sceneLoader.LoadScene(false));
+                    SceneLoader.sceneLoader.LoadScene(false);
                 }
                 else if (Input.GetKeyDown(KeyCode.B))
                 {
@@ -216,11 +214,11 @@ public class PlayerControl : MonoBehaviour
     {
         if (lives > 0)
         {
-            StartCoroutine(SceneLoader.sceneLoader.LoadScene(false, -1, 3));
+            SceneLoader.sceneLoader.LoadScene(false, -1, 3);
         }
         else
         {
-            StartCoroutine(SceneLoader.sceneLoader.LoadScene(true, 0, 3));
+            SceneLoader.sceneLoader.LoadScene(true, 0, 3);
         }
     }
 }

@@ -8,9 +8,6 @@ public class TealBot : MonoBehaviour
     float dstToTarget;
     Quaternion rotToTarget;
 
-    [SerializeField] LayerMask transparentLayerMask;
-    [SerializeField] LayerMask barrierLayerMask;
-
     BaseTankLogic baseTankLogic;
 
     Transform body;
@@ -33,9 +30,7 @@ public class TealBot : MonoBehaviour
 
     [SerializeField] float gravity = 10;
     float velocityY = 0;
-     
-    float triggerRadius = 3.5f;
-
+    
     FireControl fireControl;
 
     enum Mode
@@ -61,8 +56,6 @@ public class TealBot : MonoBehaviour
 
         rb = GetComponent<Rigidbody>();
 
-        triggerRadius = GetComponent<SphereCollider>().radius;
-
         fireControl = GetComponent<FireControl>();
     }
 
@@ -73,9 +66,14 @@ public class TealBot : MonoBehaviour
         {
             dstToTarget = Vector3.Distance(transform.position, targetSelector.target.position);
 
-            if (fireControl.canFire && mode != Mode.Shoot && Physics.Raycast(barrel.position, barrel.forward, out RaycastHit barrelHit, dstToTarget, ~transparentLayerMask, QueryTriggerInteraction.Ignore))
+            if (fireControl.canFire && mode != Mode.Shoot && Physics.Raycast(barrel.position, barrel.forward, out RaycastHit barrelHit, dstToTarget, ~baseTankLogic.transparentLayers, QueryTriggerInteraction.Ignore))
             {
-                if (barrelHit.transform.root.name == targetSelector.target.root.name)
+                // Ray hits the capsule collider which is on Tank Origin for player and the 2nd topmost transform for tank bots
+                if (barrelHit.transform.root.name == "Player" && targetSelector.target.root.name == "Player")
+                {
+                    StartCoroutine(Shoot());
+                }
+                else if (barrelHit.transform == targetSelector.target.parent) // target for tank bots is the turret
                 {
                     StartCoroutine(Shoot());
                 }
@@ -90,10 +88,10 @@ public class TealBot : MonoBehaviour
 
                 // Checking Forward on the center, left, and right side
                 RaycastHit forwardHit;
-                if (Physics.Raycast(body.position, transform.forward, out forwardHit, triggerRadius, barrierLayerMask) || Physics.Raycast(body.position + transform.right, transform.forward, out forwardHit, triggerRadius, barrierLayerMask) || Physics.Raycast(body.position - transform.right, transform.forward, out forwardHit, triggerRadius, barrierLayerMask))
+                if (Physics.Raycast(body.position, transform.forward, out forwardHit, 2, baseTankLogic.barrierLayers) || Physics.Raycast(body.position + transform.right, transform.forward, out forwardHit, 2, baseTankLogic.barrierLayers) || Physics.Raycast(body.position - transform.right, transform.forward, out forwardHit, 2, baseTankLogic.barrierLayers))
                 {
                     mode = Mode.Avoid;
-                    baseTankLogic.ObstacleAvoidance(forwardHit, triggerRadius, barrierLayerMask);
+                    baseTankLogic.ObstacleAvoidance(forwardHit, 2, baseTankLogic.barrierLayers);
                 }
                 else if (mode == Mode.Avoid)
                 {
@@ -167,7 +165,15 @@ public class TealBot : MonoBehaviour
                     }
                     break;
                 case "Mine":
-                    if(other.GetComponent<MineBehaviour>().owner.name != targetSelector.target.root.name)
+                    if (SceneLoader.autoPlay)
+                    {
+                        // Move in opposite direction of mine
+                        desiredDir = transform.position - other.transform.position;
+
+                        // Applying rotation
+                        baseTankLogic.RotateToVector(desiredDir);
+                    }
+                    else if (other.GetComponent<MineBehaviour>().owner != targetSelector.target.root)
                     {
                         // Move in opposite direction of mine
                         desiredDir = transform.position - other.transform.position;

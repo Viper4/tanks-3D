@@ -8,9 +8,6 @@ public class GreyBot : MonoBehaviour
     float dstToTarget;
     Quaternion rotToTarget;
 
-    [SerializeField] LayerMask transparentLayerMask;
-    [SerializeField] LayerMask barrierLayerMask;
-
     BaseTankLogic baseTankLogic;
 
     Transform body;
@@ -40,8 +37,6 @@ public class GreyBot : MonoBehaviour
 
     [SerializeField] float gravity = 8;
     float velocityY = 0;
-
-    float triggerRadius = 3f;
 
     FireControl fireControl;
 
@@ -75,8 +70,6 @@ public class GreyBot : MonoBehaviour
             turretRotSeed = Random.Range(-99.0f, 99.0f);
         }
 
-        triggerRadius = GetComponent<SphereCollider>().radius;
-
         fireControl = GetComponent<FireControl>();
     }
 
@@ -87,9 +80,14 @@ public class GreyBot : MonoBehaviour
         {
             dstToTarget = Vector3.Distance(body.position, targetSelector.target.position);
 
-            if (fireControl.canFire && mode != Mode.Shoot && Physics.Raycast(turret.position, targetSelector.target.position - turret.position, out RaycastHit barrelHit, dstToTarget, ~transparentLayerMask, QueryTriggerInteraction.Ignore))
+            if (fireControl.canFire && mode != Mode.Shoot && Physics.Raycast(turret.position, targetSelector.target.position - turret.position, out RaycastHit barrelHit, dstToTarget, ~baseTankLogic.transparentLayers, QueryTriggerInteraction.Ignore))
             {
-                if(barrelHit.transform.root.name == targetSelector.target.root.name)
+                // Ray hits the capsule collider which is on Tank Origin for player and the 2nd topmost transform for tank bots
+                if (barrelHit.transform.root.name == "Player" && targetSelector.target.root.name == "Player")
+                {
+                    StartCoroutine(Shoot());
+                }
+                else if (barrelHit.transform == targetSelector.target.parent) // target for tank bots is the turret
                 {
                     StartCoroutine(Shoot());
                 }
@@ -103,10 +101,10 @@ public class GreyBot : MonoBehaviour
 
                 // Checking Forward on the center, left, and right side
                 RaycastHit forwardHit;
-                if (Physics.Raycast(body.position, transform.forward, out forwardHit, 2, barrierLayerMask) || Physics.Raycast(body.position + transform.right, transform.forward, out forwardHit, 2, barrierLayerMask) || Physics.Raycast(body.position - transform.right, transform.forward, out forwardHit, 2, barrierLayerMask))
+                if (Physics.Raycast(body.position, transform.forward, out forwardHit, 2, baseTankLogic.barrierLayers) || Physics.Raycast(body.position + transform.right, transform.forward, out forwardHit, 2, baseTankLogic.barrierLayers) || Physics.Raycast(body.position - transform.right, transform.forward, out forwardHit, 2, baseTankLogic.barrierLayers))
                 {
                     mode = Mode.Avoid;
-                    baseTankLogic.ObstacleAvoidance(forwardHit, triggerRadius, barrierLayerMask);
+                    baseTankLogic.ObstacleAvoidance(forwardHit, 2, baseTankLogic.barrierLayers);
                 }
                 else if (mode == Mode.Avoid)
                 {

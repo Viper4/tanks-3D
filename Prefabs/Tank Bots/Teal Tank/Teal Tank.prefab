@@ -119,7 +119,7 @@ TrailRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Time: 50
+  m_Time: 1e+20
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 0.5
@@ -384,7 +384,7 @@ GameObject:
   - component: {fileID: -563639079389155497}
   - component: {fileID: 7576510698517756716}
   - component: {fileID: 8495394420336082662}
-  m_Layer: 2
+  m_Layer: 6
   m_Name: Teal Tank
   m_TagString: Tank
   m_Icon: {fileID: 0}
@@ -423,6 +423,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   owner: {fileID: 8820478986772652707}
   bullet: {fileID: 439779918157275786, guid: e82b6db23e6ee9f45931e68f161c1c36, type: 3}
+  shootEffect: {fileID: 7275907135579404139, guid: 71b07424ffcb49a41830ab0761db5c07, type: 3}
   bulletLimit: 1
   fireCooldown: 4
   canFire: 1
@@ -452,10 +453,16 @@ MonoBehaviour:
   - 45
   frozenRotation: 1
   alignRotationSpeed: 20
-  notSlopeLayerMask:
+  nonSlopeLayers:
     serializedVersion: 2
-    m_Bits: 972
-  tankRotSpeed: 250
+    m_Bits: 2030
+  transparentLayers:
+    serializedVersion: 2
+    m_Bits: 1806
+  barrierLayers:
+    serializedVersion: 2
+    m_Bits: 705
+  tankRotSpeed: 400
   noisyRotation: 1
   randomizeSeed: 1
   tankRotNoiseScale: 5
@@ -493,12 +500,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c7dbdec69b05c094db6f48db62ed0b8d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  transparentLayerMask:
-    serializedVersion: 2
-    m_Bits: 1854
-  barrierLayerMask:
-    serializedVersion: 2
-    m_Bits: 705
   reactionTime:
   - 0.3
   - 0.45
@@ -553,7 +554,7 @@ SphereCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 3
+  m_Radius: 4
   m_Center: {x: 0, y: 0.8, z: 0}
 --- !u!1 &8330142916516434170
 GameObject:
@@ -627,7 +628,7 @@ TrailRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Time: 50
+  m_Time: 1e+20
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 0.5

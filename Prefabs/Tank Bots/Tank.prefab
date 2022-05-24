@@ -72,7 +72,7 @@ TrailRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Time: 20
+  m_Time: 1e+20
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 0.5
@@ -201,7 +201,7 @@ TrailRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Time: 20
+  m_Time: 1e+20
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 0.5
@@ -454,7 +454,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   owner: {fileID: 8015774000218417766}
   bullet: {fileID: 4307626717143694363, guid: de9dbd5b8f77ecb4a866f8d8cf75c17d, type: 3}
+  shootEffect: {fileID: 7275907135579404139, guid: 71b07424ffcb49a41830ab0761db5c07, type: 3}
   bulletLimit: 1
+  fireCooldown: 4
   canFire: 1
   solidLayerMask:
     serializedVersion: 2
@@ -482,9 +484,15 @@ MonoBehaviour:
   - 45
   frozenRotation: 1
   alignRotationSpeed: 20
-  notSlopeLayerMask:
+  nonSlopeLayers:
     serializedVersion: 2
-    m_Bits: 1996
+    m_Bits: 2030
+  transparentLayers:
+    serializedVersion: 2
+    m_Bits: 1806
+  barrierLayers:
+    serializedVersion: 2
+    m_Bits: 705
   tankRotSpeed: 250
   noisyRotation: 1
   randomizeSeed: 1

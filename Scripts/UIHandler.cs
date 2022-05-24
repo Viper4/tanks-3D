@@ -7,6 +7,7 @@ using UnityEngine.Rendering.Universal;
 
 public class UIHandler : MonoBehaviour
 {
+    public bool mainMenu;
     public Dictionary<string, Transform> UIElements = new Dictionary<string, Transform>();
     [SerializeField] PlayerControl playerControl;
     [SerializeField] CameraControl cameraControl;
@@ -21,45 +22,46 @@ public class UIHandler : MonoBehaviour
 
     private void Awake()
     {
-        if (playerControl == null)
-        {
-            playerControl = GameObject.Find("Player").GetComponent<PlayerControl>();
-        }
-
-        if (cameraControl == null)
-        {
-            cameraControl = GameObject.Find("Player").GetComponent<CameraControl>();
-        }
-
         foreach (Transform child in transform)
         {
             UIElements[child.name] = child;
 
-            if (child.name != "InGame")
-            {
-                child.gameObject.SetActive(false);
-            }
+            child.gameObject.SetActive(false);
         }
-        UIElements["PauseMenu"].Find("LabelBackground").GetChild(0).GetComponent<Text>().text = "Game Paused\nLevel " + (SceneManager.GetActiveScene().buildIndex + 1);
-        UIElements["InGame"].gameObject.SetActive(false);
+        if (!mainMenu)
+        {
+            if (playerControl == null)
+            {
+                playerControl = GameObject.Find("Player").GetComponent<PlayerControl>();
+            }
+
+            if (cameraControl == null)
+            {
+                cameraControl = GameObject.Find("Player").GetComponent<CameraControl>();
+            }
+
+            UIElements["PauseMenu"].Find("LabelBackground").GetChild(0).GetComponent<Text>().text = "Game Paused\nLevel " + (SceneManager.GetActiveScene().buildIndex + 1);
+        }
+        else
+        {
+            UIElements["MainMenu"].gameObject.SetActive(true);
+        }
     }
 
     private void Update()
     {
-        if (!UIElements["Settings"].gameObject.activeSelf)
+        if (!mainMenu)
         {
-            selectedKeyBind = null;
-        }
-
-        if (Input.GetKeyDown(playerControl.keyBinds["Shoot"]))
-        {
-            RectTransform rt = UIElements["InGame"].Find("Reticle").GetComponent<RectTransform>();
-            rt.sizeDelta = new Vector2(rt.sizeDelta.x * 1.25f, rt.sizeDelta.y * 1.25f);
-        }
-        else if (Input.GetKeyUp(playerControl.keyBinds["Shoot"]))
-        {
-            RectTransform rt = UIElements["InGame"].Find("Reticle").GetComponent<RectTransform>();
-            rt.sizeDelta = new Vector2(rt.sizeDelta.x / 1.25f, rt.sizeDelta.y / 1.25f);
+            if (Input.GetKeyDown(playerControl.keyBinds["Shoot"]))
+            {
+                RectTransform rt = UIElements["InGame"].Find("Reticle").GetComponent<RectTransform>();
+                rt.sizeDelta = new Vector2(rt.sizeDelta.x * 1.25f, rt.sizeDelta.y * 1.25f);
+            }
+            else if (Input.GetKeyUp(playerControl.keyBinds["Shoot"]))
+            {
+                RectTransform rt = UIElements["InGame"].Find("Reticle").GetComponent<RectTransform>();
+                rt.sizeDelta = new Vector2(rt.sizeDelta.x / 1.25f, rt.sizeDelta.y / 1.25f);
+            }
         }
 
         Event currentEvent = new Event();
@@ -82,9 +84,16 @@ public class UIHandler : MonoBehaviour
     
     public void Resume()
     {
-        UIElements["InGame"].gameObject.SetActive(true);
-        UIElements["PauseMenu"].gameObject.SetActive(false);
-        Time.timeScale = 1;
+        if (!mainMenu)
+        {
+            UIElements["InGame"].gameObject.SetActive(true);
+            UIElements["PauseMenu"].gameObject.SetActive(false);
+            Time.timeScale = 1;
+        }
+        else
+        {
+            SceneLoader.sceneLoader.LoadNextScene();
+        }
     }
 
     public void Pause()
