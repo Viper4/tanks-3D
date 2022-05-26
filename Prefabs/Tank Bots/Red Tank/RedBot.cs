@@ -144,7 +144,7 @@ public class RedBot : MonoBehaviour
                 barrel.eulerAngles = new Vector3(barrel.eulerAngles.x, barrel.eulerAngles.y + lastEulerAngles.y - transform.eulerAngles.y, barrel.eulerAngles.z);
 
                 // Rotating turret and barrel towards target
-                Vector3 targetDir = targetSelector.predictedTargetPos - turret.position;
+                Vector3 targetDir = targetSelector.currentTarget.position - turret.position;
                 rotToTarget = Quaternion.LookRotation(targetDir);
                 turret.rotation = barrel.rotation = turretAnchor = Quaternion.RotateTowards(turretAnchor, rotToTarget, Time.deltaTime * turretRotSpeed);
 
@@ -153,14 +153,14 @@ public class RedBot : MonoBehaviour
                 barrel.localEulerAngles = new Vector3(Clamping.ClampAngle(barrel.localEulerAngles.x + noiseX, turretRangeX[0], turretRangeX[1]), barrel.localEulerAngles.y + noiseY, 0);
             }
 
-            if (fireControl.canFire && mode != Mode.Shoot && !shooting && Physics.Raycast(barrel.position, targetSelector.predictedTargetPos - barrel.position, out RaycastHit barrelHit, Mathf.Infinity, ~baseTankLogic.transparentLayers, QueryTriggerInteraction.Ignore))
+            if (fireControl.canFire && mode != Mode.Shoot && !shooting && Physics.Raycast(barrel.position, targetSelector.currentTarget.position - barrel.position, out RaycastHit barrelHit, Mathf.Infinity, ~baseTankLogic.transparentLayers, QueryTriggerInteraction.Ignore))
             {
                 // Ray hits the capsule collider which is on Tank Origin for player and the 2nd topmost transform for tank bots
                 if (barrelHit.transform.root.name == "Player" && targetSelector.currentTarget.root.name == "Player")
                 {
                     StartCoroutine(Shoot());
                 }
-                else if (barrelHit.transform == targetSelector.currentTarget.parent) // target for tank bots is the turret
+                else if (barrelHit.transform == targetSelector.currentTarget.parent || barrelHit.transform == targetSelector.currentTarget) // target for tank bots is the turret, everything else is its own transform
                 {
                     StartCoroutine(Shoot());
                 }
@@ -196,7 +196,7 @@ public class RedBot : MonoBehaviour
                 }
                 break;
             case "Mine":
-                if (SceneLoader.autoPlay)
+                if (SceneLoader.autoPlay || targetSelector.findTarget)
                 {
                     // Move in opposite direction of mine
                     desiredDir = transform.position - other.transform.position;
@@ -220,7 +220,8 @@ public class RedBot : MonoBehaviour
     {
         // When angle between barrel and target is less than shootAngle, then stop and fire
         float angle = Quaternion.Angle(barrel.rotation, rotToTarget);
-        if(angle < maxShootAngle)
+        float shootAngle = mode == Mode.Defend ? maxShootAngle * 2.5f : maxShootAngle;
+        if(angle < shootAngle)
         {
             shooting = true;
 
