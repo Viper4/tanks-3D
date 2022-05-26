@@ -88,7 +88,7 @@ public class YellowBot : MonoBehaviour
                 {
                     StartCoroutine(Shoot());
                 }
-                else if (barrelHit.transform == targetSelector.currentTarget.parent) // target for tank bots is the turret
+                else if (barrelHit.transform == targetSelector.currentTarget.parent || barrelHit.transform == targetSelector.currentTarget) // target for tank bots is the turret, everything else is itself
                 {
                     StartCoroutine(Shoot());
                 }
