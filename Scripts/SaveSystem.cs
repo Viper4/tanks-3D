@@ -7,7 +7,25 @@ public static class SaveSystem
 {
     private static readonly string SAVE_FOLDER = Application.dataPath + "/SaveData/";
 
-    private class Settings
+    public static Settings currentSettings = new Settings
+    {
+        sensitivity = 15,
+        keyBinds = new Dictionary<string, KeyCode>()
+        {
+            { "Forward", KeyCode.W },
+            { "Left", KeyCode.A },
+            { "Backward", KeyCode.S },
+            { "Right", KeyCode.D },
+            { "Shoot", KeyCode.Mouse0 },
+            { "Lay Mine", KeyCode.Space},
+            { "Lock Turret", KeyCode.LeftControl },
+            { "Lock Camera", KeyCode.LeftShift },
+            { "Switch Camera", KeyCode.Tab }
+        },
+        silhouettes = true,
+    };
+
+    public class Settings
     {
         public float sensitivity;
         public Dictionary<string, KeyCode> keyBinds;
@@ -28,6 +46,8 @@ public static class SaveSystem
         {
             Directory.CreateDirectory(SAVE_FOLDER);
         }
+
+        LoadSettings("settings.json");
     }
 
     public static void SavePlayerData(string fileName, PlayerControl script, int highestLevel = -1)
@@ -91,18 +111,8 @@ public static class SaveSystem
 
     public static void SaveSettings(string fileName)
     {
-        GameObject player = GameObject.Find("Player");
-        PlayerControl playerControl = player.GetComponent<PlayerControl>();
-        UIHandler UIHandler = player.transform.Find("UI").GetComponent<UIHandler>();
-
-        Settings settings = new Settings
-        {
-            sensitivity = Camera.main.GetComponent<CameraControl>().sensitivity,
-            keyBinds = playerControl.keyBinds,
-            silhouettes = UIHandler.silhouettes,
-        };
-
-        string json = JsonConvert.SerializeObject(settings, Formatting.Indented);
+        // currentSettings variables are changed from SettingsUIHandler
+        string json = JsonConvert.SerializeObject(currentSettings, Formatting.Indented);
 
         File.WriteAllText(SAVE_FOLDER + fileName, json);
     }
@@ -110,14 +120,27 @@ public static class SaveSystem
     public static void LoadSettings(string fileName)
     {
         GameObject player = GameObject.Find("Player");
-        PlayerControl playerControl = player.GetComponent<PlayerControl>();
-        UIHandler UIHandler = player.transform.Find("UI").GetComponent<UIHandler>();
+        SettingsUIHandler settingsUIHandler = Object.FindObjectOfType<SettingsUIHandler>();
 
         if (File.Exists(SAVE_FOLDER + fileName))
         {
             string json = File.ReadAllText(SAVE_FOLDER + fileName);
 
-            Camera.main.GetComponent<CameraControl>().sensitivity = 15;
+            if (json != null)
+            {
+                currentSettings = JsonConvert.DeserializeObject<Settings>(json);
+            }
+        }
+        else
+        {
+            Debug.LogWarning("Could not find file '" + SAVE_FOLDER + fileName + "', creating a new file");
+
+            SaveSettings(fileName);
+        }
+
+        if (player != null)
+        {
+            PlayerControl playerControl = player.GetComponent<PlayerControl>();
 
             AddKeybind(playerControl, "Forward", KeyCode.W);
             AddKeybind(playerControl, "Left", KeyCode.A);
@@ -128,29 +151,16 @@ public static class SaveSystem
             AddKeybind(playerControl, "Lock Turret", KeyCode.LeftControl);
             AddKeybind(playerControl, "Lock Camera", KeyCode.LeftShift);
             AddKeybind(playerControl, "Switch Camera", KeyCode.Tab);
-
-            UIHandler.silhouettes = true;
-
-            if (json != null)
+            
+            foreach (string key in currentSettings.keyBinds.Keys)
             {
-                Settings settings = JsonConvert.DeserializeObject<Settings>(json);
-
-                Camera.main.GetComponent<CameraControl>().sensitivity = settings.sensitivity;
-                foreach(string key in settings.keyBinds.Keys)
-                {
-                    playerControl.keyBinds[key] = settings.keyBinds[key];
-                }
-                UIHandler.silhouettes = settings.silhouettes;
+                playerControl.keyBinds[key] = currentSettings.keyBinds[key];
             }
-        }
-        else
-        {
-            Debug.LogWarning("Could not find file '" + SAVE_FOLDER + fileName + "', creating a new file");
 
-            SaveSettings(fileName);
+            Camera.main.GetComponent<CameraControl>().sensitivity = currentSettings.sensitivity;
         }
 
-        UIHandler.UpdateSettingsUI();
+        settingsUIHandler.UpdateSettingsUI();
     }
 
     private static void AddKeybind(PlayerControl script, string key, KeyCode value)

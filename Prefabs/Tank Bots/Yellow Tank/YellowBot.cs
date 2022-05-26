@@ -5,7 +5,6 @@ using UnityEngine;
 public class YellowBot : MonoBehaviour
 {
     TargetSelector targetSelector;
-    float dstToTarget;
     Quaternion rotToTarget;
 
     BaseTankLogic baseTankLogic;
@@ -46,12 +45,12 @@ public class YellowBot : MonoBehaviour
 
     enum Mode
     {
-        Move,
+        Normal,
         Shoot,
         Avoid,
         Lay
     }
-    Mode mode = Mode.Move;
+    Mode mode = Mode.Normal;
 
     // Start is called before the first frame Update
     void Awake()
@@ -82,16 +81,14 @@ public class YellowBot : MonoBehaviour
     {
         if (!SceneLoader.frozen && Time.timeScale != 0)
         {
-            dstToTarget = Vector3.Distance(body.position, targetSelector.target.position);
-
-            if (fireControl.canFire && mode != Mode.Shoot && Physics.Raycast(barrel.position, targetSelector.target.position - barrel.position, out RaycastHit barrelHit, dstToTarget, ~baseTankLogic.transparentLayers, QueryTriggerInteraction.Ignore))
+            if (fireControl.canFire && mode != Mode.Shoot && mode != Mode.Avoid && Physics.Raycast(barrel.position, targetSelector.currentTarget.position - barrel.position, out RaycastHit barrelHit, Mathf.Infinity, ~baseTankLogic.transparentLayers, QueryTriggerInteraction.Ignore))
             {
                 // Ray hits the capsule collider which is on Tank Origin for player and the 2nd topmost transform for tank bots
-                if (barrelHit.transform.root.name == "Player" && targetSelector.target.root.name == "Player")
+                if (barrelHit.transform.root.name == "Player" && targetSelector.currentTarget.root.name == "Player")
                 {
                     StartCoroutine(Shoot());
                 }
-                else if (barrelHit.transform == targetSelector.target.parent) // target for tank bots is the turret
+                else if (barrelHit.transform == targetSelector.currentTarget.parent) // target for tank bots is the turret
                 {
                     StartCoroutine(Shoot());
                 }
@@ -104,9 +101,14 @@ public class YellowBot : MonoBehaviour
 
             if (rb != null)
             {
-                Vector3 targetDirection = transform.forward;
                 Vector3 velocity;
                 velocityY = baseTankLogic.IsGrounded() ? 0 : velocityY - Time.deltaTime * gravity;
+
+                Vector3 targetDirection = transform.forward;
+                if (Physics.Raycast(transform.position, -transform.up, out RaycastHit middleHit, 1) && Physics.Raycast(transform.position + transform.forward, -transform.up, out RaycastHit frontHit, 1))
+                {
+                    targetDirection = frontHit.point - middleHit.point;
+                }
 
                 // Checking Forward on the center, left, and right side
                 RaycastHit forwardHit;
@@ -117,17 +119,12 @@ public class YellowBot : MonoBehaviour
                 }
                 else if (mode == Mode.Avoid)
                 {
-                    mode = Mode.Move;
+                    mode = Mode.Normal;
                 }
 
                 switch (mode)
                 {
-                    case Mode.Move:
-                        if (Physics.Raycast(transform.position, -transform.up, out RaycastHit middleHit, 1) && Physics.Raycast(transform.position + transform.forward, -transform.up, out RaycastHit frontHit, 1))
-                        {
-                            targetDirection = frontHit.point - middleHit.point;
-                        }
-
+                    case Mode.Normal:
                         speed = moveSpeed;
 
                         baseTankLogic.noisyRotation = true;
@@ -157,8 +154,8 @@ public class YellowBot : MonoBehaviour
             turret.eulerAngles = new Vector3(turret.eulerAngles.x, turret.eulerAngles.y + lastEulerAngles.y - transform.eulerAngles.y, turret.eulerAngles.z);
             barrel.eulerAngles = new Vector3(barrel.eulerAngles.x, barrel.eulerAngles.y + lastEulerAngles.y - transform.eulerAngles.y, barrel.eulerAngles.z);
 
-            // Rotating turret and barrel towards player
-            Vector3 targetDir = targetSelector.target.position - turret.position;
+            // Rotating turret and barrel towards target
+            Vector3 targetDir = targetSelector.currentTarget.position - turret.position;
             rotToTarget = Quaternion.LookRotation(targetDir);
             turret.rotation = barrel.rotation = turretAnchor = Quaternion.RotateTowards(turretAnchor, rotToTarget, Time.deltaTime * turretRotSpeed);
 
@@ -167,6 +164,10 @@ public class YellowBot : MonoBehaviour
             barrel.localEulerAngles = new Vector3(Clamping.ClampAngle(barrel.localEulerAngles.x + noiseX, turretRangeX[0], turretRangeX[1]), barrel.localEulerAngles.y + noiseY, 0);
 
             lastEulerAngles = transform.eulerAngles;
+        }
+        else
+        {
+            rb.velocity = Vector3.zero;
         }
     }
 
@@ -198,7 +199,7 @@ public class YellowBot : MonoBehaviour
             yield return new WaitForSeconds(Random.Range(fireDelay[0], fireDelay[1]));
             StartCoroutine(GetComponent<FireControl>().Shoot());
 
-            mode = Mode.Move;
+            mode = Mode.Normal;
         }
         else
         {
@@ -217,7 +218,7 @@ public class YellowBot : MonoBehaviour
         rb.rotation = Quaternion.LookRotation(desiredDir);
         
         transform.position += transform.forward * 0.1f;
-        mode = Mode.Move;
+        mode = Mode.Normal;
         layingMine = false;
     }
 }

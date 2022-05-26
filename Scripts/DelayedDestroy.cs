@@ -15,7 +15,7 @@ public class DelayedDestroy : MonoBehaviour
 
     IEnumerator KillTimer()
     {
-        yield return new WaitForSecondsRealtime(delay);
+        yield return new WaitForSeconds(delay);
         if (transform.CompareTag("Bullet"))
         {
             GetComponent<BulletBehaviour>().owner.GetComponent<FireControl>().bulletsFired--;

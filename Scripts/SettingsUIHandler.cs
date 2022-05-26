@@ -2,31 +2,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.SceneManagement;
 using UnityEngine.Rendering.Universal;
 
 public class SettingsUIHandler : MonoBehaviour
 {
-    public Dictionary<string, Transform> UIElements = new Dictionary<string, Transform>();
-    [SerializeField] CameraControl cameraControl;
     [SerializeField] ForwardRendererData forwardRenderer;
     Transform selectedKeyBind;
 
-    public bool silhouettes = true;
-
     readonly KeyCode[] mouseKeyCodes = { KeyCode.Mouse0, KeyCode.Mouse1, KeyCode.Mouse2, KeyCode.Mouse3, KeyCode.Mouse4, KeyCode.Mouse5, KeyCode.Mouse6 };
-
-    private void Awake()
-    {
-        foreach (Transform child in transform)
-        {
-            UIElements[child.name] = child;
-
-            child.gameObject.SetActive(false);
-        }
-        
-        UIElements["MainMenu"].gameObject.SetActive(true);
-    }
 
     private void Update()
     {
@@ -36,12 +19,12 @@ public class SettingsUIHandler : MonoBehaviour
         {
             if (currentEvent.isKey)
             {
-                transform.parent.GetComponent<PlayerControl>().keyBinds[selectedKeyBind.name] = currentEvent.keyCode;
+                SaveSystem.currentSettings.keyBinds[selectedKeyBind.name] = currentEvent.keyCode;
                 selectedKeyBind.Find("Button").GetChild(0).GetComponent<Text>().text = currentEvent.keyCode.ToString();
             }
             else if (currentEvent.isMouse)
             {
-                transform.parent.GetComponent<PlayerControl>().keyBinds[selectedKeyBind.name] = mouseKeyCodes[currentEvent.button];
+                SaveSystem.currentSettings.keyBinds[selectedKeyBind.name] = mouseKeyCodes[currentEvent.button];
                 selectedKeyBind.Find("Button").GetChild(0).GetComponent<Text>().text = mouseKeyCodes[currentEvent.button].ToString();
             }
             selectedKeyBind = null;
@@ -61,19 +44,19 @@ public class SettingsUIHandler : MonoBehaviour
 
     public void ChangeSensitivity(Slider slider)
     {
-        cameraControl.sensitivity = slider.value;
+        SaveSystem.currentSettings.sensitivity = slider.value;
         slider.transform.Find("Value Text").GetComponent<Text>().text = slider.value.ToString();
     }
 
     public void ToggleSilhouettes(Toggle toggle)
     {
-        silhouettes = toggle.isOn;
+        SaveSystem.currentSettings.silhouettes = toggle.isOn;
 
         foreach (ScriptableRendererFeature feature in forwardRenderer.rendererFeatures)
         {
             if (feature.name == "TankHidden" || feature.name == "BulletHidden")
             {
-                feature.SetActive(silhouettes);
+                feature.SetActive(SaveSystem.currentSettings.silhouettes);
             }
         }
     }
@@ -95,11 +78,11 @@ public class SettingsUIHandler : MonoBehaviour
         {
             if (feature.name == "TankHidden" || feature.name == "BulletHidden")
             {
-                feature.SetActive(silhouettes);
+                feature.SetActive(SaveSystem.currentSettings.silhouettes);
             }
         }
         // Updating UI elements in settings
-        foreach (Transform content in UIElements["Settings"].Find("Scroll View").Find("Viewport"))
+        foreach (Transform content in BaseUIHandler.UIElements["Settings"].Find("Scroll View").Find("Viewport"))
         {
             switch (content.name)
             {
@@ -109,7 +92,7 @@ public class SettingsUIHandler : MonoBehaviour
                         switch (setting.name)
                         {
                             case "Sensitivity":
-                                setting.GetComponent<Slider>().value = cameraControl.sensitivity;
+                                setting.GetComponent<Slider>().value = SaveSystem.currentSettings.sensitivity;
                                 break;
                         }
                     }
@@ -117,7 +100,7 @@ public class SettingsUIHandler : MonoBehaviour
                 case "Keybinds":
                     foreach (Transform keybind in content)
                     {
-                        keybind.Find("Button").GetChild(0).GetComponent<Text>().text = playerControl.keyBinds[keybind.name].ToString();
+                        keybind.Find("Button").GetChild(0).GetComponent<Text>().text = SaveSystem.currentSettings.keyBinds[keybind.name].ToString();
                     }
                     break;
                 case "Video":
@@ -126,7 +109,7 @@ public class SettingsUIHandler : MonoBehaviour
                         switch (setting.name)
                         {
                             case "Silhouettes":
-                                setting.GetComponent<Toggle>().isOn = silhouettes;
+                                setting.GetComponent<Toggle>().isOn = SaveSystem.currentSettings.silhouettes;
                                 break;
                         }
                     }

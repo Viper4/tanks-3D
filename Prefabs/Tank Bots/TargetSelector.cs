@@ -4,8 +4,13 @@ using UnityEngine;
 
 public class TargetSelector : MonoBehaviour
 {
-    public Transform target;
+    public Transform primaryTarget;
+    [HideInInspector] public Transform currentTarget;
     [SerializeField] bool findTarget = false;
+
+    [SerializeField] bool predictTargetPos;
+    [SerializeField] float predictionScale = 1;
+    [HideInInspector] public Vector3 predictedTargetPos;
 
     [SerializeField] Transform turret;
     [SerializeField] LayerMask ignoreLayerMask;
@@ -20,10 +25,14 @@ public class TargetSelector : MonoBehaviour
 
         if (!findTarget && !SceneLoader.autoPlay)
         {
-            if (target == null)
+            if (primaryTarget == null)
             {
-                Debug.Log("The variable target of BrownBot has been defaulted to the player");
-                target = GameObject.Find("Player").transform;
+                Debug.Log("The variable primaryTarget of BrownBot has been defaulted to the player");
+                primaryTarget = GameObject.Find("Player").transform;
+            }
+            else
+            {
+                currentTarget = primaryTarget;
             }
         }
 
@@ -58,16 +67,41 @@ public class TargetSelector : MonoBehaviour
 
                 if (visibleTanks.Count != 0)
                 {
-                    target = GetClosestTank(visibleTanks);
+                    currentTarget = GetClosestTank(visibleTanks);
                 }
                 else
                 {
-                    target = GetClosestTank(tankParent);
+                    currentTarget = GetClosestTank(tankParent);
                 }
             }
             else
             {
-                target = tankParent;
+                currentTarget = tankParent;
+            }
+        }
+
+        if (currentTarget == null)
+        {
+            currentTarget = primaryTarget;
+        }
+
+        if (predictTargetPos)
+        {
+            Rigidbody targetRB;
+
+            if (currentTarget.CompareTag("Tank"))
+            {
+                targetRB = currentTarget.parent.GetComponent<Rigidbody>();
+            }
+            else
+            {
+                targetRB = currentTarget.GetComponent<Rigidbody>();
+            }
+
+            if (targetRB != null)
+            {
+                predictedTargetPos = currentTarget.position + (currentTarget.forward + targetRB.velocity * predictionScale);
+                Debug.DrawLine(transform.position, predictedTargetPos, Color.blue, 0.1f);
             }
         }
     }

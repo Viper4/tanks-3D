@@ -971,8 +971,8 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1509658828}
-        m_TargetAssemblyTypeName: UIHandler, Assembly-CSharp
+      - m_Target: {fileID: 1509658830}
+        m_TargetAssemblyTypeName: SettingsUIHandler, Assembly-CSharp
         m_MethodName: ChangeSensitivity
         m_Mode: 2
         m_Arguments:
@@ -1066,8 +1066,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1509658828}
-        m_TargetAssemblyTypeName: UIHandler, Assembly-CSharp
+      - m_Target: {fileID: 1509658829}
+        m_TargetAssemblyTypeName: BasicUIHandler, Assembly-CSharp
         m_MethodName: Exit
         m_Mode: 1
         m_Arguments:
@@ -1199,8 +1199,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1509658828}
-        m_TargetAssemblyTypeName: UIHandler, Assembly-CSharp
+      - m_Target: {fileID: 1509658830}
+        m_TargetAssemblyTypeName: SettingsUIHandler, Assembly-CSharp
         m_MethodName: ChangeKeyBind
         m_Mode: 2
         m_Arguments:
@@ -1332,8 +1332,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1509658828}
-        m_TargetAssemblyTypeName: UIHandler, Assembly-CSharp
+      - m_Target: {fileID: 1509658830}
+        m_TargetAssemblyTypeName: SettingsUIHandler, Assembly-CSharp
         m_MethodName: ChangeKeyBind
         m_Mode: 2
         m_Arguments:
@@ -1704,8 +1704,8 @@ MonoBehaviour:
   onValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1509658828}
-        m_TargetAssemblyTypeName: UIHandler, Assembly-CSharp
+      - m_Target: {fileID: 1509658830}
+        m_TargetAssemblyTypeName: SettingsUIHandler, Assembly-CSharp
         m_MethodName: ToggleSilhouettes
         m_Mode: 2
         m_Arguments:
@@ -1972,8 +1972,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1509658828}
-        m_TargetAssemblyTypeName: UIHandler, Assembly-CSharp
+      - m_Target: {fileID: 1509658830}
+        m_TargetAssemblyTypeName: SettingsUIHandler, Assembly-CSharp
         m_MethodName: SaveSettings
         m_Mode: 1
         m_Arguments:
@@ -2233,8 +2233,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1509658828}
-        m_TargetAssemblyTypeName: UIHandler, Assembly-CSharp
+      - m_Target: {fileID: 1509658829}
+        m_TargetAssemblyTypeName: BasicUIHandler, Assembly-CSharp
         m_MethodName: DeactivateElement
         m_Mode: 2
         m_Arguments:
@@ -2245,8 +2245,8 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-      - m_Target: {fileID: 1509658828}
-        m_TargetAssemblyTypeName: UIHandler, Assembly-CSharp
+      - m_Target: {fileID: 1509658829}
+        m_TargetAssemblyTypeName: BasicUIHandler, Assembly-CSharp
         m_MethodName: ActivateElement
         m_Mode: 2
         m_Arguments:
@@ -2871,8 +2871,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1509658828}
-        m_TargetAssemblyTypeName: UIHandler, Assembly-CSharp
+      - m_Target: {fileID: 1509658830}
+        m_TargetAssemblyTypeName: SettingsUIHandler, Assembly-CSharp
         m_MethodName: ChangeKeyBind
         m_Mode: 2
         m_Arguments:
@@ -3162,8 +3162,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1509658828}
-        m_TargetAssemblyTypeName: UIHandler, Assembly-CSharp
+      - m_Target: {fileID: 1509658830}
+        m_TargetAssemblyTypeName: SettingsUIHandler, Assembly-CSharp
         m_MethodName: ChangeKeyBind
         m_Mode: 2
         m_Arguments:
@@ -3493,24 +3493,24 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1509658828}
-        m_TargetAssemblyTypeName: UIHandler, Assembly-CSharp
-        m_MethodName: ActivateElement
+      - m_Target: {fileID: 1509658829}
+        m_TargetAssemblyTypeName: BasicUIHandler, Assembly-CSharp
+        m_MethodName: DeactivateElement
         m_Mode: 2
         m_Arguments:
-          m_ObjectArgument: {fileID: 1899510146}
+          m_ObjectArgument: {fileID: 97805308}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Transform, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-      - m_Target: {fileID: 1509658828}
-        m_TargetAssemblyTypeName: UIHandler, Assembly-CSharp
-        m_MethodName: DeactivateElement
+      - m_Target: {fileID: 1509658829}
+        m_TargetAssemblyTypeName: BasicUIHandler, Assembly-CSharp
+        m_MethodName: ActivateElement
         m_Mode: 2
         m_Arguments:
-          m_ObjectArgument: {fileID: 97805308}
+          m_ObjectArgument: {fileID: 1899510146}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Transform, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
@@ -3716,8 +3716,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1509658828}
-        m_TargetAssemblyTypeName: UIHandler, Assembly-CSharp
+      - m_Target: {fileID: 1509658830}
+        m_TargetAssemblyTypeName: SettingsUIHandler, Assembly-CSharp
         m_MethodName: ChangeKeyBind
         m_Mode: 2
         m_Arguments:
@@ -3849,9 +3849,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1509658828}
-        m_TargetAssemblyTypeName: UIHandler, Assembly-CSharp
-        m_MethodName: Resume
+      - m_Target: {fileID: 1509658829}
+        m_TargetAssemblyTypeName: BasicUIHandler, Assembly-CSharp
+        m_MethodName: LoadNextScene
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -4921,8 +4921,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1509658828}
-        m_TargetAssemblyTypeName: UIHandler, Assembly-CSharp
+      - m_Target: {fileID: 1509658830}
+        m_TargetAssemblyTypeName: SettingsUIHandler, Assembly-CSharp
         m_MethodName: SwitchScrollContent
         m_Mode: 2
         m_Arguments:
@@ -5423,8 +5423,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1509658828}
-        m_TargetAssemblyTypeName: UIHandler, Assembly-CSharp
+      - m_Target: {fileID: 1509658830}
+        m_TargetAssemblyTypeName: SettingsUIHandler, Assembly-CSharp
         m_MethodName: SwitchScrollContent
         m_Mode: 2
         m_Arguments:
@@ -5674,22 +5674,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 1310984675}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f2562ed487af46e408c078b5f71bef02, type: 3}
+  m_Script: {fileID: 11500000, guid: 3fb9e80df3a2b4841ba22c87ad3cd88a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mainMenu: 1
-  rotationSpeed: 20
-  sensitivity: 15
-  target: {fileID: 1916601847}
-  reticle: {fileID: 0}
-  dstFromTarget: 50
-  targetDstMinMax: {x: 30, y: 60}
-  pitchMinMaxN: {x: -40, y: 80}
-  pitchMinMaxL: {x: -20, y: 20}
-  rotationSmoothTime: 0.1
-  ignoreLayerMasks:
-    serializedVersion: 2
-    m_Bits: 0
+  tankParent: {fileID: 417648472}
+  target: {fileID: 417648472}
+  dstFromTarget: 30
+  targetDstMinMaxFar: {x: 30, y: 50}
+  targetDstMinMaxShort: {x: 0, y: 30}
+  rotationSpeed: 15
 --- !u!1 &1349122807
 GameObject:
   m_ObjectHideFlags: 0
@@ -5773,8 +5766,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1509658828}
-        m_TargetAssemblyTypeName: UIHandler, Assembly-CSharp
+      - m_Target: {fileID: 1509658830}
+        m_TargetAssemblyTypeName: SettingsUIHandler, Assembly-CSharp
         m_MethodName: LoadSettings
         m_Mode: 1
         m_Arguments:
@@ -6060,8 +6053,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1509658828}
-        m_TargetAssemblyTypeName: UIHandler, Assembly-CSharp
+      - m_Target: {fileID: 1509658830}
+        m_TargetAssemblyTypeName: SettingsUIHandler, Assembly-CSharp
         m_MethodName: SwitchScrollContent
         m_Mode: 2
         m_Arguments:
@@ -6138,7 +6131,7 @@ Transform:
   m_GameObject: {fileID: 1392287478}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 5, y: 1, z: 5}
+  m_LocalScale: {x: 12, y: 1, z: 12}
   m_Children: []
   m_Father: {fileID: 1916601847}
   m_RootOrder: 1
@@ -6457,8 +6450,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1509658828}
-        m_TargetAssemblyTypeName: UIHandler, Assembly-CSharp
+      - m_Target: {fileID: 1509658830}
+        m_TargetAssemblyTypeName: SettingsUIHandler, Assembly-CSharp
         m_MethodName: ChangeKeyBind
         m_Mode: 2
         m_Arguments:
@@ -6866,10 +6859,11 @@ GameObject:
   - component: {fileID: 1509658826}
   - component: {fileID: 1509658825}
   - component: {fileID: 1509658824}
-  - component: {fileID: 1509658828}
+  - component: {fileID: 1509658829}
+  - component: {fileID: 1509658830}
   m_Layer: 5
   m_Name: UI
-  m_TagString: Untagged
+  m_TagString: UI
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -6956,7 +6950,7 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
---- !u!114 &1509658828
+--- !u!114 &1509658829
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -6965,12 +6959,23 @@ MonoBehaviour:
   m_GameObject: {fileID: 1509658823}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f6b4bf8a08a48c343bda9d013890dcd4, type: 3}
+  m_Script: {fileID: 11500000, guid: 3037f118a75de2a4fb7fbd63d8c5e9b5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   mainMenu: 1
-  playerControl: {fileID: 0}
-  cameraControl: {fileID: 1310984680}
+--- !u!114 &1509658830
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1509658823}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc1c81960d521c14281a6280a42a8fa4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cameraControl: {fileID: 0}
   forwardRenderer: {fileID: 11400000, guid: 1737028377409684b801f913402574b8, type: 2}
   silhouettes: 1
 --- !u!1 &1512048770
@@ -7520,8 +7525,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1509658828}
-        m_TargetAssemblyTypeName: UIHandler, Assembly-CSharp
+      - m_Target: {fileID: 1509658830}
+        m_TargetAssemblyTypeName: SettingsUIHandler, Assembly-CSharp
         m_MethodName: SwitchScrollContent
         m_Mode: 2
         m_Arguments:
@@ -7653,8 +7658,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1509658828}
-        m_TargetAssemblyTypeName: UIHandler, Assembly-CSharp
+      - m_Target: {fileID: 1509658830}
+        m_TargetAssemblyTypeName: SettingsUIHandler, Assembly-CSharp
         m_MethodName: ChangeKeyBind
         m_Mode: 2
         m_Arguments:
@@ -8338,8 +8343,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1509658828}
-        m_TargetAssemblyTypeName: UIHandler, Assembly-CSharp
+      - m_Target: {fileID: 1509658830}
+        m_TargetAssemblyTypeName: SettingsUIHandler, Assembly-CSharp
         m_MethodName: ChangeKeyBind
         m_Mode: 2
         m_Arguments:
@@ -9022,8 +9027,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1509658828}
-        m_TargetAssemblyTypeName: UIHandler, Assembly-CSharp
+      - m_Target: {fileID: 1509658830}
+        m_TargetAssemblyTypeName: SettingsUIHandler, Assembly-CSharp
         m_MethodName: ChangeKeyBind
         m_Mode: 2
         m_Arguments:

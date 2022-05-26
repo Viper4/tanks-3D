@@ -5,7 +5,6 @@ using UnityEngine;
 public class GreyBot : MonoBehaviour
 {
     TargetSelector targetSelector;
-    float dstToTarget;
     Quaternion rotToTarget;
 
     BaseTankLogic baseTankLogic;
@@ -16,7 +15,6 @@ public class GreyBot : MonoBehaviour
     Quaternion turretAnchor;
     Vector3 lastEulerAngles;
 
-    [SerializeField] float maxShootAngle = 30;
     public float[] reactionTime = { 0.7f, 1.25f };
     public float[] fireDelay = { 0.3f, 0.6f };
 
@@ -28,6 +26,7 @@ public class GreyBot : MonoBehaviour
     [SerializeField] float turretRotSpeed = 25f;
     [SerializeField] float turretNoiseSpeed = 0.15f;
     [SerializeField] float turretRotSeed = 0;
+    [SerializeField] float maxShootAngle = 30;
 
     [SerializeField] float[] turretRangeX = { -20, 20 };
     
@@ -42,11 +41,11 @@ public class GreyBot : MonoBehaviour
 
     enum Mode
     {
-        Move,
+        Normal,
         Shoot,
         Avoid
     }
-    Mode mode = Mode.Move;
+    Mode mode = Mode.Normal;
 
     // Start is called before the first frame Update
     void Awake()
@@ -78,16 +77,14 @@ public class GreyBot : MonoBehaviour
     {
         if (!SceneLoader.frozen && Time.timeScale != 0)
         {
-            dstToTarget = Vector3.Distance(body.position, targetSelector.target.position);
-
-            if (fireControl.canFire && mode != Mode.Shoot && Physics.Raycast(turret.position, targetSelector.target.position - turret.position, out RaycastHit barrelHit, dstToTarget, ~baseTankLogic.transparentLayers, QueryTriggerInteraction.Ignore))
+            if (fireControl.canFire && mode != Mode.Shoot && Physics.Raycast(turret.position, targetSelector.currentTarget.position - turret.position, out RaycastHit barrelHit, Mathf.Infinity, ~baseTankLogic.transparentLayers, QueryTriggerInteraction.Ignore))
             {
                 // Ray hits the capsule collider which is on Tank Origin for player and the 2nd topmost transform for tank bots
-                if (barrelHit.transform.root.name == "Player" && targetSelector.target.root.name == "Player")
+                if (barrelHit.transform.root.name == "Player" && targetSelector.currentTarget.root.name == "Player")
                 {
                     StartCoroutine(Shoot());
                 }
-                else if (barrelHit.transform == targetSelector.target.parent) // target for tank bots is the turret
+                else if (barrelHit.transform == targetSelector.currentTarget.parent) // target for tank bots is the turret
                 {
                     StartCoroutine(Shoot());
                 }
@@ -95,9 +92,14 @@ public class GreyBot : MonoBehaviour
 
             if (rb != null)
             {
-                Vector3 targetDirection = transform.forward;
                 Vector3 velocity;
                 velocityY = baseTankLogic.IsGrounded() ? 0 : velocityY - Time.deltaTime * gravity;
+
+                Vector3 targetDirection = transform.forward;
+                if (Physics.Raycast(transform.position, -transform.up, out RaycastHit middleHit, 1) && Physics.Raycast(transform.position + transform.forward, -transform.up, out RaycastHit frontHit, 1))
+                {
+                    targetDirection = frontHit.point - middleHit.point;
+                }
 
                 // Checking Forward on the center, left, and right side
                 RaycastHit forwardHit;
@@ -108,17 +110,12 @@ public class GreyBot : MonoBehaviour
                 }
                 else if (mode == Mode.Avoid)
                 {
-                    mode = Mode.Move;
+                    mode = Mode.Normal;
                 }
 
                 switch (mode)
                 {
-                    case Mode.Move:
-                        if (Physics.Raycast(transform.position, -transform.up, out RaycastHit middleHit, 1) && Physics.Raycast(transform.position + transform.forward, -transform.up, out RaycastHit frontHit, 1))
-                        {
-                            targetDirection = frontHit.point - middleHit.point;
-                        }
-
+                    case Mode.Normal:
                         speed = moveSpeed;
 
                         baseTankLogic.noisyRotation = true;
@@ -128,7 +125,7 @@ public class GreyBot : MonoBehaviour
 
                         baseTankLogic.noisyRotation = false;
                         break;
-                    default:
+                    case Mode.Shoot:
                         speed = 0;
 
                         baseTankLogic.noisyRotation = false;
@@ -148,8 +145,8 @@ public class GreyBot : MonoBehaviour
             turret.eulerAngles = new Vector3(turret.eulerAngles.x, turret.eulerAngles.y + lastEulerAngles.y - transform.eulerAngles.y, turret.eulerAngles.z);
             barrel.eulerAngles = new Vector3(barrel.eulerAngles.x, barrel.eulerAngles.y + lastEulerAngles.y - transform.eulerAngles.y, barrel.eulerAngles.z);
 
-            // Rotating turret and barrel towards player
-            Vector3 targetDir = targetSelector.target.position - turret.position;
+            // Rotating turret and barrel towards target
+            Vector3 targetDir = targetSelector.currentTarget.position - turret.position;
             rotToTarget = Quaternion.LookRotation(targetDir);
             turret.rotation = barrel.rotation = turretAnchor = Quaternion.RotateTowards(turretAnchor, rotToTarget, Time.deltaTime * turretRotSpeed);
 
@@ -158,6 +155,10 @@ public class GreyBot : MonoBehaviour
             barrel.localEulerAngles = new Vector3(Clamping.ClampAngle(barrel.localEulerAngles.x + noiseX, turretRangeX[0], turretRangeX[1]), barrel.localEulerAngles.y + noiseY, 0);
 
             lastEulerAngles = transform.eulerAngles;
+        }
+        else
+        {
+            rb.velocity = Vector3.zero;
         }
     }
 
@@ -174,11 +175,7 @@ public class GreyBot : MonoBehaviour
             yield return new WaitForSeconds(Random.Range(fireDelay[0], fireDelay[1]));
             StartCoroutine(GetComponent<FireControl>().Shoot());
 
-            mode = Mode.Move;
-        }
-        else
-        {
-            yield return null;
+            mode = Mode.Normal;
         }
     }
 }

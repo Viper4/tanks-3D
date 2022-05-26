@@ -145,7 +145,7 @@ public class SceneLoader : MonoBehaviour
 
     IEnumerator DelayedStart()
     {
-        GameObject.Find("Player").transform.Find("UI").GetComponent<UIHandler>().Resume();
+        GameObject.Find("Player").transform.Find("UI").GetComponent<PlayerUIHandler>().Resume();
         yield return new WaitForSecondsRealtime(3);
         frozen = false;
     }

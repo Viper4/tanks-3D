@@ -10,7 +10,7 @@ public class PlayerControl : MonoBehaviour
 
     Transform tankOrigin;
 
-    UIHandler UIHandler;
+    PlayerUIHandler playerUIHandler;
 
     public Dictionary<string, KeyCode> keyBinds { get; set; } = new Dictionary<string, KeyCode>();
 
@@ -40,19 +40,13 @@ public class PlayerControl : MonoBehaviour
     // Start is called before the first frame Update
     void Awake()
     {
-        rb = GetComponent<Rigidbody>();
-
         baseTankLogic = GetComponent<BaseTankLogic>();
         mainCamera = Camera.main.transform;
 
         tankOrigin = transform.Find("Tank Origin");
+        rb = tankOrigin.GetComponent<Rigidbody>();
 
-        UIHandler = GameObject.Find("UI").GetComponent<UIHandler>();
-    }
-
-    private void Start()
-    {
-        SaveSystem.LoadSettings("settings.json");
+        playerUIHandler = GameObject.Find("UI").GetComponent<PlayerUIHandler>();
     }
 
     // Update is called once per frame
@@ -73,13 +67,13 @@ public class PlayerControl : MonoBehaviour
                 }
                 else if (Input.GetKeyDown(KeyCode.Escape))
                 {
-                    if (UIHandler.UIElements["PauseMenu"].gameObject.activeSelf)
+                    if (BaseUIHandler.UIElements["PauseMenu"].gameObject.activeSelf)
                     {
-                        UIHandler.Resume();
+                        playerUIHandler.Resume();
                     }
                     else
                     {
-                        UIHandler.Pause();
+                        playerUIHandler.Pause();
                     }
                 }
 

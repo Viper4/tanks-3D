@@ -6,8 +6,6 @@ public class BrownBot : MonoBehaviour
 {
     BaseTankLogic baseTankLogic;
 
-    float dstToTarget;
-
     Transform turret;
     Transform barrel;
 
@@ -43,10 +41,8 @@ public class BrownBot : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!SceneLoader.frozen && Time.timeScale != 0 && targetSelector.target != null)
+        if (!SceneLoader.frozen && Time.timeScale != 0 && targetSelector.currentTarget != null)
         {
-            dstToTarget = Vector3.Distance(transform.position, targetSelector.target.position);
-
             float angleX = Mathf.PingPong(Time.time * turretRotSpeed, turretScanRange.x * 2) - turretScanRange.x;
             float angleY = Mathf.PingPong(Time.time * turretRotSpeed, turretScanRange.y * 2) - turretScanRange.y;
 
@@ -56,14 +52,14 @@ public class BrownBot : MonoBehaviour
             barrel.localEulerAngles = new Vector3(angleX, currentScanOffset, 0);
 
             // If target is in front of barrel then fire
-            if (!shooting && Physics.Raycast(barrel.position + barrel.forward, barrel.forward, out RaycastHit barrelHit, dstToTarget, ~baseTankLogic.transparentLayers, QueryTriggerInteraction.Ignore))
+            if (!shooting && Physics.Raycast(barrel.position + barrel.forward, barrel.forward, out RaycastHit barrelHit, Mathf.Infinity, ~baseTankLogic.transparentLayers, QueryTriggerInteraction.Ignore))
             {
                 // Ray hits the capsule collider which is on Tank Origin for player and the 2nd topmost transform for tank bots
-                if (barrelHit.transform.root.name == "Player" && targetSelector.target.root.name == "Player")
+                if (barrelHit.transform.root.name == "Player" && targetSelector.currentTarget.root.name == "Player")
                 {
                     StartCoroutine(Shoot());
                 }
-                else if (barrelHit.transform == targetSelector.target.parent) // target for tank bots is the turret
+                else if (barrelHit.transform == targetSelector.currentTarget.parent) // target for tank bots is the turret
                 {
                     StartCoroutine(Shoot());
                 }

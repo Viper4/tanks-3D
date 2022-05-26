@@ -1,12 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
-public class BasicUIHandler : MonoBehaviour
+public class BaseUIHandler : MonoBehaviour
 {
     [SerializeField] bool mainMenu = false;
-    public Dictionary<string, Transform> UIElements = new Dictionary<string, Transform>();
+    public static Dictionary<string, Transform> UIElements = new Dictionary<string, Transform>();
 
     private void Awake()
     {

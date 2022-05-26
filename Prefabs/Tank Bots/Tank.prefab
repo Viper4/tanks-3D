@@ -413,6 +413,7 @@ GameObject:
   - component: {fileID: 8015774000218417766}
   - component: {fileID: 7239095871577845978}
   - component: {fileID: -1708683654604279647}
+  - component: {fileID: 6691410845055233786}
   - component: {fileID: 5844788160669333172}
   - component: {fileID: 2650588644746480228}
   m_Layer: 6
@@ -500,6 +501,25 @@ MonoBehaviour:
   tankRotNoiseSpeed: 0.5
   tankRotSeed: 0
   flipAngleThreshold: 20
+--- !u!114 &6691410845055233786
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7239095871577845980}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 42b2840cfbe33ae41a58aa074894804d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  target: {fileID: 0}
+  findTarget: 0
+  turret: {fileID: 470245200653378290}
+  ignoreLayerMask:
+    serializedVersion: 2
+    m_Bits: 1838
+  tankParent: {fileID: 0}
 --- !u!54 &5844788160669333172
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -590,7 +610,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: -2150505489808929419, guid: 5460aeb10bb94544886a6a579f2d15ac, type: 3}
+  - {fileID: 1015647835304469306, guid: 5460aeb10bb94544886a6a579f2d15ac, type: 3}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

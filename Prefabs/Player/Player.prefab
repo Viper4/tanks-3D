@@ -121,8 +121,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 867728886155491253}
-        m_TargetAssemblyTypeName: UIHandler, Assembly-CSharp
+      - m_Target: {fileID: 221091986481781732}
+        m_TargetAssemblyTypeName: SettingsUIHandler, Assembly-CSharp
         m_MethodName: ChangeKeyBind
         m_Mode: 2
         m_Arguments:
@@ -291,8 +291,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 867728886155491253}
-        m_TargetAssemblyTypeName: UIHandler, Assembly-CSharp
+      - m_Target: {fileID: 221091986481781732}
+        m_TargetAssemblyTypeName: SettingsUIHandler, Assembly-CSharp
         m_MethodName: ChangeKeyBind
         m_Mode: 2
         m_Arguments:
@@ -503,8 +503,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 867728886155491253}
-        m_TargetAssemblyTypeName: UIHandler, Assembly-CSharp
+      - m_Target: {fileID: 221091986481781732}
+        m_TargetAssemblyTypeName: SettingsUIHandler, Assembly-CSharp
         m_MethodName: SaveSettings
         m_Mode: 1
         m_Arguments:
@@ -666,7 +666,7 @@ TrailRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Time: 50
+  m_Time: 1e+20
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 0.5
@@ -923,8 +923,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 867728886155491253}
-        m_TargetAssemblyTypeName: UIHandler, Assembly-CSharp
+      - m_Target: {fileID: 221091986481781732}
+        m_TargetAssemblyTypeName: SettingsUIHandler, Assembly-CSharp
         m_MethodName: ChangeKeyBind
         m_Mode: 2
         m_Arguments:
@@ -1210,8 +1210,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 867728886155491253}
-        m_TargetAssemblyTypeName: UIHandler, Assembly-CSharp
+      - m_Target: {fileID: 221091986481781732}
+        m_TargetAssemblyTypeName: SettingsUIHandler, Assembly-CSharp
         m_MethodName: LoadSettings
         m_Mode: 1
         m_Arguments:
@@ -1269,6 +1269,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5113858065110483005}
   - component: {fileID: 6500764241754483079}
+  - component: {fileID: 4282557674429733190}
   m_Layer: 7
   m_Name: Tank Origin
   m_TagString: Untagged
@@ -1309,6 +1310,22 @@ CapsuleCollider:
   m_Height: 1.6
   m_Direction: 1
   m_Center: {x: 0, y: 0.8, z: 0}
+--- !u!54 &4282557674429733190
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1451124327931830282}
+  serializedVersion: 2
+  m_Mass: 10
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_UseGravity: 0
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 112
+  m_CollisionDetection: 0
 --- !u!1 &1510868741027181070
 GameObject:
   m_ObjectHideFlags: 0
@@ -1430,8 +1447,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 867728886155491253}
-        m_TargetAssemblyTypeName: UIHandler, Assembly-CSharp
+      - m_Target: {fileID: 221091986481781732}
+        m_TargetAssemblyTypeName: SettingsUIHandler, Assembly-CSharp
         m_MethodName: SwitchScrollContent
         m_Mode: 2
         m_Arguments:
@@ -1717,8 +1734,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 867728886155491253}
-        m_TargetAssemblyTypeName: UIHandler, Assembly-CSharp
+      - m_Target: {fileID: 221091986481781732}
+        m_TargetAssemblyTypeName: SettingsUIHandler, Assembly-CSharp
         m_MethodName: SwitchScrollContent
         m_Mode: 2
         m_Arguments:
@@ -2198,8 +2215,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 867728886155491253}
-        m_TargetAssemblyTypeName: UIHandler, Assembly-CSharp
+      - m_Target: {fileID: 221091986481781732}
+        m_TargetAssemblyTypeName: SettingsUIHandler, Assembly-CSharp
         m_MethodName: ChangeKeyBind
         m_Mode: 2
         m_Arguments:
@@ -3170,7 +3187,7 @@ TrailRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Time: 50
+  m_Time: 1e+20
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 0.5
@@ -3423,24 +3440,24 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 867728886155491253}
-        m_TargetAssemblyTypeName: UIHandler, Assembly-CSharp
-        m_MethodName: ActivateElement
+      - m_Target: {fileID: 6131770985804607588}
+        m_TargetAssemblyTypeName: BasicUIHandler, Assembly-CSharp
+        m_MethodName: DeactivateElement
         m_Mode: 2
         m_Arguments:
-          m_ObjectArgument: {fileID: 3300002247853746454}
+          m_ObjectArgument: {fileID: 4014519159986641761}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Transform, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-      - m_Target: {fileID: 867728886155491253}
-        m_TargetAssemblyTypeName: UIHandler, Assembly-CSharp
-        m_MethodName: DeactivateElement
+      - m_Target: {fileID: 6131770985804607588}
+        m_TargetAssemblyTypeName: BasicUIHandler, Assembly-CSharp
+        m_MethodName: ActivateElement
         m_Mode: 2
         m_Arguments:
-          m_ObjectArgument: {fileID: 4014519159986641761}
+          m_ObjectArgument: {fileID: 3300002247853746454}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Transform, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
@@ -3568,8 +3585,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 867728886155491253}
-        m_TargetAssemblyTypeName: UIHandler, Assembly-CSharp
+      - m_Target: {fileID: 221091986481781732}
+        m_TargetAssemblyTypeName: SettingsUIHandler, Assembly-CSharp
         m_MethodName: SwitchScrollContent
         m_Mode: 2
         m_Arguments:
@@ -3867,8 +3884,8 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 867728886155491253}
-        m_TargetAssemblyTypeName: UIHandler, Assembly-CSharp
+      - m_Target: {fileID: 221091986481781732}
+        m_TargetAssemblyTypeName: SettingsUIHandler, Assembly-CSharp
         m_MethodName: ChangeSensitivity
         m_Mode: 2
         m_Arguments:
@@ -4178,8 +4195,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 867728886155491253}
-        m_TargetAssemblyTypeName: UIHandler, Assembly-CSharp
+      - m_Target: {fileID: 221091986481781732}
+        m_TargetAssemblyTypeName: SettingsUIHandler, Assembly-CSharp
         m_MethodName: ChangeKeyBind
         m_Mode: 2
         m_Arguments:
@@ -4311,8 +4328,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 867728886155491253}
-        m_TargetAssemblyTypeName: UIHandler, Assembly-CSharp
+      - m_Target: {fileID: 6125000666325210241}
+        m_TargetAssemblyTypeName: PlayerUIHandler, Assembly-CSharp
         m_MethodName: Resume
         m_Mode: 1
         m_Arguments:
@@ -4519,8 +4536,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 867728886155491253}
-        m_TargetAssemblyTypeName: UIHandler, Assembly-CSharp
+      - m_Target: {fileID: 221091986481781732}
+        m_TargetAssemblyTypeName: SettingsUIHandler, Assembly-CSharp
         m_MethodName: ChangeKeyBind
         m_Mode: 2
         m_Arguments:
@@ -4905,8 +4922,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 867728886155491253}
-        m_TargetAssemblyTypeName: UIHandler, Assembly-CSharp
+      - m_Target: {fileID: 221091986481781732}
+        m_TargetAssemblyTypeName: SettingsUIHandler, Assembly-CSharp
         m_MethodName: SwitchScrollContent
         m_Mode: 2
         m_Arguments:
@@ -5423,8 +5440,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 867728886155491253}
-        m_TargetAssemblyTypeName: UIHandler, Assembly-CSharp
+      - m_Target: {fileID: 221091986481781732}
+        m_TargetAssemblyTypeName: SettingsUIHandler, Assembly-CSharp
         m_MethodName: ChangeKeyBind
         m_Mode: 2
         m_Arguments:
@@ -5741,7 +5758,7 @@ GameObject:
   - component: {fileID: 6161557077281983732}
   m_Layer: 7
   m_Name: Camera Target
-  m_TagString: Untagged
+  m_TagString: Tank
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -5892,12 +5909,13 @@ MonoBehaviour:
   target: {fileID: 6161557077281983732}
   reticle: {fileID: 5917198366977948427}
   dstFromTarget: 6
+  targetDstMinMax: {x: 0, y: 25}
   pitchMinMaxN: {x: -40, y: 80}
   pitchMinMaxL: {x: -20, y: 20}
   rotationSmoothTime: 0.1
   ignoreLayerMasks:
     serializedVersion: 2
-    m_Bits: 1668
+    m_Bits: 1702
 --- !u!114 &9007769207834555923
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6291,8 +6309,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 867728886155491253}
-        m_TargetAssemblyTypeName: UIHandler, Assembly-CSharp
+      - m_Target: {fileID: 221091986481781732}
+        m_TargetAssemblyTypeName: SettingsUIHandler, Assembly-CSharp
         m_MethodName: ChangeKeyBind
         m_Mode: 2
         m_Arguments:
@@ -6411,7 +6429,6 @@ GameObject:
   - component: {fileID: 6432079618835187449}
   - component: {fileID: 8717466537847481428}
   - component: {fileID: -1731460198348781545}
-  - component: {fileID: 8322250844726124174}
   m_Layer: 7
   m_Name: Player
   m_TagString: Tank
@@ -6454,7 +6471,7 @@ MonoBehaviour:
   highestLevel: 0
   cheats: 1
   godMode: 0
-  movementSpeed: 10
+  movementSpeed: 12
   speedSmoothTime: 0.1
   turnSmoothTime: 0.08
   gravity: 8
@@ -6477,7 +6494,7 @@ MonoBehaviour:
   bullet: {fileID: 4307626717143694363, guid: de9dbd5b8f77ecb4a866f8d8cf75c17d, type: 3}
   shootEffect: {fileID: 7275907135579404139, guid: 71b07424ffcb49a41830ab0761db5c07, type: 3}
   bulletLimit: 5
-  fireCooldown: 0.25
+  fireCooldown: 0.2
   canFire: 1
   solidLayerMask:
     serializedVersion: 2
@@ -6538,22 +6555,6 @@ MonoBehaviour:
   tankRotNoiseSpeed: 0.5
   tankRotSeed: 0
   flipAngleThreshold: 20
---- !u!54 &8322250844726124174
-Rigidbody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6432079618835187455}
-  serializedVersion: 2
-  m_Mass: 10
-  m_Drag: 0
-  m_AngularDrag: 0.05
-  m_UseGravity: 0
-  m_IsKinematic: 0
-  m_Interpolate: 0
-  m_Constraints: 112
-  m_CollisionDetection: 0
 --- !u!1 &6629717739489506819
 GameObject:
   m_ObjectHideFlags: 0
@@ -6833,24 +6834,24 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 867728886155491253}
-        m_TargetAssemblyTypeName: UIHandler, Assembly-CSharp
-        m_MethodName: ActivateElement
+      - m_Target: {fileID: 6131770985804607588}
+        m_TargetAssemblyTypeName: BasicUIHandler, Assembly-CSharp
+        m_MethodName: DeactivateElement
         m_Mode: 2
         m_Arguments:
-          m_ObjectArgument: {fileID: 4014519159986641761}
+          m_ObjectArgument: {fileID: 3300002247853746454}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Transform, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-      - m_Target: {fileID: 867728886155491253}
-        m_TargetAssemblyTypeName: UIHandler, Assembly-CSharp
-        m_MethodName: DeactivateElement
+      - m_Target: {fileID: 6131770985804607588}
+        m_TargetAssemblyTypeName: BasicUIHandler, Assembly-CSharp
+        m_MethodName: ActivateElement
         m_Mode: 2
         m_Arguments:
-          m_ObjectArgument: {fileID: 3300002247853746454}
+          m_ObjectArgument: {fileID: 4014519159986641761}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Transform, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
@@ -8235,8 +8236,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 867728886155491253}
-        m_TargetAssemblyTypeName: UIHandler, Assembly-CSharp
+      - m_Target: {fileID: 6131770985804607588}
+        m_TargetAssemblyTypeName: BasicUIHandler, Assembly-CSharp
         m_MethodName: Exit
         m_Mode: 1
         m_Arguments:
@@ -8368,8 +8369,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 867728886155491253}
-        m_TargetAssemblyTypeName: UIHandler, Assembly-CSharp
+      - m_Target: {fileID: 221091986481781732}
+        m_TargetAssemblyTypeName: SettingsUIHandler, Assembly-CSharp
         m_MethodName: ChangeKeyBind
         m_Mode: 2
         m_Arguments:
@@ -8583,7 +8584,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1395432473110206495}
-  - component: {fileID: 867728886155491253}
+  - component: {fileID: 6131770985804607588}
+  - component: {fileID: 221091986481781732}
+  - component: {fileID: 6125000666325210241}
   m_Layer: 5
   m_Name: UI
   m_TagString: Untagged
@@ -8608,7 +8611,7 @@ Transform:
   m_Father: {fileID: 5911122915818200133}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &867728886155491253
+--- !u!114 &6131770985804607588
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8617,13 +8620,36 @@ MonoBehaviour:
   m_GameObject: {fileID: 8953837860132725293}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f6b4bf8a08a48c343bda9d013890dcd4, type: 3}
+  m_Script: {fileID: 11500000, guid: 3037f118a75de2a4fb7fbd63d8c5e9b5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mainMenu: 0
+--- !u!114 &221091986481781732
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8953837860132725293}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc1c81960d521c14281a6280a42a8fa4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  forwardRenderer: {fileID: 11400000, guid: 1737028377409684b801f913402574b8, type: 2}
+--- !u!114 &6125000666325210241
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8953837860132725293}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 400bec422532048428c62ad49a4f5be5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   playerControl: {fileID: 6432079618835187448}
-  cameraControl: {fileID: 6161557078196686872}
-  forwardRenderer: {fileID: 11400000, guid: 1737028377409684b801f913402574b8, type: 2}
-  silhouettes: 1
 --- !u!1 &8959945014317921763
 GameObject:
   m_ObjectHideFlags: 0
@@ -8709,8 +8735,8 @@ MonoBehaviour:
   onValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 867728886155491253}
-        m_TargetAssemblyTypeName: UIHandler, Assembly-CSharp
+      - m_Target: {fileID: 221091986481781732}
+        m_TargetAssemblyTypeName: SettingsUIHandler, Assembly-CSharp
         m_MethodName: ToggleSilhouettes
         m_Mode: 2
         m_Arguments:
