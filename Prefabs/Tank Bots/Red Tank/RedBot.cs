@@ -79,6 +79,19 @@ public class RedBot : MonoBehaviour
     {
         if (!SceneLoader.frozen && Time.timeScale != 0)
         {
+            if (fireControl.canFire && mode != Mode.Shoot && !shooting && Physics.Raycast(barrel.position, targetSelector.currentTarget.position - barrel.position, out RaycastHit barrelHit, Mathf.Infinity, ~baseTankLogic.transparentLayers, QueryTriggerInteraction.Ignore))
+            {
+                // Ray hits the capsule collider which is on Tank Origin for player and the 2nd topmost transform for tank bots
+                if (barrelHit.transform.root.name == "Player" && targetSelector.currentTarget.root.name == "Player")
+                {
+                    StartCoroutine(Shoot());
+                }
+                else if (barrelHit.transform == targetSelector.currentTarget.parent || barrelHit.transform == targetSelector.currentTarget) // target for tank bots is the turret, everything else is its own transform
+                {
+                    StartCoroutine(Shoot());
+                }
+            }
+            
             if (rb != null)
             {
                 Vector3 velocity;
@@ -134,38 +147,24 @@ public class RedBot : MonoBehaviour
                 velocity = targetDirection * speed + Vector3.up * velocityY;
 
                 rb.velocity = velocity;
-
-                // Inaccuracy to rotation with noise
-                float noiseX = inaccuracy.x * (Mathf.PerlinNoise(turretRotSeed + Time.time * turretNoiseSpeed, turretRotSeed + 1f + Time.time * turretNoiseSpeed) - 0.5f);
-                float noiseY = inaccuracy.y * (Mathf.PerlinNoise(turretRotSeed + 4f + Time.time * turretNoiseSpeed, turretRotSeed + 5f + Time.time * turretNoiseSpeed) - 0.5f);
-
-                // Correcting turret and barrel y rotation to not depend on the parent
-                turret.eulerAngles = new Vector3(turret.eulerAngles.x, turret.eulerAngles.y + lastEulerAngles.y - transform.eulerAngles.y, turret.eulerAngles.z);
-                barrel.eulerAngles = new Vector3(barrel.eulerAngles.x, barrel.eulerAngles.y + lastEulerAngles.y - transform.eulerAngles.y, barrel.eulerAngles.z);
-
-                // Rotating turret and barrel towards target
-                Vector3 targetDir = targetSelector.currentTarget.position - turret.position;
-                rotToTarget = Quaternion.LookRotation(targetDir);
-                turret.rotation = barrel.rotation = turretAnchor = Quaternion.RotateTowards(turretAnchor, rotToTarget, Time.deltaTime * turretRotSpeed);
-
-                // Zeroing x and z eulers of turret and clamping barrel x euler
-                turret.localEulerAngles = new Vector3(0, turret.localEulerAngles.y + noiseY, 0);
-                barrel.localEulerAngles = new Vector3(Clamping.ClampAngle(barrel.localEulerAngles.x + noiseX, turretRangeX[0], turretRangeX[1]), barrel.localEulerAngles.y + noiseY, 0);
             }
+            
+            // Inaccuracy to rotation with noise
+            float noiseX = inaccuracy.x * (Mathf.PerlinNoise(turretRotSeed + Time.time * turretNoiseSpeed, turretRotSeed + 1f + Time.time * turretNoiseSpeed) - 0.5f);
+            float noiseY = inaccuracy.y * (Mathf.PerlinNoise(turretRotSeed + 4f + Time.time * turretNoiseSpeed, turretRotSeed + 5f + Time.time * turretNoiseSpeed) - 0.5f);
 
-            if (fireControl.canFire && mode != Mode.Shoot && !shooting && Physics.Raycast(barrel.position, targetSelector.currentTarget.position - barrel.position, out RaycastHit barrelHit, Mathf.Infinity, ~baseTankLogic.transparentLayers, QueryTriggerInteraction.Ignore))
-            {
-                // Ray hits the capsule collider which is on Tank Origin for player and the 2nd topmost transform for tank bots
-                if (barrelHit.transform.root.name == "Player" && targetSelector.currentTarget.root.name == "Player")
-                {
-                    StartCoroutine(Shoot());
-                }
-                else if (barrelHit.transform == targetSelector.currentTarget.parent || barrelHit.transform == targetSelector.currentTarget) // target for tank bots is the turret, everything else is its own transform
-                {
-                    StartCoroutine(Shoot());
-                }
-            }
+            // Correcting turret and barrel y rotation to not depend on the parent
+            turret.eulerAngles = new Vector3(turret.eulerAngles.x, turret.eulerAngles.y + lastEulerAngles.y - transform.eulerAngles.y, turret.eulerAngles.z);
+            barrel.eulerAngles = new Vector3(barrel.eulerAngles.x, barrel.eulerAngles.y + lastEulerAngles.y - transform.eulerAngles.y, barrel.eulerAngles.z);
 
+            // Rotating turret and barrel towards target
+            Vector3 targetDir = targetSelector.currentTarget.position - turret.position;
+            rotToTarget = Quaternion.LookRotation(targetDir);
+            turret.rotation = barrel.rotation = turretAnchor = Quaternion.RotateTowards(turretAnchor, rotToTarget, Time.deltaTime * turretRotSpeed);
+
+            // Zeroing x and z eulers of turret and clamping barrel x euler
+            turret.localEulerAngles = new Vector3(0, turret.localEulerAngles.y + noiseY, 0);
+            barrel.localEulerAngles = new Vector3(Clamping.ClampAngle(barrel.localEulerAngles.x + noiseX, turretRangeX[0], turretRangeX[1]), barrel.localEulerAngles.y + noiseY, 0);
             lastEulerAngles = transform.eulerAngles;
         }
         else
@@ -220,7 +219,7 @@ public class RedBot : MonoBehaviour
     {
         // When angle between barrel and target is less than shootAngle, then stop and fire
         float angle = Quaternion.Angle(barrel.rotation, rotToTarget);
-        float shootAngle = mode == Mode.Defend ? maxShootAngle * 2.5f : maxShootAngle;
+        float shootAngle = mode == Mode.Defend ? maxShootAngle * 4f : maxShootAngle;
         if(angle < shootAngle)
         {
             shooting = true;
