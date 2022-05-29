@@ -28,48 +28,82 @@ public class BulletBehaviour : MonoBehaviour
         rb.velocity = transform.forward * speed;
     }
 
+    void Update()
+    {
+        if (SceneLoader.frozen)
+        {
+            rb.constraints = RigidbodyConstraints.FreezeAll;
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (!SceneLoader.frozen)
+        {
+            switch (other.tag)
+            {
+                case "Tank":
+                    if (other.transform.parent.name != "Tanks")
+                    {
+                        if (other.transform.root.name != "Player")
+                        {
+                            KillTarget(other.transform.parent);
+                        }
+                        else
+                        {
+                            KillTarget(other.transform.root);
+                        }
+                    }
+                    break;
+            }
+        }
+    }
+
     private void OnCollisionEnter(Collision other)
     {
-        switch (other.transform.tag)
+        if (!SceneLoader.frozen)
         {
-            case "Tank":
-                KillTarget(other.transform);
-                break;
-            case "Penetrable":
-                // If can pierce, destroy the hit object, otherwise bounce off
-                if (pierceLevel != 0)
-                {
-                    if (pierces < pierceLevel)
+            switch (other.transform.tag)
+            {
+                case "Tank":
+                    KillTarget(other.transform);
+                    break;
+                case "Penetrable":
+                    // If can pierce, destroy the hit object, otherwise bounce off
+                    if (pierceLevel != 0)
                     {
-                        pierces++;
-                        // Resetting velocity
-                        rb.velocity = transform.forward * speed;
+                        if (pierces < pierceLevel)
+                        {
+                            pierces++;
+                            // Resetting velocity
+                            rb.velocity = transform.forward * speed;
+                        }
+                        else
+                        {
+                            DestroySelf();
+                        }
+                        // Playing destroy particles for hit object and destroying it
+                        other.transform.GetComponent<BreakParticleSystem>().PlayParticles();
+                        Destroy(other.gameObject);
                     }
                     else
                     {
-                        DestroySelf();
+                        BounceOff(other);
                     }
-                    // Playing destroy particles for hit object and destroying it
-                    other.transform.GetComponent<BreakParticleSystem>().PlayParticles();
+                    break;
+                case "Kill Boundary":
+                    // Kill self
+                    DestroySelf();
+                    break;
+                case "Bullet":
+                    // Destroy bullet
                     Destroy(other.gameObject);
-                }
-                else
-                {
+                    DestroySelf();
+                    break;
+                default:
                     BounceOff(other);
-                }
-                break;
-            case "Kill Boundary":
-                // Kill self
-                DestroySelf();
-                break;
-            case "Bullet":
-                // Destroy bullet
-                Destroy(other.gameObject);
-                DestroySelf();
-                break;
-            default:
-                BounceOff(other);
-                break;
+                    break;
+            }
         }
     }
 
@@ -99,9 +133,9 @@ public class BulletBehaviour : MonoBehaviour
             if (baseTankLogic != null)
             {
                 baseTankLogic.Explode();
-                if (owner.name == "Player")
+                if (owner != null && owner.name == "Player")
                 {
-                    owner.GetComponent<PlayerControl>().kills++;
+                    SaveSystem.currentPlayerData.kills++;
                 }
             }
         }
@@ -123,7 +157,7 @@ public class BulletBehaviour : MonoBehaviour
     void DestroySelf()
     {
         // Keeping track of how many bullets a tank has fired
-        if(owner != null)
+        if (owner != null)
         {
             owner.GetComponent<FireControl>().bulletsFired -= 1;
         }
@@ -144,9 +178,9 @@ public class BulletBehaviour : MonoBehaviour
                         if (collider.transform.parent != null)
                         {
                             collider.transform.parent.GetComponent<BaseTankLogic>().Explode();
-                            if (owner.name == "Player")
+                            if (owner != null && owner.name == "Player")
                             {
-                                owner.GetComponent<PlayerControl>().kills++;
+                                SaveSystem.currentPlayerData.kills++;
                             }
                         }
                         break;

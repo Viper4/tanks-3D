@@ -4,67 +4,53 @@ using UnityEngine;
 
 public class GreyBot : MonoBehaviour
 {
-    public Transform target;
-    float dstToTarget;
+    TargetSelector targetSelector;
     Quaternion rotToTarget;
-
-    [SerializeField] LayerMask ignoreLayerMask;
 
     BaseTankLogic baseTankLogic;
 
     Transform body;
     Transform turret;
     Transform barrel;
-
-    [SerializeField] float maxShootAngle = 30;
+    Quaternion turretAnchor;
+    Vector3 lastEulerAngles;
 
     public float[] reactionTime = { 0.7f, 1.25f };
-
     public float[] fireDelay = { 0.3f, 0.6f };
-    float cooldown = 0;
 
     Rigidbody rb;
 
-    [SerializeField] Vector2 inaccuracy = new Vector2(10, 25);
-
     [SerializeField] bool randomizeSeed = true;
 
+    [SerializeField] Vector2 inaccuracy = new Vector2(10, 25);
     [SerializeField] float turretRotSpeed = 25f;
     [SerializeField] float turretNoiseSpeed = 0.15f;
     [SerializeField] float turretRotSeed = 0;
-    Quaternion turretAnchor;
+    [SerializeField] float maxShootAngle = 30;
 
     [SerializeField] float[] turretRangeX = { -20, 20 };
-
-    Vector3 lastEulerAngles;
     
     [SerializeField] float moveSpeed = 4f;
     [SerializeField] float avoidSpeed = 2f;
-
     float speed = 4;
+
     [SerializeField] float gravity = 8;
     float velocityY = 0;
 
-    float triggerRadius = 3f;
-
-    Coroutine shootRoutine;
+    FireControl fireControl;
 
     enum Mode
     {
-        Move,
+        Normal,
         Shoot,
         Avoid
     }
-    Mode mode = Mode.Move;
+    Mode mode = Mode.Normal;
 
     // Start is called before the first frame Update
     void Awake()
     {
-        if (target == null)
-        {
-            Debug.Log("The variable target of GreyBot has been defaulted to the player");
-            target = GameObject.Find("Player").transform;
-        }
+        targetSelector = GetComponent<TargetSelector>();
 
         baseTankLogic = GetComponent<BaseTankLogic>();
 
@@ -83,54 +69,53 @@ public class GreyBot : MonoBehaviour
             turretRotSeed = Random.Range(-99.0f, 99.0f);
         }
 
-        triggerRadius = GetComponent<SphereCollider>().radius;
+        fireControl = GetComponent<FireControl>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (!SceneLoader.frozen && Time.timeScale != 0)
+        if (!SceneLoader.frozen && Time.timeScale != 0 && targetSelector.currentTarget != null)
         {
-            cooldown = cooldown > 0 ? cooldown - Time.deltaTime : 0;
-            dstToTarget = Vector3.Distance(body.position, target.position);
-
-            if (mode != Mode.Shoot && cooldown == 0 && !Physics.Raycast(turret.position, target.position - turret.position, dstToTarget, ~ignoreLayerMask, QueryTriggerInteraction.Ignore))
+            if (fireControl.canFire && mode != Mode.Shoot && Physics.Raycast(turret.position, targetSelector.currentTarget.position - turret.position, out RaycastHit barrelHit, Mathf.Infinity, ~baseTankLogic.transparentLayers, QueryTriggerInteraction.Ignore))
             {
-                StartCoroutine(Shoot());
-            }
-            else if (shootRoutine != null)
-            {
-                StopCoroutine(shootRoutine);
-                shootRoutine = null;
-                mode = Mode.Move;
+                // Ray hits the capsule collider which is on Tank Origin for player and the 2nd topmost transform for tank bots
+                if (barrelHit.transform.root.name == "Player" && targetSelector.currentTarget.root.name == "Player")
+                {
+                    StartCoroutine(Shoot());
+                }
+                else if (barrelHit.transform == targetSelector.currentTarget.parent || barrelHit.transform == targetSelector.currentTarget) // target for tank bots is the turret, otherwise the target is itself
+                {
+                    StartCoroutine(Shoot());
+                }
             }
 
             if (rb != null)
             {
-                Vector3 targetDirection = transform.forward;
                 Vector3 velocity;
                 velocityY = baseTankLogic.IsGrounded() ? 0 : velocityY - Time.deltaTime * gravity;
 
+                Vector3 targetDirection = transform.forward;
+                if (Physics.Raycast(transform.position, -transform.up, out RaycastHit middleHit, 1) && Physics.Raycast(transform.position + transform.forward, -transform.up, out RaycastHit frontHit, 1))
+                {
+                    targetDirection = frontHit.point - middleHit.point;
+                }
+
                 // Checking Forward on the center, left, and right side
                 RaycastHit forwardHit;
-                if (Physics.Raycast(body.position, transform.forward, out forwardHit, 2) || Physics.Raycast(body.position + transform.right, transform.forward, out forwardHit, 2) || Physics.Raycast(body.position - transform.right, transform.forward, out forwardHit, 2))
+                if (Physics.Raycast(body.position, transform.forward, out forwardHit, 2, baseTankLogic.barrierLayers) || Physics.Raycast(body.position + transform.right, transform.forward, out forwardHit, 2, baseTankLogic.barrierLayers) || Physics.Raycast(body.position - transform.right, transform.forward, out forwardHit, 2, baseTankLogic.barrierLayers))
                 {
                     mode = Mode.Avoid;
-                    baseTankLogic.ObstacleAvoidance(forwardHit, triggerRadius);
+                    baseTankLogic.ObstacleAvoidance(forwardHit, 2, baseTankLogic.barrierLayers);
                 }
                 else if (mode == Mode.Avoid)
                 {
-                    mode = Mode.Move;
+                    mode = Mode.Normal;
                 }
 
                 switch (mode)
                 {
-                    case Mode.Move:
-                        if (Physics.Raycast(transform.position, -transform.up, out RaycastHit middleHit, 1) && Physics.Raycast(transform.position + transform.forward, -transform.up, out RaycastHit frontHit, 1))
-                        {
-                            targetDirection = frontHit.point - middleHit.point;
-                        }
-
+                    case Mode.Normal:
                         speed = moveSpeed;
 
                         baseTankLogic.noisyRotation = true;
@@ -140,7 +125,7 @@ public class GreyBot : MonoBehaviour
 
                         baseTankLogic.noisyRotation = false;
                         break;
-                    default:
+                    case Mode.Shoot:
                         speed = 0;
 
                         baseTankLogic.noisyRotation = false;
@@ -160,8 +145,8 @@ public class GreyBot : MonoBehaviour
             turret.eulerAngles = new Vector3(turret.eulerAngles.x, turret.eulerAngles.y + lastEulerAngles.y - transform.eulerAngles.y, turret.eulerAngles.z);
             barrel.eulerAngles = new Vector3(barrel.eulerAngles.x, barrel.eulerAngles.y + lastEulerAngles.y - transform.eulerAngles.y, barrel.eulerAngles.z);
 
-            // Rotating turret and barrel towards player
-            Vector3 targetDir = target.position - turret.position;
+            // Rotating turret and barrel towards target
+            Vector3 targetDir = targetSelector.currentTarget.position - turret.position;
             rotToTarget = Quaternion.LookRotation(targetDir);
             turret.rotation = barrel.rotation = turretAnchor = Quaternion.RotateTowards(turretAnchor, rotToTarget, Time.deltaTime * turretRotSpeed);
 
@@ -171,6 +156,10 @@ public class GreyBot : MonoBehaviour
 
             lastEulerAngles = transform.eulerAngles;
         }
+        else
+        {
+            rb.velocity = Vector3.zero;
+        }
     }
 
     IEnumerator Shoot()
@@ -179,22 +168,14 @@ public class GreyBot : MonoBehaviour
         float angle = Quaternion.Angle(barrel.rotation, rotToTarget);
         if (angle < maxShootAngle)
         {
-
             // Keeps moving until reaction time from seeing player is reached
             yield return new WaitForSeconds(Random.Range(reactionTime[0], reactionTime[1]));
             // Stops moving and delay in firing
             mode = Mode.Shoot;
             yield return new WaitForSeconds(Random.Range(fireDelay[0], fireDelay[1]));
-            cooldown = GetComponent<FireControl>().fireCooldown;
             StartCoroutine(GetComponent<FireControl>().Shoot());
 
-            shootRoutine = null;
-            mode = Mode.Move;
-        }
-        else
-        {
-            shootRoutine = null;
-            yield return null;
+            mode = Mode.Normal;
         }
     }
 }

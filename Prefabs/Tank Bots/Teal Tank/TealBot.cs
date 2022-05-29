@@ -4,11 +4,8 @@ using UnityEngine;
 
 public class TealBot : MonoBehaviour
 {
-    public Transform target;
-    float dstToTarget;
+    TargetSelector targetSelector;
     Quaternion rotToTarget;
-
-    [SerializeField] LayerMask ignoreLayerMask;
 
     BaseTankLogic baseTankLogic;
 
@@ -16,82 +13,68 @@ public class TealBot : MonoBehaviour
     Transform turret;
     Transform barrel;
     Quaternion turretAnchor;
+    Vector3 lastEulerAngles;
 
     public float[] reactionTime = { 0.3f, 0.45f };
-
     public float[] fireDelay = { 0.3f, 0.6f };
-    float cooldown = 0;
 
     Rigidbody rb;
 
     [SerializeField] float turretRotSpeed = 25f;
     [SerializeField] float[] turretRangeX = { -20, 20 };
-
-    Vector3 lastEulerAngles;
     
     [SerializeField] float moveSpeed = 4f;
     [SerializeField] float avoidSpeed = 2f;
-
     float speed = 4;
+
     [SerializeField] float gravity = 10;
     float velocityY = 0;
-     
-    float triggerRadius = 3.5f;
-
-    Coroutine shootRoutine;
+    
+    FireControl fireControl;
+    bool shooting = false;
 
     enum Mode
     {
-        Move,
+        Normal,
         Shoot,
         Avoid
     }
-    Mode mode = Mode.Move;
+    Mode mode = Mode.Normal;
 
     // Start is called before the first frame Update
     void Awake()
     {
-        if (target == null)
-        {
-            Debug.Log("The variable target of TealBot has been defaulted to the player");
-            target = GameObject.Find("Player").transform;
-        }
+        targetSelector = GetComponent<TargetSelector>();
 
         baseTankLogic = GetComponent<BaseTankLogic>();
 
         body = transform.Find("Body");
         turret = transform.Find("Turret");
         barrel = transform.Find("Barrel");
-
         turretAnchor = turret.rotation;
+        lastEulerAngles = transform.eulerAngles;
 
         rb = GetComponent<Rigidbody>();
 
-        lastEulerAngles = transform.eulerAngles;
-
-        triggerRadius = GetComponent<SphereCollider>().radius;
+        fireControl = GetComponent<FireControl>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        if(!SceneLoader.frozen && Time.timeScale != 0)
+        if(!SceneLoader.frozen && Time.timeScale != 0 && targetSelector.currentTarget != null)
         {
-            cooldown = cooldown > 0 ? cooldown - Time.deltaTime : 0;
-            dstToTarget = Vector3.Distance(transform.position, target.position);
-
-            if (mode != Mode.Shoot && cooldown == 0 && Physics.Raycast(barrel.position, barrel.forward, out RaycastHit barrelHit, dstToTarget, ~ignoreLayerMask, QueryTriggerInteraction.Ignore))
+            if (fireControl.canFire && mode != Mode.Shoot && !shooting && Physics.Raycast(barrel.position, barrel.forward, out RaycastHit barrelHit, Mathf.Infinity, ~baseTankLogic.transparentLayers, QueryTriggerInteraction.Ignore))
             {
-                if (barrelHit.transform.root.name == "Player")
+                // Ray hits the capsule collider which is on Tank Origin for player and the 2nd topmost transform for tank bots
+                if (barrelHit.transform.root.name == "Player" && targetSelector.currentTarget.root.name == "Player")
                 {
-                    shootRoutine = StartCoroutine(Shoot());
+                    StartCoroutine(Shoot());
                 }
-            }
-            else if (shootRoutine != null)
-            {
-                StopCoroutine(shootRoutine);
-                shootRoutine = null;
-                mode = Mode.Move;
+                else if (barrelHit.transform == targetSelector.currentTarget.parent || barrelHit.transform == targetSelector.currentTarget) // target for tank bots is the turret, everything else is itself
+                {
+                    StartCoroutine(Shoot());
+                }
             }
 
             if (rb != null)
@@ -99,27 +82,28 @@ public class TealBot : MonoBehaviour
                 // Movement
                 Vector3 velocity;
                 velocityY = baseTankLogic.IsGrounded() ? 0 : velocityY - Time.deltaTime * gravity;
+
                 Vector3 targetDirection = transform.forward;
+                if (Physics.Raycast(transform.position, -transform.up, out RaycastHit middleHit, 1) && Physics.Raycast(transform.position + transform.forward, -transform.up, out RaycastHit frontHit, 1))
+                {
+                    targetDirection = frontHit.point - middleHit.point;
+                }
 
                 // Checking Forward on the center, left, and right side
                 RaycastHit forwardHit;
-                if (Physics.Raycast(body.position, transform.forward, out forwardHit, triggerRadius) || Physics.Raycast(body.position + transform.right, transform.forward, out forwardHit, triggerRadius) || Physics.Raycast(body.position - transform.right, transform.forward, out forwardHit, triggerRadius))
+                if (Physics.Raycast(body.position, transform.forward, out forwardHit, 2, baseTankLogic.barrierLayers) || Physics.Raycast(body.position + transform.right, transform.forward, out forwardHit, 2, baseTankLogic.barrierLayers) || Physics.Raycast(body.position - transform.right, transform.forward, out forwardHit, 2, baseTankLogic.barrierLayers))
                 {
                     mode = Mode.Avoid;
-                    baseTankLogic.ObstacleAvoidance(forwardHit, triggerRadius);
+                    baseTankLogic.ObstacleAvoidance(forwardHit, 2, baseTankLogic.barrierLayers);
                 }
                 else if (mode == Mode.Avoid)
                 {
-                    mode = Mode.Move;
+                    mode = Mode.Normal;
                 }
 
                 switch (mode)
                 {
-                    case Mode.Move:
-                        if (Physics.Raycast(transform.position, -transform.up, out RaycastHit middleHit, 1) && Physics.Raycast(transform.position + transform.forward, -transform.up, out RaycastHit frontHit, 1))
-                        {
-                            targetDirection = frontHit.point - middleHit.point;
-                        }
+                    case Mode.Normal:
                         speed = moveSpeed;
 
                         baseTankLogic.noisyRotation = true;
@@ -129,7 +113,7 @@ public class TealBot : MonoBehaviour
 
                         baseTankLogic.noisyRotation = false;
                         break;
-                    default:
+                    case Mode.Shoot:
                         speed = 0;
 
                         baseTankLogic.noisyRotation = false;
@@ -146,7 +130,7 @@ public class TealBot : MonoBehaviour
             barrel.eulerAngles = new Vector3(barrel.eulerAngles.x, barrel.eulerAngles.y + lastEulerAngles.y - transform.eulerAngles.y, barrel.eulerAngles.z);
 
             // Rotating turret and barrel towards player
-            Vector3 targetDir = target.position - turret.position;
+            Vector3 targetDir = targetSelector.currentTarget.position - turret.position;
             rotToTarget = Quaternion.LookRotation(targetDir);
             turret.rotation = barrel.rotation = turretAnchor = Quaternion.RotateTowards(turretAnchor, rotToTarget, Time.deltaTime * turretRotSpeed);
 
@@ -155,53 +139,50 @@ public class TealBot : MonoBehaviour
             barrel.localEulerAngles = new Vector3(Clamping.ClampAngle(barrel.localEulerAngles.x, turretRangeX[0], turretRangeX[1]), barrel.localEulerAngles.y, 0);
             lastEulerAngles = transform.eulerAngles;
         }
+        else
+        {
+            rb.velocity = Vector3.zero;
+        }
     }
 
     void OnTriggerStay(Collider other)
     {
-        if (mode != Mode.Shoot)
+        Vector3 desiredDir;
+        // Avoiding mines
+        switch (other.tag)
         {
-            Vector3 desiredDir;
-            // Avoiding bullets, mines, and obstacles
-            switch (other.tag)
-            {
-                case "Bullet":
-                    // If bullet is going to hit then dodge by moving perpendicular to bullet path
-                    RaycastHit bulletHit;
-                    if (Physics.Raycast(other.transform.position, other.transform.forward, out bulletHit))
-                    {
-                        if (bulletHit.transform == transform)
-                        {
-                            desiredDir = Random.Range(0, 2) == 0 ? other.transform.position - turret.position : other.transform.position - turret.position;
-
-                            // Applying rotation
-                            baseTankLogic.RotateToVector(desiredDir);
-                        }
-                    }
-                    break;
-                case "Mine":
+            case "Mine":
+                if (SceneLoader.autoPlay || targetSelector.findTarget)
+                {
                     // Move in opposite direction of mine
                     desiredDir = transform.position - other.transform.position;
 
                     // Applying rotation
                     baseTankLogic.RotateToVector(desiredDir);
-                    break;
-            }
+                }
+                else if (other.GetComponent<MineBehaviour>().owner != targetSelector.currentTarget.root)
+                {
+                    // Move in opposite direction of mine
+                    desiredDir = transform.position - other.transform.position;
+
+                    // Applying rotation
+                    baseTankLogic.RotateToVector(desiredDir);
+                }
+                break;
         }
     }
     
     IEnumerator Shoot()
     {
+        shooting = true;
         // Keeps moving until reaction time from seeing player is reached
         yield return new WaitForSeconds(Random.Range(reactionTime[0], reactionTime[1]));
         // Stops moving and delay in firing
         mode = Mode.Shoot;
         yield return new WaitForSeconds(Random.Range(fireDelay[0], fireDelay[1]));
-        cooldown = GetComponent<FireControl>().fireCooldown;
         StartCoroutine(GetComponent<FireControl>().Shoot());
 
-        mode = Mode.Move;
-
-        shootRoutine = null;
+        mode = Mode.Normal;
+        shooting = false;
     }
 }

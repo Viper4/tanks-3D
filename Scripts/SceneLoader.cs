@@ -9,14 +9,20 @@ public class SceneLoader : MonoBehaviour
     public static SceneLoader sceneLoader;
 
     public static bool frozen;
+    public static bool autoPlay;
+
+    bool loadingScene = false;
 
     Transform loadingScreen;
     Transform progressBar;
     Transform label;
     Transform startButton;
 
-    void Awake()
+    void Start()
     {
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
+
         SaveSystem.Init();
 
         if (sceneLoader == null)
@@ -33,60 +39,116 @@ public class SceneLoader : MonoBehaviour
         }
         else if (sceneLoader != this)
         {
+            sceneLoader.OnSceneLoad();
+
             Destroy(gameObject);
         }
     }
 
     public void OnSceneLoad()
     {
-        Time.timeScale = 0;
-        frozen = true;
+        StopAllCoroutines();
+        loadingScene = false;
+        int currentSceneIndex = SceneManager.GetActiveScene().buildIndex;
 
-        progressBar.gameObject.SetActive(false);
-        startButton.gameObject.SetActive(true);
+        if (currentSceneIndex == 11)
+        {
+            sceneLoader.loadingScreen.gameObject.SetActive(false);
+        }
+        else
+        {
+            SaveSystem.LoadSettings("settings.json");
 
-        label.Find("Level").GetComponent<Text>().text = "Level " + (SceneManager.GetActiveScene().buildIndex + 1).ToString();
-        label.Find("Tanks").GetComponent<Text>().text = "Enemy tanks: " + GameObject.Find("Enemies").transform.childCount;
-        label.Find("Lives").GetComponent<Text>().text = "Lives: " + GameObject.Find("Player").GetComponent<PlayerControl>().lives;
+            if (currentSceneIndex > 0)
+            {
+                Time.timeScale = 0;
+                autoPlay = false;
+                frozen = true;
+
+                sceneLoader.loadingScreen.gameObject.SetActive(true);
+                sceneLoader.progressBar.gameObject.SetActive(false);
+                sceneLoader.startButton.gameObject.SetActive(true);
+
+                sceneLoader.label.Find("Level").GetComponent<Text>().text = SceneManager.GetActiveScene().name;
+                sceneLoader.label.Find("EnemyTanks").GetComponent<Text>().text = "Enemy tanks: " + GameObject.Find("Tanks").transform.childCount;
+                sceneLoader.label.Find("Lives").GetComponent<Text>().text = "Lives: " + SaveSystem.currentPlayerData.lives;
+            }
+            else
+            {
+                autoPlay = true;
+                StartCoroutine(ReloadAutoPlay(2.5f));
+            }
+        }
     }
 
     public void LoadNextScene(float delay = 0)
     {
         int activeSceneIndex = SceneManager.GetActiveScene().buildIndex;
 
-        StartCoroutine(LoadScene(true, activeSceneIndex + 1, delay));
+        if (activeSceneIndex > 0)
+        {
+            StartCoroutine(LoadSceneRoutine(true, activeSceneIndex + 1, delay));
+        }
+        else
+        {
+            StartCoroutine(LoadSceneRoutine(false, activeSceneIndex + 1, delay));
+        }
     }
 
-    public IEnumerator LoadScene(bool save, int sceneIndex = -1, float delay = 0)
+    // Outside classes can't start coroutines in here for whatever reason
+    public void LoadScene(bool save, int sceneIndex = -1, float delay = 0)
     {
-        Debug.Log("LoadScene called");
+        StartCoroutine(LoadSceneRoutine(save, sceneIndex, delay));
+    }
 
-        if (sceneIndex < 0)
+    private IEnumerator LoadSceneRoutine(bool save, int sceneIndex, float delay)
+    {
+        if (!loadingScene)
         {
-            sceneIndex = SceneManager.GetActiveScene().buildIndex;
+            loadingScene = true;
+
+            if (sceneIndex < 0)
+            {
+                sceneIndex = SceneManager.GetActiveScene().buildIndex;
+            }
+
+            if (save)
+            {
+                SaveSystem.SavePlayerData("PlayerData.json", sceneIndex);
+            }
+
+            yield return new WaitForSecondsRealtime(delay);
+            AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneIndex);
+
+            if (!autoPlay)
+            {
+                loadingScreen.gameObject.SetActive(true);
+                startButton.gameObject.SetActive(false);
+                progressBar.gameObject.SetActive(true);
+
+                while (!asyncLoad.isDone)
+                {
+                    float progress = Mathf.Clamp01(asyncLoad.progress / .9f);
+
+                    progressBar.GetComponent<Slider>().value = progress;
+                    progressBar.Find("Text").GetComponent<Text>().text = progress * 100 + "%";
+                    yield return null;
+                }
+            }
         }
+    }
 
-        if (save)
-        {
-            SaveSystem.SavePlayerData("PlayerData.json", GameObject.Find("Player").GetComponent<PlayerControl>(), sceneIndex);
-        }
+    private IEnumerator ReloadAutoPlay(float startDelay = 0)
+    {
+        yield return new WaitForEndOfFrame(); // Waiting for scripts and scene to fully load
+        loadingScreen.gameObject.SetActive(false);
 
-        yield return new WaitForSecondsRealtime(delay);
-
-        AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneIndex);
-
-        loadingScreen.gameObject.SetActive(true);
-        startButton.gameObject.SetActive(false);
-        progressBar.gameObject.SetActive(true);
-
-        while (!asyncLoad.isDone)
-        {
-            float progress = Mathf.Clamp01(asyncLoad.progress / .9f);
-
-            progressBar.GetComponent<Slider>().value = progress;
-            progressBar.Find("Text").GetComponent<Text>().text = progress * 100 + "%";
-            yield return null;
-        }
+        Time.timeScale = 0;
+        frozen = true;
+        GameObject.Find("Level").GetComponent<LevelGenerator>().GenerateLevel();
+        yield return new WaitForSecondsRealtime(startDelay);
+        Time.timeScale = 1;
+        frozen = false;
     }
 
     public void StartGame()
@@ -97,13 +159,8 @@ public class SceneLoader : MonoBehaviour
 
     IEnumerator DelayedStart()
     {
-        GameObject.Find("Player").transform.Find("UI").GetComponent<UIHandler>().Resume();
+        GameObject.Find("Player").transform.Find("UI").GetComponent<PlayerUIHandler>().Resume();
         yield return new WaitForSecondsRealtime(3);
         frozen = false;
-    }
-
-    public bool CurrentSceneLoaded()
-    {
-        return SceneManager.GetActiveScene().isLoaded;
     }
 }

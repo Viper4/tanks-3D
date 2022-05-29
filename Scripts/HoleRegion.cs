@@ -8,16 +8,13 @@ public class HoleRegion : MonoBehaviour
     {
         if (other.CompareTag("Tank") && other.name == "Body")
         {
-            Debug.Log(other.name);
-            if(other.transform.root.name == "Enemies")
+            if (other.transform.root.name == "Tanks")
             {
-                Debug.Log("Enter");
                 other.transform.parent.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezePositionY | RigidbodyConstraints.FreezeRotation;
             }
-            else if(other.transform.root.name == "Player")
+            else if (other.transform.root.name == "Player")
             {
-                Debug.Log("Enter");
-                other.transform.root.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezePositionY | RigidbodyConstraints.FreezeRotation;
+                other.transform.root.Find("Tank Origin").GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezePositionY | RigidbodyConstraints.FreezeRotation;
             }
         }
     }
@@ -26,18 +23,13 @@ public class HoleRegion : MonoBehaviour
     {
         if (other.CompareTag("Tank") && other.name == "Body")
         {
-            Debug.Log(other.name);
-            if (other.transform.root.name == "Enemies")
+            if (other.transform.root.name == "Tanks")
             {
-                Debug.Log("Exit");
-
                 other.transform.parent.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeRotation;
             }
             else if (other.transform.root.name == "Player")
             {
-                Debug.Log("Exit");
-
-                other.transform.root.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeRotation;
+                other.transform.root.Find("Tank Origin").GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeRotation;
             }
         }
     }

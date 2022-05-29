@@ -43,7 +43,7 @@ public class MineBehaviour : MonoBehaviour
         }
     }
 
-    private void OnTriggerStay(Collider other)
+    private void OnTriggerEnter(Collider other)
     {
         if (activateDelay <= 0 && timer > 1.5f)
         {
@@ -86,24 +86,26 @@ public class MineBehaviour : MonoBehaviour
 
         // Getting all colliders within explosionRadius
         Collider[] colliders = Physics.OverlapSphere(transform.position, explosionRadius);
+        List<Transform> explodedTanks = new List<Transform>();
         foreach (Collider collider in colliders)
         {
             switch (collider.tag)
             {
                 case "Tank":
-                    // Blowing up tanks
-                    if (collider.transform.parent != null)
+                    if (collider != null && collider.transform.parent.name != "Tanks" && !explodedTanks.Contains(collider.transform.parent))
                     {
-                        // Tank bots are children of "Enemies" while Player has no parent
-                        try
+                        explodedTanks.Add(collider.transform.parent);
+
+                        // Blowing up tanks
+                        if (collider.transform.root.name != "Player")
                         {
                             collider.transform.parent.GetComponent<BaseTankLogic>().Explode();
-                            if(owner.name == "Player")
+                            if (owner != null && owner.name == "Player")
                             {
-                                owner.GetComponent<PlayerControl>().kills++;
+                                SaveSystem.currentPlayerData.kills++;
                             }
                         }
-                        catch
+                        else
                         {
                             collider.transform.root.GetComponent<BaseTankLogic>().Explode();
                         }

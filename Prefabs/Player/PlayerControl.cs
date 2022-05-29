@@ -10,16 +10,10 @@ public class PlayerControl : MonoBehaviour
 
     Transform tankOrigin;
 
-    UIHandler UIHandler;
-
-    public Dictionary<string, KeyCode> keyBinds { get; set; } = new Dictionary<string, KeyCode>();
-
-    public int lives = 3;
-    public int kills = 0;
-    public int deaths = 0;
-    public int highestLevel = 0;
+    PlayerUIHandler playerUIHandler;
 
     [SerializeField] bool cheats = false;
+    public bool godMode = false;
     public bool Dead { get; set; } = false;
 
     [SerializeField] float movementSpeed = 6;
@@ -39,21 +33,13 @@ public class PlayerControl : MonoBehaviour
     // Start is called before the first frame Update
     void Awake()
     {
-        rb = GetComponent<Rigidbody>();
-
         baseTankLogic = GetComponent<BaseTankLogic>();
         mainCamera = Camera.main.transform;
 
         tankOrigin = transform.Find("Tank Origin");
+        rb = tankOrigin.GetComponent<Rigidbody>();
 
-        UIHandler = GameObject.Find("UI").GetComponent<UIHandler>();
-
-        SceneLoader.sceneLoader.OnSceneLoad();
-    }
-
-    void Start()
-    {
-        SaveSystem.LoadSettings("settings.json");
+        playerUIHandler = GameObject.Find("UI").GetComponent<PlayerUIHandler>();
     }
 
     // Update is called once per frame
@@ -64,23 +50,23 @@ public class PlayerControl : MonoBehaviour
             if (Time.timeScale != 0)
             {
                 // Firing bullets
-                if (Input.GetKeyDown(keyBinds["Shoot"]))
+                if (Input.GetKeyDown(SaveSystem.currentSettings.keyBinds["Shoot"]))
                 {
                     StartCoroutine(GetComponent<FireControl>().Shoot());
                 }
-                else if (Input.GetKeyDown(keyBinds["Lay Mine"]) && baseTankLogic.IsGrounded())
+                else if (Input.GetKeyDown(SaveSystem.currentSettings.keyBinds["Lay Mine"]) && baseTankLogic.IsGrounded())
                 {
                     StartCoroutine(GetComponent<MineControl>().LayMine());
                 }
                 else if (Input.GetKeyDown(KeyCode.Escape))
                 {
-                    if (UIHandler.UIElements["PauseMenu"].gameObject.activeSelf)
+                    if (BaseUIHandler.UIElements["PauseMenu"].gameObject.activeSelf)
                     {
-                        UIHandler.Resume();
+                        playerUIHandler.Resume();
                     }
                     else
                     {
-                        UIHandler.Pause();
+                        playerUIHandler.Pause();
                     }
                 }
 
@@ -144,12 +130,12 @@ public class PlayerControl : MonoBehaviour
                 if (Input.GetKeyDown(KeyCode.N))
                 {
                     Debug.Log("Cheat Next Level");
-                    SceneLoader.sceneLoader.LoadNextScene(3);
+                    SceneLoader.sceneLoader.LoadNextScene();
                 }
                 else if (Input.GetKeyDown(KeyCode.R))
                 {
                     Debug.Log("Cheat Reload");
-                    StartCoroutine(SceneLoader.sceneLoader.LoadScene(false, -1, 3));
+                    SceneLoader.sceneLoader.LoadScene(false);
                 }
                 else if (Input.GetKeyDown(KeyCode.B))
                 {
@@ -159,6 +145,12 @@ public class PlayerControl : MonoBehaviour
                     tankOrigin.Find("Body").gameObject.SetActive(false);
                     tankOrigin.Find("Turret").gameObject.SetActive(false);
                     tankOrigin.Find("Barrel").gameObject.SetActive(false);
+                }
+                else if (Input.GetKeyDown(KeyCode.G))
+                {
+                    Debug.Log("God Mode Toggled");
+
+                    godMode = !godMode;
                 }
             }
         }
@@ -180,22 +172,22 @@ public class PlayerControl : MonoBehaviour
         {
             case "Horizontal":
                 float horizontal = 0;
-                if (Input.GetKey(keyBinds["Right"]))
+                if (Input.GetKey(SaveSystem.currentSettings.keyBinds["Right"]))
                 {
                     horizontal += 1;
                 }
-                if (Input.GetKey(keyBinds["Left"]))
+                if (Input.GetKey(SaveSystem.currentSettings.keyBinds["Left"]))
                 {
                     horizontal -= 1;
                 }
                 return horizontal;
             case "Vertical":
                 float vertical = 0;
-                if (Input.GetKey(keyBinds["Forward"]))
+                if (Input.GetKey(SaveSystem.currentSettings.keyBinds["Forward"]))
                 {
                     vertical += 1;
                 }
-                if (Input.GetKey(keyBinds["Backward"]))
+                if (Input.GetKey(SaveSystem.currentSettings.keyBinds["Backward"]))
                 {
                     vertical -= 1;
                 }
@@ -207,13 +199,16 @@ public class PlayerControl : MonoBehaviour
 
     public void Respawn()
     {
-        if (lives > 0)
+        SaveSystem.currentPlayerData.lives--;
+        SaveSystem.currentPlayerData.deaths++;
+
+        if (SaveSystem.currentPlayerData.lives > 0)
         {
-            StartCoroutine(SceneLoader.sceneLoader.LoadScene(false, -1, 3));
+            SceneLoader.sceneLoader.LoadScene(false, -1, 3);
         }
         else
         {
-            StartCoroutine(SceneLoader.sceneLoader.LoadScene(true, 0, 3));
+            SceneLoader.sceneLoader.LoadScene(true, 0, 3);
         }
     }
 }

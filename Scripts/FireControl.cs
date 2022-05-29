@@ -7,13 +7,14 @@ public class FireControl : MonoBehaviour
     [SerializeField] Transform owner;
 
     [SerializeField] Transform bullet;
+    [SerializeField] Transform shootEffect;
 
     Transform barrel;
 
     public int bulletLimit = 5;
     public int bulletsFired { get; set; } = 0;
-    public float fireCooldown = 1f;
-    bool canFire = true;
+    [SerializeField] float fireCooldown = 4f;
+    public bool canFire = true;
     
     [SerializeField] LayerMask solidLayerMask;
 
@@ -32,6 +33,7 @@ public class FireControl : MonoBehaviour
 
     public IEnumerator Shoot()
     {
+        bulletsFired = Mathf.Clamp(bulletsFired, 0, bulletLimit);
         if (canFire && bulletsFired < bulletLimit && Time.timeScale != 0)
         {
             canFire = false;
@@ -45,6 +47,7 @@ public class FireControl : MonoBehaviour
                 bulletsFired++;
                 bulletClone = Instantiate(bullet, clonePosition, cloneRotation);
                 bulletClone.localScale = new Vector3(1, 1, 1);
+                Instantiate(shootEffect, clonePosition, cloneRotation);
 
                 yield return new WaitWhile(() => bulletClone.GetComponent<BulletBehaviour>() == null);
 
@@ -62,7 +65,6 @@ public class FireControl : MonoBehaviour
             }
             else
             {
-                Debug.Log("Bullet position was blocked");
                 canFire = true;
                 yield return null;
             }

@@ -4,8 +4,7 @@ using UnityEngine;
 
 public class BrownBot : MonoBehaviour
 {
-    public Transform target;
-    float dstToTarget;
+    BaseTankLogic baseTankLogic;
 
     Transform turret;
     Transform barrel;
@@ -21,44 +20,46 @@ public class BrownBot : MonoBehaviour
 
     bool shooting = false;
 
-    BaseTankLogic baseTankLogic;
+    TargetSelector targetSelector;
 
     // Start is called before the first frame Update
     void Awake()
     {
-        if (target == null)
-        {
-            Debug.Log("The variable target of BrownBot has been defaulted to the player");
-            target = GameObject.Find("Player").transform;
-        }
-
         barrel = transform.Find("Barrel");
         turret = transform.Find("Turret");
 
+        if (GetComponent<TargetSelector>() != null)
+        {
+            targetSelector = GetComponent<TargetSelector>();
+        }
+
         baseTankLogic = GetComponent<BaseTankLogic>();
-        
+
         StartCoroutine(ChangeScan());
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (!SceneLoader.frozen && Time.timeScale != 0)
+        if (!SceneLoader.frozen && Time.timeScale != 0 && targetSelector.currentTarget != null)
         {
-            dstToTarget = Vector3.Distance(transform.position, target.position);
-
             float angleX = Mathf.PingPong(Time.time * turretRotSpeed, turretScanRange.x * 2) - turretScanRange.x;
             float angleY = Mathf.PingPong(Time.time * turretRotSpeed, turretScanRange.y * 2) - turretScanRange.y;
 
-            currentScanOffset += (scanOffset + angleY - currentScanOffset) * (Time.deltaTime * turretRotSpeed / 20);
+            currentScanOffset += (scanOffset + angleY - currentScanOffset) * (Time.deltaTime * turretRotSpeed / 30);
 
             turret.localEulerAngles = new Vector3(0, currentScanOffset, 0);
             barrel.localEulerAngles = new Vector3(angleX, currentScanOffset, 0);
 
             // If target is in front of barrel then fire
-            if (!shooting && Physics.Raycast(barrel.position + barrel.forward, barrel.forward, out RaycastHit hit, dstToTarget))
+            if (!shooting && Physics.Raycast(barrel.position + barrel.forward, barrel.forward, out RaycastHit barrelHit, Mathf.Infinity, ~baseTankLogic.transparentLayers, QueryTriggerInteraction.Ignore))
             {
-                if (hit.transform.root.name == "Player")
+                // Ray hits the capsule collider which is on Tank Origin for player and the 2nd topmost transform for tank bots
+                if (barrelHit.transform.root.name == "Player" && targetSelector.currentTarget.root.name == "Player")
+                {
+                    StartCoroutine(Shoot());
+                }
+                else if (barrelHit.transform == targetSelector.currentTarget.parent || barrelHit.transform == targetSelector.currentTarget) // target for tank bots is the turret, everything else is itself
                 {
                     StartCoroutine(Shoot());
                 }
