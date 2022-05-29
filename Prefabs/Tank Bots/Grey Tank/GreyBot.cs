@@ -75,7 +75,7 @@ public class GreyBot : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!SceneLoader.frozen && Time.timeScale != 0)
+        if (!SceneLoader.frozen && Time.timeScale != 0 && targetSelector.currentTarget != null)
         {
             if (fireControl.canFire && mode != Mode.Shoot && Physics.Raycast(turret.position, targetSelector.currentTarget.position - turret.position, out RaycastHit barrelHit, Mathf.Infinity, ~baseTankLogic.transparentLayers, QueryTriggerInteraction.Ignore))
             {

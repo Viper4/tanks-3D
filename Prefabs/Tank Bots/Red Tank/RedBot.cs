@@ -6,6 +6,7 @@ public class RedBot : MonoBehaviour
 {
     TargetSelector targetSelector;
     Quaternion rotToTarget;
+    float angleToTarget;
 
     BaseTankLogic baseTankLogic;
 
@@ -29,6 +30,8 @@ public class RedBot : MonoBehaviour
     [SerializeField] float maxShootAngle = 5;
 
     [SerializeField] float[] turretRangeX = { -20, 20 };
+
+    [SerializeField] float maxTargetAngle = 120;
 
     [SerializeField] float moveSpeed = 5f;
     [SerializeField] float avoidSpeed = 3f;
@@ -59,12 +62,10 @@ public class RedBot : MonoBehaviour
         body = transform.Find("Body");
         turret = transform.Find("Turret");
         barrel = transform.Find("Barrel");
-
         turretAnchor = turret.rotation;
+        lastEulerAngles = body.eulerAngles;
 
         rb = GetComponent<Rigidbody>();
-
-        lastEulerAngles = body.eulerAngles;
 
         if (randomizeSeed)
         {
@@ -77,8 +78,12 @@ public class RedBot : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!SceneLoader.frozen && Time.timeScale != 0)
+        if (!SceneLoader.frozen && Time.timeScale != 0 && targetSelector.currentTarget != null)
         {
+            Vector3 targetDir = targetSelector.currentTarget.position - turret.position;
+            angleToTarget = Vector3.Angle(transform.forward, targetDir);
+            rotToTarget = Quaternion.LookRotation(targetDir);
+
             if (fireControl.canFire && mode != Mode.Shoot && !shooting && Physics.Raycast(barrel.position, targetSelector.currentTarget.position - barrel.position, out RaycastHit barrelHit, Mathf.Infinity, ~baseTankLogic.transparentLayers, QueryTriggerInteraction.Ignore))
             {
                 // Ray hits the capsule collider which is on Tank Origin for player and the 2nd topmost transform for tank bots
@@ -91,7 +96,7 @@ public class RedBot : MonoBehaviour
                     StartCoroutine(Shoot());
                 }
             }
-            
+
             if (rb != null)
             {
                 Vector3 velocity;
@@ -119,8 +124,15 @@ public class RedBot : MonoBehaviour
                 {
                     case Mode.Normal:
                         // Resetting currentTarget to primary and trying to move to target
-                        targetSelector.currentTarget = targetSelector.primaryTarget;
-                        baseTankLogic.RotateToVector(targetSelector.currentTarget.position - turret.position);
+                        if (!SceneLoader.autoPlay && !targetSelector.findTarget && targetSelector.primaryTarget != null)
+                        {
+                            targetSelector.currentTarget = targetSelector.primaryTarget;
+                        }
+                        // Only rotating towards target when target is getting behind this tank
+                        if (angleToTarget > maxTargetAngle)
+                        {
+                            baseTankLogic.RotateToVector(targetDir);
+                        }
 
                         speed = moveSpeed;
 
@@ -131,6 +143,7 @@ public class RedBot : MonoBehaviour
                         speed = moveSpeed;
 
                         baseTankLogic.noisyRotation = true;
+                        mode = Mode.Normal;
                         break;
                     case Mode.Avoid:
                         speed = avoidSpeed;
@@ -158,8 +171,6 @@ public class RedBot : MonoBehaviour
             barrel.eulerAngles = new Vector3(barrel.eulerAngles.x, barrel.eulerAngles.y + lastEulerAngles.y - transform.eulerAngles.y, barrel.eulerAngles.z);
 
             // Rotating turret and barrel towards target
-            Vector3 targetDir = targetSelector.currentTarget.position - turret.position;
-            rotToTarget = Quaternion.LookRotation(targetDir);
             turret.rotation = barrel.rotation = turretAnchor = Quaternion.RotateTowards(turretAnchor, rotToTarget, Time.deltaTime * turretRotSpeed);
 
             // Zeroing x and z eulers of turret and clamping barrel x euler
@@ -175,7 +186,6 @@ public class RedBot : MonoBehaviour
 
     void OnTriggerStay(Collider other)
     {
-        mode = Mode.Normal;
         Vector3 desiredDir;
         // Avoiding bullets and mines
         switch (other.tag)

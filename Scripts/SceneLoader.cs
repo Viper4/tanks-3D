@@ -20,6 +20,9 @@ public class SceneLoader : MonoBehaviour
 
     void Start()
     {
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
+
         SaveSystem.Init();
 
         if (sceneLoader == null)
@@ -44,26 +47,37 @@ public class SceneLoader : MonoBehaviour
 
     public void OnSceneLoad()
     {
+        StopAllCoroutines();
         loadingScene = false;
+        int currentSceneIndex = SceneManager.GetActiveScene().buildIndex;
 
-        if (SceneManager.GetActiveScene().buildIndex > 0)
+        if (currentSceneIndex == 11)
         {
-            Time.timeScale = 0;
-            autoPlay = false;
-            frozen = true;
-
-            sceneLoader.loadingScreen.gameObject.SetActive(true);
-            sceneLoader.progressBar.gameObject.SetActive(false);
-            sceneLoader.startButton.gameObject.SetActive(true);
-
-            sceneLoader.label.Find("Level").GetComponent<Text>().text = SceneManager.GetActiveScene().name;
-            sceneLoader.label.Find("EnemyTanks").GetComponent<Text>().text = "Enemy tanks: " + GameObject.Find("Tanks").transform.childCount;
-            sceneLoader.label.Find("Lives").GetComponent<Text>().text = "Lives: " + GameObject.Find("Player").GetComponent<PlayerControl>().lives;
+            sceneLoader.loadingScreen.gameObject.SetActive(false);
         }
         else
         {
-            autoPlay = true;
-            StartCoroutine(ReloadAutoPlay());
+            SaveSystem.LoadSettings("settings.json");
+
+            if (currentSceneIndex > 0)
+            {
+                Time.timeScale = 0;
+                autoPlay = false;
+                frozen = true;
+
+                sceneLoader.loadingScreen.gameObject.SetActive(true);
+                sceneLoader.progressBar.gameObject.SetActive(false);
+                sceneLoader.startButton.gameObject.SetActive(true);
+
+                sceneLoader.label.Find("Level").GetComponent<Text>().text = SceneManager.GetActiveScene().name;
+                sceneLoader.label.Find("EnemyTanks").GetComponent<Text>().text = "Enemy tanks: " + GameObject.Find("Tanks").transform.childCount;
+                sceneLoader.label.Find("Lives").GetComponent<Text>().text = "Lives: " + SaveSystem.currentPlayerData.lives;
+            }
+            else
+            {
+                autoPlay = true;
+                StartCoroutine(ReloadAutoPlay(2.5f));
+            }
         }
     }
 
@@ -100,7 +114,7 @@ public class SceneLoader : MonoBehaviour
 
             if (save)
             {
-                SaveSystem.SavePlayerData("PlayerData.json", GameObject.Find("Player").GetComponent<PlayerControl>(), sceneIndex);
+                SaveSystem.SavePlayerData("PlayerData.json", sceneIndex);
             }
 
             yield return new WaitForSecondsRealtime(delay);

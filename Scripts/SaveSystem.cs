@@ -17,12 +17,22 @@ public static class SaveSystem
             { "Backward", KeyCode.S },
             { "Right", KeyCode.D },
             { "Shoot", KeyCode.Mouse0 },
-            { "Lay Mine", KeyCode.Space},
+            { "Lay Mine", KeyCode.Space },
             { "Lock Turret", KeyCode.LeftControl },
             { "Lock Camera", KeyCode.LeftShift },
             { "Switch Camera", KeyCode.Tab }
         },
         silhouettes = true,
+        showHUD = true,
+        masterVolume = 100,
+    };
+
+    public static PlayerData currentPlayerData = new PlayerData
+    {
+        lives = 3,
+        kills = 0,
+        deaths = 0,
+        highestLevel = 0,
     };
 
     public class Settings
@@ -30,9 +40,11 @@ public static class SaveSystem
         public float sensitivity;
         public Dictionary<string, KeyCode> keyBinds;
         public bool silhouettes;
+        public bool showHUD;
+        public float masterVolume;
     }
 
-    private class PlayerData
+    public class PlayerData
     {
         public int lives;
         public int kills;
@@ -46,43 +58,18 @@ public static class SaveSystem
         {
             Directory.CreateDirectory(SAVE_FOLDER);
         }
-
-        LoadSettings("settings.json");
     }
 
-    public static void SavePlayerData(string fileName, PlayerControl script, int highestLevel = -1)
+    public static void SavePlayerData(string fileName, int highestLevel = -1)
     {
-        PlayerData playerData = new PlayerData
-        {
-            lives = script.lives,
-            kills = script.kills,
-            deaths = script.deaths,
-            highestLevel = highestLevel < 0 ? script.highestLevel : highestLevel
-        };
+        currentPlayerData.highestLevel = highestLevel > currentPlayerData.highestLevel ? highestLevel : currentPlayerData.highestLevel;
 
-        if (File.Exists(SAVE_FOLDER + fileName))
-        {
-            string oldJson = File.ReadAllText(SAVE_FOLDER + fileName);
-            if (oldJson != null)
-            {
-                PlayerData oldPlayerData = JsonConvert.DeserializeObject<PlayerData>(oldJson);
-
-                playerData.kills = script.kills + oldPlayerData.kills;
-                playerData.deaths = script.deaths + oldPlayerData.deaths;
-
-                if (script.highestLevel > oldPlayerData.highestLevel)
-                {
-                    playerData.highestLevel = script.highestLevel;
-                }
-            }
-        }
-
-        string json = JsonConvert.SerializeObject(playerData, Formatting.Indented);
+        string json = JsonConvert.SerializeObject(currentPlayerData, Formatting.Indented);
 
         File.WriteAllText(SAVE_FOLDER + fileName, json);
     }
 
-    public static void LoadPlayerData(string fileName, PlayerControl script)
+    public static void LoadPlayerData(string fileName)
     {
         if (File.Exists(SAVE_FOLDER + fileName))
         {
@@ -91,10 +78,10 @@ public static class SaveSystem
             {
                 PlayerData playerData = JsonConvert.DeserializeObject<PlayerData>(json);
 
-                script.lives = playerData.lives;
-                script.kills = playerData.kills;
-                script.deaths = playerData.deaths;
-                script.highestLevel = playerData.highestLevel;
+                currentPlayerData.lives = playerData.lives;
+                currentPlayerData.kills = playerData.kills;
+                currentPlayerData.deaths = playerData.deaths;
+                currentPlayerData.highestLevel = playerData.highestLevel;
             }
             else
             {
@@ -105,7 +92,7 @@ public static class SaveSystem
         {
             Debug.LogWarning("Could not find file '" + SAVE_FOLDER + fileName + "', creating a new file");
 
-            SavePlayerData(fileName, script);
+            SavePlayerData(fileName);
         }
     }
 
@@ -140,34 +127,15 @@ public static class SaveSystem
 
         if (player != null)
         {
-            PlayerControl playerControl = player.GetComponent<PlayerControl>();
-
-            AddKeybind(playerControl, "Forward", KeyCode.W);
-            AddKeybind(playerControl, "Left", KeyCode.A);
-            AddKeybind(playerControl, "Backward", KeyCode.S);
-            AddKeybind(playerControl, "Right", KeyCode.D);
-            AddKeybind(playerControl, "Shoot", KeyCode.Mouse0);
-            AddKeybind(playerControl, "Lay Mine", KeyCode.Space);
-            AddKeybind(playerControl, "Lock Turret", KeyCode.LeftControl);
-            AddKeybind(playerControl, "Lock Camera", KeyCode.LeftShift);
-            AddKeybind(playerControl, "Switch Camera", KeyCode.Tab);
-            
-            foreach (string key in currentSettings.keyBinds.Keys)
-            {
-                playerControl.keyBinds[key] = currentSettings.keyBinds[key];
-            }
-
             Camera.main.GetComponent<CameraControl>().sensitivity = currentSettings.sensitivity;
+
+            AudioSource[] allAudioSource = Object.FindObjectsOfType<AudioSource>();
+            foreach (AudioSource audioSource in allAudioSource)
+            {
+                audioSource.volume *= currentSettings.masterVolume / 100;
+            }
         }
 
         settingsUIHandler.UpdateSettingsUI();
-    }
-
-    private static void AddKeybind(PlayerControl script, string key, KeyCode value)
-    {
-        if (!script.keyBinds.ContainsKey(key))
-        {
-            script.keyBinds.Add(key, value);
-        }
     }
 }

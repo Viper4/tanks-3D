@@ -79,7 +79,7 @@ public class YellowBot : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!SceneLoader.frozen && Time.timeScale != 0)
+        if (!SceneLoader.frozen && Time.timeScale != 0 && targetSelector.currentTarget != null)
         {
             if (fireControl.canFire && mode != Mode.Shoot && mode != Mode.Avoid && Physics.Raycast(barrel.position, targetSelector.currentTarget.position - barrel.position, out RaycastHit barrelHit, Mathf.Infinity, ~baseTankLogic.transparentLayers, QueryTriggerInteraction.Ignore))
             {

@@ -5,8 +5,8 @@ using UnityEngine;
 public class TargetSelector : MonoBehaviour
 {
     public Transform primaryTarget;
-    [HideInInspector] public Transform currentTarget;
-    [SerializeField] bool findTarget = false;
+    public Transform currentTarget;
+    public bool findTarget = false;
 
     [SerializeField] bool predictTargetPos;
     [SerializeField] float predictionScale = 1;
@@ -47,7 +47,7 @@ public class TargetSelector : MonoBehaviour
     {
         if (findTarget || SceneLoader.autoPlay)
         {
-            if(tankParent.childCount > 1)
+            if (tankParent.childCount > 1)
             {
                 List<Transform> visibleTanks = new List<Transform>();
                 foreach (Transform tank in tankParent)
@@ -82,7 +82,14 @@ public class TargetSelector : MonoBehaviour
 
         if (currentTarget == null)
         {
-            currentTarget = primaryTarget;
+            try
+            {
+                currentTarget = primaryTarget;
+            }
+            catch
+            {
+                currentTarget = tankParent;
+            }
         }
 
         if (predictTargetPos)

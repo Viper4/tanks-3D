@@ -48,6 +48,18 @@ public class SettingsUIHandler : MonoBehaviour
         slider.transform.Find("Value Text").GetComponent<Text>().text = slider.value.ToString();
     }
 
+    public void ChangeMasterVolume(Slider slider)
+    {
+        SaveSystem.currentSettings.masterVolume = slider.value;
+        slider.transform.Find("Value Text").GetComponent<Text>().text = slider.value.ToString();
+
+        AudioSource[] allAudioSource = Object.FindObjectsOfType<AudioSource>();
+        foreach (AudioSource audioSource in allAudioSource)
+        {
+            audioSource.volume *= SaveSystem.currentSettings.masterVolume / 100;
+        }
+    }
+
     public void ToggleSilhouettes(Toggle toggle)
     {
         SaveSystem.currentSettings.silhouettes = toggle.isOn;
@@ -56,9 +68,16 @@ public class SettingsUIHandler : MonoBehaviour
         {
             if (feature.name == "TankHidden" || feature.name == "BulletHidden")
             {
-                feature.SetActive(SaveSystem.currentSettings.silhouettes);
+                feature.SetActive(toggle.isOn);
             }
         }
+    }
+
+    public void ToggleHUD(Toggle toggle)
+    {
+        SaveSystem.currentSettings.showHUD = toggle.isOn;
+
+        BaseUIHandler.UIElements["HUD"].gameObject.SetActive(toggle.isOn);
     }
 
     public void SaveSettings()
@@ -111,11 +130,22 @@ public class SettingsUIHandler : MonoBehaviour
                             case "Silhouettes":
                                 setting.GetComponent<Toggle>().isOn = SaveSystem.currentSettings.silhouettes;
                                 break;
+                            case "HUD":
+                                setting.GetComponent<Toggle>().isOn = SaveSystem.currentSettings.showHUD;
+                                break;
                         }
                     }
                     break;
                 case "Audio":
-
+                    foreach (Transform setting in content)
+                    {
+                        switch (setting.name)
+                        {
+                            case "Master Volume":
+                                setting.GetComponent<Slider>().value = SaveSystem.currentSettings.masterVolume;
+                                break;
+                        }
+                    }
                     break;
             }
         }

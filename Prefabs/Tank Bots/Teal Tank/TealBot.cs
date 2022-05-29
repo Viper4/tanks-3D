@@ -62,7 +62,7 @@ public class TealBot : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(!SceneLoader.frozen && Time.timeScale != 0)
+        if(!SceneLoader.frozen && Time.timeScale != 0 && targetSelector.currentTarget != null)
         {
             if (fireControl.canFire && mode != Mode.Shoot && !shooting && Physics.Raycast(barrel.position, barrel.forward, out RaycastHit barrelHit, Mathf.Infinity, ~baseTankLogic.transparentLayers, QueryTriggerInteraction.Ignore))
             {
@@ -152,7 +152,7 @@ public class TealBot : MonoBehaviour
         switch (other.tag)
         {
             case "Mine":
-                if (SceneLoader.autoPlay)
+                if (SceneLoader.autoPlay || targetSelector.findTarget)
                 {
                     // Move in opposite direction of mine
                     desiredDir = transform.position - other.transform.position;

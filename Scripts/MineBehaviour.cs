@@ -86,20 +86,23 @@ public class MineBehaviour : MonoBehaviour
 
         // Getting all colliders within explosionRadius
         Collider[] colliders = Physics.OverlapSphere(transform.position, explosionRadius);
+        List<Transform> explodedTanks = new List<Transform>();
         foreach (Collider collider in colliders)
         {
             switch (collider.tag)
             {
                 case "Tank":
-                    if(collider != null && collider.transform.parent.name != "Tanks")
+                    if (collider != null && collider.transform.parent.name != "Tanks" && !explodedTanks.Contains(collider.transform.parent))
                     {
+                        explodedTanks.Add(collider.transform.parent);
+
                         // Blowing up tanks
                         if (collider.transform.root.name != "Player")
                         {
                             collider.transform.parent.GetComponent<BaseTankLogic>().Explode();
                             if (owner != null && owner.name == "Player")
                             {
-                                owner.GetComponent<PlayerControl>().kills++;
+                                SaveSystem.currentPlayerData.kills++;
                             }
                         }
                         else

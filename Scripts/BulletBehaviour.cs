@@ -135,7 +135,7 @@ public class BulletBehaviour : MonoBehaviour
                 baseTankLogic.Explode();
                 if (owner != null && owner.name == "Player")
                 {
-                    owner.GetComponent<PlayerControl>().kills++;
+                    SaveSystem.currentPlayerData.kills++;
                 }
             }
         }
@@ -157,7 +157,7 @@ public class BulletBehaviour : MonoBehaviour
     void DestroySelf()
     {
         // Keeping track of how many bullets a tank has fired
-        if(owner != null)
+        if (owner != null)
         {
             owner.GetComponent<FireControl>().bulletsFired -= 1;
         }
@@ -180,7 +180,7 @@ public class BulletBehaviour : MonoBehaviour
                             collider.transform.parent.GetComponent<BaseTankLogic>().Explode();
                             if (owner != null && owner.name == "Player")
                             {
-                                owner.GetComponent<PlayerControl>().kills++;
+                                SaveSystem.currentPlayerData.kills++;
                             }
                         }
                         break;

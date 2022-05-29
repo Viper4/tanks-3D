@@ -455,7 +455,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   owner: {fileID: 6009521869144415273}
   bullet: {fileID: 4307626717143694363, guid: de9dbd5b8f77ecb4a866f8d8cf75c17d, type: 3}
-  shootEffect: {fileID: 7275907135579404139, guid: 71b07424ffcb49a41830ab0761db5c07, type: 3}
+  shootEffect: {fileID: 7891438045153574773, guid: 4d61908da1eaf274aa82edf86c9a5c95, type: 3}
   bulletLimit: 5
   fireCooldown: 10
   canFire: 1
@@ -533,8 +533,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 42b2840cfbe33ae41a58aa074894804d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  target: {fileID: 0}
+  primaryTarget: {fileID: 0}
+  currentTarget: {fileID: 0}
   findTarget: 0
+  predictTargetPos: 0
+  predictionScale: 0
+  predictedTargetPos: {x: 0, y: 0, z: 0}
   turret: {fileID: 4241553243334317245}
   ignoreLayerMask:
     serializedVersion: 2

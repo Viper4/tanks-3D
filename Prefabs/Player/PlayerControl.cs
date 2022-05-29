@@ -12,13 +12,6 @@ public class PlayerControl : MonoBehaviour
 
     PlayerUIHandler playerUIHandler;
 
-    public Dictionary<string, KeyCode> keyBinds { get; set; } = new Dictionary<string, KeyCode>();
-
-    public int lives = 3;
-    public int kills = 0;
-    public int deaths = 0;
-    public int highestLevel = 0;
-
     [SerializeField] bool cheats = false;
     public bool godMode = false;
     public bool Dead { get; set; } = false;
@@ -57,11 +50,11 @@ public class PlayerControl : MonoBehaviour
             if (Time.timeScale != 0)
             {
                 // Firing bullets
-                if (Input.GetKeyDown(keyBinds["Shoot"]))
+                if (Input.GetKeyDown(SaveSystem.currentSettings.keyBinds["Shoot"]))
                 {
                     StartCoroutine(GetComponent<FireControl>().Shoot());
                 }
-                else if (Input.GetKeyDown(keyBinds["Lay Mine"]) && baseTankLogic.IsGrounded())
+                else if (Input.GetKeyDown(SaveSystem.currentSettings.keyBinds["Lay Mine"]) && baseTankLogic.IsGrounded())
                 {
                     StartCoroutine(GetComponent<MineControl>().LayMine());
                 }
@@ -179,22 +172,22 @@ public class PlayerControl : MonoBehaviour
         {
             case "Horizontal":
                 float horizontal = 0;
-                if (Input.GetKey(keyBinds["Right"]))
+                if (Input.GetKey(SaveSystem.currentSettings.keyBinds["Right"]))
                 {
                     horizontal += 1;
                 }
-                if (Input.GetKey(keyBinds["Left"]))
+                if (Input.GetKey(SaveSystem.currentSettings.keyBinds["Left"]))
                 {
                     horizontal -= 1;
                 }
                 return horizontal;
             case "Vertical":
                 float vertical = 0;
-                if (Input.GetKey(keyBinds["Forward"]))
+                if (Input.GetKey(SaveSystem.currentSettings.keyBinds["Forward"]))
                 {
                     vertical += 1;
                 }
-                if (Input.GetKey(keyBinds["Backward"]))
+                if (Input.GetKey(SaveSystem.currentSettings.keyBinds["Backward"]))
                 {
                     vertical -= 1;
                 }
@@ -206,7 +199,10 @@ public class PlayerControl : MonoBehaviour
 
     public void Respawn()
     {
-        if (lives > 0)
+        SaveSystem.currentPlayerData.lives--;
+        SaveSystem.currentPlayerData.deaths++;
+
+        if (SaveSystem.currentPlayerData.lives > 0)
         {
             SceneLoader.sceneLoader.LoadScene(false, -1, 3);
         }

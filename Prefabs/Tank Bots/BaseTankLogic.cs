@@ -61,25 +61,10 @@ public class BaseTankLogic : MonoBehaviour
             if (noisyRotation)
             {
                 // Adding noise to rotation
-                float noise = tankRotNoiseScale * (Mathf.PerlinNoise(tankRotSeed + Time.time * tankRotNoiseSpeed, (tankRotSeed + 1) + Time.time * tankRotNoiseSpeed) - 0.5f);
+                float noise = tankRotNoiseScale * (Mathf.PerlinNoise(tankRotSeed + Time.time * tankRotNoiseSpeed, tankRotSeed + 1 + Time.time * tankRotNoiseSpeed) - 0.5f);
                 Quaternion desiredTankRot = Quaternion.LookRotation(Quaternion.AngleAxis(noise, Vector3.up) * transform.forward);
-                rb.rotation = Quaternion.RotateTowards(transform.rotation, desiredTankRot, Time.deltaTime * tankRotSpeed);
+                rb.MoveRotation(Quaternion.RotateTowards(transform.rotation, desiredTankRot, Time.deltaTime * tankRotSpeed));
             }
-        }
-    }
-    
-    public void RotateToVector(Vector3 to)
-    {
-        float angle = Vector3.Angle(tankOrigin.forward, to);
-        angle = angle < 0 ? angle + 360 : angle;
-
-        if (angle > 180 - flipAngleThreshold && angle < 180 + flipAngleThreshold)
-        {
-            tankOrigin.forward = -tankOrigin.forward;
-        }
-        else
-        {
-            rb.MoveRotation(Quaternion.RotateTowards(tankOrigin.rotation, Quaternion.LookRotation(to), Time.deltaTime * tankRotSpeed * 2));
         }
     }
 
@@ -97,8 +82,6 @@ public class BaseTankLogic : MonoBehaviour
                 SceneLoader.frozen = true;
 
                 playerControl.Dead = true;
-                playerControl.lives--;
-                playerControl.deaths++;
 
                 tankOrigin.Find("Body").gameObject.SetActive(false);
                 tankOrigin.Find("Turret").gameObject.SetActive(false);
@@ -134,6 +117,21 @@ public class BaseTankLogic : MonoBehaviour
                 }
             }
             Destroy(gameObject);
+        }
+    }
+
+    public void RotateToVector(Vector3 to)
+    {
+        float angle = Vector3.Angle(tankOrigin.forward, to);
+        angle = angle < 0 ? angle + 360 : angle;
+
+        if (angle > 180 - flipAngleThreshold && angle < 180 + flipAngleThreshold)
+        {
+            tankOrigin.forward = -tankOrigin.forward;
+        }
+        else
+        {
+            rb.MoveRotation(Quaternion.RotateTowards(tankOrigin.rotation, Quaternion.LookRotation(to), Time.deltaTime * tankRotSpeed * 2));
         }
     }
 

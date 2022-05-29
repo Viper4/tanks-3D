@@ -4,8 +4,9 @@ using UnityEngine;
 
 public class BaseUIHandler : MonoBehaviour
 {
-    [SerializeField] bool mainMenu = false;
     public static Dictionary<string, Transform> UIElements = new Dictionary<string, Transform>();
+
+    [SerializeField] List<Transform> activeElements = new List<Transform>();
 
     private void Awake()
     {
@@ -13,18 +14,25 @@ public class BaseUIHandler : MonoBehaviour
         {
             UIElements[child.name] = child;
 
-            child.gameObject.SetActive(false);
+            if (!activeElements.Contains(child))
+            {
+                child.gameObject.SetActive(false);
+            }
         }
-        
-        if(mainMenu)
+        if(UIElements["InGame"] != null)
         {
-            UIElements["MainMenu"].gameObject.SetActive(true);
+            UIElements["HUD"] = UIElements["InGame"].Find("HUD");
         }
     }
     
-    public void LoadNextScene()
+    public void LoadNextScene(float delay)
     {
-        SceneLoader.sceneLoader.LoadNextScene();
+        SceneLoader.sceneLoader.LoadNextScene(delay);
+    }
+
+    public void LoadScene(int index)
+    {
+        SceneLoader.sceneLoader.LoadScene(false, index);
     }
 
     public void Exit()

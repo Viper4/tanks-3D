@@ -7,7 +7,7 @@ public class MineControl : MonoBehaviour
     [SerializeField] Transform tankOrigin;
     [SerializeField] Transform mine;
 
-    [SerializeField] int mineLimit = 2;
+    public int mineLimit = 2;
     public int minesLaid { get; set; } = 0;
     [SerializeField] float layCooldown = 2;
     public bool canLay = true;

@@ -20,15 +20,15 @@ public class TankGeneration : MonoBehaviour
         if (clonedObjects.Count != 0)
         {
             // Iterate through each clonedObject and delete them
-            foreach (GameObject clonedObject in clonedObjects)
+            for (int i = 0; i < clonedObjects.Count; i++)
             {
                 try
                 {
-                    DestroyImmediate(clonedObject);
+                    DestroyImmediate(clonedObjects[i]);
                 }
                 catch
                 {
-                    Destroy(clonedObject);
+                    Destroy(clonedObjects[i]);
                 }
             }
 
@@ -39,7 +39,7 @@ public class TankGeneration : MonoBehaviour
 
     public void RandomTankGeneration(List<GameObject> tanks, Dictionary<string, int> cloneAmounts, Collider boundingCollider)
     {
-        foreach(GameObject tank in tanks)
+        foreach (GameObject tank in tanks)
         {
             for (int i = 0; i < cloneAmounts[tank.name]; i++)
             {

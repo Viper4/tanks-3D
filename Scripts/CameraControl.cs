@@ -73,15 +73,15 @@ public class CameraControl : MonoBehaviour
         }
 
         // Lock turret toggle
-        if (Input.GetKeyDown(playerControl.keyBinds["Lock Turret"]))
+        if (Input.GetKeyDown(SaveSystem.currentSettings.keyBinds["Lock Turret"]))
         {
             lockTurret = !lockTurret;
         }
-        else if (Input.GetKeyDown(playerControl.keyBinds["Lock Camera"]))
+        else if (Input.GetKeyDown(SaveSystem.currentSettings.keyBinds["Lock Camera"]))
         {
             lockCamera = !lockCamera;
         }
-        else if (Input.GetKeyDown(playerControl.keyBinds["Switch Camera"]))
+        else if (Input.GetKeyDown(SaveSystem.currentSettings.keyBinds["Switch Camera"]))
         {
             switchCamera = !switchCamera;
         }
