@@ -6,6 +6,9 @@ using UnityEngine;
 public static class SaveSystem
 {
     private static readonly string SAVE_FOLDER = Application.dataPath + "/SaveData/";
+    private static readonly string CROSSHAIR_FOLDER = Application.dataPath + "/Crosshairs/";
+
+    public static Sprite crosshair;
 
     public static Settings currentSettings = new Settings
     {
@@ -25,14 +28,19 @@ public static class SaveSystem
         silhouettes = true,
         showHUD = true,
         masterVolume = 100,
+        crosshairFileName = "Default",
+        crosshairColorIndex = 0,
+        crosshairScale = 1,
     };
 
     public static PlayerData currentPlayerData = new PlayerData
     {
         lives = 3,
         kills = 0,
+        shots = 0,
         deaths = 0,
-        highestLevel = 0,
+        time = -1,
+        bestTime = -1,
     };
 
     public class Settings
@@ -42,14 +50,19 @@ public static class SaveSystem
         public bool silhouettes;
         public bool showHUD;
         public float masterVolume;
+        public string crosshairFileName;
+        public int crosshairColorIndex;
+        public float crosshairScale;
     }
 
     public class PlayerData
     {
         public int lives;
         public int kills;
+        public int shots;
         public int deaths;
-        public int highestLevel;
+        public float time;
+        public float bestTime;
     }
 
     public static void Init()
@@ -58,11 +71,18 @@ public static class SaveSystem
         {
             Directory.CreateDirectory(SAVE_FOLDER);
         }
+        if (!Directory.Exists(CROSSHAIR_FOLDER))
+        {
+            Directory.CreateDirectory(CROSSHAIR_FOLDER);
+        }
     }
 
-    public static void SavePlayerData(string fileName, int highestLevel = -1)
+    public static void SavePlayerData(string fileName)
     {
-        currentPlayerData.highestLevel = highestLevel > currentPlayerData.highestLevel ? highestLevel : currentPlayerData.highestLevel;
+        if (currentPlayerData.lives > 0 && (currentPlayerData.time < currentPlayerData.bestTime || currentPlayerData.bestTime == -1))
+        {
+            currentPlayerData.bestTime = currentPlayerData.time;
+        }
 
         string json = JsonConvert.SerializeObject(currentPlayerData, Formatting.Indented);
 
@@ -78,10 +98,7 @@ public static class SaveSystem
             {
                 PlayerData playerData = JsonConvert.DeserializeObject<PlayerData>(json);
 
-                currentPlayerData.lives = playerData.lives;
-                currentPlayerData.kills = playerData.kills;
-                currentPlayerData.deaths = playerData.deaths;
-                currentPlayerData.highestLevel = playerData.highestLevel;
+                currentPlayerData.bestTime = playerData.bestTime;
             }
             else
             {
@@ -117,6 +134,20 @@ public static class SaveSystem
             {
                 currentSettings = JsonConvert.DeserializeObject<Settings>(json);
             }
+
+            string filePath = CROSSHAIR_FOLDER + currentSettings.crosshairFileName + ".png";
+            crosshair = ImageToSprite(filePath);
+
+            try
+            {
+                Transform reticle = BaseUIHandler.UIElements["InGame"].Find("Reticle");
+
+                reticle.GetComponent<CrosshairManager>().UpdateReticleSprite(crosshair, currentSettings.crosshairColorIndex, currentSettings.crosshairScale);
+            }
+            catch
+            {
+                Debug.Log("Unable to set reticle sprite, skipping.");
+            }
         }
         else
         {
@@ -137,5 +168,20 @@ public static class SaveSystem
         }
 
         settingsUIHandler.UpdateSettingsUI();
+    }
+
+    public static Sprite ImageToSprite(string filePath, float pixelsPerUnit = 100.0f, SpriteMeshType spriteType = SpriteMeshType.Tight)
+    {
+        // Converting png or other image format to sprite
+        Texture2D spriteTexture = new Texture2D(2, 2);
+        if (File.Exists(filePath))
+        {
+            byte[] fileData = File.ReadAllBytes(filePath);
+            if (spriteTexture.LoadImage(fileData))
+            {
+                return Sprite.Create(spriteTexture, new Rect(0, 0, spriteTexture.width, spriteTexture.height), new Vector2(0, 0), pixelsPerUnit, 0, spriteType);
+            }
+        }
+        return null;
     }
 }

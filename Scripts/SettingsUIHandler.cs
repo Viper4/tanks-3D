@@ -80,6 +80,21 @@ public class SettingsUIHandler : MonoBehaviour
         BaseUIHandler.UIElements["HUD"].gameObject.SetActive(toggle.isOn);
     }
 
+    public void SetCustomCrosshair(InputField input)
+    {
+        SaveSystem.currentSettings.crosshairFileName = input.text;
+    }
+
+    public void SetCrosshairScale(InputField input)
+    {
+        SaveSystem.currentSettings.crosshairScale = float.Parse(input.text);
+    }
+
+    public void SetCrosshairColor(Dropdown dropdown)
+    {
+        SaveSystem.currentSettings.crosshairColorIndex = dropdown.value;
+    }
+
     public void SaveSettings()
     {
         SaveSystem.SaveSettings("settings.json");
@@ -132,6 +147,15 @@ public class SettingsUIHandler : MonoBehaviour
                                 break;
                             case "HUD":
                                 setting.GetComponent<Toggle>().isOn = SaveSystem.currentSettings.showHUD;
+                                break;
+                            case "Custom Crosshair":
+                                setting.Find("InputField").GetComponent<InputField>().text = SaveSystem.currentSettings.crosshairFileName;
+                                break;
+                            case "Crosshair Color":
+                                setting.Find("Dropdown").GetComponent<Dropdown>().value = SaveSystem.currentSettings.crosshairColorIndex;
+                                break;
+                            case "Crosshair Scale":
+                                setting.Find("InputField").GetComponent<InputField>().text = SaveSystem.currentSettings.crosshairScale.ToString();
                                 break;
                         }
                     }

@@ -19,12 +19,32 @@ public class BaseUIHandler : MonoBehaviour
                 child.gameObject.SetActive(false);
             }
         }
-        if(UIElements["InGame"] != null)
+        try
         {
             UIElements["HUD"] = UIElements["InGame"].Find("HUD");
         }
+        catch
+        {
+
+        }
     }
-    
+
+    public static bool PauseUIActive()
+    {
+        try
+        {
+            if (UIElements["PauseMenu"].gameObject.activeSelf || UIElements["Settings"].gameObject.activeSelf)
+            {
+                return true;
+            }
+            return false;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
     public void LoadNextScene(float delay)
     {
         SceneLoader.sceneLoader.LoadNextScene(delay);

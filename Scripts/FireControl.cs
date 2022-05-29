@@ -33,6 +33,11 @@ public class FireControl : MonoBehaviour
 
     public IEnumerator Shoot()
     {
+        if(transform.name == "Player")
+        {
+            SaveSystem.currentPlayerData.shots++;
+        }
+
         bulletsFired = Mathf.Clamp(bulletsFired, 0, bulletLimit);
         if (canFire && bulletsFired < bulletLimit && Time.timeScale != 0)
         {

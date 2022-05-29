@@ -21,23 +21,26 @@ public class MineBehaviour : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        activateDelay -= Time.deltaTime * 1;
-
-        if (activateDelay <= 0)
+        if (!SceneLoader.frozen)
         {
-            timer -= Time.deltaTime * 1;
+            activateDelay -= Time.deltaTime * 1;
 
-            // Explodes at 0 seconds
-            if (timer <= 0)
+            if (activateDelay <= 0)
             {
-                Explode(new List<Transform>());
-            }
-            // At less than 5 seconds, mine starts to flash
-            else if (timer < 5)
-            {
-                if (canFlash)
+                timer -= Time.deltaTime * 1;
+
+                // Explodes at 0 seconds
+                if (timer <= 0)
                 {
-                    StartCoroutine(Flash(timer));
+                    Explode(new List<Transform>());
+                }
+                // At less than 5 seconds, mine starts to flash
+                else if (timer < 5)
+                {
+                    if (canFlash)
+                    {
+                        StartCoroutine(Flash(timer));
+                    }
                 }
             }
         }
@@ -63,6 +66,15 @@ public class MineBehaviour : MonoBehaviour
                     }
                     break;
             }
+        }
+    }
+
+    void IncreaseKills()
+    {
+        if (owner != null && owner.name == "Player")
+        {
+            SaveSystem.currentPlayerData.kills++;
+            Debug.Log("Added kills");
         }
     }
 
@@ -100,10 +112,7 @@ public class MineBehaviour : MonoBehaviour
                         if (collider.transform.root.name != "Player")
                         {
                             collider.transform.parent.GetComponent<BaseTankLogic>().Explode();
-                            if (owner != null && owner.name == "Player")
-                            {
-                                SaveSystem.currentPlayerData.kills++;
-                            }
+                            IncreaseKills();
                         }
                         else
                         {
