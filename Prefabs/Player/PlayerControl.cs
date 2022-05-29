@@ -45,6 +45,18 @@ public class PlayerControl : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            if (BaseUIHandler.UIElements["PauseMenu"].gameObject.activeSelf)
+            {
+                playerUIHandler.Resume();
+            }
+            else
+            {
+                playerUIHandler.Pause();
+            }
+        }
+
         if (!Dead && !SceneLoader.frozen)
         {
             if (Time.timeScale != 0)
@@ -57,17 +69,6 @@ public class PlayerControl : MonoBehaviour
                 else if (Input.GetKeyDown(SaveSystem.currentSettings.keyBinds["Lay Mine"]) && baseTankLogic.IsGrounded())
                 {
                     StartCoroutine(GetComponent<MineControl>().LayMine());
-                }
-                else if (Input.GetKeyDown(KeyCode.Escape))
-                {
-                    if (BaseUIHandler.UIElements["PauseMenu"].gameObject.activeSelf)
-                    {
-                        playerUIHandler.Resume();
-                    }
-                    else
-                    {
-                        playerUIHandler.Pause();
-                    }
                 }
 
                 if (baseTankLogic.IsGrounded())
@@ -208,7 +209,7 @@ public class PlayerControl : MonoBehaviour
         }
         else
         {
-            SceneLoader.sceneLoader.LoadScene(true, 0, 3);
+            SceneLoader.sceneLoader.LoadScene(true, 11, 3);
         }
     }
 }

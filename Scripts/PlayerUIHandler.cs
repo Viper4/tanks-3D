@@ -69,6 +69,7 @@ public class PlayerUIHandler : MonoBehaviour
     {
         BaseUIHandler.UIElements["InGame"].gameObject.SetActive(true);
         BaseUIHandler.UIElements["PauseMenu"].gameObject.SetActive(false);
+        BaseUIHandler.UIElements["Settings"].gameObject.SetActive(false);
         Time.timeScale = 1;
     }
 

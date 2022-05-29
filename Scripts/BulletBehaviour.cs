@@ -107,6 +107,15 @@ public class BulletBehaviour : MonoBehaviour
         }
     }
 
+    void IncreaseKills()
+    {
+        if (owner != null && owner.name == "Player")
+        {
+            SaveSystem.currentPlayerData.kills++;
+            Debug.Log("Added kills");
+        }
+    }
+
     void BounceOff(Collision hit)
     {
         if (bounces < ricochetLevel)
@@ -133,10 +142,7 @@ public class BulletBehaviour : MonoBehaviour
             if (baseTankLogic != null)
             {
                 baseTankLogic.Explode();
-                if (owner != null && owner.name == "Player")
-                {
-                    SaveSystem.currentPlayerData.kills++;
-                }
+                IncreaseKills();
             }
         }
 
@@ -178,10 +184,7 @@ public class BulletBehaviour : MonoBehaviour
                         if (collider.transform.parent != null)
                         {
                             collider.transform.parent.GetComponent<BaseTankLogic>().Explode();
-                            if (owner != null && owner.name == "Player")
-                            {
-                                SaveSystem.currentPlayerData.kills++;
-                            }
+                            IncreaseKills();
                         }
                         break;
                     case "Penetrable":
