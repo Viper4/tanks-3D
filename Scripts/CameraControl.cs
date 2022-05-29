@@ -77,13 +77,14 @@ public class CameraControl : MonoBehaviour
         {
             lockTurret = !lockTurret;
         }
-        else if (Input.GetKeyDown(SaveSystem.currentSettings.keyBinds["Lock Camera"]))
+        else if (!switchCamera && Input.GetKeyDown(SaveSystem.currentSettings.keyBinds["Lock Camera"]))
         {
             lockCamera = !lockCamera;
         }
         else if (Input.GetKeyDown(SaveSystem.currentSettings.keyBinds["Switch Camera"]))
         {
             switchCamera = !switchCamera;
+            lockCamera = false;
         }
 
         if (!playerControl.Dead && Time.timeScale != 0)
