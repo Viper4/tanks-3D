@@ -111,8 +111,7 @@ public class BulletBehaviour : MonoBehaviour
     {
         if (owner != null && owner.name == "Player")
         {
-            SaveSystem.currentPlayerData.kills++;
-            Debug.Log("Added kills");
+            owner.GetComponent<DataSystem>().currentPlayerData.kills++;
         }
     }
 

@@ -10,7 +10,7 @@ public static class SaveSystem
 
     public static Sprite crosshair;
 
-    public static Settings currentSettings = new Settings
+    public static readonly Settings defaultSettings = new Settings
     {
         sensitivity = 15,
         keyBinds = new Dictionary<string, KeyCode>()
@@ -33,7 +33,7 @@ public static class SaveSystem
         crosshairScale = 1,
     };
 
-    public static PlayerData currentPlayerData = new PlayerData
+    public static readonly PlayerData defaultPlayerData = new PlayerData
     {
         lives = 3,
         kills = 0,
@@ -42,28 +42,6 @@ public static class SaveSystem
         time = -1,
         bestTime = -1,
     };
-
-    public class Settings
-    {
-        public float sensitivity;
-        public Dictionary<string, KeyCode> keyBinds;
-        public bool silhouettes;
-        public bool showHUD;
-        public float masterVolume;
-        public string crosshairFileName;
-        public int crosshairColorIndex;
-        public float crosshairScale;
-    }
-
-    public class PlayerData
-    {
-        public int lives;
-        public int kills;
-        public int shots;
-        public int deaths;
-        public float time;
-        public float bestTime;
-    }
 
     public static void Init()
     {
@@ -77,28 +55,35 @@ public static class SaveSystem
         }
     }
 
-    public static void SavePlayerData(string fileName)
+    public static void SavePlayerData(string fileName, PlayerData fromPlayerData)
     {
-        if (currentPlayerData.lives > 0 && (currentPlayerData.time < currentPlayerData.bestTime || currentPlayerData.bestTime == -1))
+        Debug.Log("Saved PlayerData");
+        if (fromPlayerData.lives > 0 && (fromPlayerData.time < fromPlayerData.bestTime || fromPlayerData.bestTime == -1))
         {
-            currentPlayerData.bestTime = currentPlayerData.time;
+            fromPlayerData.bestTime = fromPlayerData.time;
         }
 
-        string json = JsonConvert.SerializeObject(currentPlayerData, Formatting.Indented);
+        string json = JsonConvert.SerializeObject(fromPlayerData, Formatting.Indented);
 
         File.WriteAllText(SAVE_FOLDER + fileName, json);
     }
 
-    public static void LoadPlayerData(string fileName)
+    public static void LoadPlayerData(string fileName, PlayerData toPlayerData)
     {
         if (File.Exists(SAVE_FOLDER + fileName))
         {
             string json = File.ReadAllText(SAVE_FOLDER + fileName);
             if (json != null)
             {
-                PlayerData playerData = JsonConvert.DeserializeObject<PlayerData>(json);
+                PlayerData loadedPlayerData = JsonConvert.DeserializeObject<PlayerData>(json);
 
-                currentPlayerData.bestTime = playerData.bestTime;
+                toPlayerData.lives = loadedPlayerData.lives;
+                toPlayerData.kills = loadedPlayerData.kills;
+                toPlayerData.shots = loadedPlayerData.shots;
+                toPlayerData.deaths = loadedPlayerData.deaths;
+                toPlayerData.time = loadedPlayerData.time;
+                toPlayerData.bestTime = loadedPlayerData.bestTime;
+                Debug.Log("Here " + toPlayerData.lives + " / " + loadedPlayerData.lives);
             }
             else
             {
@@ -109,22 +94,22 @@ public static class SaveSystem
         {
             Debug.LogWarning("Could not find file '" + SAVE_FOLDER + fileName + "', creating a new file");
 
-            SavePlayerData(fileName);
+            SavePlayerData(fileName, defaultPlayerData);
         }
     }
 
-    public static void SaveSettings(string fileName)
+    public static void SaveSettings(string fileName, Settings fromSettings)
     {
         // currentSettings variables are changed from SettingsUIHandler
-        string json = JsonConvert.SerializeObject(currentSettings, Formatting.Indented);
+        string json = JsonConvert.SerializeObject(fromSettings, Formatting.Indented);
 
         File.WriteAllText(SAVE_FOLDER + fileName, json);
     }
 
-    public static void LoadSettings(string fileName)
+    public static void LoadSettings(string fileName, Settings toSettings)
     {
+        Debug.Log("Load Settings called");
         GameObject player = GameObject.Find("Player");
-        SettingsUIHandler settingsUIHandler = Object.FindObjectOfType<SettingsUIHandler>();
 
         if (File.Exists(SAVE_FOLDER + fileName))
         {
@@ -132,42 +117,46 @@ public static class SaveSystem
 
             if (json != null)
             {
-                currentSettings = JsonConvert.DeserializeObject<Settings>(json);
+                Settings loadedSettings = JsonConvert.DeserializeObject<Settings>(json);
+
+                toSettings.keyBinds = loadedSettings.keyBinds;
+                toSettings.sensitivity = loadedSettings.sensitivity;
+                toSettings.masterVolume = loadedSettings.masterVolume;
+                toSettings.showHUD = loadedSettings.showHUD;
+                toSettings.silhouettes = loadedSettings.silhouettes;
+                toSettings.crosshairColorIndex = loadedSettings.crosshairColorIndex;
+                toSettings.crosshairScale = loadedSettings.crosshairScale;
+                toSettings.crosshairFileName = loadedSettings.crosshairFileName;
             }
 
-            string filePath = CROSSHAIR_FOLDER + currentSettings.crosshairFileName + ".png";
+            string filePath = CROSSHAIR_FOLDER + toSettings.crosshairFileName + ".png";
             crosshair = ImageToSprite(filePath);
 
-            try
+            BaseUIHandler baseUIHandler = Object.FindObjectOfType<BaseUIHandler>();
+            if (baseUIHandler != null && baseUIHandler.UIElements.ContainsKey("InGame"))
             {
-                Transform reticle = BaseUIHandler.UIElements["InGame"].Find("Reticle");
+                Transform reticle = baseUIHandler.UIElements["InGame"].Find("Reticle");
 
-                reticle.GetComponent<CrosshairManager>().UpdateReticleSprite(crosshair, currentSettings.crosshairColorIndex, currentSettings.crosshairScale);
-            }
-            catch
-            {
-                Debug.Log("Unable to set reticle sprite, skipping.");
+                reticle.GetComponent<CrosshairManager>().UpdateReticleSprite(crosshair, toSettings.crosshairColorIndex, toSettings.crosshairScale);
             }
         }
         else
         {
             Debug.LogWarning("Could not find file '" + SAVE_FOLDER + fileName + "', creating a new file");
 
-            SaveSettings(fileName);
+            SaveSettings(fileName, defaultSettings);
         }
 
         if (player != null)
         {
-            Camera.main.GetComponent<CameraControl>().sensitivity = currentSettings.sensitivity;
-
-            AudioSource[] allAudioSource = Object.FindObjectsOfType<AudioSource>();
-            foreach (AudioSource audioSource in allAudioSource)
-            {
-                audioSource.volume *= currentSettings.masterVolume / 100;
-            }
+            Camera.main.GetComponent<CameraControl>().sensitivity = toSettings.sensitivity;
         }
 
-        settingsUIHandler.UpdateSettingsUI();
+        SoundManager[] allAudioSources = Object.FindObjectsOfType<SoundManager>();
+        foreach (SoundManager audioSource in allAudioSources)
+        {
+            audioSource.UpdateVolume();
+        }
     }
 
     public static Sprite ImageToSprite(string filePath, float pixelsPerUnit = 100.0f, SpriteMeshType spriteType = SpriteMeshType.Tight)

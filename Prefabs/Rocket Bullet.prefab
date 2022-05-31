@@ -16,8 +16,8 @@ GameObject:
   - component: {fileID: 959751802619508796}
   - component: {fileID: 8710859505732709096}
   - component: {fileID: 7393409019096572533}
-  - component: {fileID: -8431712855286968510}
   - component: {fileID: 2357316915114492385}
+  - component: {fileID: 3473729789501092902}
   m_Layer: 3
   m_Name: Rocket Bullet
   m_TagString: Bullet
@@ -259,7 +259,22 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 0.18632075, y: 0.18632077, z: 0.35075852}
   m_Center: {x: -0.000000022351742, y: -0.001978524, z: 0.072062865}
---- !u!82 &-8431712855286968510
+--- !u!114 &2357316915114492385
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 959751802619508784}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7f4c834b12ba1894bb1980f38ece9e78, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  startDelay:
+  - 0
+  - 0.05
+--- !u!82 &3473729789501092902
 AudioSource:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -282,7 +297,7 @@ AudioSource:
   MinDistance: 1
   MaxDistance: 500
   Pan2D: 0
-  rolloffMode: 1
+  rolloffMode: 2
   BypassEffects: 0
   BypassListenerEffects: 0
   BypassReverbZones: 0
@@ -298,6 +313,33 @@ AudioSource:
       weightedMode: 0
       inWeight: 0.33333334
       outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.17190996
+      value: 0.7161397
+      inSlope: -4.9173336
+      outSlope: -4.9173336
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.19076194
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.2550319
+      value: 0.36515713
+      inSlope: -3.4580731
+      outSlope: -3.4580731
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.67663
+      outWeight: 0.375052
+    - serializedVersion: 3
+      time: 0.42490166
+      value: 0.048013166
+      inSlope: -0.30107778
+      outSlope: -0.30107778
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.28586784
     - serializedVersion: 3
       time: 1
       value: 0
@@ -355,21 +397,6 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
---- !u!114 &2357316915114492385
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 959751802619508784}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7f4c834b12ba1894bb1980f38ece9e78, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  startDelay:
-  - 0
-  - 0.05
 --- !u!1 &1089144005452706118
 GameObject:
   m_ObjectHideFlags: 0

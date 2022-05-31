@@ -11,14 +11,16 @@ public class SceneLoader : MonoBehaviour
     public static bool frozen;
     public static bool autoPlay;
 
-    bool timing = false;
-
     bool loadingScene = false;
 
-    Transform loadingScreen;
+    public Transform loadingScreen;
     Transform progressBar;
     Transform label;
     Transform startButton;
+
+    DataSystem dataSystem;
+
+    BaseUIHandler baseUIHandler;
 
     void Start()
     {
@@ -47,89 +49,115 @@ public class SceneLoader : MonoBehaviour
         }
     }
 
-    private void Update()
-    {
-        if (timing)
-        {
-            SaveSystem.currentPlayerData.time += Time.deltaTime;
-        }
-    }
-
     public void OnSceneLoad()
     {
-        timing = false;
+        dataSystem = FindObjectOfType<DataSystem>();
+
         StopAllCoroutines();
         loadingScene = false;
-        int currentSceneIndex = SceneManager.GetActiveScene().buildIndex;
-
-        if (currentSceneIndex == 11)
+        string currentSceneName = SceneManager.GetActiveScene().name;
+        baseUIHandler = FindObjectOfType<BaseUIHandler>();
+        if(dataSystem != null)
         {
-            Transform stats = BaseUIHandler.UIElements["StatsMenu"].Find("Stats");
-            sceneLoader.loadingScreen.gameObject.SetActive(false);
-
-            stats.Find("Time").GetComponent<Text>().text = "Time: " + FormattedTime(SaveSystem.currentPlayerData.time);
-            stats.Find("Best Time").GetComponent<Text>().text = "Best Time: " + FormattedTime(SaveSystem.currentPlayerData.bestTime);
-            float accuracy = (float)SaveSystem.currentPlayerData.kills / SaveSystem.currentPlayerData.shots;
-            stats.Find("Accuracy").GetComponent<Text>().text = "Accuracy: " + (Mathf.Round(accuracy * 10000) / 100).ToString() + "%";
-            stats.Find("Kills").GetComponent<Text>().text = "Kills: " + SaveSystem.currentPlayerData.kills;
-            stats.Find("Deaths").GetComponent<Text>().text = "Deaths: " + SaveSystem.currentPlayerData.deaths;
-            stats.Find("KD Ratio").GetComponent<Text>().text = "KD Ratio: " + ((float)SaveSystem.currentPlayerData.kills / SaveSystem.currentPlayerData.deaths).ToString();
+            SaveSystem.LoadSettings("settings.json", dataSystem.currentSettings);
         }
-        else
+
+        switch (currentSceneName)
         {
-            SaveSystem.LoadSettings("settings.json");
-
-            if (currentSceneIndex > 0)
-            {
-                Time.timeScale = 0;
-                autoPlay = false;
-                frozen = true;
-
-                sceneLoader.loadingScreen.gameObject.SetActive(true);
-                sceneLoader.progressBar.gameObject.SetActive(false);
-                sceneLoader.startButton.gameObject.SetActive(true);
-
-                sceneLoader.label.Find("Level").GetComponent<Text>().text = SceneManager.GetActiveScene().name;
-                sceneLoader.label.Find("EnemyTanks").GetComponent<Text>().text = "Enemy tanks: " + GameObject.Find("Tanks").transform.childCount;
-                sceneLoader.label.Find("Lives").GetComponent<Text>().text = "Lives: " + SaveSystem.currentPlayerData.lives;
-            }
-            else
-            {
-                SaveSystem.currentPlayerData.time = 0;
-                SaveSystem.currentPlayerData.kills = 0;
-                SaveSystem.currentPlayerData.shots = 0;
-                SaveSystem.currentPlayerData.deaths = 0;
-                SaveSystem.currentPlayerData.lives = 3;
+            case "Main Menu":
+                SaveSystem.SavePlayerData("PlayerData.json", SaveSystem.defaultPlayerData);                 // Resetting lives, kills, deaths, etc...
                 autoPlay = true;
                 StartCoroutine(ReloadAutoPlay(2.5f));
-            }
+                break;
+            case "End Scene":
+                PlayerData playerData = new PlayerData();
+                SaveSystem.LoadPlayerData("PlayerData.json", playerData);
+
+                Transform stats = baseUIHandler.UIElements["StatsMenu"].Find("Stats");
+                sceneLoader.loadingScreen.gameObject.SetActive(false);
+
+                stats.Find("Time").GetComponent<Text>().text = "Time: " + FormattedTime(playerData.time);
+                stats.Find("Best Time").GetComponent<Text>().text = "Best Time: " + FormattedTime(playerData.bestTime);
+
+                if (playerData.kills > 0)
+                {
+                    float accuracy = 1;
+                    if (playerData.shots != 0)
+                    {
+                        accuracy = Mathf.Clamp((float)playerData.kills / playerData.shots, 0, 1);
+                    }
+                    stats.Find("Accuracy").GetComponent<Text>().text = "Accuracy: " + (Mathf.Round(accuracy * 10000) / 100).ToString() + "%";
+                    stats.Find("Kills").GetComponent<Text>().text = "Kills: " + playerData.kills;
+                    if (playerData.deaths == 0)
+                    {
+                        stats.Find("KD Ratio").GetComponent<Text>().text = "KD Ratio: " + playerData.kills.ToString();
+                    }
+                    else
+                    {
+                        stats.Find("KD Ratio").GetComponent<Text>().text = "KD Ratio: " + ((float)playerData.kills / playerData.deaths).ToString();
+                    }
+                }
+
+                stats.Find("Deaths").GetComponent<Text>().text = "Deaths: " + playerData.deaths;
+                break;
+            default:
+                int currentSceneIndex = SceneManager.GetActiveScene().buildIndex;
+                
+                if (currentSceneIndex > 11)
+                {
+                    sceneLoader.loadingScreen.gameObject.SetActive(false);
+                    Time.timeScale = 1;
+                    autoPlay = false;
+                    frozen = false;
+                }
+                else
+                {
+                    dataSystem.timing = false;
+
+                    SaveSystem.LoadPlayerData("PlayerData.json", dataSystem.currentPlayerData);
+
+                    Time.timeScale = 0;
+                    autoPlay = false;
+                    frozen = true;
+
+                    sceneLoader.loadingScreen.gameObject.SetActive(true);
+                    sceneLoader.progressBar.gameObject.SetActive(false);
+                    sceneLoader.startButton.gameObject.SetActive(true);
+
+                    sceneLoader.label.Find("Level").GetComponent<Text>().text = SceneManager.GetActiveScene().name;
+                    sceneLoader.label.Find("EnemyTanks").GetComponent<Text>().text = "Enemy tanks: " + GameObject.Find("Tanks").transform.childCount;
+                    sceneLoader.label.Find("Lives").GetComponent<Text>().text = "Lives: " + dataSystem.currentPlayerData.lives;
+                }
+                break;
         }
     }
 
     public void LoadNextScene(float delay = 0)
     {
         int activeSceneIndex = SceneManager.GetActiveScene().buildIndex;
-
-        if (activeSceneIndex == 10)
-        {
-            StartCoroutine(LoadSceneRoutine(true, activeSceneIndex + 1, delay));
-        }
-        else
-        {
-            StartCoroutine(LoadSceneRoutine(false, activeSceneIndex + 1, delay));
-        }
+        StartCoroutine(LoadSceneRoutine(activeSceneIndex + 1, delay));
     }
 
     // Outside classes can't start coroutines in here for whatever reason
-    public void LoadScene(bool save, int sceneIndex = -1, float delay = 0)
+    public void LoadScene(int sceneIndex = -1, float delay = 0)
     {
-        StartCoroutine(LoadSceneRoutine(save, sceneIndex, delay));
+        StartCoroutine(LoadSceneRoutine(sceneIndex, delay));
     }
 
-    private IEnumerator LoadSceneRoutine(bool save, int sceneIndex, float delay)
+    public void LoadScene(string sceneName = null, float delay = 0)
+    {
+        StartCoroutine(LoadSceneRoutine(sceneName, delay));
+    }
+
+    private IEnumerator LoadSceneRoutine(int sceneIndex, float delay)
     {
         if (!loadingScene)
         {
+            /*if (dataSystem != null)
+            {
+                SaveSystem.SavePlayerData("PlayerData.json", dataSystem.currentPlayerData);
+            }*/
+
             loadingScene = true;
             
             if (sceneIndex < 0)
@@ -137,14 +165,45 @@ public class SceneLoader : MonoBehaviour
                 sceneIndex = SceneManager.GetActiveScene().buildIndex;
             }
 
-            if (save)
+            yield return new WaitForSecondsRealtime(delay);
+            yield return new WaitUntil(() => baseUIHandler.PauseUIActive() == false);
+            AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneIndex);
+
+            if (!autoPlay)
             {
-                SaveSystem.SavePlayerData("PlayerData.json");
+                loadingScreen.gameObject.SetActive(true);
+                startButton.gameObject.SetActive(false);
+                progressBar.gameObject.SetActive(true);
+
+                while (!asyncLoad.isDone)
+                {
+                    float progress = Mathf.Clamp01(asyncLoad.progress / .9f);
+
+                    progressBar.GetComponent<Slider>().value = progress;
+                    progressBar.Find("Text").GetComponent<Text>().text = progress * 100 + "%";
+                    yield return null;
+                }
+            }
+        }
+    }
+
+    private IEnumerator LoadSceneRoutine(string sceneName, float delay)
+    {
+        if (!loadingScene)
+        {
+            loadingScene = true;
+
+            if (sceneName == null)
+            {
+                sceneName = SceneManager.GetActiveScene().name;
             }
 
             yield return new WaitForSecondsRealtime(delay);
-            yield return new WaitUntil(() => BaseUIHandler.PauseUIActive() == false);
-            AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneIndex);
+            if(baseUIHandler != null)
+            {
+                yield return new WaitUntil(() => baseUIHandler.PauseUIActive() == false);
+            }
+            AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneName);
 
             if (!autoPlay)
             {
@@ -167,7 +226,6 @@ public class SceneLoader : MonoBehaviour
     private IEnumerator ReloadAutoPlay(float startDelay = 0)
     {
         yield return new WaitForEndOfFrame(); // Waiting for scripts and scene to fully load
-        loadingScreen.gameObject.SetActive(false);
 
         Time.timeScale = 0;
         frozen = true;
@@ -185,10 +243,15 @@ public class SceneLoader : MonoBehaviour
 
     IEnumerator DelayedStart()
     {
-        GameObject.Find("Player").transform.Find("UI").GetComponent<PlayerUIHandler>().Resume();
+        GameObject.Find("Player").transform.Find("Player UI").GetComponent<PlayerUIHandler>().Resume();
         yield return new WaitForSecondsRealtime(3);
         frozen = false;
-        timing = true;
+        dataSystem.timing = true;
+    }
+
+    public void RestartGame()
+    {
+        LoadScene(0);
     }
 
     string FormattedTime(float time)

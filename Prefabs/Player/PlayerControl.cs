@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class PlayerControl : MonoBehaviour
 {
+    public MultiplayerManager multiplayerManager;
+    public DataSystem dataSystem;
+
     Rigidbody rb;
     BaseTankLogic baseTankLogic;
     Transform mainCamera;
@@ -11,10 +14,12 @@ public class PlayerControl : MonoBehaviour
     Transform tankOrigin;
 
     PlayerUIHandler playerUIHandler;
+    BaseUIHandler baseUIHandler;
 
     [SerializeField] bool cheats = false;
     public bool godMode = false;
     public bool Dead { get; set; } = false;
+    public bool timing { get; set; } = true;
 
     [SerializeField] float movementSpeed = 6;
 
@@ -39,119 +44,123 @@ public class PlayerControl : MonoBehaviour
         tankOrigin = transform.Find("Tank Origin");
         rb = tankOrigin.GetComponent<Rigidbody>();
 
-        playerUIHandler = GameObject.Find("UI").GetComponent<PlayerUIHandler>();
+        playerUIHandler = transform.Find("Player UI").GetComponent<PlayerUIHandler>();
+        baseUIHandler = transform.Find("Player UI").GetComponent<BaseUIHandler>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (multiplayerManager.ViewIsMine())
         {
-            if (BaseUIHandler.UIElements["PauseMenu"].gameObject.activeSelf)
+            if (Input.GetKeyDown(KeyCode.Escape))
             {
-                playerUIHandler.Resume();
-            }
-            else
-            {
-                playerUIHandler.Pause();
-            }
-        }
-
-        if (!Dead && !SceneLoader.frozen)
-        {
-            if (Time.timeScale != 0)
-            {
-                // Firing bullets
-                if (Input.GetKeyDown(SaveSystem.currentSettings.keyBinds["Shoot"]))
+                if (baseUIHandler.UIElements["PauseMenu"].gameObject.activeSelf)
                 {
-                    StartCoroutine(GetComponent<FireControl>().Shoot());
-                }
-                else if (Input.GetKeyDown(SaveSystem.currentSettings.keyBinds["Lay Mine"]) && baseTankLogic.IsGrounded())
-                {
-                    StartCoroutine(GetComponent<MineControl>().LayMine());
-                }
-
-                if (baseTankLogic.IsGrounded())
-                {
-                    velocityY = 0;
+                    playerUIHandler.Resume();
                 }
                 else
                 {
-                    velocityY -= gravity * Time.deltaTime;
+                    playerUIHandler.Pause();
                 }
+            }
 
-                Vector2 inputDir = new Vector2(GetInputAxis("Horizontal"), GetInputAxis("Vertical")).normalized;
-
-                // Moving the tank with player input
-                float targetSpeed = movementSpeed / 2 * inputDir.magnitude;
-
-                currentSpeed = Mathf.SmoothDamp(currentSpeed, targetSpeed, ref speedSmoothVelocity, GetModifiedSmoothTime(speedSmoothTime));
-
-                mainCamera.Find("Anchor").eulerAngles = new Vector3(0, mainCamera.eulerAngles.y, mainCamera.eulerAngles.z);
-
-                Vector3 velocityDir = tankOrigin.forward;
-
-                RaycastHit middleHit;
-                RaycastHit frontHit;
-                if (Physics.Raycast(tankOrigin.position + tankOrigin.up * 1.22f, -tankOrigin.up, out middleHit, 3, ~ignoreLayerMasks) && Physics.Raycast(tankOrigin.position + tankOrigin.up * 1.22f + tankOrigin.forward, -tankOrigin.up, out frontHit, 3, ~ignoreLayerMasks))
+            if (!Dead && !SceneLoader.frozen)
+            {
+                if (Time.timeScale != 0)
                 {
-                    velocityDir = frontHit.point - middleHit.point;
-                }
-
-                Vector3 velocity = currentSpeed * velocityDir + Vector3.up * velocityY;
-
-                rb.velocity = velocity;
-
-                // Rotating tank with movement
-                if (inputDir != Vector2.zero)
-                {
-                    float targetRotation = Mathf.Atan2(inputDir.x, inputDir.y) * Mathf.Rad2Deg + mainCamera.eulerAngles.y;
-                    float angle = tankOrigin.eulerAngles.y - targetRotation;
-                    angle = angle < 0 ? angle + 360 : angle;
-                    if (angle > 180 - baseTankLogic.flipAngleThreshold && angle < 180 + baseTankLogic.flipAngleThreshold)
+                    // Firing bullets
+                    if (Input.GetKeyDown(dataSystem.currentSettings.keyBinds["Shoot"]))
                     {
-                        tankOrigin.forward = -tankOrigin.forward;
+                        StartCoroutine(GetComponent<FireControl>().Shoot());
+                    }
+                    else if (Input.GetKeyDown(dataSystem.currentSettings.keyBinds["Lay Mine"]) && baseTankLogic.IsGrounded())
+                    {
+                        StartCoroutine(GetComponent<MineControl>().LayMine());
+                    }
+
+                    if (baseTankLogic.IsGrounded())
+                    {
+                        velocityY = 0;
                     }
                     else
                     {
-                        tankOrigin.eulerAngles = new Vector3(tankOrigin.eulerAngles.x, Mathf.SmoothDampAngle(tankOrigin.eulerAngles.y, targetRotation, ref turnSmoothVelocity, GetModifiedSmoothTime(turnSmoothTime)), tankOrigin.eulerAngles.z);
+                        velocityY -= gravity * Time.deltaTime;
+                    }
+
+                    Vector2 inputDir = new Vector2(GetInputAxis("Horizontal"), GetInputAxis("Vertical")).normalized;
+
+                    // Moving the tank with player input
+                    float targetSpeed = movementSpeed / 2 * inputDir.magnitude;
+
+                    currentSpeed = Mathf.SmoothDamp(currentSpeed, targetSpeed, ref speedSmoothVelocity, GetModifiedSmoothTime(speedSmoothTime));
+
+                    mainCamera.Find("Anchor").eulerAngles = new Vector3(0, mainCamera.eulerAngles.y, mainCamera.eulerAngles.z);
+
+                    Vector3 velocityDir = tankOrigin.forward;
+
+                    RaycastHit middleHit;
+                    RaycastHit frontHit;
+                    if (Physics.Raycast(tankOrigin.position + tankOrigin.up * 1.22f, -tankOrigin.up, out middleHit, 3, ~ignoreLayerMasks) && Physics.Raycast(tankOrigin.position + tankOrigin.up * 1.22f + tankOrigin.forward, -tankOrigin.up, out frontHit, 3, ~ignoreLayerMasks))
+                    {
+                        velocityDir = frontHit.point - middleHit.point;
+                    }
+
+                    Vector3 velocity = currentSpeed * velocityDir + Vector3.up * velocityY;
+
+                    rb.velocity = velocity;
+
+                    // Rotating tank with movement
+                    if (inputDir != Vector2.zero)
+                    {
+                        float targetRotation = Mathf.Atan2(inputDir.x, inputDir.y) * Mathf.Rad2Deg + mainCamera.eulerAngles.y;
+                        float angle = tankOrigin.eulerAngles.y - targetRotation;
+                        angle = angle < 0 ? angle + 360 : angle;
+                        if (angle > 180 - baseTankLogic.flipAngleThreshold && angle < 180 + baseTankLogic.flipAngleThreshold)
+                        {
+                            tankOrigin.forward = -tankOrigin.forward;
+                        }
+                        else
+                        {
+                            tankOrigin.eulerAngles = new Vector3(tankOrigin.eulerAngles.x, Mathf.SmoothDampAngle(tankOrigin.eulerAngles.y, targetRotation, ref turnSmoothVelocity, GetModifiedSmoothTime(turnSmoothTime)), tankOrigin.eulerAngles.z);
+                        }
                     }
                 }
             }
-        }
-        else
-        {
-            rb.velocity = Vector3.zero;
-        }
-
-        if (cheats)
-        {
-            if (Input.GetKey(KeyCode.LeftAlt))
+            else
             {
-                if (Input.GetKeyDown(KeyCode.N))
-                {
-                    Debug.Log("Cheat Next Level");
-                    SceneLoader.sceneLoader.LoadNextScene();
-                }
-                else if (Input.GetKeyDown(KeyCode.R))
-                {
-                    Debug.Log("Cheat Reload");
-                    SceneLoader.sceneLoader.LoadScene(false);
-                }
-                else if (Input.GetKeyDown(KeyCode.B))
-                {
-                    Debug.Log("Cheat Reset");
-                    Dead = false;
+                rb.velocity = Vector3.zero;
+            }
 
-                    tankOrigin.Find("Body").gameObject.SetActive(false);
-                    tankOrigin.Find("Turret").gameObject.SetActive(false);
-                    tankOrigin.Find("Barrel").gameObject.SetActive(false);
-                }
-                else if (Input.GetKeyDown(KeyCode.G))
+            if (cheats)
+            {
+                if (Input.GetKey(KeyCode.LeftAlt))
                 {
-                    Debug.Log("God Mode Toggled");
+                    if (Input.GetKeyDown(KeyCode.N))
+                    {
+                        Debug.Log("Cheat Next Level");
+                        SceneLoader.sceneLoader.LoadNextScene();
+                    }
+                    else if (Input.GetKeyDown(KeyCode.R))
+                    {
+                        Debug.Log("Cheat Reload");
+                        SceneLoader.sceneLoader.LoadScene(-1);
+                    }
+                    else if (Input.GetKeyDown(KeyCode.B))
+                    {
+                        Debug.Log("Cheat Reset");
+                        Dead = false;
 
-                    godMode = !godMode;
+                        tankOrigin.Find("Body").gameObject.SetActive(false);
+                        tankOrigin.Find("Turret").gameObject.SetActive(false);
+                        tankOrigin.Find("Barrel").gameObject.SetActive(false);
+                    }
+                    else if (Input.GetKeyDown(KeyCode.G))
+                    {
+                        Debug.Log("God Mode Toggled");
+
+                        godMode = !godMode;
+                    }
                 }
             }
         }
@@ -173,22 +182,22 @@ public class PlayerControl : MonoBehaviour
         {
             case "Horizontal":
                 float horizontal = 0;
-                if (Input.GetKey(SaveSystem.currentSettings.keyBinds["Right"]))
+                if (Input.GetKey(dataSystem.currentSettings.keyBinds["Right"]))
                 {
                     horizontal += 1;
                 }
-                if (Input.GetKey(SaveSystem.currentSettings.keyBinds["Left"]))
+                if (Input.GetKey(dataSystem.currentSettings.keyBinds["Left"]))
                 {
                     horizontal -= 1;
                 }
                 return horizontal;
             case "Vertical":
                 float vertical = 0;
-                if (Input.GetKey(SaveSystem.currentSettings.keyBinds["Forward"]))
+                if (Input.GetKey(dataSystem.currentSettings.keyBinds["Forward"]))
                 {
                     vertical += 1;
                 }
-                if (Input.GetKey(SaveSystem.currentSettings.keyBinds["Backward"]))
+                if (Input.GetKey(dataSystem.currentSettings.keyBinds["Backward"]))
                 {
                     vertical -= 1;
                 }
@@ -200,16 +209,16 @@ public class PlayerControl : MonoBehaviour
 
     public void Respawn()
     {
-        SaveSystem.currentPlayerData.lives--;
-        SaveSystem.currentPlayerData.deaths++;
+        dataSystem.currentPlayerData.lives--;
+        dataSystem.currentPlayerData.deaths++;
 
-        if (SaveSystem.currentPlayerData.lives > 0)
+        if (dataSystem.currentPlayerData.lives > 0)
         {
-            SceneLoader.sceneLoader.LoadScene(false, -1, 3);
+            SceneLoader.sceneLoader.LoadScene(-1, 3);
         }
         else
         {
-            SceneLoader.sceneLoader.LoadScene(true, 11, 3);
+            SceneLoader.sceneLoader.LoadScene(11, 3);
         }
     }
 }

@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class BaseTankLogic : MonoBehaviour
 {
+    [SerializeField] bool player = false;
+    [SerializeField] PlayerControl playerControl;
+
     [SerializeField] Transform tankOrigin;
     [SerializeField] Transform explosionEffect;
     [SerializeField] Transform deathMarker;
@@ -41,7 +44,7 @@ public class BaseTankLogic : MonoBehaviour
     
     private void Update()
     {
-        if (!SceneLoader.frozen)
+        if (!SceneLoader.frozen && !player)
         {
             if (frozenRotation)
             {
@@ -73,21 +76,22 @@ public class BaseTankLogic : MonoBehaviour
         Instantiate(explosionEffect, tankOrigin.position, Quaternion.Euler(-90, 0, 0));
         Instantiate(deathMarker, tankOrigin.position + tankOrigin.up * 0.05f, Quaternion.Euler(new Vector3(tankOrigin.eulerAngles.x, 45, tankOrigin.eulerAngles.z)));
 
-        if (transform.name == "Player")
+        if (player)
         {
-            PlayerControl playerControl = GetComponent<PlayerControl>();
-
-            if (!playerControl.godMode)
+            if (playerControl.multiplayerManager.ViewIsMine())
             {
-                SceneLoader.frozen = true;
+                if (!playerControl.godMode)
+                {
+                    SceneLoader.frozen = true;
 
-                playerControl.Dead = true;
+                    playerControl.Dead = true;
 
-                tankOrigin.Find("Body").gameObject.SetActive(false);
-                tankOrigin.Find("Turret").gameObject.SetActive(false);
-                tankOrigin.Find("Barrel").gameObject.SetActive(false);
+                    tankOrigin.Find("Body").gameObject.SetActive(false);
+                    tankOrigin.Find("Turret").gameObject.SetActive(false);
+                    tankOrigin.Find("Barrel").gameObject.SetActive(false);
 
-                playerControl.Respawn();
+                    playerControl.Respawn();
+                }
             }
         }
         else
@@ -100,22 +104,7 @@ public class BaseTankLogic : MonoBehaviour
                 Destroy(trackMarks.GetComponent<TrailEmitter>());
             }
 
-            if (!SceneLoader.autoPlay)
-            {
-                if (transform.root.childCount <= 1)
-                {
-                    SceneLoader.frozen = true;
-                    SceneLoader.sceneLoader.LoadNextScene(3);
-                }
-            }
-            else
-            {
-                if (transform.root.childCount <= 2)
-                {
-                    Time.timeScale = 0.2f;
-                    SceneLoader.sceneLoader.LoadScene(false, -1, 3f);
-                }
-            }
+            transform.root.GetComponent<TankManager>().StartCheckTankCount();
             Destroy(gameObject);
         }
     }

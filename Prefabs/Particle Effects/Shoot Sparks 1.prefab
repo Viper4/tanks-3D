@@ -12,8 +12,8 @@ GameObject:
   - component: {fileID: 3697885029110259684}
   - component: {fileID: 73995495670105552}
   - component: {fileID: 5004743025919581952}
-  - component: {fileID: 926614778588207873}
   - component: {fileID: 7595748191054958444}
+  - component: {fileID: 678997568157267518}
   m_Layer: 2
   m_Name: Shoot Sparks 1
   m_TagString: IgnoreBullets
@@ -4880,7 +4880,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   delay: 2
---- !u!82 &926614778588207873
+--- !u!114 &7595748191054958444
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3610617624835580716}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7f4c834b12ba1894bb1980f38ece9e78, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  startDelay:
+  - 0
+  - 0.1
+--- !u!82 &678997568157267518
 AudioSource:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -4890,7 +4905,7 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 0}
+  m_audioClip: {fileID: 8300000, guid: 0123a7676c026004f98061e2be49d80b, type: 3}
   m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
@@ -4903,7 +4918,7 @@ AudioSource:
   MinDistance: 1
   MaxDistance: 500
   Pan2D: 0
-  rolloffMode: 1
+  rolloffMode: 2
   BypassEffects: 0
   BypassListenerEffects: 0
   BypassReverbZones: 0
@@ -4920,32 +4935,32 @@ AudioSource:
       inWeight: 0.33333334
       outWeight: 0.33333334
     - serializedVersion: 3
-      time: 0.024221271
-      value: 0.4059459
-      inSlope: -1.1992064
-      outSlope: -1.1992064
+      time: 0.17190996
+      value: 0.7161397
+      inSlope: -4.9173336
+      outSlope: -4.9173336
       tangentMode: 0
       weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.15981904
-    - serializedVersion: 3
-      time: 0.045200437
-      value: 0.06303151
-      inSlope: -0.5540005
-      outSlope: -0.5540005
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
+      inWeight: 0.19076194
       outWeight: 0.33333334
     - serializedVersion: 3
-      time: 0.08233735
-      value: 0.012316972
-      inSlope: -0.04011158
-      outSlope: -0.04011158
+      time: 0.2550319
+      value: 0.36515713
+      inSlope: -3.4580731
+      outSlope: -3.4580731
       tangentMode: 0
       weightedMode: 0
-      inWeight: 1
-      outWeight: 0.28056052
+      inWeight: 0.67663
+      outWeight: 0.375052
+    - serializedVersion: 3
+      time: 0.42490166
+      value: 0.048013166
+      inSlope: -0.30107778
+      outSlope: -0.30107778
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.28586784
     - serializedVersion: 3
       time: 1
       value: 0
@@ -5003,21 +5018,6 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
---- !u!114 &7595748191054958444
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3610617624835580716}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7f4c834b12ba1894bb1980f38ece9e78, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  startDelay:
-  - 0
-  - 0.1
 --- !u!1 &6985988159183340970
 GameObject:
   m_ObjectHideFlags: 0

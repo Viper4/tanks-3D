@@ -4,12 +4,14 @@ using UnityEngine;
 
 public class FireControl : MonoBehaviour
 {
+    [SerializeField] DataSystem dataSystem;
+
     [SerializeField] Transform owner;
 
     [SerializeField] Transform bullet;
     [SerializeField] Transform shootEffect;
 
-    Transform barrel;
+    [SerializeField] Transform barrel;
 
     public int bulletLimit = 5;
     public int bulletsFired { get; set; } = 0;
@@ -18,24 +20,11 @@ public class FireControl : MonoBehaviour
     
     [SerializeField] LayerMask solidLayerMask;
 
-    // Start is called before the first frame Update
-    void Awake()
-    {
-        if (transform.name != "Player")
-        {
-            barrel = transform.Find("Barrel");
-        }
-        else
-        {
-            barrel = transform.Find("Tank Origin").Find("Barrel");
-        }
-    }
-
     public IEnumerator Shoot()
     {
-        if(transform.name == "Player")
+        if (transform.name == "Player")
         {
-            SaveSystem.currentPlayerData.shots++;
+            dataSystem.currentPlayerData.shots++;
         }
 
         bulletsFired = Mathf.Clamp(bulletsFired, 0, bulletLimit);

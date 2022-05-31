@@ -4985,8 +4985,8 @@ GameObject:
   - component: {fileID: 9094124410927380229}
   - component: {fileID: 9094124410927380234}
   - component: {fileID: 8643074728521372930}
-  - component: {fileID: 1943148935576737657}
   - component: {fileID: 2072076429811490114}
+  - component: {fileID: 2600348696503673058}
   m_Layer: 2
   m_Name: Explosion 1 - Small Sound
   m_TagString: IgnoreBullets
@@ -9854,7 +9854,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   delay: 4
---- !u!82 &1943148935576737657
+--- !u!114 &2072076429811490114
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9094124410927380235}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7f4c834b12ba1894bb1980f38ece9e78, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  startDelay:
+  - 0
+  - 0.2
+--- !u!82 &2600348696503673058
 AudioSource:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -9866,7 +9881,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 8300000, guid: eef1b87c3966147429e5ed1bfc06e921, type: 3}
   m_PlayOnAwake: 0
-  m_Volume: 0.9
+  m_Volume: 1
   m_Pitch: 1
   Loop: 0
   Mute: 0
@@ -9877,7 +9892,7 @@ AudioSource:
   MinDistance: 1
   MaxDistance: 500
   Pan2D: 0
-  rolloffMode: 1
+  rolloffMode: 2
   BypassEffects: 0
   BypassListenerEffects: 0
   BypassReverbZones: 0
@@ -9893,6 +9908,33 @@ AudioSource:
       weightedMode: 0
       inWeight: 0.33333334
       outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.17190996
+      value: 0.7161397
+      inSlope: -4.9173336
+      outSlope: -4.9173336
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.19076194
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.2550319
+      value: 0.36515713
+      inSlope: -3.4580731
+      outSlope: -3.4580731
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.67663
+      outWeight: 0.375052
+    - serializedVersion: 3
+      time: 0.42490166
+      value: 0.048013166
+      inSlope: -0.30107778
+      outSlope: -0.30107778
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.28586784
     - serializedVersion: 3
       time: 1
       value: 0
@@ -9950,21 +9992,6 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
---- !u!114 &2072076429811490114
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9094124410927380235}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7f4c834b12ba1894bb1980f38ece9e78, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  startDelay:
-  - 0
-  - 0.2
 --- !u!1 &9094124411470022241
 GameObject:
   m_ObjectHideFlags: 0

@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class MineBehaviour : MonoBehaviour
 {
+    [SerializeField] DataSystem dataSystem;
+
     public Transform owner { get; set; }
 
     public Transform explosionEffect;
@@ -73,8 +75,7 @@ public class MineBehaviour : MonoBehaviour
     {
         if (owner != null && owner.name == "Player")
         {
-            SaveSystem.currentPlayerData.kills++;
-            Debug.Log("Added kills");
+            dataSystem.currentPlayerData.kills++;
         }
     }
 
