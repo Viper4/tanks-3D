@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
+using Photon.Realtime;
 
 public class ConnectToServer : MonoBehaviourPunCallbacks
 {
@@ -9,6 +10,11 @@ public class ConnectToServer : MonoBehaviourPunCallbacks
     void Start()
     {
         PhotonNetwork.ConnectUsingSettings();
+    }
+
+    public void CancelConnect()
+    {
+        PhotonNetwork.Disconnect();
     }
 
     public override void OnConnectedToMaster()
@@ -19,5 +25,10 @@ public class ConnectToServer : MonoBehaviourPunCallbacks
     public override void OnJoinedLobby()
     {
         SceneLoader.sceneLoader.LoadScene("Lobby");
+    }
+
+    public override void OnDisconnected(DisconnectCause cause)
+    {
+        SceneLoader.sceneLoader.LoadScene("Main Menu");
     }
 }

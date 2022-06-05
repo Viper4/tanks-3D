@@ -30,7 +30,7 @@ public class TankManager : MonoBehaviour
             if (transform.childCount < 1)
             {
                 SceneLoader.frozen = true;
-                SceneLoader.sceneLoader.LoadNextScene(3);
+                SceneLoader.sceneLoader.LoadNextScene(3, true);
             }
         }
         else

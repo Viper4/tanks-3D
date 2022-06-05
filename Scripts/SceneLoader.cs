@@ -51,21 +51,19 @@ public class SceneLoader : MonoBehaviour
 
     public void OnSceneLoad()
     {
-        dataSystem = FindObjectOfType<DataSystem>();
-
         StopAllCoroutines();
         loadingScene = false;
         string currentSceneName = SceneManager.GetActiveScene().name;
+
         baseUIHandler = FindObjectOfType<BaseUIHandler>();
-        if(dataSystem != null)
-        {
-            SaveSystem.LoadSettings("settings.json", dataSystem.currentSettings);
-        }
+        dataSystem = FindObjectOfType<DataSystem>();
 
         switch (currentSceneName)
         {
             case "Main Menu":
-                SaveSystem.SavePlayerData("PlayerData.json", SaveSystem.defaultPlayerData);                 // Resetting lives, kills, deaths, etc...
+                loadingScreen.gameObject.SetActive(false);
+
+                SaveSystem.SavePlayerData("PlayerData.json", SaveSystem.defaultPlayerData, false);                 // Resetting lives, kills, deaths, etc...
                 autoPlay = true;
                 StartCoroutine(ReloadAutoPlay(2.5f));
                 break;
@@ -132,37 +130,37 @@ public class SceneLoader : MonoBehaviour
         }
     }
 
-    public void LoadNextScene(float delay = 0)
+    public void LoadNextScene(float delay = 0, bool save = false)
     {
         int activeSceneIndex = SceneManager.GetActiveScene().buildIndex;
-        StartCoroutine(LoadSceneRoutine(activeSceneIndex + 1, delay));
+        StartCoroutine(LoadSceneRoutine(activeSceneIndex + 1, delay, save));
     }
 
     // Outside classes can't start coroutines in here for whatever reason
-    public void LoadScene(int sceneIndex = -1, float delay = 0)
+    public void LoadScene(int sceneIndex = -1, float delay = 0, bool save = false)
     {
-        StartCoroutine(LoadSceneRoutine(sceneIndex, delay));
+        StartCoroutine(LoadSceneRoutine(sceneIndex, delay, save));
     }
 
-    public void LoadScene(string sceneName = null, float delay = 0)
+    public void LoadScene(string sceneName = null, float delay = 0, bool save = false)
     {
-        StartCoroutine(LoadSceneRoutine(sceneName, delay));
+        StartCoroutine(LoadSceneRoutine(sceneName, delay, save));
     }
 
-    private IEnumerator LoadSceneRoutine(int sceneIndex, float delay)
+    private IEnumerator LoadSceneRoutine(int sceneIndex, float delay, bool save = false)
     {
         if (!loadingScene)
         {
-            /*if (dataSystem != null)
-            {
-                SaveSystem.SavePlayerData("PlayerData.json", dataSystem.currentPlayerData);
-            }*/
-
             loadingScene = true;
             
             if (sceneIndex < 0)
             {
                 sceneIndex = SceneManager.GetActiveScene().buildIndex;
+            }
+
+            if (dataSystem != null && save)
+            {
+                SaveSystem.SavePlayerData("PlayerData.json", dataSystem.currentPlayerData, sceneIndex == 11);
             }
 
             yield return new WaitForSecondsRealtime(delay);
@@ -187,7 +185,7 @@ public class SceneLoader : MonoBehaviour
         }
     }
 
-    private IEnumerator LoadSceneRoutine(string sceneName, float delay)
+    private IEnumerator LoadSceneRoutine(string sceneName, float delay, bool save = false)
     {
         if (!loadingScene)
         {
@@ -196,6 +194,11 @@ public class SceneLoader : MonoBehaviour
             if (sceneName == null)
             {
                 sceneName = SceneManager.GetActiveScene().name;
+            }
+
+            if (dataSystem != null && save)
+            {
+                SaveSystem.SavePlayerData("PlayerData.json", dataSystem.currentPlayerData, sceneName == "End Scene");
             }
 
             yield return new WaitForSecondsRealtime(delay);
@@ -229,7 +232,7 @@ public class SceneLoader : MonoBehaviour
 
         Time.timeScale = 0;
         frozen = true;
-        GameObject.Find("Level").GetComponent<LevelGenerator>().GenerateLevel();
+        FindObjectOfType<LevelGenerator>().GenerateLevel();
         yield return new WaitForSecondsRealtime(startDelay);
         Time.timeScale = 1;
         frozen = false;
@@ -243,7 +246,8 @@ public class SceneLoader : MonoBehaviour
 
     IEnumerator DelayedStart()
     {
-        GameObject.Find("Player").transform.Find("Player UI").GetComponent<PlayerUIHandler>().Resume();
+        yield return new WaitForEndOfFrame();
+        FindObjectOfType<PlayerUIHandler>().Resume();
         yield return new WaitForSecondsRealtime(3);
         frozen = false;
         dataSystem.timing = true;

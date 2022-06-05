@@ -1,10 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Photon.Pun;
 
 public class FireControl : MonoBehaviour
 {
-    [SerializeField] DataSystem dataSystem;
+    [SerializeField] PlayerControl playerControl;
 
     [SerializeField] Transform owner;
 
@@ -24,7 +25,7 @@ public class FireControl : MonoBehaviour
     {
         if (transform.name == "Player")
         {
-            dataSystem.currentPlayerData.shots++;
+            playerControl.dataSystem.currentPlayerData.shots++;
         }
 
         bulletsFired = Mathf.Clamp(bulletsFired, 0, bulletLimit);
@@ -33,15 +34,23 @@ public class FireControl : MonoBehaviour
             canFire = false;
 
             Transform bulletClone = null;
-            Vector3 clonePosition = barrel.position + barrel.forward * 2;
+            Vector3 clonePosition = barrel.position + barrel.forward * 2.25f;
             Quaternion cloneRotation = Quaternion.LookRotation(barrel.forward, Vector3.up);
             // Checking if the clone spot is not blocked
             if (!Physics.CheckBox(clonePosition, bullet.GetComponent<Collider>().bounds.size, cloneRotation, solidLayerMask))
             {
                 bulletsFired++;
-                bulletClone = Instantiate(bullet, clonePosition, cloneRotation);
-                bulletClone.localScale = new Vector3(1, 1, 1);
-                Instantiate(shootEffect, clonePosition, cloneRotation);
+                if (playerControl != null && playerControl.multiplayerManager.inMultiplayer)
+                {
+                    bulletClone = PhotonNetwork.Instantiate(bullet.name, clonePosition, cloneRotation).transform;
+                    PhotonNetwork.Instantiate(shootEffect.name, clonePosition, cloneRotation);
+                }
+                else
+                {
+                    bulletClone = Instantiate(bullet, clonePosition, cloneRotation);
+                    Instantiate(shootEffect, clonePosition, cloneRotation);
+                }
+                bulletClone.transform.localScale = new Vector3(1, 1, 1);
 
                 yield return new WaitWhile(() => bulletClone.GetComponent<BulletBehaviour>() == null);
 
@@ -53,7 +62,7 @@ public class FireControl : MonoBehaviour
                 {
                     bulletsFired--;
                 }
-                
+
                 yield return new WaitForSeconds(fireCooldown);
                 canFire = true;
             }

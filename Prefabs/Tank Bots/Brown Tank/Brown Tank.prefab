@@ -400,6 +400,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6dd208702654b75488b856b2664059db, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  disabled: 0
   trackMarks: {fileID: 4391486955260679417}
   baseTankLogic: {fileID: -1282805828423814551}
 --- !u!1 &6353959912858125971
@@ -453,6 +454,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3c151e8ebee41b84a99874f82a5f7355, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  playerControl: {fileID: 0}
   owner: {fileID: 6009521869144415273}
   bullet: {fileID: 4307626717143694363, guid: de9dbd5b8f77ecb4a866f8d8cf75c17d, type: 3}
   shootEffect: {fileID: 7891438045153574773, guid: 4d61908da1eaf274aa82edf86c9a5c95, type: 3}
@@ -495,15 +497,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1b39add62465dcc4c958f9a167f94014, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  player: 0
+  playerControl: {fileID: 0}
   tankOrigin: {fileID: 6009521869144415273}
   explosionEffect: {fileID: 3507901705876011728, guid: 8d9ad67b12c764e4387b9e13b552aa70, type: 3}
   deathMarker: {fileID: 1488974823688567530, guid: b6f86cc02a55019419155e7336e1ee70, type: 3}
   pitchRange:
-  - -45
-  - 45
+  - -180
+  - 180
   rollRange:
-  - -45
-  - 45
+  - -180
+  - 180
   frozenRotation: 0
   alignRotationSpeed: 20
   nonSlopeLayers:

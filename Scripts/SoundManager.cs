@@ -10,17 +10,23 @@ public class SoundManager : MonoBehaviour
     float originalVolume = 1;
 
     // Start is called before the first frame update
-    void Awake()
+    void Start()
     {
         audioSource = GetComponent<AudioSource>();
         originalVolume = audioSource.volume;
-        UpdateVolume();
+        UpdateVolume(FindObjectOfType<DataSystem>().currentSettings.masterVolume);
+
+        MultiplayerManager[] allClients = FindObjectsOfType<MultiplayerManager>();
+        foreach(MultiplayerManager multiplayerManager in allClients)
+        {
+            multiplayerManager.UpdateSoundManagerOnClient(this);
+        }
 
         audioSource.PlayDelayed(Random.Range(startDelay[0], startDelay[1]));
     }
 
-    public void UpdateVolume()
+    public void UpdateVolume(float masterVolume)
     {
-        audioSource.volume = originalVolume * FindObjectOfType<DataSystem>().currentSettings.masterVolume / 100;
+        audioSource.volume = originalVolume * masterVolume / 100;
     }
 }

@@ -6,15 +6,15 @@ public class EngineSoundManager : MonoBehaviour
 {
     [SerializeField] Rigidbody rb;
     AudioSource audioSource;
-    DataSystem dataSystem;
+    float masterVolume = 100;
 
     [SerializeField] float scale;
 
     private void Start()
     {
-        dataSystem = FindObjectOfType<DataSystem>();
-
         audioSource = GetComponent<AudioSource>();
+
+        UpdateMasterVolume(FindObjectOfType<DataSystem>().currentSettings.masterVolume);
 
         audioSource.Pause();
     }
@@ -26,12 +26,17 @@ public class EngineSoundManager : MonoBehaviour
         {
             audioSource.UnPause();
 
-            float targetVolume = rb.velocity.magnitude * scale * (dataSystem.currentSettings.masterVolume / 100);
+            float targetVolume = rb.velocity.magnitude * scale * (masterVolume / 100);
             audioSource.volume = targetVolume;
         }
         else
         {
             audioSource.Pause();
         }
+    }
+
+    public void UpdateMasterVolume(float targetVolume)
+    {
+        masterVolume = targetVolume;
     }
 }

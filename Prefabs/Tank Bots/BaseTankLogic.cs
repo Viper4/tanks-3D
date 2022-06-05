@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Photon.Pun;
 
 public class BaseTankLogic : MonoBehaviour
 {
@@ -8,6 +9,10 @@ public class BaseTankLogic : MonoBehaviour
     [SerializeField] PlayerControl playerControl;
 
     [SerializeField] Transform tankOrigin;
+    GameObject body;
+    GameObject turret;
+    GameObject barrel;
+
     [SerializeField] Transform explosionEffect;
     [SerializeField] Transform deathMarker;
 
@@ -40,11 +45,15 @@ public class BaseTankLogic : MonoBehaviour
         }
         
         rb = GetComponent<Rigidbody>();
+
+        body = tankOrigin.Find("Body").gameObject;
+        turret = tankOrigin.Find("Turret").gameObject;
+        barrel = tankOrigin.Find("Barrel").gameObject;
     }
-    
+
     private void Update()
     {
-        if (!SceneLoader.frozen && !player)
+        if (!SceneLoader.frozen)
         {
             if (frozenRotation)
             {
@@ -61,7 +70,7 @@ public class BaseTankLogic : MonoBehaviour
                 tankOrigin.eulerAngles = new Vector3(Clamping.ClampAngle(tankOrigin.eulerAngles.x, pitchRange[0], pitchRange[1]), tankOrigin.eulerAngles.y, Clamping.ClampAngle(tankOrigin.eulerAngles.z, rollRange[0], rollRange[1]));
             }
 
-            if (noisyRotation)
+            if (noisyRotation && !player)
             {
                 // Adding noise to rotation
                 float noise = tankRotNoiseScale * (Mathf.PerlinNoise(tankRotSeed + Time.time * tankRotNoiseSpeed, tankRotSeed + 1 + Time.time * tankRotNoiseSpeed) - 0.5f);
@@ -71,31 +80,52 @@ public class BaseTankLogic : MonoBehaviour
         }
     }
 
-    public void Explode()
+    [PunRPC]
+    public void MultiplayerExplodeTank()
     {
-        Instantiate(explosionEffect, tankOrigin.position, Quaternion.Euler(-90, 0, 0));
-        Instantiate(deathMarker, tankOrigin.position + tankOrigin.up * 0.05f, Quaternion.Euler(new Vector3(tankOrigin.eulerAngles.x, 45, tankOrigin.eulerAngles.z)));
-
         if (player)
         {
-            if (playerControl.multiplayerManager.ViewIsMine())
+            
+        }
+        else
+        {
+
+        }
+    }
+    
+    [PunRPC]
+    public void ExplodeTank()
+    {
+        if (player)
+        {
+            tankOrigin.GetComponent<Collider>().enabled = false;
+
+            body.SetActive(false);
+            turret.SetActive(false);
+            barrel.SetActive(false);
+
+            playerControl.Dead = true;
+            playerControl.Respawn();
+            if (playerControl.multiplayerManager.inMultiplayer)
             {
-                if (!playerControl.godMode)
-                {
-                    SceneLoader.frozen = true;
+                PhotonNetwork.Instantiate(explosionEffect.name, tankOrigin.position, Quaternion.identity);
+                PhotonNetwork.Instantiate(deathMarker.name, tankOrigin.position + tankOrigin.up * 0.05f, Quaternion.Euler(new Vector3(tankOrigin.eulerAngles.x, 45, tankOrigin.eulerAngles.z)));
+            }
+            else
+            {
+                Instantiate(explosionEffect, tankOrigin.position, Quaternion.identity);
+                Instantiate(deathMarker, tankOrigin.position + tankOrigin.up * 0.05f, Quaternion.Euler(new Vector3(tankOrigin.eulerAngles.x, 45, tankOrigin.eulerAngles.z)));
 
-                    playerControl.Dead = true;
+                Debug.Log("Regular");
 
-                    tankOrigin.Find("Body").gameObject.SetActive(false);
-                    tankOrigin.Find("Turret").gameObject.SetActive(false);
-                    tankOrigin.Find("Barrel").gameObject.SetActive(false);
-
-                    playerControl.Respawn();
-                }
+                SceneLoader.frozen = true;
             }
         }
         else
         {
+            Instantiate(explosionEffect, tankOrigin.position, Quaternion.identity);
+            Instantiate(deathMarker, tankOrigin.position + tankOrigin.up * 0.05f, Quaternion.Euler(new Vector3(tankOrigin.eulerAngles.x, 45, tankOrigin.eulerAngles.z)));
+
             Transform trackMarks = tankOrigin.Find("TrackMarks");
 
             if (trackMarks != null)
@@ -116,12 +146,17 @@ public class BaseTankLogic : MonoBehaviour
 
         if (angle > 180 - flipAngleThreshold && angle < 180 + flipAngleThreshold)
         {
-            tankOrigin.forward = -tankOrigin.forward;
+            FlipTank();
         }
         else
         {
             rb.MoveRotation(Quaternion.RotateTowards(tankOrigin.rotation, Quaternion.LookRotation(to), Time.deltaTime * tankRotSpeed * 2));
         }
+    }
+
+    public void FlipTank()
+    {
+        tankOrigin.forward = -tankOrigin.forward;
     }
 
     public void ObstacleAvoidance(RaycastHit forwardHit, float maxDistance, LayerMask barrierLayers)

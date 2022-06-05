@@ -41,6 +41,7 @@ public static class SaveSystem
         deaths = 0,
         time = -1,
         bestTime = -1,
+        username = "Player",
     };
 
     public static void Init()
@@ -55,10 +56,9 @@ public static class SaveSystem
         }
     }
 
-    public static void SavePlayerData(string fileName, PlayerData fromPlayerData)
+    public static void SavePlayerData(string fileName, PlayerData fromPlayerData, bool compareTime)
     {
-        Debug.Log("Saved PlayerData");
-        if (fromPlayerData.lives > 0 && (fromPlayerData.time < fromPlayerData.bestTime || fromPlayerData.bestTime == -1))
+        if (compareTime && fromPlayerData.lives > 0 && (fromPlayerData.time < fromPlayerData.bestTime || fromPlayerData.bestTime == -1))
         {
             fromPlayerData.bestTime = fromPlayerData.time;
         }
@@ -83,7 +83,7 @@ public static class SaveSystem
                 toPlayerData.deaths = loadedPlayerData.deaths;
                 toPlayerData.time = loadedPlayerData.time;
                 toPlayerData.bestTime = loadedPlayerData.bestTime;
-                Debug.Log("Here " + toPlayerData.lives + " / " + loadedPlayerData.lives);
+                toPlayerData.username = loadedPlayerData.username;
             }
             else
             {
@@ -94,7 +94,7 @@ public static class SaveSystem
         {
             Debug.LogWarning("Could not find file '" + SAVE_FOLDER + fileName + "', creating a new file");
 
-            SavePlayerData(fileName, defaultPlayerData);
+            SavePlayerData(fileName, defaultPlayerData, false);
         }
     }
 
@@ -106,11 +106,8 @@ public static class SaveSystem
         File.WriteAllText(SAVE_FOLDER + fileName, json);
     }
 
-    public static void LoadSettings(string fileName, Settings toSettings)
+    public static void LoadSettings(string fileName, DataSystem toData)
     {
-        Debug.Log("Load Settings called");
-        GameObject player = GameObject.Find("Player");
-
         if (File.Exists(SAVE_FOLDER + fileName))
         {
             string json = File.ReadAllText(SAVE_FOLDER + fileName);
@@ -119,25 +116,29 @@ public static class SaveSystem
             {
                 Settings loadedSettings = JsonConvert.DeserializeObject<Settings>(json);
 
-                toSettings.keyBinds = loadedSettings.keyBinds;
-                toSettings.sensitivity = loadedSettings.sensitivity;
-                toSettings.masterVolume = loadedSettings.masterVolume;
-                toSettings.showHUD = loadedSettings.showHUD;
-                toSettings.silhouettes = loadedSettings.silhouettes;
-                toSettings.crosshairColorIndex = loadedSettings.crosshairColorIndex;
-                toSettings.crosshairScale = loadedSettings.crosshairScale;
-                toSettings.crosshairFileName = loadedSettings.crosshairFileName;
+                toData.currentSettings.keyBinds = loadedSettings.keyBinds;
+                toData.currentSettings.sensitivity = loadedSettings.sensitivity;
+                toData.currentSettings.masterVolume = loadedSettings.masterVolume;
+                toData.currentSettings.showHUD = loadedSettings.showHUD;
+                toData.currentSettings.silhouettes = loadedSettings.silhouettes;
+                toData.currentSettings.crosshairColorIndex = loadedSettings.crosshairColorIndex;
+                toData.currentSettings.crosshairScale = loadedSettings.crosshairScale;
+                toData.currentSettings.crosshairFileName = loadedSettings.crosshairFileName;
             }
 
-            string filePath = CROSSHAIR_FOLDER + toSettings.crosshairFileName + ".png";
+            string filePath = CROSSHAIR_FOLDER + toData.currentSettings.crosshairFileName + ".png";
             crosshair = ImageToSprite(filePath);
 
-            BaseUIHandler baseUIHandler = Object.FindObjectOfType<BaseUIHandler>();
-            if (baseUIHandler != null && baseUIHandler.UIElements.ContainsKey("InGame"))
+            Transform playerUI = toData.transform.Find("Player UI");
+            if (playerUI != null)
             {
-                Transform reticle = baseUIHandler.UIElements["InGame"].Find("Reticle");
+                BaseUIHandler baseUIHandler = playerUI.GetComponent<BaseUIHandler>();
+                if (baseUIHandler != null && baseUIHandler.UIElements.ContainsKey("InGame"))
+                {
+                    Transform reticle = baseUIHandler.UIElements["InGame"].Find("Reticle");
 
-                reticle.GetComponent<CrosshairManager>().UpdateReticleSprite(crosshair, toSettings.crosshairColorIndex, toSettings.crosshairScale);
+                    reticle.GetComponent<CrosshairManager>().UpdateReticleSprite(crosshair, toData.currentSettings.crosshairColorIndex, toData.currentSettings.crosshairScale);
+                }
             }
         }
         else
@@ -147,15 +148,32 @@ public static class SaveSystem
             SaveSettings(fileName, defaultSettings);
         }
 
-        if (player != null)
+        Transform camera = toData.transform.Find("Main Camera");
+        if(camera != null)
         {
-            Camera.main.GetComponent<CameraControl>().sensitivity = toSettings.sensitivity;
+            CameraControl cameraS = toData.transform.Find("Main Camera").GetComponent<CameraControl>();
+            MultiplayerCameraControl cameraM = toData.transform.Find("Main Camera").GetComponent<MultiplayerCameraControl>();
+
+            if (cameraS != null)
+            {
+                cameraS.sensitivity = toData.currentSettings.sensitivity;
+            }
+            else if (cameraM != null)
+            {
+                cameraM.sensitivity = toData.currentSettings.sensitivity;
+            }
         }
 
-        SoundManager[] allAudioSources = Object.FindObjectsOfType<SoundManager>();
-        foreach (SoundManager audioSource in allAudioSources)
+        SoundManager[] allSounds = Object.FindObjectsOfType<SoundManager>();
+        foreach (SoundManager sound in allSounds)
         {
-            audioSource.UpdateVolume();
+            sound.UpdateVolume(toData.currentSettings.masterVolume);
+        }
+
+        EngineSoundManager[] allEngineSounds = Object.FindObjectsOfType<EngineSoundManager>();
+        foreach (EngineSoundManager engineSound in allEngineSounds)
+        {
+            engineSound.UpdateMasterVolume(toData.currentSettings.masterVolume);
         }
     }
 

@@ -18,6 +18,10 @@ public class BaseUIHandler : MonoBehaviour
             {
                 child.gameObject.SetActive(false);
             }
+            else
+            {
+                child.gameObject.SetActive(true);
+            }
         }
         if (UIElements.ContainsKey("InGame"))
         {

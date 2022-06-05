@@ -1,3 +1,4 @@
+using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -20,12 +21,24 @@ public class BulletBehaviour : MonoBehaviour
     public int ricochetLevel = 1;
     int bounces = 0;
 
+    [SerializeField] bool multiplayer = false;
+    PhotonView view;
+
     // Start is called before the first frame Update
     void Awake()
     {
         rb = GetComponent<Rigidbody>();
 
-        rb.velocity = transform.forward * speed;
+        if (multiplayer)
+        {
+            view = GetComponent<PhotonView>();
+
+            view.RPC("ResetVelocity", RpcTarget.All);
+        }
+        else
+        {
+            ResetVelocity();
+        }
     }
 
     void Update()
@@ -45,15 +58,11 @@ public class BulletBehaviour : MonoBehaviour
                 case "Tank":
                     if (other.transform.parent.name != "Tanks")
                     {
-                        if (other.transform.root.name != "Player")
-                        {
-                            KillTarget(other.transform.parent);
-                        }
-                        else
-                        {
-                            KillTarget(other.transform.root);
-                        }
+                        KillTarget(other.transform.parent);
                     }
+                    break;
+                case "Player":
+                    KillTarget(other.transform.root);
                     break;
             }
         }
@@ -66,6 +75,9 @@ public class BulletBehaviour : MonoBehaviour
             switch (other.transform.tag)
             {
                 case "Tank":
+                    KillTarget(other.transform);
+                    break;
+                case "Player":
                     KillTarget(other.transform);
                     break;
                 case "Penetrable":
@@ -97,7 +109,14 @@ public class BulletBehaviour : MonoBehaviour
                     break;
                 case "Bullet":
                     // Destroy bullet
-                    Destroy(other.gameObject);
+                    if (multiplayer)
+                    {
+                        PhotonNetwork.Destroy(other.gameObject);
+                    }
+                    else
+                    {
+                        Destroy(other.gameObject);
+                    }
                     DestroySelf();
                     break;
                 default:
@@ -109,8 +128,9 @@ public class BulletBehaviour : MonoBehaviour
 
     void IncreaseKills()
     {
-        if (owner != null && owner.name == "Player")
+        if (owner != null && owner.CompareTag("Player"))
         {
+            Debug.Log("Increased kills");
             owner.GetComponent<DataSystem>().currentPlayerData.kills++;
         }
     }
@@ -119,13 +139,26 @@ public class BulletBehaviour : MonoBehaviour
     {
         if (bounces < ricochetLevel)
         {
-            Instantiate(sparkEffect, transform.position, Quaternion.identity);
-            // Reflecting bullet across perpendicular vector of contact point
             bounces++;
             Vector3 reflection = Vector3.Reflect(transform.forward, hit.contacts[0].normal);
-            transform.forward = reflection;
-            // Resetting velocity
-            rb.velocity = transform.forward * speed;
+
+            if (multiplayer)
+            {
+                if (view != null && view.IsMine)
+                {
+                    PhotonNetwork.Instantiate(sparkEffect.name, transform.position, Quaternion.identity);
+
+                    view.RPC("Reflect", RpcTarget.All, new object[] { reflection });
+                    view.RPC("ResetVelocity", RpcTarget.All);
+                }
+            }
+            else
+            {
+                Instantiate(sparkEffect, transform.position, Quaternion.identity);
+
+                Reflect(reflection);
+                ResetVelocity();
+            }
         }
         else
         {
@@ -133,15 +166,41 @@ public class BulletBehaviour : MonoBehaviour
         }
     }
 
+    [PunRPC]
+    void Reflect(Vector3 reflection)
+    {
+        transform.forward = reflection;
+    }
+
+    [PunRPC]
+    void ResetVelocity()
+    {
+        rb.velocity = transform.forward * speed;
+    }
+
     void KillTarget(Transform target)
     {
-        if (transform.name != "Rocket Bullet" && target != null && target.CompareTag("Tank"))
+        if (transform.name != "Rocket Bullet" && target != null)
         {
-            BaseTankLogic baseTankLogic = target.GetComponent<BaseTankLogic>();
-            if (baseTankLogic != null)
+            if (target != owner)
             {
-                baseTankLogic.Explode();
                 IncreaseKills();
+            }
+            if (multiplayer)
+            {
+                if (view.IsMine)
+                {
+                    Debug.Log("Started here");
+                    target.GetComponent<PhotonView>().RPC("ExplodeTank", RpcTarget.All);
+                }
+            }
+            else
+            {
+                BaseTankLogic baseTankLogic = target.GetComponent<BaseTankLogic>();
+                if (baseTankLogic != null)
+                {
+                    baseTankLogic.ExplodeTank();
+                }
             }
         }
 
@@ -156,11 +215,19 @@ public class BulletBehaviour : MonoBehaviour
             owner.GetComponent<FireControl>().bulletsFired -= 1;
         }
 
-        Destroy(gameObject);
+        if (multiplayer)
+        {
+            PhotonNetwork.Destroy(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
 
     void DestroySelf()
     {
+
         // Keeping track of how many bullets a tank has fired
         if (owner != null)
         {
@@ -182,7 +249,7 @@ public class BulletBehaviour : MonoBehaviour
                         // Blowing up tanks
                         if (collider.transform.parent != null)
                         {
-                            collider.transform.parent.GetComponent<BaseTankLogic>().Explode();
+                            collider.transform.parent.GetComponent<BaseTankLogic>().ExplodeTank();
                             IncreaseKills();
                         }
                         break;
@@ -197,7 +264,7 @@ public class BulletBehaviour : MonoBehaviour
                         break;
                     case "Mine":
                         // Explode mines
-                        collider.GetComponent<MineBehaviour>().Explode(new List<Transform>());
+                        collider.GetComponent<MineBehaviour>().ExplodeMine(new List<Transform>());
                         break;
                 }
 
@@ -210,7 +277,18 @@ public class BulletBehaviour : MonoBehaviour
             }
         }
 
-        Instantiate(explosionEffect, transform.position, Quaternion.identity);
-        Destroy(gameObject);
+        if (multiplayer)
+        {
+            if (GetComponent<PhotonView>().IsMine)
+            {
+                PhotonNetwork.Instantiate(explosionEffect.name, transform.position, Quaternion.identity);
+                PhotonNetwork.Destroy(gameObject);
+            }
+        }
+        else
+        {
+            Instantiate(explosionEffect, transform.position, Quaternion.identity);
+            Destroy(gameObject);
+        }
     }
 }

@@ -7,12 +7,17 @@ using Photon.Realtime;
 
 public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
 {
+    [SerializeField] DataSystem dataSystem;
+
     public InputField createInput;
     public InputField joinInput;
+    public InputField usernameInput;
 
     public void CreateRoom()
     {
-        PhotonNetwork.CreateRoom(createInput.text);
+        RoomOptions roomOptions = new RoomOptions();
+        roomOptions.PublishUserId = true;
+        PhotonNetwork.CreateRoom(createInput.text, roomOptions);
     }
 
     public void JoinRoom()
@@ -22,6 +27,8 @@ public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
 
     public override void OnJoinedRoom()
     {
+        PhotonNetwork.NickName = usernameInput.text;
+        
         PhotonNetwork.LoadLevel("Multiplayer Level");
     }
 

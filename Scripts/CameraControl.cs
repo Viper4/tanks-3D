@@ -38,7 +38,7 @@ public class CameraControl : MonoBehaviour
     bool switchCamera = false;
 
     // Start is called before the first frame Update
-    void Awake()
+    void Start()
     {
         // If target is not set, automatically set it to the parent
         if (target == null)
@@ -60,117 +60,105 @@ public class CameraControl : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (playerControl.multiplayerManager.ViewIsMine())
+        float zoomRate = Input.GetKey(KeyCode.LeftShift) ? 0.5f : 5f;
+        // Zoom with scroll
+        if (Input.GetAxisRaw("Mouse ScrollWheel") > 0)
         {
-            float zoomRate = Input.GetKey(KeyCode.LeftShift) ? 0.5f : 5f;
-            // Zoom with scroll
-            if (Input.GetAxisRaw("Mouse ScrollWheel") > 0)
+            dstFromTarget = Mathf.Clamp(dstFromTarget - zoomRate, targetDstMinMax.x, targetDstMinMax.y);
+        }
+        else if (Input.GetAxisRaw("Mouse ScrollWheel") < 0)
+        {
+            dstFromTarget = Mathf.Clamp(dstFromTarget + zoomRate, targetDstMinMax.x, targetDstMinMax.y);
+        }
+
+        // Lock turret toggle
+        if (Input.GetKeyDown(playerControl.dataSystem.currentSettings.keyBinds["Lock Turret"]))
+        {
+            lockTurret = !lockTurret;
+        }
+        else if (!switchCamera && Input.GetKeyDown(playerControl.dataSystem.currentSettings.keyBinds["Lock Camera"]))
+        {
+            lockCamera = !lockCamera;
+        }
+        else if (Input.GetKeyDown(playerControl.dataSystem.currentSettings.keyBinds["Switch Camera"]))
+        {
+            switchCamera = !switchCamera;
+            lockCamera = false;
+        }
+
+        if (!playerControl.Dead && Time.timeScale != 0)
+        {
+            // Unlinking y eulers of turret, barrel, and target from parent
+            turret.eulerAngles = new Vector3(turret.eulerAngles.x, turret.eulerAngles.y + lastEulerAngles.y - tankOrigin.eulerAngles.y, turret.eulerAngles.z);
+            barrel.eulerAngles = target.eulerAngles = new Vector3(barrel.eulerAngles.x, barrel.eulerAngles.y + lastEulerAngles.y - tankOrigin.eulerAngles.y, barrel.eulerAngles.z);
+
+            reticle.gameObject.SetActive(true);
+            Cursor.visible = false;
+            if (switchCamera)
             {
-                dstFromTarget = Mathf.Clamp(dstFromTarget - zoomRate, targetDstMinMax.x, targetDstMinMax.y);
+                transform.eulerAngles = new Vector3(90, 0, 0);
+                transform.position = new Vector3(0, 30 + dstFromTarget, 0);
             }
-            else if (Input.GetAxisRaw("Mouse ScrollWheel") < 0)
+
+            if (dstFromTarget == 0 && !switchCamera)
             {
-                dstFromTarget = Mathf.Clamp(dstFromTarget + zoomRate, targetDstMinMax.x, targetDstMinMax.y);
-            }
+                Cursor.lockState = CursorLockMode.Locked;
+                pitchMinMax = pitchMinMaxL;
 
-            // Lock turret toggle
-            if (Input.GetKeyDown(playerControl.dataSystem.currentSettings.keyBinds["Lock Turret"]))
-            {
-                lockTurret = !lockTurret;
-            }
-            else if (!switchCamera && Input.GetKeyDown(playerControl.dataSystem.currentSettings.keyBinds["Lock Camera"]))
-            {
-                lockCamera = !lockCamera;
-            }
-            else if (Input.GetKeyDown(playerControl.dataSystem.currentSettings.keyBinds["Switch Camera"]))
-            {
-                switchCamera = !switchCamera;
-                lockCamera = false;
-            }
-
-            if (!playerControl.Dead && Time.timeScale != 0)
-            {
-                // Unlinking y eulers of turret, barrel, and target from parent
-                turret.eulerAngles = new Vector3(turret.eulerAngles.x, turret.eulerAngles.y + lastEulerAngles.y - tankOrigin.eulerAngles.y, turret.eulerAngles.z);
-                barrel.eulerAngles = target.eulerAngles = new Vector3(barrel.eulerAngles.x, barrel.eulerAngles.y + lastEulerAngles.y - tankOrigin.eulerAngles.y, barrel.eulerAngles.z);
-
-                reticle.gameObject.SetActive(true);
-                Cursor.visible = false;
-                if (switchCamera)
-                {
-                    Cursor.lockState = CursorLockMode.Confined;
-                    pitchMinMax = pitchMinMaxN;
-
-                    body.gameObject.GetComponent<MeshRenderer>().enabled = turret.gameObject.GetComponent<MeshRenderer>().enabled = barrel.gameObject.GetComponent<MeshRenderer>().enabled = true;
-
-                    RotateToMousePoint();
-
-                    transform.eulerAngles = new Vector3(90, 0, 0);
-                    transform.position = new Vector3(0, 30 + dstFromTarget, 0);
-                }
-                else
-                {
-                    if (dstFromTarget == 0)
-                    {
-                        Cursor.lockState = CursorLockMode.Locked;
-                        pitchMinMax = pitchMinMaxL;
-
-                        turret.rotation = barrel.rotation = Camera.main.transform.rotation;
-                        body.gameObject.GetComponent<MeshRenderer>().enabled = turret.gameObject.GetComponent<MeshRenderer>().enabled = barrel.gameObject.GetComponent<MeshRenderer>().enabled = false;
-                        reticle.position = new Vector3(Screen.width * 0.5f, Screen.height * 0.5f, 0);
-                    }
-                    else
-                    {
-                        Cursor.lockState = CursorLockMode.Confined;
-                        pitchMinMax = pitchMinMaxN;
-
-                        body.gameObject.GetComponent<MeshRenderer>().enabled = turret.gameObject.GetComponent<MeshRenderer>().enabled = barrel.gameObject.GetComponent<MeshRenderer>().enabled = true;
-
-                        if (!lockTurret)
-                        {
-                            RotateToMousePoint();
-                        }
-                        else
-                        {
-                            if (Physics.Raycast(target.position, barrel.forward, out RaycastHit barrelHit, Mathf.Infinity, ~ignoreLayerMasks))
-                            {
-                                reticle.position = Camera.main.WorldToScreenPoint(barrelHit.point);
-                            }
-                        }
-                    }
-                }
-
-                // Zeroing x and z eulers of turret and clamping barrel x euler
-                turret.localEulerAngles = new Vector3(0, turret.localEulerAngles.y, 0);
-                barrel.localEulerAngles = new Vector3(Clamping.ClampAngle(barrel.localEulerAngles.x, pitchMinMaxL.x, pitchMinMaxL.y), barrel.localEulerAngles.y, 0);
-
-                lastEulerAngles = tankOrigin.eulerAngles;
+                turret.rotation = barrel.rotation = Camera.main.transform.rotation;
+                body.gameObject.GetComponent<MeshRenderer>().enabled = turret.gameObject.GetComponent<MeshRenderer>().enabled = barrel.gameObject.GetComponent<MeshRenderer>().enabled = false;
+                reticle.position = new Vector3(Screen.width * 0.5f, Screen.height * 0.5f, 0);
             }
             else
             {
-                reticle.position = Input.mousePosition;
+                Cursor.lockState = CursorLockMode.Confined;
+                pitchMinMax = pitchMinMaxN;
+
+                body.gameObject.GetComponent<MeshRenderer>().enabled = turret.gameObject.GetComponent<MeshRenderer>().enabled = barrel.gameObject.GetComponent<MeshRenderer>().enabled = true;
+
+                if (!lockTurret)
+                {
+                    RotateToMousePoint();
+                }
+                else
+                {
+                    if (Physics.Raycast(target.position, barrel.forward, out RaycastHit barrelHit, Mathf.Infinity, ~ignoreLayerMasks))
+                    {
+                        reticle.position = Camera.main.WorldToScreenPoint(barrelHit.point);
+                    }
+                }
             }
 
-            if (!switchCamera)
+            // Zeroing x and z eulers of turret and clamping barrel x euler
+            turret.localEulerAngles = new Vector3(0, turret.localEulerAngles.y, 0);
+            barrel.localEulerAngles = new Vector3(Clamping.ClampAngle(barrel.localEulerAngles.x, pitchMinMaxL.x, pitchMinMaxL.y), barrel.localEulerAngles.y, 0);
+
+            lastEulerAngles = tankOrigin.eulerAngles;
+        }
+        else
+        {
+            reticle.position = Input.mousePosition;
+        }
+
+        if (!switchCamera)
+        {
+            if (!lockCamera)
             {
-                if (!lockCamera)
-                {
-                    // Translating inputs from mouse into smoothed rotation of camera
-                    yaw += Input.GetAxis("Mouse X") * sensitivity / 4;
-                    pitch -= Input.GetAxis("Mouse Y") * sensitivity / 4;
-                    pitch = Mathf.Clamp(pitch, pitchMinMax.x, pitchMinMax.y);
+                // Translating inputs from mouse into smoothed rotation of camera
+                yaw += Input.GetAxis("Mouse X") * sensitivity / 4;
+                pitch -= Input.GetAxis("Mouse Y") * sensitivity / 4;
+                pitch = Mathf.Clamp(pitch, pitchMinMax.x, pitchMinMax.y);
 
-                    currentRotation = Vector3.SmoothDamp(currentRotation, new Vector3(pitch, yaw), ref rotationSmoothVelocity, rotationSmoothTime);
-                    // Setting rotation and position of camera on previous params and target and dstFromTarget
-                    transform.eulerAngles = currentRotation;
-                }
-                transform.position = target.position - transform.forward * dstFromTarget;
+                currentRotation = Vector3.SmoothDamp(currentRotation, new Vector3(pitch, yaw), ref rotationSmoothVelocity, rotationSmoothTime);
+                // Setting rotation and position of camera on previous params and target and dstFromTarget
+                transform.eulerAngles = currentRotation;
+            }
+            transform.position = target.position - transform.forward * dstFromTarget;
 
-                // Prevent clipping of camera
-                if (Physics.Raycast(target.position, (transform.position - target.position).normalized, out RaycastHit clippingHit, dstFromTarget, ~ignoreLayerMasks))
-                {
-                    transform.position = clippingHit.point - (transform.position - target.position).normalized;
-                }
+            // Prevent clipping of camera
+            if (Physics.Raycast(target.position, (transform.position - target.position).normalized, out RaycastHit clippingHit, dstFromTarget, ~ignoreLayerMasks))
+            {
+                transform.position = clippingHit.point - (transform.position - target.position).normalized;
             }
         }
     }
@@ -183,8 +171,8 @@ public class CameraControl : MonoBehaviour
         {
             Debug.DrawLine(transform.position, mouseHit.point, Color.red, 0.1f);
             // Rotating turret and barrel towards the mouseHit point
-            Vector3 dir = Vector3.RotateTowards(target.forward, mouseHit.point - target.position, Time.deltaTime * 3, 0);
-            Quaternion lookRotation = Quaternion.LookRotation(dir, tankOrigin.up);
+            //Vector3 dir = Vector3.RotateTowards(target.forward, mouseHit.point - target.position, Time.deltaTime * 3, 0);
+            Quaternion lookRotation = Quaternion.LookRotation(mouseHit.point - target.position, tankOrigin.up);
 
             turret.rotation = Quaternion.AngleAxis(lookRotation.eulerAngles.y, Vector3.up);
             barrel.rotation = target.rotation = lookRotation;

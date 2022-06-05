@@ -1,25 +1,29 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Photon.Pun;
 
 public class PlayerControl : MonoBehaviour
 {
     public MultiplayerManager multiplayerManager;
     public DataSystem dataSystem;
 
-    Rigidbody rb;
-    BaseTankLogic baseTankLogic;
-    Transform mainCamera;
+    [SerializeField] Rigidbody rb;
+    [SerializeField] BaseTankLogic baseTankLogic;
+    [SerializeField] Transform mainCamera;
 
-    Transform tankOrigin;
+    [SerializeField] Transform tankOrigin;
 
-    PlayerUIHandler playerUIHandler;
-    BaseUIHandler baseUIHandler;
+    [SerializeField] PlayerUIHandler playerUIHandler;
+    [SerializeField] BaseUIHandler baseUIHandler;
 
     [SerializeField] bool cheats = false;
     public bool godMode = false;
     public bool Dead { get; set; } = false;
-    public bool timing { get; set; } = true;
+    public bool Paused { get; set; } = false;
+    public bool Timing { get; set; } = true;
+
+    bool respawning = false;
 
     [SerializeField] float movementSpeed = 6;
 
@@ -32,24 +36,12 @@ public class PlayerControl : MonoBehaviour
 
     public float gravity = 10;
     float velocityY = 0;
+    [SerializeField] float speedLimit = 15;
 
     [SerializeField] LayerMask ignoreLayerMasks;
 
-    // Start is called before the first frame Update
-    void Awake()
-    {
-        baseTankLogic = GetComponent<BaseTankLogic>();
-        mainCamera = Camera.main.transform;
-
-        tankOrigin = transform.Find("Tank Origin");
-        rb = tankOrigin.GetComponent<Rigidbody>();
-
-        playerUIHandler = transform.Find("Player UI").GetComponent<PlayerUIHandler>();
-        baseUIHandler = transform.Find("Player UI").GetComponent<BaseUIHandler>();
-    }
-
     // Update is called once per frame
-    void Update()
+    void LateUpdate()
     {
         if (multiplayerManager.ViewIsMine())
         {
@@ -65,7 +57,7 @@ public class PlayerControl : MonoBehaviour
                 }
             }
 
-            if (!Dead && !SceneLoader.frozen)
+            if (!Dead && !SceneLoader.frozen && !Paused)
             {
                 if (Time.timeScale != 0)
                 {
@@ -86,6 +78,7 @@ public class PlayerControl : MonoBehaviour
                     else
                     {
                         velocityY -= gravity * Time.deltaTime;
+                        velocityY = Mathf.Clamp(velocityY, -speedLimit, speedLimit);
                     }
 
                     Vector2 inputDir = new Vector2(GetInputAxis("Horizontal"), GetInputAxis("Vertical")).normalized;
@@ -118,7 +111,7 @@ public class PlayerControl : MonoBehaviour
                         angle = angle < 0 ? angle + 360 : angle;
                         if (angle > 180 - baseTankLogic.flipAngleThreshold && angle < 180 + baseTankLogic.flipAngleThreshold)
                         {
-                            tankOrigin.forward = -tankOrigin.forward;
+                            baseTankLogic.FlipTank();
                         }
                         else
                         {
@@ -151,9 +144,9 @@ public class PlayerControl : MonoBehaviour
                         Debug.Log("Cheat Reset");
                         Dead = false;
 
-                        tankOrigin.Find("Body").gameObject.SetActive(false);
-                        tankOrigin.Find("Turret").gameObject.SetActive(false);
-                        tankOrigin.Find("Barrel").gameObject.SetActive(false);
+                        tankOrigin.Find("Body").GetComponent<MeshRenderer>().enabled = true;
+                        tankOrigin.Find("Turret").GetComponent<MeshRenderer>().enabled = true;
+                        tankOrigin.Find("Barrel").GetComponent<MeshRenderer>().enabled = true;
                     }
                     else if (Input.GetKeyDown(KeyCode.G))
                     {
@@ -209,16 +202,69 @@ public class PlayerControl : MonoBehaviour
 
     public void Respawn()
     {
-        dataSystem.currentPlayerData.lives--;
         dataSystem.currentPlayerData.deaths++;
 
-        if (dataSystem.currentPlayerData.lives > 0)
+        if (multiplayerManager.inMultiplayer)
         {
-            SceneLoader.sceneLoader.LoadScene(-1, 3);
+            if (!respawning)
+            {
+                StartCoroutine(MultiplayerRespawn());
+            }
         }
         else
         {
-            SceneLoader.sceneLoader.LoadScene(11, 3);
+            dataSystem.currentPlayerData.lives--;
+
+            if (dataSystem.currentPlayerData.lives > 0)
+            {
+                SceneLoader.sceneLoader.LoadScene(-1, 3, true);
+            }
+            else
+            {
+                SceneLoader.sceneLoader.LoadScene("End Scene", 3, true);
+            }
+        }
+    }
+
+    IEnumerator MultiplayerRespawn()
+    {
+        respawning = true;
+        yield return new WaitForSeconds(3);
+
+        Dead = false;
+
+        tankOrigin.localPosition = Vector3.zero;
+        tankOrigin.localRotation = Quaternion.identity;
+        FindObjectOfType<SpawnPlayers>().RespawnPlayer(tankOrigin);
+
+        if (multiplayerManager.inMultiplayer)
+        {
+            multiplayerManager.photonView.RPC("ReactivatePlayer", RpcTarget.All, new object[] { true });
+        }
+        else
+        {
+            ReactivatePlayer(false);
+        }
+
+        respawning = false;
+    }
+    
+    [PunRPC]
+    void ReactivatePlayer(bool RPC)
+    {
+        tankOrigin.GetComponent<CapsuleCollider>().enabled = true;
+
+        tankOrigin.Find("Body").gameObject.SetActive(true);
+        tankOrigin.Find("Turret").gameObject.SetActive(true);
+        tankOrigin.Find("Barrel").gameObject.SetActive(true);
+
+        if (RPC)
+        {
+            tankOrigin.Find("TrackMarks").GetComponent<PhotonView>().RPC("ResetTrails", RpcTarget.All);
+        }
+        else
+        {
+            tankOrigin.Find("TrackMarks").GetComponent<TrailEmitter>().ResetTrails();
         }
     }
 }

@@ -170,8 +170,10 @@ public static class RandomExtensions
     {
         for (int i = 0; i < 10; i++)
         {
-            if (Physics.Raycast(GetPointInCollider(collider), direction, out RaycastHit hit, Mathf.Infinity, ~ignoreLayers))
+            Vector3 origin = GetPointInCollider(collider);
+            if (Physics.Raycast(origin, direction, out RaycastHit hit, Mathf.Infinity, ~ignoreLayers))
             {
+                Debug.DrawLine(origin, hit.point, Color.blue, 10f);
                 if (spawnCollider != null)
                 {
                     Vector3 spawnPosition = hit.point + Vector3.up * (spawnCollider.bounds.size.y / 2 + 0.1f);

@@ -15,6 +15,7 @@ public class SettingsUIHandler : MonoBehaviour
 
     private void Start()
     {
+        Debug.Log("Called start SettingsUIHandler");
         UpdateSettingsUI();
     }
 
@@ -104,12 +105,12 @@ public class SettingsUIHandler : MonoBehaviour
 
     public void SaveSettings()
     {
-        SaveSystem.SaveSettings("settings.json", dataSystem.currentSettings);
+        SaveSystem.SaveSettings("Settings.json", dataSystem.currentSettings);
     }
 
     public void LoadSettings()
     {
-        SaveSystem.LoadSettings("settings.json", dataSystem.currentSettings);
+        SaveSystem.LoadSettings("Settings.json", dataSystem);
         UpdateSettingsUI();
     }
 

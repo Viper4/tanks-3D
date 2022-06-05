@@ -1,9 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Photon.Pun;
 
 public class MineControl : MonoBehaviour
 {
+    [SerializeField] PlayerControl playerControl;
     [SerializeField] Transform tankOrigin;
     [SerializeField] Transform mine;
 
@@ -20,7 +22,17 @@ public class MineControl : MonoBehaviour
 
             canLay = false;
 
-            Transform newMine = Instantiate(mine, tankOrigin.position, Quaternion.identity);
+            Transform newMine;
+
+            if (playerControl != null && playerControl.multiplayerManager.inMultiplayer)
+            {
+                newMine = PhotonNetwork.Instantiate(mine.name, tankOrigin.position, Quaternion.identity).transform;
+            }
+            else
+            {
+                newMine = Instantiate(mine, tankOrigin.position, Quaternion.identity);
+            }
+
             newMine.GetComponent<MineBehaviour>().owner = transform;
 
             yield return new WaitForSeconds(layCooldown);

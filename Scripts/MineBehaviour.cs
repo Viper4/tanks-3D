@@ -1,3 +1,4 @@
+using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -20,6 +21,13 @@ public class MineBehaviour : MonoBehaviour
 
     bool canFlash = true;
 
+    [SerializeField] bool multiplayer = false;
+
+    private void Start()
+    {
+        dataSystem = owner.GetComponent<DataSystem>();
+    }
+
     // Update is called once per frame
     void Update()
     {
@@ -34,7 +42,7 @@ public class MineBehaviour : MonoBehaviour
                 // Explodes at 0 seconds
                 if (timer <= 0)
                 {
-                    Explode(new List<Transform>());
+                    ExplodeMine(new List<Transform>());
                 }
                 // At less than 5 seconds, mine starts to flash
                 else if (timer < 5)
@@ -60,11 +68,17 @@ public class MineBehaviour : MonoBehaviour
                         timer = 2;
                     }
                     break;
+                case "Player":
+                    if (timer > 2)
+                    {
+                        timer = 2;
+                    }
+                    break;
                 case "Bullet":
                     // Exploding if bullet hits the mine
                     if (Vector3.Distance(transform.position, other.transform.position) <= GetComponent<SphereCollider>().radius)
                     {
-                        Explode(new List<Transform>());
+                        ExplodeMine(new List<Transform>());
                     }
                     break;
             }
@@ -73,7 +87,7 @@ public class MineBehaviour : MonoBehaviour
 
     void IncreaseKills()
     {
-        if (owner != null && owner.name == "Player")
+        if (owner != null && owner.CompareTag("Player"))
         {
             dataSystem.currentPlayerData.kills++;
         }
@@ -93,7 +107,7 @@ public class MineBehaviour : MonoBehaviour
         canFlash = true;
     }
 
-    public void Explode(List<Transform> chain)
+    public void ExplodeMine(List<Transform> chain)
     {
         chain.Add(transform);
 
@@ -110,21 +124,42 @@ public class MineBehaviour : MonoBehaviour
                         explodedTanks.Add(collider.transform.parent);
 
                         // Blowing up tanks
-                        if (collider.transform.root.name != "Player")
+                        collider.transform.parent.GetComponent<BaseTankLogic>().ExplodeTank();
+                        IncreaseKills();
+                    }
+                    break;
+                case "Player":
+                    if (collider != null && !explodedTanks.Contains(collider.transform.parent))
+                    {
+                        explodedTanks.Add(collider.transform.parent);
+                        if (multiplayer)
                         {
-                            collider.transform.parent.GetComponent<BaseTankLogic>().Explode();
-                            IncreaseKills();
+                            if (GetComponent<PhotonView>().IsMine)
+                            {
+                                collider.transform.root.GetComponent<PhotonView>().RPC("ExplodeTank", RpcTarget.All);
+                                if (owner != collider.transform.root)
+                                {
+                                    IncreaseKills();
+                                }
+                            }
                         }
                         else
                         {
-                            collider.transform.root.GetComponent<BaseTankLogic>().Explode();
+                            collider.transform.root.GetComponent<BaseTankLogic>().ExplodeTank();
                         }
                     }
                     break;
                 case "Penetrable":
                     // Playing destroy particles for hit object and destroying it
                     collider.transform.GetComponent<BreakParticleSystem>().PlayParticles();
-                    Destroy(collider.gameObject);
+                    if (multiplayer)
+                    {
+                        PhotonNetwork.Destroy(collider.gameObject);
+                    }
+                    else
+                    {
+                        Destroy(collider.gameObject);
+                    }
                     break;
                 case "Bullet":
                     // Destroying bullets in explosion
@@ -132,9 +167,9 @@ public class MineBehaviour : MonoBehaviour
                     break;
                 case "Mine":
                     // Explode other mines not in mine chain
-                    if(!chain.Contains(collider.transform))
+                    if (!chain.Contains(collider.transform))
                     {
-                        collider.GetComponent<MineBehaviour>().Explode(chain);
+                        collider.GetComponent<MineBehaviour>().ExplodeMine(chain);
                     }
                     break;
             }
@@ -146,16 +181,32 @@ public class MineBehaviour : MonoBehaviour
                 rb.AddExplosionForce(explosionForce, transform.position, explosionRadius, 3);
             }
         }
-        Instantiate(explosionEffect, transform.position, Quaternion.Euler(-90, 0, 0));
+
+        if (multiplayer)
+        {
+            PhotonNetwork.Instantiate(explosionEffect.name, transform.position, Quaternion.Euler(-90, 0, 0));
+        }
+        else
+        {
+            Instantiate(explosionEffect, transform.position, Quaternion.Euler(-90, 0, 0));
+        }
         DestroySelf();
     }
 
     void DestroySelf()
     {
-        if(owner != null)
+        if (owner != null)
         {
             owner.GetComponent<MineControl>().minesLaid -= 1;
         }
-        Destroy(gameObject);
+
+        if (multiplayer)
+        {
+            PhotonNetwork.Destroy(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
 }
