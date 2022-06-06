@@ -13,9 +13,9 @@ public class PlayerUIHandler : MonoBehaviour
 
         baseUIHandler.UIElements["PauseMenu"].Find("LabelBackground").GetChild(0).GetComponent<Text>().text = "Game Paused\n " + SceneManager.GetActiveScene().name;
 
-        if (playerControl.multiplayerManager.inMultiplayer)
+        if (playerControl.ClientManager.inMultiplayer)
         {
-            if (playerControl.multiplayerManager.ViewIsMine())
+            if (playerControl.ClientManager.ViewIsMine())
             {
                 GameObject[] allUIs = GameObject.FindGameObjectsWithTag("PlayerUI");
                 foreach (GameObject UI in allUIs)
@@ -35,7 +35,7 @@ public class PlayerUIHandler : MonoBehaviour
 
     private void LateUpdate()
     {
-        if (playerControl.multiplayerManager.ViewIsMine())
+        if (playerControl.ClientManager.ViewIsMine())
         {
             if (Input.GetKeyDown(playerControl.dataSystem.currentSettings.keyBinds["Shoot"]))
             {
@@ -81,7 +81,7 @@ public class PlayerUIHandler : MonoBehaviour
                     }
                 }
 
-                if (playerControl.multiplayerManager.inMultiplayer)
+                if (playerControl.ClientManager.inMultiplayer)
                 {
                     baseUIHandler.UIElements["HUD"].Find("Kills").GetComponent<Text>().text = "Kills: " + playerControl.dataSystem.currentPlayerData.kills;
                     baseUIHandler.UIElements["HUD"].Find("Deaths").GetComponent<Text>().text = "Deaths: " + playerControl.dataSystem.currentPlayerData.deaths;
@@ -114,7 +114,7 @@ public class PlayerUIHandler : MonoBehaviour
     public void Pause()
     {
         playerControl.Paused = true;
-        if (!playerControl.multiplayerManager.inMultiplayer)
+        if (!playerControl.ClientManager.inMultiplayer)
         {
             Time.timeScale = 0;
         }
@@ -126,6 +126,6 @@ public class PlayerUIHandler : MonoBehaviour
 
     public void Disconnect()
     {
-        playerControl.multiplayerManager.Disconnect();
+        playerControl.ClientManager.Disconnect();
     }
 }

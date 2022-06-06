@@ -23,7 +23,8 @@ public static class SaveSystem
             { "Lay Mine", KeyCode.Space },
             { "Lock Turret", KeyCode.LeftControl },
             { "Lock Camera", KeyCode.LeftShift },
-            { "Switch Camera", KeyCode.Tab }
+            { "Switch Camera", KeyCode.LeftAlt },
+            { "Leaderboard", KeyCode.Tab }
         },
         silhouettes = true,
         showHUD = true,
@@ -41,7 +42,6 @@ public static class SaveSystem
         deaths = 0,
         time = -1,
         bestTime = -1,
-        username = "Player",
     };
 
     public static void Init()
@@ -83,8 +83,7 @@ public static class SaveSystem
                 toPlayerData.deaths = loadedPlayerData.deaths;
                 toPlayerData.time = loadedPlayerData.time;
                 toPlayerData.bestTime = loadedPlayerData.bestTime;
-                toPlayerData.username = loadedPlayerData.username;
-            }
+            } 
             else
             {
                 Debug.LogWarning("Could not retrieve json data from file " + SAVE_FOLDER + fileName);

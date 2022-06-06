@@ -5,7 +5,7 @@ using Photon.Pun;
 
 public class PlayerControl : MonoBehaviour
 {
-    public MultiplayerManager multiplayerManager;
+    public ClientManager ClientManager;
     public DataSystem dataSystem;
 
     [SerializeField] Rigidbody rb;
@@ -43,7 +43,7 @@ public class PlayerControl : MonoBehaviour
     // Update is called once per frame
     void LateUpdate()
     {
-        if (multiplayerManager.ViewIsMine())
+        if (ClientManager.ViewIsMine())
         {
             if (Input.GetKeyDown(KeyCode.Escape))
             {
@@ -204,7 +204,7 @@ public class PlayerControl : MonoBehaviour
     {
         dataSystem.currentPlayerData.deaths++;
 
-        if (multiplayerManager.inMultiplayer)
+        if (ClientManager.inMultiplayer)
         {
             if (!respawning)
             {
@@ -237,9 +237,9 @@ public class PlayerControl : MonoBehaviour
         tankOrigin.localRotation = Quaternion.identity;
         FindObjectOfType<SpawnPlayers>().RespawnPlayer(tankOrigin);
 
-        if (multiplayerManager.inMultiplayer)
+        if (ClientManager.inMultiplayer)
         {
-            multiplayerManager.photonView.RPC("ReactivatePlayer", RpcTarget.All, new object[] { true });
+            ClientManager.photonView.RPC("ReactivatePlayer", RpcTarget.All, new object[] { true });
         }
         else
         {

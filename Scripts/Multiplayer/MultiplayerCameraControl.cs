@@ -44,7 +44,7 @@ public class MultiplayerCameraControl : MonoBehaviour
     // Start is called before the first frame Update
     void Start()
     {
-        if (playerControl.multiplayerManager.ViewIsMine())
+        if (playerControl.ClientManager.ViewIsMine())
         {
             thisCamera = GetComponent<Camera>();
 
@@ -64,13 +64,23 @@ public class MultiplayerCameraControl : MonoBehaviour
 
             lastEulerAngles = tankOrigin.eulerAngles;
 
-            // Disabling all other cameras except for this camera
+            // Disabling all other cameras except for this client's
             GameObject[] allCameras = GameObject.FindGameObjectsWithTag("MainCamera");
             foreach (GameObject camera in allCameras)
             {
                 if (camera != gameObject)
                 {
                     camera.SetActive(false);
+                }
+            }
+
+            // Disabling all other audio listeners except for this client's
+            AudioListener[] audioListeners = FindObjectsOfType<AudioListener>();
+            foreach (AudioListener audioListener in audioListeners)
+            {
+                if (audioListener != transform.GetComponent<AudioListener>())
+                {
+                    audioListener.enabled = false;
                 }
             }
         }
@@ -83,7 +93,7 @@ public class MultiplayerCameraControl : MonoBehaviour
     // Update is called once per frame
     void LateUpdate()
     {
-        if (playerControl.multiplayerManager.ViewIsMine() && !playerControl.Paused)
+        if (playerControl.ClientManager.ViewIsMine() && !playerControl.Paused)
         {
             // Updating every username to rotate to this camera for this client
             UsernameSystem[] allUsernames = FindObjectsOfType<UsernameSystem>();

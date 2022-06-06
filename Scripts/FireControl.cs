@@ -40,7 +40,7 @@ public class FireControl : MonoBehaviour
             if (!Physics.CheckBox(clonePosition, bullet.GetComponent<Collider>().bounds.size, cloneRotation, solidLayerMask))
             {
                 bulletsFired++;
-                if (playerControl != null && playerControl.multiplayerManager.inMultiplayer)
+                if (playerControl != null && playerControl.ClientManager.inMultiplayer)
                 {
                     bulletClone = PhotonNetwork.Instantiate(bullet.name, clonePosition, cloneRotation).transform;
                     PhotonNetwork.Instantiate(shootEffect.name, clonePosition, cloneRotation);

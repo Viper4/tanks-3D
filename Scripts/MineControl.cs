@@ -24,7 +24,7 @@ public class MineControl : MonoBehaviour
 
             Transform newMine;
 
-            if (playerControl != null && playerControl.multiplayerManager.inMultiplayer)
+            if (playerControl != null && playerControl.ClientManager.inMultiplayer)
             {
                 newMine = PhotonNetwork.Instantiate(mine.name, tankOrigin.position, Quaternion.identity).transform;
             }

@@ -190,7 +190,6 @@ public class BulletBehaviour : MonoBehaviour
             {
                 if (view.IsMine)
                 {
-                    Debug.Log("Started here");
                     target.GetComponent<PhotonView>().RPC("ExplodeTank", RpcTarget.All);
                 }
             }

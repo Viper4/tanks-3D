@@ -14,7 +14,7 @@ public class UsernameSystem : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        textMesh.text = playerControl.multiplayerManager.photonView.Owner.NickName;
+        textMesh.text = playerControl.ClientManager.photonView.Owner.NickName;
     }
 
     // Update is called once per frame

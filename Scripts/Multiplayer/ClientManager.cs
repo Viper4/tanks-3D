@@ -4,7 +4,7 @@ using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
 
-public class MultiplayerManager : MonoBehaviourPunCallbacks
+public class ClientManager : MonoBehaviourPunCallbacks
 {
     public bool inMultiplayer = false;
 
@@ -21,12 +21,12 @@ public class MultiplayerManager : MonoBehaviourPunCallbacks
                 // Making sure other players can see this client's kills, deaths, etc
                 view.RPC("LoadPlayerDataForAll", RpcTarget.All);
             }
-        }
 
-        EngineSoundManager[] allEngineSounds = FindObjectsOfType<EngineSoundManager>();
-        foreach(EngineSoundManager engineSound in allEngineSounds)
-        {
-            engineSound.UpdateMasterVolume(dataSystem.currentSettings.masterVolume);
+            EngineSoundManager[] allEngineSounds = FindObjectsOfType<EngineSoundManager>();
+            foreach (EngineSoundManager engineSound in allEngineSounds)
+            {
+                engineSound.UpdateMasterVolume(dataSystem.currentSettings.masterVolume);
+            }
         }
     }
 

@@ -16,10 +16,10 @@ public class SoundManager : MonoBehaviour
         originalVolume = audioSource.volume;
         UpdateVolume(FindObjectOfType<DataSystem>().currentSettings.masterVolume);
 
-        MultiplayerManager[] allClients = FindObjectsOfType<MultiplayerManager>();
-        foreach(MultiplayerManager multiplayerManager in allClients)
+        ClientManager[] allClients = FindObjectsOfType<ClientManager>();
+        foreach(ClientManager ClientManager in allClients)
         {
-            multiplayerManager.UpdateSoundManagerOnClient(this);
+            ClientManager.UpdateSoundManagerOnClient(this);
         }
 
         audioSource.PlayDelayed(Random.Range(startDelay[0], startDelay[1]));
