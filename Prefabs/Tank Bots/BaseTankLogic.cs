@@ -108,8 +108,11 @@ public class BaseTankLogic : MonoBehaviour
             playerControl.Respawn();
             if (playerControl.ClientManager.inMultiplayer)
             {
-                PhotonNetwork.Instantiate(explosionEffect.name, tankOrigin.position, Quaternion.identity);
-                PhotonNetwork.Instantiate(deathMarker.name, tankOrigin.position + tankOrigin.up * 0.05f, Quaternion.Euler(new Vector3(tankOrigin.eulerAngles.x, 45, tankOrigin.eulerAngles.z)));
+                if (playerControl.ClientManager.ViewIsMine())
+                {
+                    PhotonNetwork.Instantiate(explosionEffect.name, tankOrigin.position, Quaternion.identity);
+                    PhotonNetwork.Instantiate(deathMarker.name, tankOrigin.position + tankOrigin.up * 0.05f, Quaternion.Euler(new Vector3(tankOrigin.eulerAngles.x, 45, tankOrigin.eulerAngles.z)));
+                }
             }
             else
             {

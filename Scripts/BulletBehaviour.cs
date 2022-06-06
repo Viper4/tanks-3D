@@ -8,6 +8,7 @@ public class BulletBehaviour : MonoBehaviour
     Rigidbody rb;
 
     public Transform owner { get; set; }
+    public DataSystem dataSystem { get; set; }
 
     [SerializeField] Transform explosionEffect;
     [SerializeField] Transform sparkEffect;
@@ -25,7 +26,7 @@ public class BulletBehaviour : MonoBehaviour
     PhotonView view;
 
     // Start is called before the first frame Update
-    void Awake()
+    void Start()
     {
         rb = GetComponent<Rigidbody>();
 
@@ -125,13 +126,14 @@ public class BulletBehaviour : MonoBehaviour
             }
         }
     }
-
+    
+    [PunRPC]
     void IncreaseKills()
     {
         if (owner != null && owner.CompareTag("Player"))
         {
             Debug.Log("Increased kills");
-            owner.GetComponent<DataSystem>().currentPlayerData.kills++;
+            dataSystem.currentPlayerData.kills++;
         }
     }
 
@@ -182,19 +184,23 @@ public class BulletBehaviour : MonoBehaviour
     {
         if (transform.name != "Rocket Bullet" && target != null)
         {
-            if (target != owner)
-            {
-                IncreaseKills();
-            }
             if (multiplayer)
             {
                 if (view.IsMine)
                 {
                     target.GetComponent<PhotonView>().RPC("ExplodeTank", RpcTarget.All);
+                    if (target != owner)
+                    {
+                        view.RPC("IncreaseKills", RpcTarget.All);
+                    }
                 }
             }
             else
             {
+                if (target != owner)
+                {
+                    IncreaseKills();
+                }
                 BaseTankLogic baseTankLogic = target.GetComponent<BaseTankLogic>();
                 if (baseTankLogic != null)
                 {

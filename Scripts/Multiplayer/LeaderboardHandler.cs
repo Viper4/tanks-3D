@@ -59,7 +59,7 @@ public class LeaderboardHandler : MonoBehaviour
             {
                 for (int i = 0; i < 10; i++)
                 {
-                    string newUsername = username + " (" + i + ")";
+                    string newUsername = username + " (" + (i + 1) + ")";
                     if (!playerKillPair.ContainsKey(newUsername))
                     {
                         playerKillPair[newUsername] = dataSystem.currentPlayerData.kills;

@@ -23,7 +23,7 @@ public class FireControl : MonoBehaviour
 
     public IEnumerator Shoot()
     {
-        if (transform.name == "Player")
+        if (transform.CompareTag("Player"))
         {
             playerControl.dataSystem.currentPlayerData.shots++;
         }
@@ -57,6 +57,10 @@ public class FireControl : MonoBehaviour
                 if (bulletClone != null)
                 {
                     bulletClone.GetComponent<BulletBehaviour>().owner = owner;
+                    if (transform.CompareTag("Player"))
+                    {
+                        bulletClone.GetComponent<BulletBehaviour>().dataSystem = owner.GetComponent<DataSystem>();
+                    }
                 }
                 else
                 {
