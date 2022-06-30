@@ -24,11 +24,11 @@ public class ConnectToServer : MonoBehaviourPunCallbacks
 
     public override void OnJoinedLobby()
     {
-        SceneLoader.sceneLoader.LoadScene("Lobby");
+        GameManager.gameManager.LoadScene("Lobby");
     }
 
     public override void OnDisconnected(DisconnectCause cause)
     {
-        SceneLoader.sceneLoader.LoadScene("Main Menu");
+        GameManager.gameManager.LoadScene("Main Menu");
     }
 }

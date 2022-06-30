@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using CustomExtensions;
 
 public class TealBot : MonoBehaviour
 {
@@ -62,7 +63,7 @@ public class TealBot : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(!SceneLoader.frozen && Time.timeScale != 0 && targetSelector.currentTarget != null)
+        if(!GameManager.frozen && Time.timeScale != 0 && targetSelector.currentTarget != null)
         {
             if (fireControl.canFire && mode != Mode.Shoot && !shooting && Physics.Raycast(barrel.position, barrel.forward, out RaycastHit barrelHit, Mathf.Infinity, ~baseTankLogic.transparentLayers, QueryTriggerInteraction.Ignore))
             {
@@ -136,7 +137,7 @@ public class TealBot : MonoBehaviour
 
             // Zeroing x and z eulers of turret and clamping barrel x euler
             turret.localEulerAngles = new Vector3(0, turret.localEulerAngles.y, 0);
-            barrel.localEulerAngles = new Vector3(Clamping.ClampAngle(barrel.localEulerAngles.x, turretRangeX[0], turretRangeX[1]), barrel.localEulerAngles.y, 0);
+            barrel.localEulerAngles = new Vector3(MathExtensions.ClampAngle(barrel.localEulerAngles.x, turretRangeX[0], turretRangeX[1]), barrel.localEulerAngles.y, 0);
             lastEulerAngles = transform.eulerAngles;
         }
         else
@@ -152,7 +153,7 @@ public class TealBot : MonoBehaviour
         switch (other.tag)
         {
             case "Mine":
-                if (SceneLoader.autoPlay || targetSelector.findTarget)
+                if (GameManager.autoPlay || targetSelector.findTarget)
                 {
                     // Move in opposite direction of mine
                     desiredDir = transform.position - other.transform.position;

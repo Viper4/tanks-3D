@@ -141,6 +141,7 @@ GameObject:
   - component: {fileID: 2870490197895478779}
   - component: {fileID: 7166121196504945542}
   - component: {fileID: 22278053626971372}
+  - component: {fileID: 8437000370683247241}
   m_Layer: 6
   m_Name: Barrel
   m_TagString: Tank
@@ -158,7 +159,8 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 1.215, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
+  m_Children:
+  - {fileID: 4587583927666423598}
   m_Father: {fileID: 6009521869144415273}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -222,6 +224,19 @@ BoxCollider:
   m_GameObject: {fileID: 4915484167786151285}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.4272948, y: 0.42200983, z: 1.0955627}
+  m_Center: {x: 0.0000053048134, y: -0.009514272, z: 1.1293906}
+--- !u!65 &8437000370683247241
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4915484167786151285}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
   m_Size: {x: 0.4272948, y: 0.42200983, z: 1.0955627}
@@ -417,6 +432,7 @@ GameObject:
   - component: {fileID: -1282805828423814551}
   - component: {fileID: -7805956923958026188}
   - component: {fileID: 2164580800702390093}
+  - component: {fileID: 2417470595023533493}
   m_Layer: 6
   m_Name: Brown Tank
   m_TagString: Tank
@@ -454,10 +470,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3c151e8ebee41b84a99874f82a5f7355, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  PV: {fileID: 2417470595023533493}
   playerControl: {fileID: 0}
-  owner: {fileID: 6009521869144415273}
   bullet: {fileID: 4307626717143694363, guid: de9dbd5b8f77ecb4a866f8d8cf75c17d, type: 3}
   shootEffect: {fileID: 7891438045153574773, guid: 4d61908da1eaf274aa82edf86c9a5c95, type: 3}
+  spawnPoint: {fileID: 4587583927666423598}
   barrel: {fileID: 7368496710220962928}
   bulletLimit: 5
   fireCooldown: 10
@@ -565,6 +582,28 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &2417470595023533493
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6353959912858125971}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ObservedComponentsFoldoutOpen: 1
+  Group: 0
+  prefixField: -1
+  Synchronization: 3
+  OwnershipTransfer: 0
+  observableSearch: 2
+  ObservedComponents: []
+  sceneViewId: 0
+  InstantiationId: 0
+  isRuntimeInstantiated: 0
 --- !u!1 &6473996178172189060
 GameObject:
   m_ObjectHideFlags: 0
@@ -577,6 +616,7 @@ GameObject:
   - component: {fileID: 8384272000962358938}
   - component: {fileID: 7608988248526255873}
   - component: {fileID: 65023814549998130}
+  - component: {fileID: 3420805068926242436}
   m_Layer: 6
   m_Name: Turret
   m_TagString: Tank
@@ -660,6 +700,19 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1.1307571, y: 0.6751647, z: 1.1671374}
   m_Center: {x: 0.000005066395, y: 0.0038772821, z: -0.0019680858}
+--- !u!65 &3420805068926242436
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6473996178172189060}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1.1307571, y: 0.6751647, z: 1.1671374}
+  m_Center: {x: 0.000005066395, y: 0.0038772821, z: -0.0019680858}
 --- !u!1 &6646554434287263658
 GameObject:
   m_ObjectHideFlags: 0
@@ -672,6 +725,7 @@ GameObject:
   - component: {fileID: 292858619094422560}
   - component: {fileID: 8592974007400254692}
   - component: {fileID: 6938076018002581678}
+  - component: {fileID: 3909246933192394388}
   m_Layer: 6
   m_Name: Body
   m_TagString: Tank
@@ -757,3 +811,46 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 2.1000001, y: 0.86395407, z: 2.2000003}
   m_Center: {x: 0, y: -0.048248097, z: -0.00000011920929}
+--- !u!65 &3909246933192394388
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6646554434287263658}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 2.1000001, y: 0.86395407, z: 2.2000003}
+  m_Center: {x: 0, y: -0.048248097, z: -0.00000011920929}
+--- !u!1 &8948091448035139228
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4587583927666423598}
+  m_Layer: 7
+  m_Name: BulletSpawn
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4587583927666423598
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8948091448035139228}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 1.8}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 7368496710220962928}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

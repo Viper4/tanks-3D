@@ -1,5 +1,35 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &178177191797433766
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4936167098490846088}
+  m_Layer: 7
+  m_Name: BulletSpawn
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4936167098490846088
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 178177191797433766}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 1.8}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 6492373173433346623}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1094023387992391213
 GameObject:
   m_ObjectHideFlags: 0
@@ -542,6 +572,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6dd208702654b75488b856b2664059db, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  disabled: 0
   trackMarks: {fileID: 7243328552777515205}
   baseTankLogic: {fileID: -1708683654604279647}
 --- !u!1 &7239095871577845980
@@ -554,10 +585,12 @@ GameObject:
   m_Component:
   - component: {fileID: 8015774000218417766}
   - component: {fileID: 7239095871577845978}
+  - component: {fileID: 2378127408620227041}
   - component: {fileID: -1708683654604279647}
   - component: {fileID: 6691410845055233786}
   - component: {fileID: 5844788160669333172}
   - component: {fileID: 2650588644746480228}
+  - component: {fileID: -2919022130532306940}
   m_Layer: 6
   m_Name: Tank
   m_TagString: Tank
@@ -596,10 +629,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3c151e8ebee41b84a99874f82a5f7355, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  PV: {fileID: -2919022130532306940}
   playerControl: {fileID: 0}
-  owner: {fileID: 8015774000218417766}
   bullet: {fileID: 4307626717143694363, guid: de9dbd5b8f77ecb4a866f8d8cf75c17d, type: 3}
   shootEffect: {fileID: 7275907135579404139, guid: 71b07424ffcb49a41830ab0761db5c07, type: 3}
+  spawnPoint: {fileID: 4936167098490846088}
   barrel: {fileID: 6492373173433346623}
   bulletLimit: 1
   fireCooldown: 4
@@ -607,6 +641,24 @@ MonoBehaviour:
   solidLayerMask:
     serializedVersion: 2
     m_Bits: 1
+--- !u!114 &2378127408620227041
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7239095871577845980}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e86729278561f7641a9aed8cc39ff1e7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  PV: {fileID: -2919022130532306940}
+  tankOrigin: {fileID: 8015774000218417766}
+  mine: {fileID: 4223942867902412960, guid: 8a98f2906960e414d93db694525801d9, type: 3}
+  mineLimit: 2
+  layCooldown: 3
+  canLay: 1
 --- !u!114 &-1708683654604279647
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -701,6 +753,28 @@ CapsuleCollider:
   m_Height: 1.6
   m_Direction: 1
   m_Center: {x: 0, y: 0.8, z: 0}
+--- !u!114 &-2919022130532306940
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7239095871577845980}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ObservedComponentsFoldoutOpen: 1
+  Group: 0
+  prefixField: -1
+  Synchronization: 3
+  OwnershipTransfer: 0
+  observableSearch: 2
+  ObservedComponents: []
+  sceneViewId: 0
+  InstantiationId: 0
+  isRuntimeInstantiated: 0
 --- !u!1 &7314939320093077451
 GameObject:
   m_ObjectHideFlags: 0
@@ -825,7 +899,8 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 1.22, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
+  m_Children:
+  - {fileID: 4936167098490846088}
   m_Father: {fileID: 8015774000218417766}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

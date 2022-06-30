@@ -14,7 +14,7 @@ public class SoundManager : MonoBehaviour
     {
         audioSource = GetComponent<AudioSource>();
         originalVolume = audioSource.volume;
-        UpdateVolume(FindObjectOfType<DataSystem>().currentSettings.masterVolume);
+        UpdateVolume(FindObjectOfType<DataManager>().currentPlayerSettings.masterVolume);
 
         ClientManager[] allClients = FindObjectsOfType<ClientManager>();
         foreach(ClientManager ClientManager in allClients)

@@ -41,7 +41,7 @@ public class BrownBot : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!SceneLoader.frozen && Time.timeScale != 0 && targetSelector.currentTarget != null)
+        if (!GameManager.frozen && Time.timeScale != 0 && targetSelector.currentTarget != null)
         {
             float angleX = Mathf.PingPong(Time.time * turretRotSpeed, turretScanRange.x * 2) - turretScanRange.x;
             float angleY = Mathf.PingPong(Time.time * turretRotSpeed, turretScanRange.y * 2) - turretScanRange.y;

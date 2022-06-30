@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using CustomExtensions;
 
 public class YellowBot : MonoBehaviour
 {
@@ -79,7 +80,7 @@ public class YellowBot : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!SceneLoader.frozen && Time.timeScale != 0 && targetSelector.currentTarget != null)
+        if (!GameManager.frozen && Time.timeScale != 0 && targetSelector.currentTarget != null)
         {
             if (fireControl.canFire && mode != Mode.Shoot && mode != Mode.Avoid && Physics.Raycast(barrel.position, targetSelector.currentTarget.position - barrel.position, out RaycastHit barrelHit, Mathf.Infinity, ~baseTankLogic.transparentLayers, QueryTriggerInteraction.Ignore))
             {
@@ -161,7 +162,7 @@ public class YellowBot : MonoBehaviour
 
             // Zeroing x and z eulers of turret and clamping barrel x euler
             turret.localEulerAngles = new Vector3(0, turret.localEulerAngles.y + noiseY, 0);
-            barrel.localEulerAngles = new Vector3(Clamping.ClampAngle(barrel.localEulerAngles.x + noiseX, turretRangeX[0], turretRangeX[1]), barrel.localEulerAngles.y + noiseY, 0);
+            barrel.localEulerAngles = new Vector3(MathExtensions.ClampAngle(barrel.localEulerAngles.x + noiseX, turretRangeX[0], turretRangeX[1]), barrel.localEulerAngles.y + noiseY, 0);
 
             lastEulerAngles = transform.eulerAngles;
         }

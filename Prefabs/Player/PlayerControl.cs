@@ -2,26 +2,24 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
+using PhotonHashtable = ExitGames.Client.Photon.Hashtable;
 
 public class PlayerControl : MonoBehaviour
 {
-    public ClientManager ClientManager;
-    public DataSystem dataSystem;
+    public ClientManager clientManager;
+    public DataManager myData;
 
-    [SerializeField] Rigidbody rb;
+    [SerializeField] Rigidbody RB;
     [SerializeField] BaseTankLogic baseTankLogic;
     [SerializeField] Transform mainCamera;
 
     [SerializeField] Transform tankOrigin;
 
-    [SerializeField] PlayerUIHandler playerUIHandler;
-    [SerializeField] BaseUIHandler baseUIHandler;
-
     [SerializeField] bool cheats = false;
     public bool godMode = false;
     public bool Dead { get; set; } = false;
     public bool Paused { get; set; } = false;
-    public bool Timing { get; set; } = true;
+    public bool showHUD = true;
 
     bool respawning = false;
 
@@ -43,32 +41,23 @@ public class PlayerControl : MonoBehaviour
     // Update is called once per frame
     void LateUpdate()
     {
-        if (ClientManager.ViewIsMine())
+        if (PhotonNetwork.OfflineMode || clientManager.PV.IsMine)
         {
-            if (Input.GetKeyDown(KeyCode.Escape))
-            {
-                if (baseUIHandler.UIElements["PauseMenu"].gameObject.activeSelf)
-                {
-                    playerUIHandler.Resume();
-                }
-                else
-                {
-                    playerUIHandler.Pause();
-                }
-            }
-
-            if (!Dead && !SceneLoader.frozen && !Paused)
+            if (!Dead && !GameManager.frozen && !Paused)
             {
                 if (Time.timeScale != 0)
                 {
-                    // Firing bullets
-                    if (Input.GetKeyDown(dataSystem.currentSettings.keyBinds["Shoot"]))
+                    if (Input.GetKeyDown(myData.currentPlayerSettings.keyBinds["Shoot"]))
                     {
                         StartCoroutine(GetComponent<FireControl>().Shoot());
                     }
-                    else if (Input.GetKeyDown(dataSystem.currentSettings.keyBinds["Lay Mine"]) && baseTankLogic.IsGrounded())
+                    else if (Input.GetKeyDown(myData.currentPlayerSettings.keyBinds["Lay Mine"]) && baseTankLogic.IsGrounded())
                     {
                         StartCoroutine(GetComponent<MineControl>().LayMine());
+                    }
+                    else if (Input.GetKeyDown(myData.currentPlayerSettings.keyBinds["Toggle HUD"]))
+                    {
+                        showHUD = !showHUD;
                     }
 
                     if (baseTankLogic.IsGrounded())
@@ -81,14 +70,12 @@ public class PlayerControl : MonoBehaviour
                         velocityY = Mathf.Clamp(velocityY, -speedLimit, speedLimit);
                     }
 
+                    // Moving the tank with player input
                     Vector2 inputDir = new Vector2(GetInputAxis("Horizontal"), GetInputAxis("Vertical")).normalized;
 
-                    // Moving the tank with player input
                     float targetSpeed = movementSpeed / 2 * inputDir.magnitude;
 
                     currentSpeed = Mathf.SmoothDamp(currentSpeed, targetSpeed, ref speedSmoothVelocity, GetModifiedSmoothTime(speedSmoothTime));
-
-                    mainCamera.Find("Anchor").eulerAngles = new Vector3(0, mainCamera.eulerAngles.y, mainCamera.eulerAngles.z);
 
                     Vector3 velocityDir = tankOrigin.forward;
 
@@ -101,7 +88,7 @@ public class PlayerControl : MonoBehaviour
 
                     Vector3 velocity = currentSpeed * velocityDir + Vector3.up * velocityY;
 
-                    rb.velocity = velocity;
+                    RB.velocity = velocity;
 
                     // Rotating tank with movement
                     if (inputDir != Vector2.zero)
@@ -122,7 +109,7 @@ public class PlayerControl : MonoBehaviour
             }
             else
             {
-                rb.velocity = Vector3.zero;
+                RB.velocity = Vector3.zero;
             }
 
             if (cheats)
@@ -132,12 +119,12 @@ public class PlayerControl : MonoBehaviour
                     if (Input.GetKeyDown(KeyCode.N))
                     {
                         Debug.Log("Cheat Next Level");
-                        SceneLoader.sceneLoader.LoadNextScene();
+                        GameManager.gameManager.LoadNextScene();
                     }
                     else if (Input.GetKeyDown(KeyCode.R))
                     {
                         Debug.Log("Cheat Reload");
-                        SceneLoader.sceneLoader.LoadScene(-1);
+                        GameManager.gameManager.LoadScene(-1);
                     }
                     else if (Input.GetKeyDown(KeyCode.B))
                     {
@@ -175,22 +162,22 @@ public class PlayerControl : MonoBehaviour
         {
             case "Horizontal":
                 float horizontal = 0;
-                if (Input.GetKey(dataSystem.currentSettings.keyBinds["Right"]))
+                if (Input.GetKey(myData.currentPlayerSettings.keyBinds["Right"]))
                 {
                     horizontal += 1;
                 }
-                if (Input.GetKey(dataSystem.currentSettings.keyBinds["Left"]))
+                if (Input.GetKey(myData.currentPlayerSettings.keyBinds["Left"]))
                 {
                     horizontal -= 1;
                 }
                 return horizontal;
             case "Vertical":
                 float vertical = 0;
-                if (Input.GetKey(dataSystem.currentSettings.keyBinds["Forward"]))
+                if (Input.GetKey(myData.currentPlayerSettings.keyBinds["Forward"]))
                 {
                     vertical += 1;
                 }
-                if (Input.GetKey(dataSystem.currentSettings.keyBinds["Backward"]))
+                if (Input.GetKey(myData.currentPlayerSettings.keyBinds["Backward"]))
                 {
                     vertical -= 1;
                 }
@@ -202,30 +189,34 @@ public class PlayerControl : MonoBehaviour
 
     public void Respawn()
     {
-        dataSystem.currentPlayerData.deaths++;
+        myData.currentPlayerData.deaths++;
 
-        if (ClientManager.inMultiplayer)
+        if (!PhotonNetwork.OfflineMode)
         {
-            if (!respawning)
+            if (!respawning && clientManager.PV.IsMine)
             {
+                PhotonHashtable playerProperties = PhotonNetwork.LocalPlayer.CustomProperties;
+                playerProperties["Deaths"] = myData.currentPlayerData.deaths;
+                PhotonNetwork.LocalPlayer.SetCustomProperties(playerProperties);
+
                 StartCoroutine(MultiplayerRespawn());
             }
         }
         else
         {
-            dataSystem.currentPlayerData.lives--;
+            myData.currentPlayerData.lives--;
 
-            if (dataSystem.currentPlayerData.lives > 0)
+            if (myData.currentPlayerData.lives > 0)
             {
-                SceneLoader.sceneLoader.LoadScene(-1, 3, true);
+                GameManager.gameManager.LoadScene(-1, 3, true);
             }
             else
             {
-                SceneLoader.sceneLoader.LoadScene("End Scene", 3, true);
+                GameManager.gameManager.LoadScene("End Scene", 3, true);
             }
         }
     }
-
+     
     IEnumerator MultiplayerRespawn()
     {
         respawning = true;
@@ -235,22 +226,15 @@ public class PlayerControl : MonoBehaviour
 
         tankOrigin.localPosition = Vector3.zero;
         tankOrigin.localRotation = Quaternion.identity;
-        FindObjectOfType<SpawnPlayers>().RespawnPlayer(tankOrigin);
+        FindObjectOfType<PlayerManager>().RespawnPlayer(tankOrigin);
 
-        if (ClientManager.inMultiplayer)
-        {
-            ClientManager.photonView.RPC("ReactivatePlayer", RpcTarget.All, new object[] { true });
-        }
-        else
-        {
-            ReactivatePlayer(false);
-        }
+        clientManager.photonView.RPC("ReactivatePlayer", RpcTarget.All);
 
         respawning = false;
     }
     
     [PunRPC]
-    void ReactivatePlayer(bool RPC)
+    void ReactivatePlayer()
     {
         tankOrigin.GetComponent<CapsuleCollider>().enabled = true;
 
@@ -258,13 +242,6 @@ public class PlayerControl : MonoBehaviour
         tankOrigin.Find("Turret").gameObject.SetActive(true);
         tankOrigin.Find("Barrel").gameObject.SetActive(true);
 
-        if (RPC)
-        {
-            tankOrigin.Find("TrackMarks").GetComponent<PhotonView>().RPC("ResetTrails", RpcTarget.All);
-        }
-        else
-        {
-            tankOrigin.Find("TrackMarks").GetComponent<TrailEmitter>().ResetTrails();
-        }
+        tankOrigin.Find("TrackMarks").GetComponent<PhotonView>().RPC("ResetTrails", RpcTarget.All);
     }
 }

@@ -21,7 +21,6 @@ public class DelayedDestroy : MonoBehaviour
         if (transform.CompareTag("Bullet"))
         {
             GetComponent<BulletBehaviour>().owner.GetComponent<FireControl>().bulletsFired--;
-            Debug.Log(GetComponent<BulletBehaviour>().owner.GetComponent<FireControl>().bulletsFired);
         }
 
         if (multiplayer)

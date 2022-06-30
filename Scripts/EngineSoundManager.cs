@@ -14,7 +14,7 @@ public class EngineSoundManager : MonoBehaviour
     {
         audioSource = GetComponent<AudioSource>();
 
-        UpdateMasterVolume(FindObjectOfType<DataSystem>().currentSettings.masterVolume);
+        UpdateMasterVolume(FindObjectOfType<DataManager>().currentPlayerSettings.masterVolume);
 
         audioSource.Pause();
     }
@@ -22,7 +22,7 @@ public class EngineSoundManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!SceneLoader.frozen && Time.timeScale > 0)
+        if (!GameManager.frozen && Time.timeScale > 0)
         {
             audioSource.UnPause();
 

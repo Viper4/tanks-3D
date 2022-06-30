@@ -1,63 +1,54 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
-using Photon.Realtime;
 
 public class ClientManager : MonoBehaviourPunCallbacks
 {
-    public bool inMultiplayer = false;
-
-    [SerializeField] PhotonView view;
-    [SerializeField] DataSystem dataSystem;
+    public PhotonView PV;
+    [SerializeField] DataManager clientData;
 
     // Start is called before the first frame update
     void Start()
     {
-        if (inMultiplayer)
+        if (!PhotonNetwork.OfflineMode)
         {
-            if (view.IsMine)
-            {
-                // Making sure other players can see this client's kills, deaths, etc
-                view.RPC("LoadPlayerDataForAll", RpcTarget.All);
-            }
-
             EngineSoundManager[] allEngineSounds = FindObjectsOfType<EngineSoundManager>();
             foreach (EngineSoundManager engineSound in allEngineSounds)
             {
-                engineSound.UpdateMasterVolume(dataSystem.currentSettings.masterVolume);
+                engineSound.UpdateMasterVolume(clientData.currentPlayerSettings.masterVolume);
             }
         }
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
-
     public void UpdateSoundManagerOnClient(SoundManager soundManager)
     {
-        soundManager.UpdateVolume(dataSystem.currentSettings.masterVolume);
+        soundManager.UpdateVolume(clientData.currentPlayerSettings.masterVolume);
     }
 
     [PunRPC]
-    void LoadPlayerDataForAll()
+    void RandomizeMaterialColors()
     {
-        SaveSystem.LoadPlayerData("PlayerData.json", dataSystem.currentPlayerData);
-    }
+        Color primaryColor = new Color(Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f));
+        Color secondaryColor = new Color(Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f));
 
-    public bool ViewIsMine()
-    {
-        return view.IsMine;
+        Transform tankOrigin = transform.Find("Tank Origin");
+        MeshRenderer bodyRenderer = tankOrigin.Find("Body").GetComponent<MeshRenderer>();
+        MeshRenderer turretRenderer = tankOrigin.Find("Turret").GetComponent<MeshRenderer>();
+        MeshRenderer barrelRenderer = tankOrigin.Find("Barrel").GetComponent<MeshRenderer>();
+        bodyRenderer.materials[2].color = primaryColor;
+        bodyRenderer.materials[0].color = secondaryColor;
+
+        turretRenderer.materials[0].color = secondaryColor;
+
+        barrelRenderer.materials[1].color = primaryColor;
+        barrelRenderer.materials[0].color = secondaryColor;
     }
 
     public void Disconnect()
     {
-        if (view.IsMine)
+        if (PV.IsMine)
         {
             PhotonNetwork.Disconnect();
-            SceneLoader.sceneLoader.LoadScene("Main Menu");
+            GameManager.gameManager.LoadScene("Main Menu", 0 , false, false);
         }
     }
 }

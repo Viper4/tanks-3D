@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using CustomExtensions;
 
 public class RedBot : MonoBehaviour
 {
@@ -78,7 +79,7 @@ public class RedBot : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!SceneLoader.frozen && Time.timeScale != 0 && targetSelector.currentTarget != null)
+        if (!GameManager.frozen && Time.timeScale != 0 && targetSelector.currentTarget != null)
         {
             Vector3 targetDir = targetSelector.currentTarget.position - turret.position;
             angleToTarget = Vector3.Angle(transform.forward, targetDir);
@@ -124,7 +125,7 @@ public class RedBot : MonoBehaviour
                 {
                     case Mode.Normal:
                         // Resetting currentTarget to primary and trying to move to target
-                        if (!SceneLoader.autoPlay && !targetSelector.findTarget && targetSelector.primaryTarget != null)
+                        if (!GameManager.autoPlay && !targetSelector.findTarget && targetSelector.primaryTarget != null)
                         {
                             targetSelector.currentTarget = targetSelector.primaryTarget;
                         }
@@ -175,7 +176,7 @@ public class RedBot : MonoBehaviour
 
             // Zeroing x and z eulers of turret and clamping barrel x euler
             turret.localEulerAngles = new Vector3(0, turret.localEulerAngles.y + noiseY, 0);
-            barrel.localEulerAngles = new Vector3(Clamping.ClampAngle(barrel.localEulerAngles.x + noiseX, turretRangeX[0], turretRangeX[1]), barrel.localEulerAngles.y + noiseY, 0);
+            barrel.localEulerAngles = new Vector3(MathExtensions.ClampAngle(barrel.localEulerAngles.x + noiseX, turretRangeX[0], turretRangeX[1]), barrel.localEulerAngles.y + noiseY, 0);
             lastEulerAngles = transform.eulerAngles;
         }
         else
@@ -205,7 +206,7 @@ public class RedBot : MonoBehaviour
                 }
                 break;
             case "Mine":
-                if (SceneLoader.autoPlay || targetSelector.findTarget)
+                if (GameManager.autoPlay || targetSelector.findTarget)
                 {
                     // Move in opposite direction of mine
                     desiredDir = transform.position - other.transform.position;
