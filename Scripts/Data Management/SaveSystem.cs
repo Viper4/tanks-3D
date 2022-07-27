@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using UnityEngine;
 using System.Runtime.Serialization.Formatters.Binary;
-using CustomExtensions;
+using MyUnityAddons.Math;
 
 public static class SaveSystem
 {
@@ -47,7 +47,6 @@ public static class SaveSystem
     {
         version = "0.0.1",
         map = "Classic",
-        roomName = "",
         primaryMode = "FFA",
         secondaryMode = "Endless",
         teamLimit = 2,
@@ -169,7 +168,7 @@ public static class SaveSystem
         if (player.CompareTag("Player"))
         {
             string crosshairFilePath = CROSSHAIR_FOLDER + newSettings.crosshairFileName + ".png";
-            crosshair = MathExtensions.ImageToSprite(crosshairFilePath);
+            crosshair = CustomMath.ImageToSprite(crosshairFilePath);
             Transform playerUI = player.Find("Player UI");
             if (playerUI != null)
             {

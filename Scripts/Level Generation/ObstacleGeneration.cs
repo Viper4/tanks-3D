@@ -1,7 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using CustomExtensions;
+using MyUnityAddons.Math;
+using System.Collections;
 
 /* Cites
  * RandomExtensions (class I created) 
@@ -15,77 +16,20 @@ using CustomExtensions;
  *  Variables: GameObject https://docs.unity3d.com/ScriptReference/GameObject-ctor.html, Transform https://docs.unity3d.com/ScriptReference/Transform.html, Vector3 https://docs.unity3d.com/ScriptReference/Vector3.html, Bounds https://docs.unity3d.com/ScriptReference/Bounds.html, RaycastHit https://docs.unity3d.com/ScriptReference/RaycastHit.html
  *  Classes: MonoBehaviour https://docs.unity3d.com/ScriptReference/MonoBehaviour.html, Debug https://docs.unity3d.com/ScriptReference/Debug.html, Physics https://docs.unity3d.com/ScriptReference/Physics.html, Mathf https://docs.unity3d.com/ScriptReference/Mathf.html
  */
+
 public class ObstacleGeneration : MonoBehaviour
 {
     // Declaring global variables
     List<GameObject> clonedObjects = new List<GameObject>();
 
-    [SerializeField] Vector3 direction;
-    [SerializeField] float distanceAway;
-    [SerializeField] int times = 1;
-    [SerializeField] Vector3 eulerAngles;
-    [SerializeField] Vector3 scale = new Vector3(2, 2, 2);
-
-    public void Extend()
-    {
-        // Iterate through all the times to clone this gameobject
-        for (int i = 0; i < times; i++)
-        {
-            // Instantiate this object at the given direction and distance away, reset its name and scale, and add the clone to the clonedObjects list
-            Transform clone = Instantiate(transform, transform.position + direction * (distanceAway * (i + 1)), Quaternion.Euler(eulerAngles), transform.parent);
-            clone.name = transform.name;
-            clone.localScale = scale;
-            clonedObjects.Add(clone.gameObject);
-        }
-    }
-
-    public void Delete()
-    {
-        // Delete this game object
-        DestroyImmediate(gameObject);
-    }
-
-    public void Undo()
-    {
-        // If the there are extended objects
-        if (clonedObjects.Count != 0)
-        {
-            // If the most recent element in clonedObjects is not null delete it
-            if (clonedObjects[clonedObjects.Count - 1] != null)
-            {
-                DestroyImmediate(clonedObjects[clonedObjects.Count - 1]);
-            }
-            // Remove most recent element in clonedObjects
-            clonedObjects.RemoveAt(clonedObjects.Count - 1);
-        }
-    }
-
-    public void Clear()
-    {
-        Debug.Log(transform.name + " cleared " + clonedObjects.Count + " obstacles.");
-
-        // If there are cloned objects
-        if (clonedObjects.Count != 0)
-        {
-            // Iterate through each clonedObject and delete them
-            foreach (GameObject clonedObject in clonedObjects)
-            {
-                DestroyImmediate(clonedObject);
-            }
-
-            // Clear the list referencing the clonedObjects
-            clonedObjects.Clear();
-        }
-    }
-
     public void RandomObstacleGeneration(List<GameObject> obstacles, List<GameObject> clonedObstacles, float switchChance, float branchChance, Dictionary<string,int> cloneAmounts, 
         Vector3 lastPosition, List<WeightedVector3> directions, bool logicalStructure, List<WeightedFloat> distances, bool rangedDst, Collider boundingCollider)
     {
         // If the user input obstacles to generate
-        if(obstacles.Count != 0)
+        if (obstacles.Count != 0)
         {
             // Select random direction from input possible directions
-            WeightedVector3 targetDirection = RandomExtensions.ChooseWeightedVector3(directions);
+            WeightedVector3 targetDirection = CustomRandom.ChooseWeightedVector3(directions);
 
             // Iterating through each obstacle in input obstacles
             foreach (GameObject obstacle in obstacles.ToList())
@@ -102,8 +46,8 @@ public class ObstacleGeneration : MonoBehaviour
                         if (rangedDst && distances.Count > 1)
                         {
                             // Picks random startVal, picks random endVal from  startVal to the end of the values, and sets dstAway to a random value between startVal and endVal (from my RandomExtensions class)
-                            float startVal = RandomExtensions.ChooseWeightedFloat(distances).value;
-                            float endVal = RandomExtensions.ChooseWeightedFloat(distances, startVal).value;
+                            float startVal = CustomRandom.ChooseWeightedFloat(distances).value;
+                            float endVal = CustomRandom.ChooseWeightedFloat(distances, startVal).value;
 
                             dstAway = Random.Range(startVal, endVal);
                             Debug.Log(startVal + " - " + endVal + " : " + dstAway);
@@ -111,13 +55,13 @@ public class ObstacleGeneration : MonoBehaviour
                         // If the user wants to select a single distance based on weights (from my RandomExtensions class)
                         else
                         {
-                            dstAway = RandomExtensions.ChooseWeightedFloat(distances).value;
+                            dstAway = CustomRandom.ChooseWeightedFloat(distances).value;
                         }
                     }
-                    // If the user did not input distances away to generate each obstacle set it to the global variable distanceAway
+                    // If the user did not input distances away to generate each obstacle set it to obstacle's collider size x
                     else
                     {
-                        dstAway = distanceAway;
+                        dstAway = obstacle.GetComponent<BoxCollider>().size.x;
                     }
 
                     // Setting newPosition to instantiate at
@@ -146,7 +90,7 @@ public class ObstacleGeneration : MonoBehaviour
                             // If a valid direction(s) has been found, randomely pick one based on weights (from my RandomExtensions class), set the position to instantiate at, and break out of the loop
                             if (validDirections.Count != 0)
                             {
-                                targetDirection = RandomExtensions.ChooseWeightedVector3(validDirections);
+                                targetDirection = CustomRandom.ChooseWeightedVector3(validDirections);
 
                                 newPosition = clonedObstacles[k].transform.position + targetDirection.value * dstAway;
                                 break;
@@ -166,10 +110,10 @@ public class ObstacleGeneration : MonoBehaviour
                     if (logicalStructure)
                     {
                         // Checking if the new position is above ground
-                        if(Physics.Raycast(newPosition, Vector3.down, out RaycastHit groundHit, Mathf.Infinity))
+                        if (Physics.Raycast(newPosition, Vector3.down, out RaycastHit groundHit, Mathf.Infinity))
                         {
                             // Setting new position to the distance to ground, instantiating the object, and updating last position
-                            newPosition -= Vector3.up * (groundHit.distance - obstacle.GetComponent<Renderer>().bounds.size.y * 0.5f);
+                            newPosition -= Vector3.up * (groundHit.distance - (obstacle.GetComponent<BoxCollider>().size.y * obstacle.transform.localScale.y * 0.5f));
                             clonedObstacles.Add(Instantiate(obstacle, newPosition, transform.rotation, transform.parent));
                             lastPosition = newPosition;
                         }

@@ -2,12 +2,10 @@ using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using CustomExtensions;
+using MyUnityAddons.CustomPhoton;
 
 public class SpectatorControl : MonoBehaviour
 {
-    public PlayerManager playerManager;
-
     [SerializeField] PhotonView PV;
     [SerializeField] DataManager dataSystem;
 
@@ -49,10 +47,10 @@ public class SpectatorControl : MonoBehaviour
 
                 float targetSpeed = movementSpeed / 2 * inputDir.magnitude;
 
-                if (Input.GetMouseButtonDown(0) && PhotonExtensions.InGamePlayerList.Length != 0)
+                if (Input.GetMouseButtonDown(0) && CustomNetworkHandling.NonSpectatorList.Length != 0)
                 {
-                    targetIndex = targetIndex + 1 > PhotonExtensions.InGamePlayerList.Length ? 0 : targetIndex + 1;
-                    target = ((GameObject)PhotonExtensions.InGamePlayerList[targetIndex].TagObject).transform;
+                    targetIndex = targetIndex + 1 > CustomNetworkHandling.NonSpectatorList.Length ? 0 : targetIndex + 1;
+                    target = CustomNetworkHandling.PhotonViewInScene(CustomNetworkHandling.NonSpectatorList[targetIndex]).transform;
                 }
 
                 if (targetIndex == -1)

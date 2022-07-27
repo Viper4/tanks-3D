@@ -1,8 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using Photon.Pun;
-using CustomExtensions;
+using MyUnityAddons.Math;
 
 public class MultiplayerCameraControl : MonoBehaviour
 {
@@ -172,7 +169,7 @@ public class MultiplayerCameraControl : MonoBehaviour
 
                 // Zeroing x and z eulers of turret and clamping barrel x euler
                 turret.localEulerAngles = new Vector3(0, turret.localEulerAngles.y, 0);
-                barrel.localEulerAngles = new Vector3(MathExtensions.ClampAngle(barrel.localEulerAngles.x, pitchMinMaxL.x, pitchMinMaxL.y), barrel.localEulerAngles.y, 0);
+                barrel.localEulerAngles = new Vector3(CustomMath.ClampAngle(barrel.localEulerAngles.x, pitchMinMaxL.x, pitchMinMaxL.y), barrel.localEulerAngles.y, 0);
 
                 lastEulerAngles = tankOrigin.eulerAngles;
             }

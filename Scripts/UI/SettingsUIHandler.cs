@@ -6,7 +6,7 @@ using UnityEngine.Rendering.Universal;
 
 public class SettingsUIHandler : MonoBehaviour
 {
-    [SerializeField] ForwardRendererData forwardRenderer;
+    [SerializeField] UniversalRendererData forwardRenderer;
     [SerializeField] BaseUIHandler baseUIHandler;
     [SerializeField] DataManager dataSystem;
     Transform selectedKeyBind;

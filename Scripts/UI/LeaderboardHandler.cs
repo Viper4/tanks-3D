@@ -1,27 +1,20 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Photon.Pun;
-using UnityEngine.UI;
 using System.Linq;
 using TMPro;
 using Photon.Realtime;
-using CustomExtensions;
+using MyUnityAddons.CustomPhoton;
+using Photon.Pun.UtilityScripts;
 
 public class LeaderboardHandler : MonoBehaviour
 {
     [SerializeField] Transform leaderboardCanvas;
     [SerializeField] Transform playerList;
-    [SerializeField] GameObject playerSlotPrefab;
+    [SerializeField] GameObject playerSlot;
+    [SerializeField] GameObject[] teamPlayerSlots;
 
     [SerializeField] ClientManager ClientManager;
     [SerializeField] DataManager clientDataSystem;
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
 
     // Update is called once per frame
     void LateUpdate()
@@ -45,20 +38,21 @@ public class LeaderboardHandler : MonoBehaviour
 
     void UpdateLeaderboard()
     {
-        foreach(Transform child in playerList)
+        foreach (Transform child in playerList)
         {
             Destroy(child.gameObject);
         }
 
         Dictionary<string, LeaderboardData> leaderboard = new Dictionary<string, LeaderboardData>();
 
-        foreach (Player player in PhotonExtensions.InGamePlayerList)
+        foreach (Player player in CustomNetworkHandling.NonSpectatorList)
         {
             PlayerData playerData = player.PhotonViewInScene().GetComponent<DataManager>().currentPlayerData;
             LeaderboardData leaderboardData = new LeaderboardData()
             {
                 kills = playerData.kills,
                 deaths = playerData.deaths,
+                teamName = player.GetPhotonTeam().Name,
             };
 
             leaderboardData.KD = playerData.deaths == 0 ? playerData.kills : (Mathf.Round((float)playerData.kills / playerData.deaths * 100) / 100);
@@ -72,10 +66,29 @@ public class LeaderboardHandler : MonoBehaviour
 
         for (int i = 0; i < orderedDictionary.Count; i++)
         {
-            GameObject newPlayerSlot = Instantiate(playerSlotPrefab, playerList);
             string username = orderedDictionary[i].Key;
             LeaderboardData leaderboardData = orderedDictionary[i].Value;
 
+            GameObject newPlayerSlot;
+
+            switch (leaderboardData.teamName)
+            {
+                case "Team 1":
+                    newPlayerSlot = Instantiate(teamPlayerSlots[0], playerList);
+                    break;
+                case "Team 2":
+                    newPlayerSlot = Instantiate(teamPlayerSlots[1], playerList);
+                    break;
+                case "Team 3":
+                    newPlayerSlot = Instantiate(teamPlayerSlots[2], playerList);
+                    break;
+                case "Team 4":
+                    newPlayerSlot = Instantiate(teamPlayerSlots[3], playerList);
+                    break;
+                default:
+                    newPlayerSlot = Instantiate(playerSlot, playerList);
+                    break;
+            }
             newPlayerSlot.transform.Find("Name").GetComponent<TextMeshProUGUI>().text = username;
             newPlayerSlot.transform.Find("Kills").GetComponent<TextMeshProUGUI>().text = leaderboardData.kills.ToString();
             newPlayerSlot.transform.Find("Deaths").GetComponent<TextMeshProUGUI>().text = leaderboardData.deaths.ToString();
@@ -88,5 +101,6 @@ public class LeaderboardHandler : MonoBehaviour
         public int kills;
         public int deaths;
         public float KD;
+        public string teamName;
     }
 }

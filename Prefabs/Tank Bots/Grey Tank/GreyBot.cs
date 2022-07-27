@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using CustomExtensions;
+using MyUnityAddons.Math;
 
 public class GreyBot : MonoBehaviour
 {
@@ -153,7 +153,7 @@ public class GreyBot : MonoBehaviour
 
             // Zeroing x and z eulers of turret and clamping barrel x euler
             turret.localEulerAngles = new Vector3(0, turret.localEulerAngles.y + noiseY, 0);
-            barrel.localEulerAngles = new Vector3(MathExtensions.ClampAngle(barrel.localEulerAngles.x + noiseX, turretRangeX[0], turretRangeX[1]), barrel.localEulerAngles.y + noiseY, 0);
+            barrel.localEulerAngles = new Vector3(CustomMath.ClampAngle(barrel.localEulerAngles.x + noiseX, turretRangeX[0], turretRangeX[1]), barrel.localEulerAngles.y + noiseY, 0);
 
             lastEulerAngles = transform.eulerAngles;
         }

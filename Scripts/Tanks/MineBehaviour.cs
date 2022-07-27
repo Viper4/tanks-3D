@@ -18,7 +18,7 @@ public class MineBehaviour : MonoBehaviour
 
     public float activateDelay = 1;
     public float timer = 30;
-    public float explosionForce = 8f;
+    public float explosionForce = 12f;
     public float explosionRadius = 4.5f;
 
     bool canFlash = true;
@@ -159,7 +159,7 @@ public class MineBehaviour : MonoBehaviour
                             if (ownerPV.IsMine)
                             {
                                 collider.transform.parent.parent.GetComponent<PhotonView>().RPC("ExplodeTank", RpcTarget.All);
-                                if (owner != collider.transform.parent.parent)
+                                if (owner != collider.transform.parent.parent && !(owner.name.Contains("Team") && owner.name == collider.transform.parent.parent.name))
                                 {
                                     IncreaseKills();
                                 }
@@ -172,7 +172,7 @@ public class MineBehaviour : MonoBehaviour
                     }
                     break;
                 case "Destructable":
-                    collider.GetComponent<DestructableObject>().DestroyObject();
+                    collider.transform.parent.GetComponent<DestructableObject>().DestroyObject();
                     break;
                 case "Bullet":
                     // Destroying bullets in explosion

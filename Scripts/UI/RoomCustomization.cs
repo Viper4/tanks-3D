@@ -110,30 +110,32 @@ public class RoomCustomization : MonoBehaviour
     public void UpdateSettingsUI()
     {
         GameObject[] allUISettings = GameObject.FindGameObjectsWithTag("UI Setting");
-        foreach(GameObject setting in allUISettings)
+        foreach (GameObject setting in allUISettings)
         {
             switch (setting.name)
             {
                 case "Map Dropdown":
-                    SetValueToOption(setting, dataManager.currentRoomSettings.map);
+                    SetValueToOption(setting.GetComponent<Dropdown>(), dataManager.currentRoomSettings.map);
                     break;
                 case "Map Preview":
 
                     break;
                 case "Mode 1 Dropdown":
-                    SetValueToOption(setting, dataManager.currentRoomSettings.primaryMode);
+                    SetValueToOption(setting.GetComponent<Dropdown>(), dataManager.currentRoomSettings.primaryMode);
+                    ChangePrimaryMode(setting.GetComponent<Dropdown>()); // Enable/disable gameobjects
                     break;
                 case "Mode 2 Dropdown":
-                    SetValueToOption(setting, dataManager.currentRoomSettings.secondaryMode);
+                    SetValueToOption(setting.GetComponent<Dropdown>(), dataManager.currentRoomSettings.secondaryMode);
+                    ChangeSecondaryMode(setting.GetComponent<Dropdown>()); // Enable/disable gameobjects
                     break;
                 case "Team Limit":
-                    SetValueToOption(setting, dataManager.currentRoomSettings.teamLimit.ToString());
+                    SetValueToOption(setting.GetComponent<Dropdown>(), dataManager.currentRoomSettings.teamLimit.ToString());
                     break;
                 case "Team Size":
                     setting.GetComponent<InputField>().text = dataManager.currentRoomSettings.teamSize.ToString();
                     break;
                 case "Wave Size":
-                    SetValueToOption(setting, dataManager.currentRoomSettings.waveSize.ToString());
+                    SetValueToOption(setting.GetComponent<Dropdown>(), dataManager.currentRoomSettings.waveSize.ToString());
                     break;
                 case "Difficulty":
                     setting.GetComponent<Dropdown>().value = dataManager.currentRoomSettings.difficulty;
@@ -145,7 +147,7 @@ public class RoomCustomization : MonoBehaviour
                     setting.GetComponent<InputField>().text = dataManager.currentRoomSettings.playerLimit.ToString();
                     break;
                 case "Bot Selection":
-                    SetValuesToOptions(setting, dataManager.currentRoomSettings.bots);
+                    SetValuesToOptions(setting.GetComponent<MultiDropdown>(), dataManager.currentRoomSettings.bots);
                     break;
                 case "Bot Limit":
                     setting.GetComponent<InputField>().text = dataManager.currentRoomSettings.botLimit.ToString();
@@ -157,27 +159,29 @@ public class RoomCustomization : MonoBehaviour
         }
     }
 
-    private void SetValueToOption(GameObject dropdownGO, string optionText)
+    private void SetValueToOption(Dropdown dropdown, string optionText)
     {
-        Dropdown dropdown = dropdownGO.GetComponent<Dropdown>();
-        Dropdown.OptionData option = new Dropdown.OptionData(optionText, null);
-        int optionIndex = dropdown.options.IndexOf(option);
-        if(optionIndex != -1)
+        for (int i = 0; i < dropdown.options.Count; i++)
         {
-            dropdown.value = optionIndex;
+            if (dropdown.options[i].text == optionText)
+            {
+                dropdown.value = i;
+                break;
+            }
         }
     }
 
-    private void SetValuesToOptions(GameObject multiDropdownGO, List<string> optionTexts)
+    private void SetValuesToOptions(MultiDropdown multiDropdown, List<string> optionTexts)
     {
-        MultiDropdown multiDropdown = multiDropdownGO.GetComponent<MultiDropdown>();
         for (int i = 0; i < optionTexts.Count; i++)
         {
-            Dropdown.OptionData option = new Dropdown.OptionData(optionTexts[i], null);
-            int optionIndex = multiDropdown.options.IndexOf(option);
-            if (optionIndex != -1 && !multiDropdown.values.Contains(optionIndex))
+            for (int j = 0; j < multiDropdown.options.Count; j++)
             {
-                multiDropdown.values.Add(optionIndex);
+                if (multiDropdown.options[j].text == optionTexts[i])
+                {
+                    multiDropdown.values.Add(j);
+                    break;
+                }
             }
         }
     }

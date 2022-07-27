@@ -8,7 +8,7 @@ public class ReplaceWithPrefab : EditorWindow
     [MenuItem("Tools/Replace With Prefab")]
     static void CreateReplaceWithPrefab()
     {
-        EditorWindow.GetWindow<ReplaceWithPrefab>();
+        GetWindow<ReplaceWithPrefab>();
     }
 
     private void OnGUI()
@@ -19,7 +19,7 @@ public class ReplaceWithPrefab : EditorWindow
         {
             var selection = Selection.gameObjects;
 
-            for (var i = selection.Length - 1; i >= 0; --i)
+            for (var i = selection.Length - 1; i >= 0; i--)
             {
                 var selected = selection[i];
                 var prefabType = PrefabUtility.GetPrefabAssetType(prefab);

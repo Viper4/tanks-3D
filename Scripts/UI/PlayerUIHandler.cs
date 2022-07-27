@@ -156,8 +156,9 @@ public class PlayerUIHandler : MonoBehaviour
         Cursor.visible = true;
     }
 
-    public void Disconnect()
+    public void Leave()
     {
-        playerControl.clientManager.Disconnect();
+        PhotonNetwork.LeaveRoom();
+        SceneManager.LoadScene("Lobby");
     }
 }

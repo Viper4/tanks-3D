@@ -1,8 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
-using CustomExtensions;
+using MyUnityAddons.Math;
 
 public class BaseTankLogic : MonoBehaviour
 {
@@ -68,7 +66,7 @@ public class BaseTankLogic : MonoBehaviour
             else
             {
                 // Ensuring tank doesn't flip over
-                tankOrigin.eulerAngles = new Vector3(MathExtensions.ClampAngle(tankOrigin.eulerAngles.x, pitchRange[0], pitchRange[1]), tankOrigin.eulerAngles.y, MathExtensions.ClampAngle(tankOrigin.eulerAngles.z, rollRange[0], rollRange[1]));
+                tankOrigin.eulerAngles = new Vector3(CustomMath.ClampAngle(tankOrigin.eulerAngles.x, pitchRange[0], pitchRange[1]), tankOrigin.eulerAngles.y, CustomMath.ClampAngle(tankOrigin.eulerAngles.z, rollRange[0], rollRange[1]));
             }
 
             if (noisyRotation && !player)

@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using Photon.Pun;
 using Photon.Realtime;
 using PhotonHashtable = ExitGames.Client.Photon.Hashtable;
+using UnityEngine.SceneManagement;
 
 public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
 {
@@ -90,19 +91,20 @@ public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
 
     public override void OnJoinedRoom()
     {
-        PhotonNetwork.NickName = usernameInput.text;
+        PhotonNetwork.NickName = GetUniqueUsername(usernameInput.text);
 
         if (PhotonNetwork.IsMasterClient)
         {
             PhotonNetwork.AutomaticallySyncScene = true;
 
-            PhotonHashtable roomProperties = new PhotonHashtable();
-            roomProperties.Add("RoomSettings", dataManager.currentRoomSettings);
-            //roomProperties.Add("Waiting", true);
-            roomProperties.Add("Waiting", false);
+            PhotonHashtable roomProperties = new PhotonHashtable
+            {
+                { "RoomSettings", dataManager.currentRoomSettings },
+                { "Waiting", true }
+            };
             PhotonNetwork.CurrentRoom.SetCustomProperties(roomProperties);
 
-            StartCoroutine(DelayedPhotonLoad()); // Have to wait until CustomProperties are synched and updated across the network
+            StartCoroutine(DelayedPhotonLoad("Waiting Room"));
         }
         else
         {
@@ -117,10 +119,32 @@ public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
         }
     }
 
-    IEnumerator DelayedPhotonLoad()
+    string GetUniqueUsername(string username)
     {
-        yield return new WaitForSecondsRealtime(0.25f);
-        PhotonNetwork.LoadLevel(dataManager.currentRoomSettings.map);
+        List<string> usernames = new List<string>();
+        foreach (Player player in PhotonNetwork.PlayerListOthers)
+        {
+            usernames.Add(player.NickName);
+        }
+
+        if (usernames.Contains(username))
+        {
+            for (int i = 0; i < 20; i++)
+            {
+                string newUsername = username + " (" + (i + 1) + ")";
+                if (!usernames.Contains(newUsername))
+                {
+                    return newUsername;
+                }
+            }
+        }
+        return username;
+    }
+
+    IEnumerator DelayedPhotonLoad(string sceneName)
+    {
+        yield return new WaitForSecondsRealtime(0.15f); // Wait until CustomProperties are synched and updated across the network
+        PhotonNetwork.LoadLevel(sceneName);
     }
 
     IEnumerator ShowPlaceholderError(InputField input, string message, float delay)
@@ -144,7 +168,7 @@ public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
     public override void OnDisconnected(DisconnectCause cause)
     {
         Debug.Log("Disconnected: " + cause);
-        GameManager.gameManager.LoadScene("Main Menu");
+        SceneManager.LoadScene("Main Menu");
     }
 
     public override void OnCreateRoomFailed(short returnCode, string message)

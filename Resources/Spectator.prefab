@@ -705,7 +705,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 72a46c6361c34274b9f79ddda0f4deb6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerManager: {fileID: 0}
   PV: {fileID: 1800493497886942107}
   dataSystem: {fileID: 1800493497886942105}
   myCamera: {fileID: 1458544633275823483}
@@ -739,7 +738,6 @@ MonoBehaviour:
   currentRoomSettings:
     version: 
     map: 
-    roomName: 
     primaryMode: 
     secondaryMode: 
     teamLimit: 0
@@ -1477,7 +1475,7 @@ GameObject:
   - component: {fileID: 8582326394304236981}
   - component: {fileID: 9204515240827637233}
   m_Layer: 5
-  m_Name: Disconnect
+  m_Name: Leave
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1587,7 +1585,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 2215995634929616041}
         m_TargetAssemblyTypeName: SpectatorUIHandler, Assembly-CSharp
-        m_MethodName: Disconnect
+        m_MethodName: Leave
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -2398,7 +2396,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Disconnect
+  m_Text: Leave
 --- !u!1 &8802638295858291298
 GameObject:
   m_ObjectHideFlags: 0

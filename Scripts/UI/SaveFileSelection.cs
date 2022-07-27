@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class SaveFileSelection : MonoBehaviour
 {
-    [SerializeField] DataManager dataSystem;
+    [SerializeField] DataManager dataManager;
 
     [SerializeField] RectTransform template;
     [SerializeField] RectTransform container;
@@ -55,7 +55,7 @@ public class SaveFileSelection : MonoBehaviour
         {
             if (!allSaveFiles.Contains(fileName))
             {
-                dataSystem.currentRoomSettings.SaveRoomSettings(fileName);
+                dataManager.currentRoomSettings.SaveRoomSettings(fileName);
 
                 InstantiateSaveSlot(fileName);
             }
@@ -74,7 +74,7 @@ public class SaveFileSelection : MonoBehaviour
     {
         if (selectedSaveSlot != null)
         {
-            dataSystem.currentRoomSettings.SaveRoomSettings(selectedSaveSlot.Find("Label").GetComponent<Text>().text);
+            dataManager.currentRoomSettings.SaveRoomSettings(selectedSaveSlot.Find("Label").GetComponent<Text>().text);
         }
         else
         {
@@ -86,8 +86,7 @@ public class SaveFileSelection : MonoBehaviour
     {
         if (selectedSaveSlot != null)
         {
-            dataSystem.currentRoomSettings = SaveSystem.LoadRoomSettings(selectedSaveSlot.Find("Label").GetComponent<Text>().text);
-            Debug.Log(dataSystem.currentRoomSettings.playerLimit);
+            dataManager.currentRoomSettings = SaveSystem.LoadRoomSettings(selectedSaveSlot.Find("Label").GetComponent<Text>().text);
         }
         else
         {

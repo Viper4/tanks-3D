@@ -1,11 +1,9 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using Photon.Pun;
-using Photon.Realtime;
-using CustomExtensions;
+using MyUnityAddons.Math;
 
 public class GameManager : MonoBehaviour
 {
@@ -94,6 +92,9 @@ public class GameManager : MonoBehaviour
                 }
 
                 stats.Find("Deaths").GetComponent<Text>().text = "Deaths: " + playerData.deaths;
+                break;
+            case "Lobby":
+                Destroy(gameManager.gameObject);
                 break;
             default:
                 if (currentSceneIndex > 11)

@@ -62,8 +62,9 @@ public class SpectatorUIHandler : MonoBehaviour
         Cursor.lockState = CursorLockMode.None;
     }
 
-    public void Disconnect()
+    public void Leave()
     {
-        clientManager.Disconnect();
+        PhotonNetwork.LeaveRoom();
+        SceneManager.LoadScene("Lobby");
     }
 }

@@ -7,7 +7,6 @@ public class RoomSettings
 {
     public string version;
     public string map;
-    public string roomName;
     public string primaryMode;
     public string secondaryMode;
     public int teamLimit;

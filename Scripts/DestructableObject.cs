@@ -7,16 +7,17 @@ public class DestructableObject : MonoBehaviour
     public Transform particles;
     public Material material;
     [SerializeField] float respawnDelay = 0;
+    [SerializeField] GameObject cube;
 
     public void PlayParticles()
     {
         Transform newParticles = Instantiate(particles, transform.position, Quaternion.Euler(-90, 0, 0));
         newParticles.GetComponent<Renderer>().material = material;
     }
-
+    
     public void DestroyObject()
     {
-        gameObject.SetActive(false);
+        cube.SetActive(false);
         PlayParticles();
 
         if (respawnDelay > 0)
@@ -28,6 +29,6 @@ public class DestructableObject : MonoBehaviour
     IEnumerator Respawn()
     {
         yield return new WaitForSeconds(respawnDelay);
-        gameObject.SetActive(true);
+        cube.SetActive(true);
     }
 }

@@ -42,13 +42,4 @@ public class ClientManager : MonoBehaviourPunCallbacks
         barrelRenderer.materials[1].color = primaryColor;
         barrelRenderer.materials[0].color = secondaryColor;
     }
-
-    public void Disconnect()
-    {
-        if (PV.IsMine)
-        {
-            PhotonNetwork.Disconnect();
-            GameManager.gameManager.LoadScene("Main Menu", 0 , false, false);
-        }
-    }
 }

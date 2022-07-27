@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using CustomExtensions;
+using MyUnityAddons.Math;
 
 public class TankGeneration : MonoBehaviour
 {
@@ -48,7 +48,7 @@ public class TankGeneration : MonoBehaviour
                 {
                     Quaternion rotation = randomYRotation ? Quaternion.AngleAxis(Random.Range(-180.0f, 180.0f), Vector3.up) : tank.transform.rotation;
                     
-                    Vector3 spawnPosition = RandomExtensions.GetSpawnPointInCollider(boundingCollider, Vector3.down, ignoreLayerMask, tank.transform.Find("Body").GetComponent<Collider>(), rotation);
+                    Vector3 spawnPosition = CustomRandom.GetSpawnPointInCollider(boundingCollider, Vector3.down, ignoreLayerMask, tank.transform.Find("Body").GetComponent<BoxCollider>(), rotation);
                     if (spawnPosition != Vector3.zero)
                     {
                         clonedObjects.Add(Instantiate(tank, spawnPosition, rotation, tankParent));

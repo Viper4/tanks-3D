@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
 using ExitGames.Client.Photon;
-using CustomExtensions;
+using MyUnityAddons.CustomPhoton;
 
 public class DataManager : MonoBehaviourPun, IPunObservable
 {
@@ -28,20 +28,12 @@ public class DataManager : MonoBehaviourPun, IPunObservable
         {
             currentPlayerData.time += Time.deltaTime;
         }
-
-        if (Input.GetKeyDown(KeyCode.L))
-        {
-            byte[] byteArray = PhotonExtensions.ObjectToByteArray(currentRoomSettings);
-
-            RoomSettings deserializedRoomSettings = (RoomSettings)PhotonExtensions.ByteArrayToObject(byteArray);
-            Debug.Log(deserializedRoomSettings.map);
-        }
     }
 
     void RegisterCustomTypes()
     {
-        PhotonPeer.RegisterType(typeof(Transform), (byte)'T', PhotonExtensions.ObjectToByteArray, PhotonExtensions.ByteArrayToObject);
-        PhotonPeer.RegisterType(typeof(RoomSettings), (byte)'R', PhotonExtensions.ObjectToByteArray, PhotonExtensions.ByteArrayToObject);
+        PhotonPeer.RegisterType(typeof(Transform), (byte)'T', PhotonDataSerialization.ObjectToByteArray, PhotonDataSerialization.ByteArrayToObject);
+        PhotonPeer.RegisterType(typeof(RoomSettings), (byte)'R', PhotonDataSerialization.ObjectToByteArray, PhotonDataSerialization.ByteArrayToObject);
     }
 
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
@@ -54,15 +46,7 @@ public class DataManager : MonoBehaviourPun, IPunObservable
         else if (stream.IsReading)
         {
             currentPlayerData.kills = (int)stream.ReceiveNext();
-            currentPlayerData.kills = (int)stream.ReceiveNext();
+            currentPlayerData.deaths = (int)stream.ReceiveNext();
         }
     }
-}
-
-[System.Serializable]
-public struct SerializableTransform
-{
-    public Vector3 position;
-    public Quaternion rotation;
-    public Vector3 localScale;
 }
