@@ -15,21 +15,19 @@ public class BulletBehaviour : MonoBehaviour
     [SerializeField] Transform explosionEffect;
     [SerializeField] Transform sparkEffect;
 
-    public float speed = 32;
-    public float explosionRadius = 0;
+    public float speed { get; set; } = 32f;
+    public float explosionRadius { get; set; } = 0;
 
-    public int pierceLevel = 0;
+    public int pierceLevel { get; set; } = 0;
     int pierces = 0;
 
-    public int ricochetLevel = 1;
+    public int ricochetLevel { get; set; } = 1;
     int bounces = 0;
 
     // Start is called before the first frame Update
     void Start()
     {
         rb = GetComponent<Rigidbody>();
-
-        ResetVelocity();
     }
 
     void Update()
@@ -153,7 +151,7 @@ public class BulletBehaviour : MonoBehaviour
         transform.forward = reflection;
     }
 
-    void ResetVelocity()
+    public void ResetVelocity()
     {
         rb.velocity = transform.forward * speed;
     }

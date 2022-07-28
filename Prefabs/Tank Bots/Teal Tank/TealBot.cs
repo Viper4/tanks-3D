@@ -6,23 +6,17 @@ using MyUnityAddons.Math;
 public class TealBot : MonoBehaviour
 {
     TargetSelector targetSelector;
-    Quaternion rotToTarget;
 
     BaseTankLogic baseTankLogic;
 
     Transform body;
     Transform turret;
     Transform barrel;
-    Quaternion turretAnchor;
-    Vector3 lastEulerAngles;
 
     public float[] reactionTime = { 0.3f, 0.45f };
     public float[] fireDelay = { 0.3f, 0.6f };
 
     Rigidbody rb;
-
-    [SerializeField] float turretRotSpeed = 25f;
-    [SerializeField] float[] turretRangeX = { -20, 20 };
     
     [SerializeField] float moveSpeed = 4f;
     [SerializeField] float avoidSpeed = 2f;
@@ -36,14 +30,14 @@ public class TealBot : MonoBehaviour
 
     enum Mode
     {
-        Normal,
+        Move,
         Shoot,
         Avoid
     }
-    Mode mode = Mode.Normal;
+    Mode mode = Mode.Move;
 
     // Start is called before the first frame Update
-    void Awake()
+    void Start()
     {
         targetSelector = GetComponent<TargetSelector>();
 
@@ -52,8 +46,6 @@ public class TealBot : MonoBehaviour
         body = transform.Find("Body");
         turret = transform.Find("Turret");
         barrel = transform.Find("Barrel");
-        turretAnchor = turret.rotation;
-        lastEulerAngles = transform.eulerAngles;
 
         rb = GetComponent<Rigidbody>();
 
@@ -99,12 +91,12 @@ public class TealBot : MonoBehaviour
                 }
                 else if (mode == Mode.Avoid)
                 {
-                    mode = Mode.Normal;
+                    mode = Mode.Move;
                 }
 
                 switch (mode)
                 {
-                    case Mode.Normal:
+                    case Mode.Move:
                         speed = moveSpeed;
 
                         baseTankLogic.noisyRotation = true;
@@ -126,19 +118,9 @@ public class TealBot : MonoBehaviour
                 rb.velocity = velocity;
             }
 
-            // Correcting turret and barrel y rotation to not depend on the parent
-            turret.eulerAngles = new Vector3(turret.eulerAngles.x, turret.eulerAngles.y + lastEulerAngles.y - transform.eulerAngles.y, turret.eulerAngles.z);
-            barrel.eulerAngles = new Vector3(barrel.eulerAngles.x, barrel.eulerAngles.y + lastEulerAngles.y - transform.eulerAngles.y, barrel.eulerAngles.z);
-
             // Rotating turret and barrel towards player
             Vector3 targetDir = targetSelector.currentTarget.position - turret.position;
-            rotToTarget = Quaternion.LookRotation(targetDir);
-            turret.rotation = barrel.rotation = turretAnchor = Quaternion.RotateTowards(turretAnchor, rotToTarget, Time.deltaTime * turretRotSpeed);
-
-            // Zeroing x and z eulers of turret and clamping barrel x euler
-            turret.localEulerAngles = new Vector3(0, turret.localEulerAngles.y, 0);
-            barrel.localEulerAngles = new Vector3(CustomMath.ClampAngle(barrel.localEulerAngles.x, turretRangeX[0], turretRangeX[1]), barrel.localEulerAngles.y, 0);
-            lastEulerAngles = transform.eulerAngles;
+            baseTankLogic.RotateTurretTo(targetDir);
         }
         else
         {
@@ -159,7 +141,7 @@ public class TealBot : MonoBehaviour
                     desiredDir = transform.position - other.transform.position;
 
                     // Applying rotation
-                    baseTankLogic.RotateToVector(desiredDir);
+                    baseTankLogic.RotateTankToVector(desiredDir);
                 }
                 else if (other.GetComponent<MineBehaviour>().owner != targetSelector.currentTarget.root)
                 {
@@ -167,7 +149,7 @@ public class TealBot : MonoBehaviour
                     desiredDir = transform.position - other.transform.position;
 
                     // Applying rotation
-                    baseTankLogic.RotateToVector(desiredDir);
+                    baseTankLogic.RotateTankToVector(desiredDir);
                 }
                 break;
         }
@@ -183,7 +165,7 @@ public class TealBot : MonoBehaviour
         yield return new WaitForSeconds(Random.Range(fireDelay[0], fireDelay[1]));
         StartCoroutine(GetComponent<FireControl>().Shoot());
 
-        mode = Mode.Normal;
+        mode = Mode.Move;
         shooting = false;
     }
 }

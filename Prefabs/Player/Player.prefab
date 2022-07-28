@@ -2503,7 +2503,7 @@ MonoBehaviour:
   speedLimit: 15
   ignoreLayerMasks:
     serializedVersion: 2
-    m_Bits: 1996
+    m_Bits: 65484
 --- !u!114 &6432079618835187449
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2518,10 +2518,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   PV: {fileID: 0}
   playerControl: {fileID: 6432079618835187448}
-  bullet: {fileID: 4307626717143694363, guid: de9dbd5b8f77ecb4a866f8d8cf75c17d, type: 3}
-  shootEffect: {fileID: 3951999571271251617, guid: f7daba63eab9f5b4cae466ebd10c14b6, type: 3}
-  spawnPoint: {fileID: 5070647258124889183}
   barrel: {fileID: 7434512807079599132}
+  bullet: {fileID: 4307626717143694363, guid: de9dbd5b8f77ecb4a866f8d8cf75c17d, type: 3}
+  spawnPoint: {fileID: 5070647258124889183}
+  shootEffect: {fileID: 3951999571271251617, guid: f7daba63eab9f5b4cae466ebd10c14b6, type: 3}
+  speed: 16
+  explosionRadius: 0
+  pierceLevel: 0
+  ricochetLevel: 1
   bulletLimit: 5
   fireCooldown: 0.1
   canFire: 1
@@ -2560,33 +2564,38 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   player: 1
   playerControl: {fileID: 6432079618835187448}
-  tankOrigin: {fileID: 5113858065110483005}
   explosionEffect: {fileID: 3507901705876011728, guid: 8d9ad67b12c764e4387b9e13b552aa70, type: 3}
   deathMarker: {fileID: 4070220823033511741, guid: f0cc2cf5ee9d8734f83a01e8b6694bf1, type: 3}
+  transparentLayers:
+    serializedVersion: 2
+    m_Bits: 1806
+  barrierLayers:
+    serializedVersion: 2
+    m_Bits: 64193
+  nonSlopeLayers:
+    serializedVersion: 2
+    m_Bits: 65518
+  slopeAlignment: 1
+  alignRotationSpeed: 20
+  flipAngleThreshold: 20
+  restrictRotation: 0
   pitchRange:
   - -45
   - 45
   rollRange:
   - -45
   - 45
-  frozenRotation: 1
-  alignRotationSpeed: 20
-  nonSlopeLayers:
-    serializedVersion: 2
-    m_Bits: 2030
-  transparentLayers:
-    serializedVersion: 2
-    m_Bits: 1806
-  barrierLayers:
-    serializedVersion: 2
-    m_Bits: 705
-  tankRotSpeed: 250
   noisyRotation: 0
-  randomizeSeed: 1
+  tankRotSpeed: 250
   tankRotNoiseScale: 5
   tankRotNoiseSpeed: 0.5
-  tankRotSeed: 0
-  flipAngleThreshold: 20
+  turretRotSpeed: 35
+  inaccuracy: {x: 8, y: 35}
+  turretNoiseSpeed: 0.15
+  turretRangeX:
+  - -20
+  - 20
+  tankOrigin: {fileID: 5113858065110483005}
 --- !u!114 &714796969137908049
 MonoBehaviour:
   m_ObjectHideFlags: 0

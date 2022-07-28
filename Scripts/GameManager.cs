@@ -22,6 +22,8 @@ public class GameManager : MonoBehaviour
     DataManager dataSystem;
     BaseUIHandler baseUIHandler;
 
+    readonly int multiplayerSceneIndexEnd = 3;
+
     void Start()
     {
         Cursor.visible = true;
@@ -53,7 +55,7 @@ public class GameManager : MonoBehaviour
         loadingScene = false;
         string currentSceneName = SceneManager.GetActiveScene().name;
         int currentSceneIndex = SceneManager.GetActiveScene().buildIndex;
-        PhotonNetwork.OfflineMode = currentSceneIndex < 11;
+        PhotonNetwork.OfflineMode = currentSceneIndex > multiplayerSceneIndexEnd;
 
         switch (currentSceneName)
         {
@@ -97,7 +99,7 @@ public class GameManager : MonoBehaviour
                 Destroy(gameManager.gameObject);
                 break;
             default:
-                if (currentSceneIndex > 11)
+                if (currentSceneIndex <= multiplayerSceneIndexEnd)
                 {
                     gameManager.loadingScreen.gameObject.SetActive(false);
                     Time.timeScale = 1;

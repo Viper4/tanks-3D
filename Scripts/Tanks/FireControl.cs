@@ -9,11 +9,16 @@ public class FireControl : MonoBehaviour
     [SerializeField] PhotonView PV;
     [SerializeField] PlayerControl playerControl;
 
-    [SerializeField] Transform bullet;
-    [SerializeField] Transform shootEffect;
-    [SerializeField] Transform spawnPoint;
-
     [SerializeField] Transform barrel;
+
+    [SerializeField] Transform bullet;
+    [SerializeField] Transform spawnPoint;
+    [SerializeField] Transform shootEffect;
+
+    [SerializeField] float speed = 32;
+    [SerializeField] float explosionRadius = 0;
+    [SerializeField] int pierceLevel = 0;
+    [SerializeField] int ricochetLevel = 1;
 
     public int bulletLimit = 5;
     public int bulletsFired { get; set; } = 0;
@@ -52,6 +57,11 @@ public class FireControl : MonoBehaviour
                     BulletBehaviour bulletBehaviour = bulletClone.GetComponent<BulletBehaviour>();
                     bulletBehaviour.owner = transform;
                     bulletBehaviour.ownerPV = PV;
+                    bulletBehaviour.speed = speed;
+                    bulletBehaviour.explosionRadius = explosionRadius;
+                    bulletBehaviour.pierceLevel = pierceLevel;
+                    bulletBehaviour.ricochetLevel = ricochetLevel;
+                    bulletBehaviour.ResetVelocity();
 
                     if (transform.CompareTag("Player"))
                     {

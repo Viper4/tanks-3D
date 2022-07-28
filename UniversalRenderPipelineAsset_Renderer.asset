@@ -39,6 +39,45 @@ MonoBehaviour:
       restoreCamera: 1
       offset: {x: 0, y: 0, z: 0, w: 0}
       cameraFieldOfView: 60
+--- !u!114 &-4001502282404131102
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b3d386ba5cd94485973aee1479b272e, type: 3}
+  m_Name: Yellow Tank Hidden
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  settings:
+    passTag: Yellow Tank Hidden
+    Event: 300
+    filterSettings:
+      RenderQueueType: 0
+      LayerMask:
+        serializedVersion: 2
+        m_Bits: 16384
+      PassNames: []
+    overrideMaterial: {fileID: 2100000, guid: 46a5417c68783c34e8d9d5487f5b8993, type: 2}
+    overrideMaterialPassIndex: 0
+    overrideDepthState: 1
+    depthCompareFunction: 5
+    enableWrite: 0
+    stencilSettings:
+      overrideStencilState: 0
+      stencilReference: 0
+      stencilCompareFunction: 8
+      passOperation: 0
+      failOperation: 0
+      zFailOperation: 0
+    cameraSettings:
+      overrideCamera: 0
+      restoreCamera: 1
+      offset: {x: 0, y: 0, z: 0, w: 0}
+      cameraFieldOfView: 60
 --- !u!114 &-3791869279455481248
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -61,7 +100,7 @@ MonoBehaviour:
         serializedVersion: 2
         m_Bits: 8
       PassNames: []
-    overrideMaterial: {fileID: 2100000, guid: fa0cab6d31c888842a515f975422c16e, type: 2}
+    overrideMaterial: {fileID: 2100000, guid: 4bfc5b1031fceb448a860331ff0f27c1, type: 2}
     overrideMaterialPassIndex: 0
     overrideDepthState: 1
     depthCompareFunction: 5
@@ -88,17 +127,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6b3d386ba5cd94485973aee1479b272e, type: 3}
-  m_Name: TankVisible
+  m_Name: Tank Visible
   m_EditorClassIdentifier: 
   m_Active: 1
   settings:
-    passTag: TankVisible
+    passTag: Tank Visible
     Event: 300
     filterSettings:
       RenderQueueType: 0
       LayerMask:
         serializedVersion: 2
-        m_Bits: 64
+        m_Bits: 129216
       PassNames: []
     overrideMaterial: {fileID: 0}
     overrideMaterialPassIndex: 0
@@ -132,11 +171,17 @@ MonoBehaviour:
   debugShaders:
     debugReplacementPS: {fileID: 4800000, guid: cf852408f2e174538bcd9b7fda1c5ae7, type: 3}
   m_RendererFeatures:
-  - {fileID: 8375286052448810129}
-  - {fileID: -1749398730071828732}
   - {fileID: -3791869279455481248}
   - {fileID: -5619945639659899262}
-  m_RendererFeatureMap: 91b47e604afe3a7404978cab1fe3b8e760f25603fb9260cb82f6106b37f101b2
+  - {fileID: 8375286052448810129}
+  - {fileID: 1243224051852678398}
+  - {fileID: 8561528149233080396}
+  - {fileID: 8199533904146564313}
+  - {fileID: 8716675394768272972}
+  - {fileID: -4001502282404131102}
+  - {fileID: 1472263855911026509}
+  - {fileID: -1749398730071828732}
+  m_RendererFeatureMap: 60f25603fb9260cb82f6106b37f101b291b47e604afe3a74fe94e632b0d140114c988ba57da8d076d9846d90a498ca714cfe8caf16daf778e20e6301e0ce77c84d3f39332d886e1404978cab1fe3b8e7
   m_UseNativeRenderPass: 0
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}
@@ -173,6 +218,123 @@ MonoBehaviour:
   m_ClusteredRendering: 0
   m_TileSize: 32
   m_IntermediateTextureMode: 1
+--- !u!114 &1243224051852678398
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b3d386ba5cd94485973aee1479b272e, type: 3}
+  m_Name: Red Tank Hidden
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  settings:
+    passTag: Red Tank Hidden
+    Event: 300
+    filterSettings:
+      RenderQueueType: 0
+      LayerMask:
+        serializedVersion: 2
+        m_Bits: 32768
+      PassNames: []
+    overrideMaterial: {fileID: 2100000, guid: e372075f287c34246927cafae870bd7f, type: 2}
+    overrideMaterialPassIndex: 0
+    overrideDepthState: 1
+    depthCompareFunction: 5
+    enableWrite: 0
+    stencilSettings:
+      overrideStencilState: 0
+      stencilReference: 0
+      stencilCompareFunction: 8
+      passOperation: 0
+      failOperation: 0
+      zFailOperation: 0
+    cameraSettings:
+      overrideCamera: 0
+      restoreCamera: 1
+      offset: {x: 0, y: 0, z: 0, w: 0}
+      cameraFieldOfView: 64
+--- !u!114 &1472263855911026509
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b3d386ba5cd94485973aee1479b272e, type: 3}
+  m_Name: Green Tank Hidden
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  settings:
+    passTag: Green Tank Hidden
+    Event: 300
+    filterSettings:
+      RenderQueueType: 0
+      LayerMask:
+        serializedVersion: 2
+        m_Bits: 65536
+      PassNames: []
+    overrideMaterial: {fileID: 2100000, guid: 97c0dbaa1829bc546aa56e2968292e60, type: 2}
+    overrideMaterialPassIndex: 0
+    overrideDepthState: 1
+    depthCompareFunction: 5
+    enableWrite: 0
+    stencilSettings:
+      overrideStencilState: 0
+      stencilReference: 0
+      stencilCompareFunction: 8
+      passOperation: 0
+      failOperation: 0
+      zFailOperation: 0
+    cameraSettings:
+      overrideCamera: 0
+      restoreCamera: 1
+      offset: {x: 0, y: 0, z: 0, w: 0}
+      cameraFieldOfView: 60
+--- !u!114 &8199533904146564313
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b3d386ba5cd94485973aee1479b272e, type: 3}
+  m_Name: Grey Tank Hidden
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  settings:
+    passTag: Grey Tank Hidden
+    Event: 300
+    filterSettings:
+      RenderQueueType: 0
+      LayerMask:
+        serializedVersion: 2
+        m_Bits: 4096
+      PassNames: []
+    overrideMaterial: {fileID: 2100000, guid: 0e996722173b8014eb793efc6ac14c10, type: 2}
+    overrideMaterialPassIndex: 0
+    overrideDepthState: 1
+    depthCompareFunction: 5
+    enableWrite: 0
+    stencilSettings:
+      overrideStencilState: 0
+      stencilReference: 0
+      stencilCompareFunction: 8
+      passOperation: 0
+      failOperation: 0
+      zFailOperation: 0
+    cameraSettings:
+      overrideCamera: 0
+      restoreCamera: 1
+      offset: {x: 0, y: 0, z: 0, w: 0}
+      cameraFieldOfView: 60
 --- !u!114 &8375286052448810129
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -183,19 +345,97 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6b3d386ba5cd94485973aee1479b272e, type: 3}
-  m_Name: TankHidden
+  m_Name: Tank Hidden
   m_EditorClassIdentifier: 
   m_Active: 1
   settings:
-    passTag: TankHidden
+    passTag: Tank Hidden
     Event: 300
     filterSettings:
       RenderQueueType: 0
       LayerMask:
         serializedVersion: 2
-        m_Bits: 64
+        m_Bits: 192
       PassNames: []
     overrideMaterial: {fileID: 2100000, guid: 4bfc5b1031fceb448a860331ff0f27c1, type: 2}
+    overrideMaterialPassIndex: 0
+    overrideDepthState: 1
+    depthCompareFunction: 5
+    enableWrite: 1
+    stencilSettings:
+      overrideStencilState: 0
+      stencilReference: 0
+      stencilCompareFunction: 8
+      passOperation: 0
+      failOperation: 0
+      zFailOperation: 0
+    cameraSettings:
+      overrideCamera: 0
+      restoreCamera: 1
+      offset: {x: 0, y: 0, z: 0, w: 0}
+      cameraFieldOfView: 60
+--- !u!114 &8561528149233080396
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b3d386ba5cd94485973aee1479b272e, type: 3}
+  m_Name: Brown Tank Hidden
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  settings:
+    passTag: Brown Tank Hidden
+    Event: 300
+    filterSettings:
+      RenderQueueType: 0
+      LayerMask:
+        serializedVersion: 2
+        m_Bits: 2048
+      PassNames: []
+    overrideMaterial: {fileID: 2100000, guid: b19e038a37bc29949875ff7921868c51, type: 2}
+    overrideMaterialPassIndex: 0
+    overrideDepthState: 1
+    depthCompareFunction: 5
+    enableWrite: 0
+    stencilSettings:
+      overrideStencilState: 0
+      stencilReference: 0
+      stencilCompareFunction: 8
+      passOperation: 0
+      failOperation: 0
+      zFailOperation: 0
+    cameraSettings:
+      overrideCamera: 0
+      restoreCamera: 1
+      offset: {x: 0, y: 0, z: 0, w: 0}
+      cameraFieldOfView: 60
+--- !u!114 &8716675394768272972
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b3d386ba5cd94485973aee1479b272e, type: 3}
+  m_Name: Teal Tank Hidden
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  settings:
+    passTag: Teal Tank Hidden
+    Event: 300
+    filterSettings:
+      RenderQueueType: 0
+      LayerMask:
+        serializedVersion: 2
+        m_Bits: 8192
+      PassNames: []
+    overrideMaterial: {fileID: 2100000, guid: 56bff21944f8ecf419dd65e39c19cd77, type: 2}
     overrideMaterialPassIndex: 0
     overrideDepthState: 1
     depthCompareFunction: 5

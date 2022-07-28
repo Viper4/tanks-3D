@@ -73,7 +73,7 @@ public class SettingsUIHandler : MonoBehaviour
 
         foreach (ScriptableRendererFeature feature in forwardRenderer.rendererFeatures)
         {
-            if (feature.name == "TankHidden" || feature.name == "BulletHidden")
+            if (feature.name.Contains("Hidden"))
             {
                 feature.SetActive(toggle.isOn);
             }

@@ -6,15 +6,13 @@ using MyUnityAddons.Math;
 public class YellowBot : MonoBehaviour
 {
     TargetSelector targetSelector;
-    Quaternion rotToTarget;
+    Vector3 targetDir;
 
     BaseTankLogic baseTankLogic;
 
     Transform body;
     Transform turret;
     Transform barrel;
-    Quaternion turretAnchor;
-    Vector3 lastEulerAngles;
 
     [SerializeField] float maxShootAngle = 30;
     public float[] reactionTime = { 0.3f, 0.45f };
@@ -23,15 +21,6 @@ public class YellowBot : MonoBehaviour
     public float[] layDelay = { 0.3f, 0.6f };
 
     Rigidbody rb;
-
-    [SerializeField] bool randomizeSeed = true;
-
-    [SerializeField] Vector2 inaccuracy = new Vector2(8, 35);
-    [SerializeField] float turretRotSpeed = 35f;
-    [SerializeField] float turretNoiseSpeed = 0.15f;
-    [SerializeField] float turretRotSeed = 0;
-
-    [SerializeField] float[] turretRangeX = { -20, 20 };
 
     [SerializeField] float moveSpeed = 6f;
     [SerializeField] float avoidSpeed = 4f;
@@ -46,15 +35,15 @@ public class YellowBot : MonoBehaviour
 
     enum Mode
     {
-        Normal,
+        Move,
         Shoot,
         Avoid,
         Lay
     }
-    Mode mode = Mode.Normal;
+    Mode mode = Mode.Move;
 
     // Start is called before the first frame Update
-    void Awake()
+    void Start()
     {
         targetSelector = GetComponent<TargetSelector>();
 
@@ -63,15 +52,8 @@ public class YellowBot : MonoBehaviour
         body = transform.Find("Body");
         turret = transform.Find("Turret");
         barrel = transform.Find("Barrel");
-        turretAnchor = turret.rotation;
-        lastEulerAngles = body.eulerAngles;
 
         rb = GetComponent<Rigidbody>();
-
-        if (randomizeSeed)
-        {
-            turretRotSeed = Random.Range(-99.0f, 99.0f);
-        }
 
         fireControl = GetComponent<FireControl>();
         mineControl = GetComponent<MineControl>();
@@ -120,12 +102,12 @@ public class YellowBot : MonoBehaviour
                 }
                 else if (mode == Mode.Avoid)
                 {
-                    mode = Mode.Normal;
+                    mode = Mode.Move;
                 }
 
                 switch (mode)
                 {
-                    case Mode.Normal:
+                    case Mode.Move:
                         speed = moveSpeed;
 
                         baseTankLogic.noisyRotation = true;
@@ -147,24 +129,9 @@ public class YellowBot : MonoBehaviour
                 rb.velocity = velocity;
             }
 
-            // Inaccuracy to rotation with noise
-            float noiseX = inaccuracy.x * (Mathf.PerlinNoise(turretRotSeed + Time.time * turretNoiseSpeed, turretRotSeed + 1f + Time.time * turretNoiseSpeed) - 0.5f);
-            float noiseY = inaccuracy.y * (Mathf.PerlinNoise(turretRotSeed + 4f + Time.time * turretNoiseSpeed, turretRotSeed + 5f + Time.time * turretNoiseSpeed) - 0.5f);
-
-            // Correcting turret and barrel y rotation to not depend on the parent
-            turret.eulerAngles = new Vector3(turret.eulerAngles.x, turret.eulerAngles.y + lastEulerAngles.y - transform.eulerAngles.y, turret.eulerAngles.z);
-            barrel.eulerAngles = new Vector3(barrel.eulerAngles.x, barrel.eulerAngles.y + lastEulerAngles.y - transform.eulerAngles.y, barrel.eulerAngles.z);
-
             // Rotating turret and barrel towards target
-            Vector3 targetDir = targetSelector.currentTarget.position - turret.position;
-            rotToTarget = Quaternion.LookRotation(targetDir);
-            turret.rotation = barrel.rotation = turretAnchor = Quaternion.RotateTowards(turretAnchor, rotToTarget, Time.deltaTime * turretRotSpeed);
-
-            // Zeroing x and z eulers of turret and clamping barrel x euler
-            turret.localEulerAngles = new Vector3(0, turret.localEulerAngles.y + noiseY, 0);
-            barrel.localEulerAngles = new Vector3(CustomMath.ClampAngle(barrel.localEulerAngles.x + noiseX, turretRangeX[0], turretRangeX[1]), barrel.localEulerAngles.y + noiseY, 0);
-
-            lastEulerAngles = transform.eulerAngles;
+            targetDir = targetSelector.currentTarget.position - turret.position;
+            baseTankLogic.RotateTurretTo(targetDir);
         }
         else
         {
@@ -182,7 +149,7 @@ public class YellowBot : MonoBehaviour
                 desiredDir = transform.position - other.transform.position;
 
                 // Applying rotation
-                baseTankLogic.RotateToVector(desiredDir);
+                baseTankLogic.RotateTankToVector(desiredDir);
                 break;
         }
     }
@@ -190,7 +157,7 @@ public class YellowBot : MonoBehaviour
     IEnumerator Shoot()
     {
         // When angle between barrel and target is less than maxShootAngle, then stop and fire
-        float angle = Quaternion.Angle(barrel.rotation, rotToTarget);
+        float angle = Vector3.Angle(barrel.forward, targetDir);
         if (angle < maxShootAngle)
         {
             // Keeps moving until reaction time from seeing player is reached
@@ -200,7 +167,7 @@ public class YellowBot : MonoBehaviour
             yield return new WaitForSeconds(Random.Range(fireDelay[0], fireDelay[1]));
             StartCoroutine(GetComponent<FireControl>().Shoot());
 
-            mode = Mode.Normal;
+            mode = Mode.Move;
         }
         else
         {
@@ -219,7 +186,7 @@ public class YellowBot : MonoBehaviour
         rb.rotation = Quaternion.LookRotation(desiredDir);
         
         transform.position += transform.forward * 0.1f;
-        mode = Mode.Normal;
+        mode = Mode.Move;
         layingMine = false;
     }
 }

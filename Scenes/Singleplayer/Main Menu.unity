@@ -351,6 +351,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e896a6bda30957d47b22de51d519efd2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &488655923 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4357016146763665350, guid: 2bf0c03fa3cedc64aa8a74b11d329b0b, type: 3}
+  m_PrefabInstance: {fileID: 4697115687487449145}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &515383215
 GameObject:
   m_ObjectHideFlags: 0
@@ -992,6 +997,8 @@ MonoBehaviour:
   targetDstMinMaxFar: {x: 30, y: 50}
   targetDstMinMaxTank: {x: 0, y: 40}
   rotationSpeed: 5
+  mainMenuObject: {fileID: 488655923}
+  dataManager: {fileID: 1446979105}
 --- !u!114 &1310984681
 MonoBehaviour:
   m_ObjectHideFlags: 0

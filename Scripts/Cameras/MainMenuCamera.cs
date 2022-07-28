@@ -16,6 +16,9 @@ public class MainMenuCamera : MonoBehaviour
 
     [SerializeField] float rotationSpeed = 15;
 
+    [SerializeField] GameObject mainMenuObject;
+    [SerializeField] DataManager dataManager;
+
     // Update is called once per frame
     void Update()
     {
@@ -25,7 +28,7 @@ public class MainMenuCamera : MonoBehaviour
             targetIndex = -1;
             target = tankParent;
         }
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetKeyDown(dataManager.currentPlayerSettings.keyBinds["Shoot"]))
         {
             target.gameObject.SetActive(true);
             targetIndex++;
@@ -40,6 +43,10 @@ public class MainMenuCamera : MonoBehaviour
                 targetDstLimit = targetDstMinMaxTank;
                 target = tankParent.GetChild(targetIndex).Find("Barrel");
             }
+        }
+        else if (Input.GetKeyDown(dataManager.currentPlayerSettings.keyBinds["Toggle HUD"]))
+        {
+            mainMenuObject.SetActive(!mainMenuObject.activeSelf);
         }
 
         float zoomRate = Input.GetKey(KeyCode.LeftShift) ? 0.5f : 5f;

@@ -15,9 +15,9 @@ GameObject:
   - component: {fileID: 959751802619508799}
   - component: {fileID: 959751802619508796}
   - component: {fileID: 8710859505732709096}
-  - component: {fileID: 7393409019096572533}
   - component: {fileID: 2357316915114492385}
   - component: {fileID: 3473729789501092902}
+  - component: {fileID: -7317032773225158753}
   m_Layer: 3
   m_Name: Rocket Bullet
   m_TagString: Bullet
@@ -233,10 +233,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   explosionEffect: {fileID: 9094124410927380228, guid: 5a15cf448b5d8c5459a98c68c7b14e39, type: 3}
   sparkEffect: {fileID: 3372998996563099117, guid: 922fbac2d5dfb0c4689a4a5ae48ea9ca, type: 3}
-  speed: 32
-  explosionRadius: 0
-  pierceLevel: 0
-  ricochetLevel: 0
 --- !u!114 &8710859505732709096
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -251,19 +247,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   delay: 10
   multiplayer: 0
---- !u!65 &7393409019096572533
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 959751802619508784}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 0.18632075, y: 0.18632077, z: 0.35075852}
-  m_Center: {x: -0.000000022351742, y: -0.001978524, z: 0.072062865}
 --- !u!114 &2357316915114492385
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -402,6 +385,20 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!64 &-7317032773225158753
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 959751802619508784}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 4
+  m_Convex: 1
+  m_CookingOptions: 30
+  m_Mesh: {fileID: -5495902117074765545, guid: 1b40e3b513e31504896ed825a565b70f, type: 3}
 --- !u!1 &1089144005452706118
 GameObject:
   m_ObjectHideFlags: 0

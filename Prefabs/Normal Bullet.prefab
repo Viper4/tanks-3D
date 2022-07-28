@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 1040201166546546761}
   - component: {fileID: 3498191908644365997}
   - component: {fileID: -7978378026096755603}
-  - component: {fileID: 2296101630329394522}
+  - component: {fileID: 7615734855973624224}
   m_Layer: 3
   m_Name: Normal Bullet
   m_TagString: Bullet
@@ -229,10 +229,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   explosionEffect: {fileID: 7951521304590920985, guid: d3ed4892f26cb5d4db7422b5701e3c95, type: 3}
   sparkEffect: {fileID: 3372998996563099117, guid: 922fbac2d5dfb0c4689a4a5ae48ea9ca, type: 3}
-  speed: 15
-  explosionRadius: 0
-  pierceLevel: 0
-  ricochetLevel: 1
 --- !u!114 &-7978378026096755603
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -247,8 +243,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   delay: 15
   multiplayer: 0
---- !u!65 &2296101630329394522
-BoxCollider:
+--- !u!64 &7615734855973624224
+MeshCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -257,6 +253,7 @@ BoxCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 0.18632075, y: 0.18632077, z: 0.35075852}
-  m_Center: {x: -0.000000022351742, y: -0.001978524, z: 0.072062865}
+  serializedVersion: 4
+  m_Convex: 1
+  m_CookingOptions: 30
+  m_Mesh: {fileID: -5495902117074765545, guid: 1b40e3b513e31504896ed825a565b70f, type: 3}

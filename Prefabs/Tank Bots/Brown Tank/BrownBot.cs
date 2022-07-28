@@ -23,7 +23,7 @@ public class BrownBot : MonoBehaviour
     TargetSelector targetSelector;
 
     // Start is called before the first frame Update
-    void Awake()
+    void Start()
     {
         barrel = transform.Find("Barrel");
         turret = transform.Find("Turret");

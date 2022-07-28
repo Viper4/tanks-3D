@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6245761879246086811}
-  m_Layer: 7
+  m_Layer: 15
   m_Name: BulletSpawn
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -43,7 +43,7 @@ GameObject:
   - component: {fileID: 7900757832201618000}
   - component: {fileID: 2954374006970297389}
   - component: {fileID: 8052258414182839835}
-  m_Layer: 6
+  m_Layer: 15
   m_Name: Barrel
   m_TagString: Tank
   m_Icon: {fileID: 0}
@@ -141,13 +141,13 @@ GameObject:
   m_Component:
   - component: {fileID: 1807415214875140994}
   - component: {fileID: 1323752777862920510}
-  - component: {fileID: 2189044298125408581}
   - component: {fileID: 7128904291512063631}
+  - component: {fileID: 2189044298125408581}
   - component: {fileID: -3049139407162140918}
   - component: {fileID: 2824986948199448400}
   - component: {fileID: 5971857906689901440}
   - component: {fileID: 5315314118918684429}
-  m_Layer: 6
+  m_Layer: 15
   m_Name: Red Tank
   m_TagString: Tank
   m_Icon: {fileID: 0}
@@ -189,57 +189,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   PV: {fileID: 5315314118918684429}
   playerControl: {fileID: 0}
-  bullet: {fileID: 4307626717143694363, guid: de9dbd5b8f77ecb4a866f8d8cf75c17d, type: 3}
-  shootEffect: {fileID: 7891438045153574773, guid: 4d61908da1eaf274aa82edf86c9a5c95, type: 3}
-  spawnPoint: {fileID: 6245761879246086811}
   barrel: {fileID: 3184342306150245339}
+  bullet: {fileID: 4307626717143694363, guid: de9dbd5b8f77ecb4a866f8d8cf75c17d, type: 3}
+  spawnPoint: {fileID: 6245761879246086811}
+  shootEffect: {fileID: 7891438045153574773, guid: 4d61908da1eaf274aa82edf86c9a5c95, type: 3}
+  speed: 16
+  explosionRadius: 0
+  pierceLevel: 0
+  ricochetLevel: 1
   bulletLimit: 3
   fireCooldown: 0.2
   canFire: 1
   solidLayerMask:
     serializedVersion: 2
     m_Bits: 1
---- !u!114 &2189044298125408581
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1323752777862920504}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1b39add62465dcc4c958f9a167f94014, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  player: 0
-  playerControl: {fileID: 0}
-  tankOrigin: {fileID: 1807415214875140994}
-  explosionEffect: {fileID: 3507901705876011728, guid: 8d9ad67b12c764e4387b9e13b552aa70, type: 3}
-  deathMarker: {fileID: 1488974823688567530, guid: b6f86cc02a55019419155e7336e1ee70, type: 3}
-  pitchRange:
-  - -45
-  - 45
-  rollRange:
-  - -45
-  - 45
-  frozenRotation: 1
-  alignRotationSpeed: 20
-  nonSlopeLayers:
-    serializedVersion: 2
-    m_Bits: 2030
-  transparentLayers:
-    serializedVersion: 2
-    m_Bits: 1806
-  barrierLayers:
-    serializedVersion: 2
-    m_Bits: 705
-  tankRotSpeed: 300
-  noisyRotation: 1
-  randomizeSeed: 1
-  tankRotNoiseScale: 5
-  tankRotNoiseSpeed: 0.5
-  tankRotSeed: 0
-  flipAngleThreshold: 20
 --- !u!114 &7128904291512063631
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -263,6 +226,52 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 1838
   tankParent: {fileID: 0}
+--- !u!114 &2189044298125408581
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1323752777862920504}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1b39add62465dcc4c958f9a167f94014, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  player: 0
+  playerControl: {fileID: 0}
+  explosionEffect: {fileID: 3507901705876011728, guid: 8d9ad67b12c764e4387b9e13b552aa70, type: 3}
+  deathMarker: {fileID: 1488974823688567530, guid: b6f86cc02a55019419155e7336e1ee70, type: 3}
+  transparentLayers:
+    serializedVersion: 2
+    m_Bits: 1806
+  barrierLayers:
+    serializedVersion: 2
+    m_Bits: 64193
+  nonSlopeLayers:
+    serializedVersion: 2
+    m_Bits: 65518
+  slopeAlignment: 1
+  alignRotationSpeed: 20
+  flipAngleThreshold: 20
+  restrictRotation: 0
+  pitchRange:
+  - -45
+  - 45
+  rollRange:
+  - -45
+  - 45
+  noisyRotation: 1
+  tankRotSpeed: 300
+  tankRotNoiseScale: 5
+  tankRotNoiseSpeed: 0.5
+  turretRotSpeed: 60
+  inaccuracy: {x: 1, y: 35}
+  turretNoiseSpeed: 0.8
+  turretRangeX:
+  - -20
+  - 20
+  tankOrigin: {fileID: 1807415214875140994}
 --- !u!114 &-3049139407162140918
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -281,16 +290,8 @@ MonoBehaviour:
   fireDelay:
   - 0.08
   - 0.1
-  randomizeSeed: 1
-  inaccuracy: {x: 1, y: 35}
-  turretRotSpeed: 60
-  turretNoiseSpeed: 0.8
-  turretRotSeed: 0
   maxShootAngle: 4
-  turretRangeX:
-  - -20
-  - 20
-  maxTargetAngle: 120
+  maxTargetAngle: 100
   moveSpeed: 5
   avoidSpeed: 2.5
   gravity: 8
@@ -358,7 +359,7 @@ GameObject:
   - component: {fileID: 4479335834575884593}
   - component: {fileID: 2588347938300807338}
   - component: {fileID: 2774976682133096682}
-  m_Layer: 6
+  m_Layer: 15
   m_Name: Turret
   m_TagString: Tank
   m_Icon: {fileID: 0}
@@ -453,7 +454,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1346010612084230433}
   - component: {fileID: 7814099748817003604}
-  m_Layer: 7
+  m_Layer: 15
   m_Name: TrackMarks
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -504,7 +505,7 @@ GameObject:
   - component: {fileID: 5648454701361359755}
   - component: {fileID: 4409946070307468111}
   - component: {fileID: 7686117848075099159}
-  m_Layer: 6
+  m_Layer: 15
   m_Name: Body
   m_TagString: Tank
   m_Icon: {fileID: 0}
@@ -601,7 +602,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3121844128973764371}
   - component: {fileID: 717513263638271034}
-  m_Layer: 2
+  m_Layer: 15
   m_Name: Trail 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -733,7 +734,7 @@ GameObject:
   - component: {fileID: 5696180440495642285}
   - component: {fileID: 1558276047431803079}
   - component: {fileID: 3830193943978007854}
-  m_Layer: 7
+  m_Layer: 15
   m_Name: Engine Sounds
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -902,7 +903,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1944722495263930329}
   - component: {fileID: 1239526385186089834}
-  m_Layer: 2
+  m_Layer: 15
   m_Name: SphereCollider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -918,7 +919,7 @@ Transform:
   m_GameObject: {fileID: 5774077335112187644}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 3, y: 3, z: 3}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1807415214875140994}
@@ -935,7 +936,7 @@ SphereCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 5
+  m_Radius: 7
   m_Center: {x: 0, y: 0.8, z: 0}
 --- !u!1 &8720733653133506505
 GameObject:
@@ -947,7 +948,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8969140369936239948}
   - component: {fileID: 6577135804217082156}
-  m_Layer: 2
+  m_Layer: 15
   m_Name: Trail 2
   m_TagString: Untagged
   m_Icon: {fileID: 0}

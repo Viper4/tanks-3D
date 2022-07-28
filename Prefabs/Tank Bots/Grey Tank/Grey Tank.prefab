@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7823962715843024704}
   - component: {fileID: 3653878489445696383}
-  m_Layer: 2
+  m_Layer: 12
   m_Name: Trail 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -27,6 +27,7 @@ Transform:
   m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
   m_LocalPosition: {x: 0.75, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 4544845528916168414}
   m_RootOrder: 0
@@ -43,6 +44,7 @@ TrailRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 0
   m_LightProbeUsage: 0
   m_ReflectionProbeUsage: 0
@@ -139,7 +141,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4544845528916168414}
   - component: {fileID: 6759268206555763387}
-  m_Layer: 7
+  m_Layer: 12
   m_Name: TrackMarks
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -156,6 +158,7 @@ Transform:
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0.025, z: -0.5}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 7823962715843024704}
   - {fileID: 1582480441479279017}
@@ -186,7 +189,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8960685113855324647}
-  m_Layer: 7
+  m_Layer: 12
   m_Name: BulletSpawn
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -203,6 +206,7 @@ Transform:
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 1.8}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 690586443962760300}
   m_RootOrder: 0
@@ -219,7 +223,7 @@ GameObject:
   - component: {fileID: 5188528995214269927}
   - component: {fileID: 910977558777983898}
   - component: {fileID: 8295234825418006744}
-  m_Layer: 6
+  m_Layer: 12
   m_Name: Barrel
   m_TagString: Tank
   m_Icon: {fileID: 0}
@@ -236,6 +240,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 1.215, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 8960685113855324647}
   m_Father: {fileID: 4373347413315304501}
@@ -260,6 +265,7 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
@@ -317,7 +323,7 @@ GameObject:
   - component: {fileID: 7766225960865346620}
   - component: {fileID: 1771951314046201080}
   - component: {fileID: 4334421833343153969}
-  m_Layer: 6
+  m_Layer: 12
   m_Name: Body
   m_TagString: Tank
   m_Icon: {fileID: 0}
@@ -334,6 +340,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 4373347413315304501}
   m_RootOrder: 1
@@ -357,6 +364,7 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
@@ -414,7 +422,7 @@ GameObject:
   - component: {fileID: 1985444184858693254}
   - component: {fileID: 454813528273196829}
   - component: {fileID: 4836805935946046650}
-  m_Layer: 6
+  m_Layer: 12
   m_Name: Turret
   m_TagString: Tank
   m_Icon: {fileID: 0}
@@ -431,6 +439,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 1.215, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 4373347413315304501}
   m_RootOrder: 2
@@ -454,6 +463,7 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
@@ -507,13 +517,13 @@ GameObject:
   m_Component:
   - component: {fileID: 4373347413315304501}
   - component: {fileID: 4033695715270616713}
-  - component: {fileID: 4306979400757749490}
   - component: {fileID: 348678474553284728}
+  - component: {fileID: 4306979400757749490}
   - component: {fileID: 6089765290543581610}
   - component: {fileID: -1444549703756494348}
   - component: {fileID: 3746023654145071983}
   - component: {fileID: 2404285162009187128}
-  m_Layer: 6
+  m_Layer: 12
   m_Name: Grey Tank
   m_TagString: Tank
   m_Icon: {fileID: 0}
@@ -530,6 +540,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 690586443962760300}
   - {fileID: 211351361649562084}
@@ -553,57 +564,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   PV: {fileID: 2404285162009187128}
   playerControl: {fileID: 0}
-  bullet: {fileID: 4307626717143694363, guid: de9dbd5b8f77ecb4a866f8d8cf75c17d, type: 3}
-  shootEffect: {fileID: 7891438045153574773, guid: 4d61908da1eaf274aa82edf86c9a5c95, type: 3}
-  spawnPoint: {fileID: 8960685113855324647}
   barrel: {fileID: 690586443962760300}
+  bullet: {fileID: 4307626717143694363, guid: de9dbd5b8f77ecb4a866f8d8cf75c17d, type: 3}
+  spawnPoint: {fileID: 8960685113855324647}
+  shootEffect: {fileID: 7891438045153574773, guid: 4d61908da1eaf274aa82edf86c9a5c95, type: 3}
+  speed: 16
+  explosionRadius: 0
+  pierceLevel: 0
+  ricochetLevel: 1
   bulletLimit: 1
   fireCooldown: 4
   canFire: 1
   solidLayerMask:
     serializedVersion: 2
     m_Bits: 1
---- !u!114 &4306979400757749490
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4033695715270616719}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1b39add62465dcc4c958f9a167f94014, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  player: 0
-  playerControl: {fileID: 0}
-  tankOrigin: {fileID: 4373347413315304501}
-  explosionEffect: {fileID: 3507901705876011728, guid: 8d9ad67b12c764e4387b9e13b552aa70, type: 3}
-  deathMarker: {fileID: 1488974823688567530, guid: b6f86cc02a55019419155e7336e1ee70, type: 3}
-  pitchRange:
-  - -45
-  - 45
-  rollRange:
-  - -45
-  - 45
-  frozenRotation: 1
-  alignRotationSpeed: 20
-  nonSlopeLayers:
-    serializedVersion: 2
-    m_Bits: 2030
-  transparentLayers:
-    serializedVersion: 2
-    m_Bits: 1806
-  barrierLayers:
-    serializedVersion: 2
-    m_Bits: 705
-  tankRotSpeed: 300
-  noisyRotation: 1
-  randomizeSeed: 1
-  tankRotNoiseScale: 5
-  tankRotNoiseSpeed: 0.5
-  tankRotSeed: 0
-  flipAngleThreshold: 20
 --- !u!114 &348678474553284728
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -627,6 +601,52 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 1838
   tankParent: {fileID: 0}
+--- !u!114 &4306979400757749490
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4033695715270616719}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1b39add62465dcc4c958f9a167f94014, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  player: 0
+  playerControl: {fileID: 0}
+  explosionEffect: {fileID: 3507901705876011728, guid: 8d9ad67b12c764e4387b9e13b552aa70, type: 3}
+  deathMarker: {fileID: 1488974823688567530, guid: b6f86cc02a55019419155e7336e1ee70, type: 3}
+  transparentLayers:
+    serializedVersion: 2
+    m_Bits: 1806
+  barrierLayers:
+    serializedVersion: 2
+    m_Bits: 64193
+  nonSlopeLayers:
+    serializedVersion: 2
+    m_Bits: 65518
+  slopeAlignment: 1
+  alignRotationSpeed: 20
+  flipAngleThreshold: 20
+  restrictRotation: 0
+  pitchRange:
+  - -45
+  - 45
+  rollRange:
+  - -45
+  - 45
+  noisyRotation: 1
+  tankRotSpeed: 300
+  tankRotNoiseScale: 5
+  tankRotNoiseSpeed: 0.5
+  turretRotSpeed: 35
+  inaccuracy: {x: 5, y: 30}
+  turretNoiseSpeed: 0.15
+  turretRangeX:
+  - -20
+  - 20
+  tankOrigin: {fileID: 4373347413315304501}
 --- !u!114 &6089765290543581610
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -645,15 +665,7 @@ MonoBehaviour:
   fireDelay:
   - 0.3
   - 0.6
-  randomizeSeed: 1
-  inaccuracy: {x: 5, y: 30}
-  turretRotSpeed: 35
-  turretNoiseSpeed: 0.15
-  turretRotSeed: 0
   maxShootAngle: 15
-  turretRangeX:
-  - -20
-  - 20
   moveSpeed: 3
   avoidSpeed: 2
   gravity: 8
@@ -719,7 +731,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1582480441479279017}
   - component: {fileID: 2761500110392661377}
-  m_Layer: 2
+  m_Layer: 12
   m_Name: Trail 2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -736,6 +748,7 @@ Transform:
   m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
   m_LocalPosition: {x: -0.75, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 4544845528916168414}
   m_RootOrder: 1
@@ -752,6 +765,7 @@ TrailRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 0
   m_LightProbeUsage: 0
   m_ReflectionProbeUsage: 0
@@ -849,7 +863,7 @@ GameObject:
   - component: {fileID: 3089859120372640522}
   - component: {fileID: 5404360676059370152}
   - component: {fileID: 2290271307518673622}
-  m_Layer: 7
+  m_Layer: 12
   m_Name: Engine Sounds
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -866,6 +880,7 @@ Transform:
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 4373347413315304501}
   m_RootOrder: 4

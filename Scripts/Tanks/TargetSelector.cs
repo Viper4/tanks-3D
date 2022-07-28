@@ -10,10 +10,10 @@ public class TargetSelector : MonoBehaviour
 
     [SerializeField] bool predictTargetPos;
     [SerializeField] float predictionScale = 1;
-    [HideInInspector] public Vector3 predictedTargetPos;
+    public Vector3 predictedTargetPos { get; set; }
 
     [SerializeField] Transform turret;
-    [SerializeField] LayerMask ignoreLayerMask;
+    public LayerMask ignoreLayerMask;
     [SerializeField] Transform tankParent;
 
     private void Awake()
