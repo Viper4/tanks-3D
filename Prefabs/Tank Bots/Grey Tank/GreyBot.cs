@@ -5,7 +5,7 @@ using MyUnityAddons.Math;
 
 public class GreyBot : MonoBehaviour
 {
-    TargetSelector targetSelector;
+    TargetSystem targetSystem;
     Vector3 targetDir;
 
     BaseTankLogic baseTankLogic;
@@ -41,7 +41,7 @@ public class GreyBot : MonoBehaviour
     // Start is called before the first frame Update
     void Start()
     {
-        targetSelector = GetComponent<TargetSelector>();
+        targetSystem = GetComponent<TargetSystem>();
 
         baseTankLogic = GetComponent<BaseTankLogic>();
 
@@ -57,19 +57,11 @@ public class GreyBot : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!GameManager.frozen && Time.timeScale != 0 && targetSelector.currentTarget != null)
+        if (!GameManager.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null)
         {
-            if (fireControl.canFire && mode != Mode.Shoot && Physics.Raycast(turret.position, targetSelector.currentTarget.position - turret.position, out RaycastHit barrelHit, Mathf.Infinity, ~baseTankLogic.transparentLayers, QueryTriggerInteraction.Ignore))
+            if (fireControl.canFire && mode != Mode.Shoot && targetSystem.TargetVisible())
             {
-                // Ray hits the capsule collider which is on Tank Origin for player and the 2nd topmost transform for tank bots
-                if (barrelHit.transform.root.name == "Player" && targetSelector.currentTarget.root.name == "Player")
-                {
-                    StartCoroutine(Shoot());
-                }
-                else if (barrelHit.transform == targetSelector.currentTarget.parent || barrelHit.transform == targetSelector.currentTarget) // target for tank bots is the turret, otherwise the target is itself
-                {
-                    StartCoroutine(Shoot());
-                }
+                StartCoroutine(Shoot());
             }
 
             if (rb != null)
@@ -120,7 +112,7 @@ public class GreyBot : MonoBehaviour
             }
 
             // Rotating turret and barrel towards target
-            targetDir = targetSelector.currentTarget.position - turret.position;
+            targetDir = targetSystem.currentTarget.position - turret.position;
             baseTankLogic.RotateTurretTo(targetDir);
         }
         else

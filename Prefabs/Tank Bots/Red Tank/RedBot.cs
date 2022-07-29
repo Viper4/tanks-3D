@@ -5,7 +5,7 @@ using MyUnityAddons.Math;
 
 public class RedBot : MonoBehaviour
 {
-    TargetSelector targetSelector;
+    TargetSystem targetSystem;
     Vector3 targetDir;
 
     BaseTankLogic baseTankLogic;
@@ -46,7 +46,7 @@ public class RedBot : MonoBehaviour
     // Start is called before the first frame Update
     void Start()
     {
-        targetSelector = GetComponent<TargetSelector>();
+        targetSystem = GetComponent<TargetSystem>();
 
         baseTankLogic = GetComponent<BaseTankLogic>();
 
@@ -62,22 +62,14 @@ public class RedBot : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!GameManager.frozen && Time.timeScale != 0 && targetSelector.currentTarget != null)
+        if (!GameManager.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null)
         {
-            targetDir = targetSelector.currentTarget.position - turret.position;
+            targetDir = targetSystem.currentTarget.position - turret.position;
             angleToTarget = Vector3.Angle(transform.forward, targetDir);
 
-            if (fireControl.canFire && mode != Mode.Shoot && !shooting && Physics.Raycast(barrel.position, targetSelector.currentTarget.position - barrel.position, out RaycastHit barrelHit, Mathf.Infinity, ~baseTankLogic.transparentLayers, QueryTriggerInteraction.Ignore))
+            if (fireControl.canFire && mode != Mode.Shoot && !shooting && targetSystem.TargetVisible())
             {
-                // Ray hits the capsule collider which is on Tank Origin for player and the 2nd topmost transform for tank bots
-                if (barrelHit.transform.root.name == "Player" && targetSelector.currentTarget.root.name == "Player")
-                {
-                    StartCoroutine(Shoot());
-                }
-                else if (barrelHit.transform == targetSelector.currentTarget.parent || barrelHit.transform == targetSelector.currentTarget) // target for tank bots is the turret, everything else is its own transform
-                {
-                    StartCoroutine(Shoot());
-                }
+                StartCoroutine(Shoot());
             }
 
             if (rb != null)
@@ -107,9 +99,9 @@ public class RedBot : MonoBehaviour
                 {
                     case Mode.Move:
                         // Resetting currentTarget to primary and trying to move to target
-                        if (!GameManager.autoPlay && !targetSelector.findTarget && targetSelector.primaryTarget != null)
+                        if (!GameManager.autoPlay && !targetSystem.chooseTarget && targetSystem.primaryTarget != null)
                         {
-                            targetSelector.currentTarget = targetSelector.primaryTarget;
+                            targetSystem.currentTarget = targetSystem.primaryTarget;
                         }
                         // Only rotating towards target when target is getting behind this tank
                         if (angleToTarget > maxTargetAngle)
@@ -170,11 +162,11 @@ public class RedBot : MonoBehaviour
                     baseTankLogic.RotateTankToVector(desiredDir);
 
                     // Firing at bullets
-                    targetSelector.currentTarget = other.transform;
+                    targetSystem.currentTarget = other.transform;
                 }
                 break;
             case "Mine":
-                if (GameManager.autoPlay || targetSelector.findTarget)
+                if (GameManager.autoPlay || targetSystem.chooseTarget)
                 {
                     // Move in opposite direction of mine
                     desiredDir = transform.position - other.transform.position;
@@ -182,7 +174,7 @@ public class RedBot : MonoBehaviour
                     // Applying rotation
                     baseTankLogic.RotateTankToVector(desiredDir);
                 }
-                else if (other.GetComponent<MineBehaviour>().owner != targetSelector.primaryTarget.root)
+                else if (other.GetComponent<MineBehaviour>().owner != targetSystem.primaryTarget.root)
                 {
                     // Move in opposite direction of mine
                     desiredDir = transform.position - other.transform.position;

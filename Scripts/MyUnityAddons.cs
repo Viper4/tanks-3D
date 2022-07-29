@@ -221,6 +221,14 @@ namespace MyUnityAddons
                 return Mathf.Abs(a - b);
             }
 
+            public static float SqrDistance(Vector3 a, Vector3 b)
+            {
+                float xD = a.x - b.x;
+                float yD = a.y - b.y; // optional
+                float zD = a.z - b.z;
+                return xD * xD + yD * yD + zD * zD; // or xD*xD + zD*zD
+            }
+
             public static string FormattedTime(this float time)
             {
                 float minutes = Mathf.FloorToInt(time / 60);
@@ -251,6 +259,31 @@ namespace MyUnityAddons
                     }
                 }
                 return null;
+            }
+
+            public static Vector3 Round(this Vector3 vector3, int decimalPlaces = 1)
+            {
+                float multiplier = 1;
+                if (decimalPlaces < 0)
+                {
+                    for (int i = 0; i > decimalPlaces; i++)
+                    {
+                        multiplier /= 10;
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < decimalPlaces; i++)
+                    {
+                        multiplier *= 10;
+                    }
+                }
+
+                return new Vector3(
+                    Mathf.Round(vector3.x * multiplier) / multiplier,
+                    Mathf.Round(vector3.y * multiplier) / multiplier,
+                    Mathf.Round(vector3.z * multiplier) / multiplier
+                    );
             }
         }
     }

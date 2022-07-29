@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 1040201166546546761}
   - component: {fileID: 3498191908644365997}
   - component: {fileID: -7978378026096755603}
-  - component: {fileID: 7615734855973624224}
+  - component: {fileID: 322337249994657207}
   m_Layer: 3
   m_Name: Normal Bullet
   m_TagString: Bullet
@@ -243,8 +243,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   delay: 15
   multiplayer: 0
---- !u!64 &7615734855973624224
-MeshCollider:
+--- !u!65 &322337249994657207
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -253,7 +253,6 @@ MeshCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  serializedVersion: 4
-  m_Convex: 1
-  m_CookingOptions: 30
-  m_Mesh: {fileID: -5495902117074765545, guid: 1b40e3b513e31504896ed825a565b70f, type: 3}
+  serializedVersion: 2
+  m_Size: {x: 0.18632074, y: 0.18632075, z: 0.35075855}
+  m_Center: {x: 0.000000007450581, y: 0.00041275844, z: 0.0696716}

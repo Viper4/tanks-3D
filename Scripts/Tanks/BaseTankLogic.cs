@@ -13,7 +13,6 @@ public class BaseTankLogic : MonoBehaviour
     [SerializeField] private Transform deathMarker;
 
     [Header("Slope Settings")]
-    public LayerMask transparentLayers;
     public LayerMask barrierLayers;
     [SerializeField] private LayerMask nonSlopeLayers;
     [SerializeField] private bool slopeAlignment = true;

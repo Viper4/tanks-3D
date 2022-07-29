@@ -1,29 +1,29 @@
+using MyUnityAddons.Math;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TargetSelector : MonoBehaviour
+public class TargetSystem : MonoBehaviour
 {
     public Transform primaryTarget;
     public Transform currentTarget;
-    public bool findTarget = false;
+    public bool chooseTarget = false;
 
     [SerializeField] bool predictTargetPos;
     [SerializeField] float predictionScale = 1;
     public Vector3 predictedTargetPos { get; set; }
 
-    [SerializeField] Transform turret;
+    Transform turret;
+    Transform barrel;
     public LayerMask ignoreLayerMask;
     [SerializeField] Transform tankParent;
 
-    private void Awake()
+    private void Start()
     {
-        if (turret == null)
-        {
-            turret = transform.Find("Turret");
-        }
+        turret = transform.Find("Turret");
+        barrel = transform.Find("Barrel");
 
-        if (!findTarget && !GameManager.autoPlay)
+        if (!chooseTarget && !GameManager.autoPlay)
         {
             if (primaryTarget == null)
             {
@@ -45,7 +45,7 @@ public class TargetSelector : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (findTarget || GameManager.autoPlay)
+        if (chooseTarget || GameManager.autoPlay)
         {
             if (tankParent.childCount > 1)
             {
@@ -94,23 +94,30 @@ public class TargetSelector : MonoBehaviour
 
         if (predictTargetPos)
         {
-            Rigidbody targetRB;
-
-            if (currentTarget.CompareTag("Tank"))
+            if (currentTarget.parent.TryGetComponent(out Rigidbody targetRB))
             {
-                targetRB = currentTarget.parent.GetComponent<Rigidbody>();
-            }
-            else
-            {
-                targetRB = currentTarget.GetComponent<Rigidbody>();
-            }
-
-            if (targetRB != null)
-            {
-                predictedTargetPos = currentTarget.position + (currentTarget.forward + targetRB.velocity * predictionScale);
-                Debug.DrawLine(transform.position, predictedTargetPos, Color.blue, 0.1f);
+                predictedTargetPos = currentTarget.position + (targetRB.velocity * predictionScale);
+                Debug.DrawLine(turret.position, predictedTargetPos, Color.blue, 0.1f);
             }
         }
+    }
+
+    public bool TargetVisible()
+    {
+        if (Physics.Raycast(turret.position, currentTarget.position - turret.position, out RaycastHit hit, Mathf.Infinity, ~ignoreLayerMask))
+        {
+            return currentTarget.gameObject.layer == hit.transform.gameObject.layer;
+        }
+        return false;
+    }
+
+    public bool TargetInLineOfFire()
+    {
+        if (Physics.Raycast(barrel.position, barrel.forward, out RaycastHit barrelHit, Mathf.Infinity, ~ignoreLayerMask))
+        {
+            return barrelHit.transform.gameObject.layer == currentTarget.gameObject.layer;
+        }
+        return false;
     }
 
     Transform GetClosestTank(List<Transform> tanks)
@@ -121,7 +128,7 @@ public class TargetSelector : MonoBehaviour
         {
             if (tank != transform)
             {
-                float dstToTank = Vector3.Distance(tank.transform.position, transform.position);
+                float dstToTank = CustomMath.SqrDistance(tank.transform.position, transform.position);
 
                 if (dstToTank < closestTankDst)
                 {
@@ -141,7 +148,7 @@ public class TargetSelector : MonoBehaviour
         {
             if (tank != transform)
             {
-                float dstToTank = Vector3.Distance(tank.transform.position, transform.position);
+                float dstToTank = CustomMath.SqrDistance(tank.transform.position, transform.position);
 
                 if (dstToTank < closestTankDst)
                 {

@@ -4,8 +4,6 @@ using UnityEngine;
 
 public class BrownBot : MonoBehaviour
 {
-    BaseTankLogic baseTankLogic;
-
     Transform turret;
     Transform barrel;
 
@@ -20,7 +18,7 @@ public class BrownBot : MonoBehaviour
 
     bool shooting = false;
 
-    TargetSelector targetSelector;
+    TargetSystem targetSystem;
 
     // Start is called before the first frame Update
     void Start()
@@ -28,12 +26,10 @@ public class BrownBot : MonoBehaviour
         barrel = transform.Find("Barrel");
         turret = transform.Find("Turret");
 
-        if (GetComponent<TargetSelector>() != null)
+        if (GetComponent<TargetSystem>() != null)
         {
-            targetSelector = GetComponent<TargetSelector>();
+            targetSystem = GetComponent<TargetSystem>();
         }
-
-        baseTankLogic = GetComponent<BaseTankLogic>();
 
         StartCoroutine(ChangeScan());
     }
@@ -41,7 +37,7 @@ public class BrownBot : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!GameManager.frozen && Time.timeScale != 0 && targetSelector.currentTarget != null)
+        if (!GameManager.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null)
         {
             float angleX = Mathf.PingPong(Time.time * turretRotSpeed, turretScanRange.x * 2) - turretScanRange.x;
             float angleY = Mathf.PingPong(Time.time * turretRotSpeed, turretScanRange.y * 2) - turretScanRange.y;
@@ -52,17 +48,9 @@ public class BrownBot : MonoBehaviour
             barrel.localEulerAngles = new Vector3(angleX, currentScanOffset, 0);
 
             // If target is in front of barrel then fire
-            if (!shooting && Physics.Raycast(barrel.position + barrel.forward, barrel.forward, out RaycastHit barrelHit, Mathf.Infinity, ~baseTankLogic.transparentLayers, QueryTriggerInteraction.Ignore))
+            if (!shooting && targetSystem.TargetInLineOfFire())
             {
-                // Ray hits the capsule collider which is on Tank Origin for player and the 2nd topmost transform for tank bots
-                if (barrelHit.transform.root.name == "Player" && targetSelector.currentTarget.root.name == "Player")
-                {
-                    StartCoroutine(Shoot());
-                }
-                else if (barrelHit.transform == targetSelector.currentTarget.parent || barrelHit.transform == targetSelector.currentTarget) // target for tank bots is the turret, everything else is itself
-                {
-                    StartCoroutine(Shoot());
-                }
+                StartCoroutine(Shoot());
             }
         }
     }

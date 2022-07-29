@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 268702098409813898}
   m_Layer: 13
   m_Name: Engine Sounds
-  m_TagString: Untagged
+  m_TagString: Tank
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -182,7 +182,7 @@ GameObject:
   - component: {fileID: 7968080951278322270}
   m_Layer: 13
   m_Name: TrackMarks
-  m_TagString: Untagged
+  m_TagString: Tank
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -228,9 +228,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6901609897244754546}
-  m_Layer: 13
+  m_Layer: 2
   m_Name: BulletSpawn
-  m_TagString: Untagged
+  m_TagString: Tank
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -243,7 +243,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5994608288994695818}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 1.8}
+  m_LocalPosition: {x: 0, y: 0, z: 2}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -262,7 +262,7 @@ GameObject:
   - component: {fileID: 1696145314865933893}
   m_Layer: 13
   m_Name: Trail 2
-  m_TagString: Untagged
+  m_TagString: Tank
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -381,6 +381,51 @@ TrailRenderer:
   m_MinVertexDistance: 0.5
   m_Autodestruct: 0
   m_Emitting: 0
+--- !u!1 &6527502524458635480
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5732680672395322853}
+  - component: {fileID: 4064295119105246564}
+  m_Layer: 2
+  m_Name: Collider
+  m_TagString: Tank
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5732680672395322853
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6527502524458635480}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5714107077558805242}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &4064295119105246564
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6527502524458635480}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.4272948, y: 0.42200983, z: 1.0955627}
+  m_Center: {x: 0.0000053048134, y: -0.009514272, z: 1.1293906}
 --- !u!1 &7870586143288968191
 GameObject:
   m_ObjectHideFlags: 0
@@ -392,7 +437,6 @@ GameObject:
   - component: {fileID: 5714107077558805242}
   - component: {fileID: 1069808370206507889}
   - component: {fileID: 5367608962587421964}
-  - component: {fileID: 6616148046311543360}
   m_Layer: 13
   m_Name: Barrel
   m_TagString: Tank
@@ -413,6 +457,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6901609897244754546}
+  - {fileID: 5732680672395322853}
   m_Father: {fileID: 8820478986772652707}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -468,19 +513,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &6616148046311543360
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7870586143288968191}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 0.4272948, y: 0.42200983, z: 1.0955627}
-  m_Center: {x: 0.0000053048134, y: -0.009514272, z: 1.1293906}
 --- !u!1 &8130967180433581838
 GameObject:
   m_ObjectHideFlags: 0
@@ -803,7 +835,7 @@ GameObject:
   - component: {fileID: 56362698741418096}
   m_Layer: 13
   m_Name: Trail 1
-  m_TagString: Untagged
+  m_TagString: Tank
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

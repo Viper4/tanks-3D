@@ -24,6 +24,8 @@ public class BulletBehaviour : MonoBehaviour
     public int ricochetLevel { get; set; } = 1;
     int bounces = 0;
 
+    bool removedSelf = false;
+
     // Start is called before the first frame Update
     void Start()
     {
@@ -66,6 +68,10 @@ public class BulletBehaviour : MonoBehaviour
             {
                 case "Tank":
                     KillTarget(other.transform, true);
+                    break;
+                case "Player":
+                    Transform otherPlayer = other.transform.parent.parent;
+                    KillTarget(otherPlayer, !(owner.name.Contains("Team") && owner.name == otherPlayer.name));
                     break;
                 case "Destructable":
                     // If can pierce, destroy the hit object, otherwise bounce off
@@ -188,14 +194,19 @@ public class BulletBehaviour : MonoBehaviour
         NormalDestroy();
     }
 
-    void NormalDestroy()
+    void SubtractBulletsFired()
     {
         // Keeping track of how many bullets a tank has fired
-        if (owner != null)
+        if (!removedSelf && owner != null)
         {
-            owner.GetComponent<FireControl>().bulletsFired -= 1;
+            owner.GetComponent<FireControl>().bulletsFired--;
+            removedSelf = true;
         }
+    }
 
+    void NormalDestroy()
+    {
+        SubtractBulletsFired();
         // Same explosion system as mines
         if (explosionRadius > 0)
         {
@@ -273,11 +284,7 @@ public class BulletBehaviour : MonoBehaviour
 
     public void SafeDestroy()
     {
-        // Keeping track of how many bullets a tank has fired
-        if (owner != null)
-        {
-            owner.GetComponent<FireControl>().bulletsFired -= 1;
-        }
+        SubtractBulletsFired();
 
         Destroy(gameObject);
     }

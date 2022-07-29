@@ -9,9 +9,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7687003468503951504}
-  m_Layer: 14
+  m_Layer: 2
   m_Name: BulletSpawn
-  m_TagString: Untagged
+  m_TagString: Tank
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -24,7 +24,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 395400776923881256}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 1.8}
+  m_LocalPosition: {x: 0, y: 0, z: 2}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -44,7 +44,7 @@ GameObject:
   - component: {fileID: 3144664368079777017}
   m_Layer: 14
   m_Name: Engine Sounds
-  m_TagString: Untagged
+  m_TagString: Tank
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -213,7 +213,7 @@ GameObject:
   - component: {fileID: 568472612749813356}
   m_Layer: 14
   m_Name: Trail 2
-  m_TagString: Untagged
+  m_TagString: Tank
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -332,6 +332,51 @@ TrailRenderer:
   m_MinVertexDistance: 0.5
   m_Autodestruct: 0
   m_Emitting: 0
+--- !u!1 &3197845213310617174
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8934714000304819513}
+  - component: {fileID: 2999319275689163054}
+  m_Layer: 2
+  m_Name: Collider
+  m_TagString: Tank
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8934714000304819513
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3197845213310617174}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: -0.004999995, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8112177591830709403}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &2999319275689163054
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3197845213310617174}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.4272948, y: 0.42200983, z: 1.0955627}
+  m_Center: {x: 0.0000053048134, y: -0.009514272, z: 1.1293906}
 --- !u!1 &5275660209609865726
 GameObject:
   m_ObjectHideFlags: 0
@@ -344,7 +389,7 @@ GameObject:
   - component: {fileID: 3518563296054969108}
   m_Layer: 14
   m_Name: TrackMarks
-  m_TagString: Untagged
+  m_TagString: Tank
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -588,7 +633,6 @@ MonoBehaviour:
   findTarget: 0
   predictTargetPos: 0
   predictionScale: 1
-  predictedTargetPos: {x: 0, y: 0, z: 0}
   turret: {fileID: 3173648016111815766}
   ignoreLayerMask:
     serializedVersion: 2
@@ -825,7 +869,6 @@ GameObject:
   - component: {fileID: 8112177591830709403}
   - component: {fileID: 3530841476254803216}
   - component: {fileID: 8477247291344669549}
-  - component: {fileID: 3682377294164644187}
   m_Layer: 14
   m_Name: Barrel
   m_TagString: Tank
@@ -846,6 +889,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 7687003468503951504}
+  - {fileID: 8934714000304819513}
   m_Father: {fileID: 5021525065886696642}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -901,19 +945,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &3682377294164644187
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5972152382801175966}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 0.4272948, y: 0.42200983, z: 1.0955627}
-  m_Center: {x: 0.0000053048134, y: -0.009514272, z: 1.1293906}
 --- !u!1 &7024084707242572408
 GameObject:
   m_ObjectHideFlags: 0
@@ -971,7 +1002,7 @@ GameObject:
   - component: {fileID: 6147464609565193082}
   m_Layer: 14
   m_Name: Trail 1
-  m_TagString: Untagged
+  m_TagString: Tank
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

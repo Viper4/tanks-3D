@@ -234,7 +234,7 @@ GameObject:
   - component: {fileID: 7289095412322223194}
   m_Layer: 2
   m_Name: Trail 2
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -682,7 +682,7 @@ GameObject:
   - component: {fileID: 4282557674429733190}
   m_Layer: 7
   m_Name: Tank Origin
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1215,7 +1215,7 @@ GameObject:
   - component: {fileID: 3753825058920506144}
   m_Layer: 2
   m_Name: Trail 1
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1693,7 +1693,6 @@ GameObject:
   - component: {fileID: 7434512807079599132}
   - component: {fileID: 2790152685050166679}
   - component: {fileID: 7070009262639649770}
-  - component: {fileID: 8581870531182829205}
   m_Layer: 7
   m_Name: Barrel
   m_TagString: Player
@@ -1714,6 +1713,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 5070647258124889183}
+  - {fileID: 6211310194213898582}
   m_Father: {fileID: 5113858065110483005}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -1769,19 +1769,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &8581870531182829205
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4997258887544159513}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 0.4272948, y: 0.42200983, z: 1.0955627}
-  m_Center: {x: 0.0000053048134, y: -0.009514272, z: 1.1293906}
 --- !u!1 &5113615995362290542
 GameObject:
   m_ObjectHideFlags: 0
@@ -2042,7 +2029,7 @@ GameObject:
   - component: {fileID: 2947148916795075784}
   m_Layer: 7
   m_Name: TrackMarks
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -2090,7 +2077,7 @@ GameObject:
   - component: {fileID: 6161557077281983732}
   m_Layer: 7
   m_Name: Camera Target
-  m_TagString: Tank
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -2566,9 +2553,6 @@ MonoBehaviour:
   playerControl: {fileID: 6432079618835187448}
   explosionEffect: {fileID: 3507901705876011728, guid: 8d9ad67b12c764e4387b9e13b552aa70, type: 3}
   deathMarker: {fileID: 4070220823033511741, guid: f0cc2cf5ee9d8734f83a01e8b6694bf1, type: 3}
-  transparentLayers:
-    serializedVersion: 2
-    m_Bits: 1806
   barrierLayers:
     serializedVersion: 2
     m_Bits: 64193
@@ -2660,9 +2644,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5070647258124889183}
-  m_Layer: 7
+  m_Layer: 2
   m_Name: BulletSpawn
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -2675,13 +2659,58 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6597881472347150753}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 1.8}
+  m_LocalPosition: {x: 0, y: 0, z: 2}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 7434512807079599132}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &6628178206374322897
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6211310194213898582}
+  - component: {fileID: 5188613411035656275}
+  m_Layer: 2
+  m_Name: Collider
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6211310194213898582
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6628178206374322897}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7434512807079599132}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &5188613411035656275
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6628178206374322897}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.4272948, y: 0.42200983, z: 1.0955627}
+  m_Center: {x: 0.0000053048134, y: -0.009514272, z: 1.1293906}
 --- !u!1 &6635765075803471329
 GameObject:
   m_ObjectHideFlags: 0
@@ -3665,7 +3694,7 @@ GameObject:
   - component: {fileID: 2964430190728926029}
   m_Layer: 7
   m_Name: Engine Sounds
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

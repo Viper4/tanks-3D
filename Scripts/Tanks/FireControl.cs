@@ -33,14 +33,14 @@ public class FireControl : MonoBehaviour
         {
             canFire = false;
 
-            if (transform.CompareTag("Player"))
-            {
-                playerControl.myData.currentPlayerData.shots++;
-            }
-
             // Checking if the clone spot is not blocked
             if (!Physics.CheckBox(spawnPoint.position, bullet.GetComponent<Collider>().bounds.size, spawnPoint.rotation, solidLayerMask))
             {
+                if (transform.CompareTag("Player"))
+                {
+                    playerControl.myData.currentPlayerData.shots++;
+                }
+
                 bulletsFired++;
 
                 Transform bulletClone = InstantiateBullet(spawnPoint.position, spawnPoint.rotation);
@@ -51,7 +51,7 @@ public class FireControl : MonoBehaviour
                 }
                 
                 yield return new WaitWhile(() => bulletClone.GetComponent<BulletBehaviour>() == null);
-
+                
                 if (bulletClone != null)
                 {
                     BulletBehaviour bulletBehaviour = bulletClone.GetComponent<BulletBehaviour>();
@@ -81,8 +81,6 @@ public class FireControl : MonoBehaviour
                 canFire = true;
                 yield return null;
             }
-
-            bulletsFired = Mathf.Clamp(bulletsFired, 0, bulletLimit);
         }
     }
 
