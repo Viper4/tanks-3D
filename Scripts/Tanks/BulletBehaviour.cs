@@ -47,14 +47,11 @@ public class BulletBehaviour : MonoBehaviour
             switch (other.tag)
             {
                 case "Tank":
-                    if (other.transform.parent.name != "Tanks")
-                    {
-                        KillTarget(other.transform.parent, true);
-                    }
+                    KillTarget(other.transform.parent);
                     break;
                 case "Player":
-                    Transform otherPlayer = other.transform.parent.parent;
-                    KillTarget(otherPlayer, !(owner.name.Contains("Team") && owner.name == otherPlayer.name));
+                    Transform otherPlayer = other.transform.root.Find("Tank Origin");
+                    KillTarget(otherPlayer);
                     break;
             }
         }
@@ -67,11 +64,11 @@ public class BulletBehaviour : MonoBehaviour
             switch (other.transform.tag)
             {
                 case "Tank":
-                    KillTarget(other.transform, true);
+                    KillTarget(other.transform);
                     break;
                 case "Player":
-                    Transform otherPlayer = other.transform.parent.parent;
-                    KillTarget(otherPlayer, !(owner.name.Contains("Team") && owner.name == otherPlayer.name));
+                    Transform otherPlayer = other.transform.root.Find("Tank Origin");
+                    KillTarget(otherPlayer);
                     break;
                 case "Destructable":
                     // If can pierce, destroy the hit object, otherwise bounce off
@@ -111,20 +108,42 @@ public class BulletBehaviour : MonoBehaviour
             }
         }
     }
-    
-    void IncreaseKills()
+
+    void MultiplayerAddKills()
     {
-        if (owner != null && owner.CompareTag("Player"))
+        dataSystem.currentPlayerData.kills++;
+
+        PhotonHashtable playerProperties = PhotonNetwork.LocalPlayer.CustomProperties;
+        playerProperties["Kills"] = dataSystem.currentPlayerData.kills;
+        PhotonNetwork.LocalPlayer.SetCustomProperties(playerProperties);
+    }
+    
+    void IncreaseKills(Transform other)
+    {
+        if (owner != null && owner.CompareTag("Player") && owner != other)
         {
             if (!PhotonNetwork.OfflineMode)
             {
                 if (ownerPV != null && ownerPV.IsMine)
                 {
-                    dataSystem.currentPlayerData.kills++;
-
-                    PhotonHashtable playerProperties = PhotonNetwork.LocalPlayer.CustomProperties;
-                    playerProperties["Kills"] = dataSystem.currentPlayerData.kills;
-                    PhotonNetwork.LocalPlayer.SetCustomProperties(playerProperties);
+                    if (other.CompareTag("Tank"))
+                    {
+                        MultiplayerAddKills();
+                    }
+                    else if (other.CompareTag("Player"))
+                    {
+                        if (other.name.Contains("Team"))
+                        {
+                            if (other.name != owner.name)
+                            {
+                                MultiplayerAddKills();
+                            }
+                        }
+                        else
+                        {
+                            MultiplayerAddKills();
+                        }
+                    }
                 }
             }
             else
@@ -162,7 +181,7 @@ public class BulletBehaviour : MonoBehaviour
         rb.velocity = transform.forward * speed;
     }
 
-    void KillTarget(Transform target, bool increaseKills)
+    void KillTarget(Transform target)
     {
         if (transform.name != "Rocket Bullet" && target != null)
         {
@@ -171,18 +190,13 @@ public class BulletBehaviour : MonoBehaviour
                 if (ownerPV != null && ownerPV.IsMine)
                 {
                     target.GetComponent<PhotonView>().RPC("ExplodeTank", RpcTarget.All);
-                    if (target != owner && increaseKills)
-                    {
-                        IncreaseKills();
-                    }
+                    IncreaseKills(target);
                 }
             }
             else
             {
-                if (target != owner && increaseKills)
-                {
-                    IncreaseKills();
-                }
+                IncreaseKills(target);
+                
                 BaseTankLogic baseTankLogic = target.GetComponent<BaseTankLogic>();
                 if (baseTankLogic != null)
                 {
@@ -226,13 +240,13 @@ public class BulletBehaviour : MonoBehaviour
                                 if (ownerPV.IsMine)
                                 {
                                     collider.transform.parent.GetComponent<PhotonView>().RPC("ExplodeTank", RpcTarget.All);
-                                    IncreaseKills();
+                                    IncreaseKills(collider.transform.parent);
                                 }
                             }
                             else
                             {
                                 collider.transform.parent.GetComponent<BaseTankLogic>().ExplodeTank();
-                                IncreaseKills();
+                                IncreaseKills(collider.transform.parent);
                             }
                         }
                         break;
@@ -245,10 +259,7 @@ public class BulletBehaviour : MonoBehaviour
                                 if (ownerPV.IsMine)
                                 {
                                     collider.transform.parent.parent.GetComponent<PhotonView>().RPC("ExplodeTank", RpcTarget.All);
-                                    if (owner != collider.transform.parent.parent && !(owner.name.Contains("Team") && owner.name == collider.transform.parent.parent.name))
-                                    {
-                                        IncreaseKills();
-                                    }
+                                    IncreaseKills(collider.transform.root.Find("Tank Origin"));
                                 }
                             }
                             else

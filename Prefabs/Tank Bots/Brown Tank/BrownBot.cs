@@ -7,8 +7,6 @@ public class BrownBot : MonoBehaviour
     Transform turret;
     Transform barrel;
 
-    public float[] fireDelay = { 1, 3 };
-
     [SerializeField] float turretRotSpeed = 20;
 
     [SerializeField] Vector2 turretScanRange = new Vector2(8, 45);
@@ -50,19 +48,9 @@ public class BrownBot : MonoBehaviour
             // If target is in front of barrel then fire
             if (!shooting && targetSystem.TargetInLineOfFire())
             {
-                StartCoroutine(Shoot());
+                StartCoroutine(GetComponent<FireControl>().Shoot());
             }
         }
-    }
-
-    IEnumerator Shoot()
-    {
-        shooting = true;
-
-        yield return new WaitForSeconds(Random.Range(fireDelay[0], fireDelay[1]));
-        StartCoroutine(GetComponent<FireControl>().Shoot());
-
-        shooting = false;
     }
     
     IEnumerator ChangeScan()

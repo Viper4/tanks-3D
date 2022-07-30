@@ -14,8 +14,7 @@ public class RedBot : MonoBehaviour
     Transform turret;
     Transform barrel;
 
-    public float[] reactionTime = { 0.28f, 0.425f };
-    public float[] fireDelay = { 0.2f, 0.45f };
+    public float[] fireDelay = { 0.28f, 0.425f };
 
     Rigidbody rb;
 
@@ -67,7 +66,7 @@ public class RedBot : MonoBehaviour
             targetDir = targetSystem.currentTarget.position - turret.position;
             angleToTarget = Vector3.Angle(transform.forward, targetDir);
 
-            if (fireControl.canFire && mode != Mode.Shoot && !shooting && targetSystem.TargetVisible())
+            if (fireControl.canFire && fireControl.bulletsFired < fireControl.bulletLimit && mode != Mode.Shoot && !shooting && targetSystem.TargetVisible())
             {
                 StartCoroutine(Shoot());
             }
@@ -194,16 +193,13 @@ public class RedBot : MonoBehaviour
         {
             shooting = true;
 
-            // Keeps moving until reaction time from seeing player is reached
-            yield return new WaitForSeconds(Random.Range(reactionTime[0], reactionTime[1]));
-
             // Stops moving and delay in firing
             mode = Mode.Shoot;
             yield return new WaitForSeconds(Random.Range(fireDelay[0], fireDelay[1]));
             StartCoroutine(GetComponent<FireControl>().Shoot());
-
-            mode = Mode.Move;
-            shooting = false;
         }
+
+        mode = Mode.Move;
+        shooting = false;
     }
 }

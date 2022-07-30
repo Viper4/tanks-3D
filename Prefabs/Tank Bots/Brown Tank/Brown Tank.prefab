@@ -462,7 +462,9 @@ MonoBehaviour:
   pierceLevel: 0
   ricochetLevel: 1
   bulletLimit: 1
-  fireCooldown: 10
+  fireCooldown:
+  - 4
+  - 8
   canFire: 1
   solidLayerMask:
     serializedVersion: 2
@@ -479,9 +481,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6556f800d65fe5f4696688a3b2aa91c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  fireDelay:
-  - 1
-  - 3
   turretRotSpeed: 20
   turretScanRange: {x: 8, y: 45}
   scanChangeDelay:
@@ -503,9 +502,6 @@ MonoBehaviour:
   playerControl: {fileID: 0}
   explosionEffect: {fileID: 3507901705876011728, guid: 8d9ad67b12c764e4387b9e13b552aa70, type: 3}
   deathMarker: {fileID: 1488974823688567530, guid: b6f86cc02a55019419155e7336e1ee70, type: 3}
-  transparentLayers:
-    serializedVersion: 2
-    m_Bits: 1806
   barrierLayers:
     serializedVersion: 2
     m_Bits: 64193
@@ -547,10 +543,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   primaryTarget: {fileID: 0}
   currentTarget: {fileID: 0}
-  findTarget: 0
+  chooseTarget: 0
   predictTargetPos: 0
   predictionScale: 0
-  turret: {fileID: 4241553243334317245}
   ignoreLayerMask:
     serializedVersion: 2
     m_Bits: 1838
@@ -830,7 +825,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6193247515519740014}
   - component: {fileID: 2225061462500333763}
-  m_Layer: 2
+  m_Layer: 11
   m_Name: Collider
   m_TagString: Tank
   m_Icon: {fileID: 0}

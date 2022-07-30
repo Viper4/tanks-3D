@@ -17,7 +17,7 @@ GameObject:
   - component: {fileID: 8710859505732709096}
   - component: {fileID: 2357316915114492385}
   - component: {fileID: 3473729789501092902}
-  - component: {fileID: 447179035243486172}
+  - component: {fileID: 1881009222403047775}
   m_Layer: 3
   m_Name: Rocket Bullet
   m_TagString: Bullet
@@ -218,7 +218,7 @@ Rigidbody:
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 112
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
 --- !u!114 &959751802619508796
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -385,8 +385,8 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
---- !u!65 &447179035243486172
-BoxCollider:
+--- !u!64 &1881009222403047775
+MeshCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -395,9 +395,10 @@ BoxCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 0.18632074, y: 0.18632075, z: 0.35075855}
-  m_Center: {x: 0.000000007450581, y: 0.00041275844, z: 0.0696716}
+  serializedVersion: 4
+  m_Convex: 1
+  m_CookingOptions: 30
+  m_Mesh: {fileID: -5495902117074765545, guid: 1b40e3b513e31504896ed825a565b70f, type: 3}
 --- !u!1 &1089144005452706118
 GameObject:
   m_ObjectHideFlags: 0

@@ -391,7 +391,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5732680672395322853}
   - component: {fileID: 4064295119105246564}
-  m_Layer: 2
+  m_Layer: 13
   m_Name: Collider
   m_TagString: Tank
   m_Icon: {fileID: 0}
@@ -421,7 +421,7 @@ BoxCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6527502524458635480}
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
   m_Size: {x: 0.4272948, y: 0.42200983, z: 1.0955627}
@@ -677,7 +677,9 @@ MonoBehaviour:
   pierceLevel: 0
   ricochetLevel: 0
   bulletLimit: 1
-  fireCooldown: 4
+  fireCooldown:
+  - 3
+  - 4
   canFire: 1
   solidLayerMask:
     serializedVersion: 2
@@ -696,10 +698,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   primaryTarget: {fileID: 0}
   currentTarget: {fileID: 0}
-  findTarget: 0
+  chooseTarget: 0
   predictTargetPos: 0
   predictionScale: 1
-  turret: {fileID: 1428688472867334711}
   ignoreLayerMask:
     serializedVersion: 2
     m_Bits: 1838
@@ -720,9 +721,6 @@ MonoBehaviour:
   playerControl: {fileID: 0}
   explosionEffect: {fileID: 3507901705876011728, guid: 8d9ad67b12c764e4387b9e13b552aa70, type: 3}
   deathMarker: {fileID: 1488974823688567530, guid: b6f86cc02a55019419155e7336e1ee70, type: 3}
-  transparentLayers:
-    serializedVersion: 2
-    m_Bits: 1806
   barrierLayers:
     serializedVersion: 2
     m_Bits: 64193
@@ -762,9 +760,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c7dbdec69b05c094db6f48db62ed0b8d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  reactionTime:
-  - 0.3
-  - 0.45
   fireDelay:
   - 0.15
   - 0.3
@@ -1063,7 +1058,7 @@ GameObject:
   m_Component:
   - component: {fileID: 75953750476611346}
   - component: {fileID: 3233757360078005319}
-  m_Layer: 13
+  m_Layer: 2
   m_Name: SphereCollider
   m_TagString: Untagged
   m_Icon: {fileID: 0}

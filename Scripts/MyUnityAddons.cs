@@ -313,11 +313,23 @@ namespace MyUnityAddons
                 }
             }
 
-            public static PhotonView PhotonViewInScene(this Player player)
+            public static PhotonView FindPhotonView(this Player player)
             {
                 try
                 {
                     return PhotonView.Find((int)player.CustomProperties["ViewID"]);
+                }
+                catch
+                {
+                    return null;
+                }
+            }
+
+            public static Player GetPlayer(this PhotonView PV)
+            {
+                try
+                {
+                    return PhotonNetwork.PlayerList.Where((x) => PV.ViewID == (int)x.CustomProperties["ViewID"]).FirstOrDefault();
                 }
                 catch
                 {

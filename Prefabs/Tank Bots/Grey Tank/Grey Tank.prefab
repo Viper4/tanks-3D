@@ -560,7 +560,9 @@ MonoBehaviour:
   pierceLevel: 0
   ricochetLevel: 1
   bulletLimit: 1
-  fireCooldown: 4
+  fireCooldown:
+  - 2
+  - 4
   canFire: 1
   solidLayerMask:
     serializedVersion: 2
@@ -579,10 +581,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   primaryTarget: {fileID: 0}
   currentTarget: {fileID: 0}
-  findTarget: 0
+  chooseTarget: 0
   predictTargetPos: 0
   predictionScale: 1
-  turret: {fileID: 6127809415104591009}
   ignoreLayerMask:
     serializedVersion: 2
     m_Bits: 1838
@@ -603,9 +604,6 @@ MonoBehaviour:
   playerControl: {fileID: 0}
   explosionEffect: {fileID: 3507901705876011728, guid: 8d9ad67b12c764e4387b9e13b552aa70, type: 3}
   deathMarker: {fileID: 1488974823688567530, guid: b6f86cc02a55019419155e7336e1ee70, type: 3}
-  transparentLayers:
-    serializedVersion: 2
-    m_Bits: 1806
   barrierLayers:
     serializedVersion: 2
     m_Bits: 64193

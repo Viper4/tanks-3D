@@ -4057,7 +4057,9 @@ MonoBehaviour:
   pierceLevel: 0
   ricochetLevel: 1
   bulletLimit: 5
-  fireCooldown: 0.1
+  fireCooldown:
+  - 0.1
+  - 0.1
   canFire: 1
   solidLayerMask:
     serializedVersion: 2
@@ -11277,9 +11279,9 @@ GameObject:
   m_Component:
   - component: {fileID: 1429874211104828709}
   - component: {fileID: 4422025940568380939}
-  m_Layer: 2
+  m_Layer: 7
   m_Name: Collider
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

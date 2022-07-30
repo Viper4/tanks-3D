@@ -558,7 +558,9 @@ MonoBehaviour:
   pierceLevel: 0
   ricochetLevel: 2
   bulletLimit: 2
-  fireCooldown: 0.25
+  fireCooldown:
+  - 1
+  - 2
   canFire: 1
   solidLayerMask:
     serializedVersion: 2
@@ -599,7 +601,7 @@ MonoBehaviour:
   tankRotSpeed: 300
   tankRotNoiseScale: 5
   tankRotNoiseSpeed: 0.5
-  turretRotSpeed: 60
+  turretRotSpeed: 65
   inaccuracy: {x: 0, y: 0}
   turretNoiseSpeed: 0
   turretRangeX:
@@ -640,11 +642,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   fireDelay:
-  - 0.5
-  - 0.8
+  - 0.2
+  - 0.45
   indexChangeDelay:
-  - 0.5
-  - 1.5
+  - 0.3
+  - 1.25
   maxShootAngle: 1.5
   showRays: 0
   mirrorLayerMask:
@@ -653,9 +655,9 @@ MonoBehaviour:
   obstructLayerMask:
     serializedVersion: 2
     m_Bits: 129025
-  updateDelay: 1
+  updateDelay: 0.25
   ricochetPredictions: 2
-  testRays: 40
+  testRays: 60
   rayRadius: 0.045
 --- !u!54 &-1444549703756494348
 Rigidbody:

@@ -29,7 +29,8 @@ public class GreenBot : MonoBehaviour
     [SerializeField] int testRays = 60;
     [SerializeField] float rayRadius = 0.045f;
 
-    Dictionary<Transform, Vector3> mirrorPositionPair = new Dictionary<Transform, Vector3>();
+    Dictionary<Transform, List<List<Vector3>>> mirrorPositionPairs = new Dictionary<Transform, List<List<Vector3>>>();
+
     List<Vector3> shootPositions = new List<Vector3>();
     List<Vector3> tempShootPositions = new List<Vector3>();
     int shootIndex = 0;
@@ -98,7 +99,7 @@ public class GreenBot : MonoBehaviour
     {
         yield return new WaitUntil(() => !GameManager.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null);
 
-        CalculateBulletRicochet(turret.position, targetSystem.currentTarget.position, ricochetPredictions);
+        CalculateBulletRicochets(turret.position, targetSystem.currentTarget.position);
 
         yield return new WaitForSeconds(updateDelay);
 
@@ -118,107 +119,210 @@ public class GreenBot : MonoBehaviour
 
     void ScanArea(Vector3 origin)
     {
-        mirrorPositionPair.Clear();
-        List<RaycastHit> mirrorHits = new List<RaycastHit>();
+        mirrorPositionPairs.Clear();
         lastPosition = transform.position;
+        List<RaycastHit> mirrorHits = new List<RaycastHit>();
 
         float angleOffset = 360 / testRays;
         // Finding valid mirrors by casting testRays number of rays in 360 degrees
-        for (int j = 0; j < testRays; j++)
+        for (int i = 0; i < testRays; i++)
         {
-            Vector3 testDirection = Quaternion.AngleAxis(angleOffset * j, Vector3.up) * Vector3.forward;
+            Vector3 testDirection = Quaternion.AngleAxis(angleOffset * i, Vector3.up) * Vector3.forward;
             if (Physics.Raycast(origin, testDirection, out RaycastHit mirrorHit, Mathf.Infinity, mirrorLayerMask))
             {
-                if (!mirrorPositionPair.ContainsKey(mirrorHit.transform))
+                // Populating first ricochet mirror positions
+                if (!mirrorPositionPairs.ContainsKey(mirrorHit.transform))
                 {
-                    mirrorHits.Add(mirrorHit);
                     Vector3 mirroredPosition = Mirror(testDirection, mirrorHit);
-                    mirrorPositionPair.Add(mirrorHit.transform, mirroredPosition);
-                    
+                    mirrorPositionPairs.Add(mirrorHit.transform, new List<List<Vector3>>());
+                    for (int j = 0; j < ricochetPredictions; j++)
+                    {
+                        mirrorPositionPairs[mirrorHit.transform].Add(new List<Vector3>() { mirroredPosition });
+                    }
+                    mirrorHits.Add(mirrorHit);
+
                     if (showRays)
                     {
-                        Debug.DrawLine(turret.position, mirrorHit.point, Color.magenta, Mathf.Infinity);
-                        Debug.DrawLine(mirrorHit.point, mirroredPosition, Color.yellow, Mathf.Infinity);
+                        Debug.DrawLine(turret.position, mirrorHit.point, Color.magenta, 60);
+                        Debug.DrawLine(mirrorHit.point, mirroredPosition, Color.yellow, 60);
                     }
                 }
                 else if (showRays)
                 {
-                    Debug.DrawLine(turret.position, mirrorHit.point, Color.red, Mathf.Infinity);
+                    Debug.DrawLine(turret.position, mirrorHit.point, Color.red, 60);
                 }
             }
             else if (showRays)
             {
-                Debug.DrawRay(turret.position, testDirection, Color.red, Mathf.Infinity);
+                Debug.DrawRay(turret.position, testDirection, Color.red, 60);
+            }
+        }
+
+        // Skip first ricochet mirror positions
+        for (int i = 1; i < ricochetPredictions; i++)
+        {
+            foreach (Transform mirror in mirrorPositionPairs.Keys)
+            {
+                foreach (RaycastHit mirrorHit in mirrorHits)
+                {
+                    foreach(Vector3 lastMirrorPosition in mirrorPositionPairs[mirror][i - 1])
+                    {
+                        Vector3 mirroredPosition = Mirror(mirrorHit.point - lastMirrorPosition, mirrorHit, 1);
+                        if (!mirrorPositionPairs[mirrorHit.transform][i].Contains(mirroredPosition))
+                        {
+                            mirrorPositionPairs[mirrorHit.transform][i].Add(mirroredPosition);
+                            if (showRays)
+                            {
+                                Debug.DrawLine(mirroredPosition, mirrorHit.point, Color.blue, 60);
+                            }
+                        }
+                    }
+                }
             }
         }
     }
-    
-    void UpdateShootLookPositions(Vector3 origin, Vector3 destination)
+
+    void CalculateBulletRicochets(Vector3 origin, Vector3 destination)
     {
         tempShootPositions.Clear();
         tempLookPositions.Clear();
-        foreach (Transform mirror in mirrorPositionPair.Keys)
+        float halfUpdateDelay = updateDelay * 0.5f;
+        foreach (Transform mirror in mirrorPositionPairs.Keys)
         {
-            Vector3 LOSDir = mirrorPositionPair[mirror] - destination;
-
-            // Checking if destination is in line of sight of mirroredPosition
-            if (Physics.Raycast(destination, LOSDir, out RaycastHit LOSHit, Vector3.Distance(destination, mirrorPositionPair[mirror]), mirrorLayerMask))
+            foreach (Vector3 mirroredPosition in mirrorPositionPairs[mirror][ricochetPredictions - 1])
             {
-                // Checking bullet path
-                if (!Physics.Raycast(destination, LOSDir, out RaycastHit bulletObstruct1, Vector3.Distance(destination, LOSHit.point) - 0.1f, obstructLayerMask))
+                Vector3 LOSDir = mirroredPosition - destination;
+
+                // Checking if destination is in line of sight of mirroredPosition
+                if (Physics.Raycast(destination, LOSDir, out RaycastHit LOSHit, Vector3.Distance(destination, mirroredPosition), mirrorLayerMask))
                 {
-                    // Checking if the visible LOS point corresponds to this mirror
-                    if (LOSHit.transform == mirror)
+                    // Checking bullet path
+                    if (!Physics.Raycast(destination, LOSDir, out RaycastHit bulletObstruct1, Vector3.Distance(destination, LOSHit.point) - 0.1f, obstructLayerMask))
                     {
-                        // Checking bullet path
-                        if (!Physics.SphereCast(origin, rayRadius, LOSHit.point - origin, out RaycastHit bulletObstruct, Vector3.Distance(origin, LOSHit.point) - 0.1f, obstructLayerMask))
+                        // Checking if the visible LOS point corresponds to this mirror
+                        if (LOSHit.transform == mirror)
                         {
-                            tempShootPositions.Add(LOSHit.point);
-
-                            if (showRays)
+                            if (ricochetPredictions > 1)
                             {
-                                Debug.DrawLine(origin, LOSHit.point, Color.green, updateDelay);
-                                Debug.DrawLine(LOSHit.point, LOSHit.point, Color.green, updateDelay);
-                                Debug.DrawLine(LOSHit.point, destination, Color.green, updateDelay);
+                                RaycastHit lastReflectHit = LOSHit;
+                                Vector3 lastDestination = destination;
+                                for (int i = 0; i < ricochetPredictions - 1; i++)
+                                {
+                                    // Reflecting
+                                    Vector3 reflectedDir = Vector3.Reflect(lastReflectHit.point - lastDestination, lastReflectHit.normal);
+                                    if (Physics.Raycast(lastReflectHit.point, reflectedDir, out RaycastHit reflectHit, Mathf.Infinity, obstructLayerMask))
+                                    {
+                                        // Checking bullet path
+                                        if (!Physics.SphereCast(lastReflectHit.point, rayRadius, reflectedDir, out RaycastHit bulletObstruct, Vector3.Distance(lastReflectHit.point, reflectHit.point) - 0.1f, obstructLayerMask))
+                                        {
+                                            if (showRays)
+                                            {
+                                                Debug.DrawLine(lastReflectHit.point, lastDestination, Color.green, halfUpdateDelay);
+                                                Debug.DrawLine(lastReflectHit.point, reflectHit.point, Color.green, halfUpdateDelay);
+                                            }
+                                            if (i < ricochetPredictions - 2)
+                                            {
+                                                lastDestination = lastReflectHit.point;
+                                                lastReflectHit = reflectHit;
+                                            }
+                                            else
+                                            {
+                                                if (!Physics.SphereCast(origin, rayRadius, reflectHit.point - origin, out RaycastHit obstructHit, Vector3.Distance(origin, reflectHit.point) - 0.1f, obstructLayerMask))
+                                                {
+                                                    // Comparing inciting angle with exiting angle
+                                                    float incitingAngle = Vector3.Angle(reflectHit.point - origin, reflectHit.normal);
+                                                    float exitingAngle = Vector3.Angle(reflectHit.point - lastReflectHit.point, reflectHit.normal);
+                                                    if (Mathf.Abs(incitingAngle - exitingAngle) < maxShootAngle)
+                                                    {
+                                                        tempShootPositions.Add(reflectHit.point);
+
+                                                        if (showRays)
+                                                        {
+                                                            Debug.DrawLine(origin, reflectHit.point, Color.green, updateDelay);
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        tempLookPositions.Add(reflectHit.point);
+
+                                                        if (showRays)
+                                                        {
+                                                            Debug.DrawLine(origin, reflectHit.point, Color.cyan, updateDelay);
+                                                        }
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    tempLookPositions.Add(reflectHit.point);
+
+                                                    if (showRays)
+                                                    {
+                                                        Debug.DrawLine(origin, obstructHit.point, Color.red, halfUpdateDelay);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        else
+                                        {
+                                            if (showRays)
+                                            {
+                                                Debug.DrawLine(lastReflectHit.point, lastDestination, Color.cyan, halfUpdateDelay);
+                                                Debug.DrawLine(lastReflectHit.point, reflectHit.point, Color.cyan, halfUpdateDelay);
+                                                Debug.DrawLine(lastReflectHit.point, bulletObstruct.point, Color.red, halfUpdateDelay);
+                                            }
+                                            break;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        break;
+                                    }
+                                }
                             }
-                        }
-                        else
-                        {
-                            Debug.Log(bulletObstruct.transform.name);
-                            tempLookPositions.Add(LOSHit.point);
-
-                            if (showRays)
+                            else
                             {
-                                Debug.DrawLine(origin, LOSHit.point, Color.cyan, updateDelay);
-                                Debug.DrawLine(origin, bulletObstruct.point, Color.red, updateDelay);
+                                // Checking bullet path
+                                if (!Physics.SphereCast(origin, rayRadius, LOSHit.point - origin, out RaycastHit bulletObstruct, Vector3.Distance(origin, LOSHit.point) - 0.1f, obstructLayerMask))
+                                {
+                                    tempShootPositions.Add(LOSHit.point);
+
+                                    if (showRays)
+                                    {
+                                        Debug.DrawLine(origin, LOSHit.point, Color.green, updateDelay);
+                                        Debug.DrawLine(LOSHit.point, LOSHit.point, Color.green, updateDelay);
+                                        Debug.DrawLine(LOSHit.point, destination, Color.green, updateDelay);
+                                    }
+                                }
+                                else
+                                {
+                                    tempLookPositions.Add(LOSHit.point);
+
+                                    if (showRays)
+                                    {
+                                        Debug.DrawLine(origin, LOSHit.point, Color.cyan, updateDelay);
+                                        Debug.DrawLine(origin, bulletObstruct.point, Color.red, updateDelay);
+                                    }
+                                }
                             }
                         }
                     }
-
-                }
-                else
-                {
-                    Debug.Log(bulletObstruct1.transform.name);
-
-                    tempLookPositions.Add(LOSHit.point);
-
-                    if (showRays)
+                    else
                     {
-                        Debug.DrawLine(destination, LOSHit.point, Color.cyan, updateDelay);
-                        Debug.DrawLine(destination, bulletObstruct1.point, Color.red, updateDelay);
+                        tempLookPositions.Add(LOSHit.point);
+
+                        if (showRays)
+                        {
+                            Debug.DrawLine(destination, LOSHit.point, Color.cyan, updateDelay);
+                            Debug.DrawLine(destination, bulletObstruct1.point, Color.red, updateDelay);
+                        }
                     }
                 }
-            }
-            else if (showRays)
-            {
-                Debug.DrawLine(destination, mirrorPositionPair[mirror], Color.white, updateDelay);
+                else if (showRays)
+                {
+                    Debug.DrawLine(destination, mirroredPosition, Color.white, updateDelay);
+                }
             }
         }
-    }
-
-    void CalculateBulletRicochet(Vector3 origin, Vector3 destination, int ricochets = 1)
-    {
-        UpdateShootLookPositions(origin, destination);
 
         shootPositions = tempShootPositions.ToList();
         lookPositions = tempLookPositions.ToList();

@@ -15,8 +15,7 @@ public class YellowBot : MonoBehaviour
     Transform barrel;
 
     [SerializeField] float maxShootAngle = 30;
-    public float[] reactionTime = { 0.3f, 0.45f };
-    public float[] fireDelay = { 0.3f, 0.6f };
+    public float[] fireDelay = { 0.3f, 0.45f };
 
     public float[] layDelay = { 0.3f, 0.6f };
 
@@ -152,8 +151,6 @@ public class YellowBot : MonoBehaviour
         float angle = Vector3.Angle(barrel.forward, targetDir);
         if (angle < maxShootAngle)
         {
-            // Keeps moving until reaction time from seeing player is reached
-            yield return new WaitForSeconds(Random.Range(reactionTime[0], reactionTime[1]));
             // Stops moving and delay in firing
             mode = Mode.Shoot;
             yield return new WaitForSeconds(Random.Range(fireDelay[0], fireDelay[1]));
@@ -170,9 +167,8 @@ public class YellowBot : MonoBehaviour
     IEnumerator LayMine()
     {
         layingMine = true;
-        yield return new WaitForSeconds(Random.Range(layDelay[0], layDelay[1]));
         mode = Mode.Lay;
-        yield return new WaitForSeconds(Random.Range(fireDelay[0], fireDelay[1]));
+        yield return new WaitForSeconds(Random.Range(layDelay[0], layDelay[1]));
         StartCoroutine(GetComponent<MineControl>().LayMine());
         Vector3 desiredDir = Quaternion.AngleAxis(Random.Range(-180.0f, 180.0f), Vector3.up) * transform.forward;
         rb.rotation = Quaternion.LookRotation(desiredDir);

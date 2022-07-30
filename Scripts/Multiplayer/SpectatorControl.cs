@@ -50,7 +50,7 @@ public class SpectatorControl : MonoBehaviour
                 if (Input.GetMouseButtonDown(0) && CustomNetworkHandling.NonSpectatorList.Length != 0)
                 {
                     targetIndex = targetIndex + 1 > CustomNetworkHandling.NonSpectatorList.Length ? 0 : targetIndex + 1;
-                    target = CustomNetworkHandling.PhotonViewInScene(CustomNetworkHandling.NonSpectatorList[targetIndex]).transform;
+                    target = CustomNetworkHandling.FindPhotonView(CustomNetworkHandling.NonSpectatorList[targetIndex]).transform;
                 }
 
                 if (targetIndex == -1)

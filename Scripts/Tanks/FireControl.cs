@@ -22,7 +22,7 @@ public class FireControl : MonoBehaviour
 
     public int bulletLimit = 5;
     public int bulletsFired { get; set; } = 0;
-    [SerializeField] float fireCooldown = 4f;
+    [SerializeField] float[] fireCooldown = { 2, 4 };
     public bool canFire = true;
     
     [SerializeField] LayerMask solidLayerMask;
@@ -73,7 +73,8 @@ public class FireControl : MonoBehaviour
                     bulletsFired--;
                 }
 
-                yield return new WaitForSeconds(fireCooldown);
+                yield return new WaitForSeconds(Random.Range(fireCooldown[0], fireCooldown[1]));
+
                 canFire = true;
             }
             else

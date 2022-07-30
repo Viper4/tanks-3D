@@ -14,8 +14,7 @@ public class GreyBot : MonoBehaviour
     Transform turret;
     Transform barrel;
 
-    public float[] reactionTime = { 0.7f, 1.25f };
-    public float[] fireDelay = { 0.3f, 0.6f };
+    public float[] fireDelay = { 0.7f, 1.25f };
 
     Rigidbody rb;
 
@@ -127,8 +126,6 @@ public class GreyBot : MonoBehaviour
         float angle = Vector3.Angle(barrel.forward, targetDir);
         if (angle < maxShootAngle)
         {
-            // Keeps moving until reaction time from seeing player is reached
-            yield return new WaitForSeconds(Random.Range(reactionTime[0], reactionTime[1]));
             // Stops moving and delay in firing
             mode = Mode.Shoot;
             yield return new WaitForSeconds(Random.Range(fireDelay[0], fireDelay[1]));

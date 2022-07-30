@@ -20,7 +20,10 @@ public class DelayedDestroy : MonoBehaviour
         yield return new WaitForSeconds(delay);
         if (transform.CompareTag("Bullet"))
         {
-            GetComponent<BulletBehaviour>().owner.GetComponent<FireControl>().bulletsFired--;
+            if (GetComponent<BulletBehaviour>().owner != null)
+            {
+                GetComponent<BulletBehaviour>().owner.GetComponent<FireControl>().bulletsFired--;
+            }
         }
 
         if (multiplayer)

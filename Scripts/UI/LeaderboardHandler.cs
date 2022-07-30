@@ -47,7 +47,7 @@ public class LeaderboardHandler : MonoBehaviour
 
         foreach (Player player in CustomNetworkHandling.NonSpectatorList)
         {
-            PlayerData playerData = player.PhotonViewInScene().GetComponent<DataManager>().currentPlayerData;
+            PlayerData playerData = player.FindPhotonView().GetComponent<DataManager>().currentPlayerData;
             LeaderboardData leaderboardData = new LeaderboardData()
             {
                 kills = playerData.kills,
