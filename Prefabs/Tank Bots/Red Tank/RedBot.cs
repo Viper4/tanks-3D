@@ -6,7 +6,6 @@ using MyUnityAddons.Math;
 public class RedBot : MonoBehaviour
 {
     TargetSystem targetSystem;
-    Vector3 targetDir;
 
     BaseTankLogic baseTankLogic;
 
@@ -16,31 +15,12 @@ public class RedBot : MonoBehaviour
 
     public float[] fireDelay = { 0.28f, 0.425f };
 
-    Rigidbody rb;
-
-    float angleToTarget;
     [SerializeField] float maxShootAngle = 5;
-
-    [Tooltip("Threshold angle to start rotating tank to target")] [SerializeField] float maxTargetAngle = 100;
-
-    [SerializeField] float moveSpeed = 5f;
-    [SerializeField] float avoidSpeed = 3f;
-    float speed = 5;
-
-    [SerializeField] float gravity = 8;
-    float velocityY = 0;
 
     FireControl fireControl;
     bool shooting = false;
 
-    enum Mode
-    {
-        Move,
-        Shoot,
-        Avoid,
-        Defend
-    }
-    Mode mode = Mode.Move;
+    Transform nearbyMine = null;
 
     // Start is called before the first frame Update
     void Start()
@@ -53,8 +33,6 @@ public class RedBot : MonoBehaviour
         turret = transform.Find("Turret");
         barrel = transform.Find("Barrel");
 
-        rb = GetComponent<Rigidbody>();
-
         fireControl = GetComponent<FireControl>();
     }
 
@@ -63,123 +41,42 @@ public class RedBot : MonoBehaviour
     {
         if (!GameManager.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null)
         {
-            targetDir = targetSystem.currentTarget.position - turret.position;
-            angleToTarget = Vector3.Angle(transform.forward, targetDir);
+            baseTankLogic.targetTurretDir = targetSystem.currentTarget.position - turret.position;
 
-            if (fireControl.canFire && fireControl.bulletsFired < fireControl.bulletLimit && mode != Mode.Shoot && !shooting && targetSystem.TargetVisible())
+            if (fireControl.canFire && fireControl.bulletsFired < fireControl.bulletLimit && !shooting && targetSystem.TargetVisible())
             {
                 StartCoroutine(Shoot());
             }
 
-            if (rb != null)
+            if (nearbyMine == null)
             {
-                Vector3 velocity;
-                velocityY = baseTankLogic.IsGrounded() ? 0 : velocityY - Time.deltaTime * gravity;
-
-                Vector3 targetDirection = transform.forward;
-                if (Physics.Raycast(transform.position, -transform.up, out RaycastHit middleHit, 1) && Physics.Raycast(transform.position + transform.forward, -transform.up, out RaycastHit frontHit, 1))
-                {
-                    targetDirection = frontHit.point - middleHit.point;
-                }
-
-                // Checking Forward on the center, left, and right side
-                RaycastHit forwardHit;
-                if (Physics.Raycast(body.position, transform.forward, out forwardHit, 2, baseTankLogic.barrierLayers) || Physics.Raycast(body.position + transform.right, transform.forward, out forwardHit, 2, baseTankLogic.barrierLayers) || Physics.Raycast(body.position - transform.right, transform.forward, out forwardHit, 2, baseTankLogic.barrierLayers))
-                {
-                    mode = Mode.Avoid;
-                    baseTankLogic.ObstacleAvoidance(forwardHit, 2, baseTankLogic.barrierLayers);
-                }
-                else if (mode == Mode.Avoid)
-                {
-                    mode = Mode.Move;
-                }
-
-                switch (mode)
-                {
-                    case Mode.Move:
-                        // Resetting currentTarget to primary and trying to move to target
-                        if (!GameManager.autoPlay && !targetSystem.chooseTarget && targetSystem.primaryTarget != null)
-                        {
-                            targetSystem.currentTarget = targetSystem.primaryTarget;
-                        }
-                        // Only rotating towards target when target is getting behind this tank
-                        if (angleToTarget > maxTargetAngle)
-                        {
-                            baseTankLogic.RotateTankToVector(targetDir);
-                        }
-
-                        speed = moveSpeed;
-
-                        baseTankLogic.noisyRotation = true;
-                        break;
-                    case Mode.Defend:
-                        // OnTriggerStay handles rotation
-                        speed = moveSpeed;
-
-                        baseTankLogic.noisyRotation = true;
-                        mode = Mode.Move;
-                        break;
-                    case Mode.Avoid:
-                        speed = avoidSpeed;
-
-                        baseTankLogic.noisyRotation = false;
-                        break;
-                    case Mode.Shoot:
-                        speed = 0;
-
-                        baseTankLogic.noisyRotation = false;
-                        break;
-                }
-
-                velocity = targetDirection * speed + Vector3.up * velocityY;
-
-                rb.velocity = velocity;
+                baseTankLogic.targetTankDir = transform.forward;
             }
-
-            baseTankLogic.RotateTurretTo(targetDir);
-        }
-        else
-        {
-            rb.velocity = Vector3.zero;
+            else
+            {
+                baseTankLogic.targetTankDir = transform.position - nearbyMine.position;
+            }
         }
     }
 
-    void OnTriggerStay(Collider other)
+    private void OnTriggerStay(Collider other)
     {
-        Vector3 desiredDir;
-        // Avoiding bullets and mines
         switch (other.tag)
         {
-            case "Bullet":
-                // Move perpendicular to bullets and shoot at them
-                if (other.GetComponent<BulletBehaviour>().owner != transform)
-                {
-                    mode = Mode.Defend;
-                    desiredDir = Random.Range(0, 2) == 0 ? Quaternion.AngleAxis(90, Vector3.up) * other.transform.forward : Quaternion.AngleAxis(-90, Vector3.up) * other.transform.forward;
-
-                    // Applying rotation
-                    baseTankLogic.RotateTankToVector(desiredDir);
-
-                    // Firing at bullets
-                    targetSystem.currentTarget = other.transform;
-                }
-                break;
             case "Mine":
-                if (GameManager.autoPlay || targetSystem.chooseTarget)
-                {
-                    // Move in opposite direction of mine
-                    desiredDir = transform.position - other.transform.position;
+                nearbyMine = other.transform;
+                break;
+        }
+    }
 
-                    // Applying rotation
-                    baseTankLogic.RotateTankToVector(desiredDir);
-                }
-                else if (other.GetComponent<MineBehaviour>().owner != targetSystem.primaryTarget.root)
+    private void OnTriggerExit(Collider other)
+    {
+        switch (other.tag)
+        {
+            case "Mine":
+                if (nearbyMine == other.transform)
                 {
-                    // Move in opposite direction of mine
-                    desiredDir = transform.position - other.transform.position;
-
-                    // Applying rotation
-                    baseTankLogic.RotateTankToVector(desiredDir);
+                    nearbyMine = null;
                 }
                 break;
         }
@@ -188,18 +85,17 @@ public class RedBot : MonoBehaviour
     IEnumerator Shoot()
     {
         // When angle between barrel and target is less than shootAngle, then stop and fire
-        float shootAngle = mode == Mode.Defend ? maxShootAngle * 4f : maxShootAngle;
-        if (Vector3.Angle(barrel.forward, targetDir) < shootAngle)
+        if (Vector3.Angle(barrel.forward, baseTankLogic.targetTurretDir) < maxShootAngle)
         {
             shooting = true;
 
+            yield return new WaitForSeconds(Random.Range(fireDelay[0], fireDelay[1]));
             // Stops moving and delay in firing
-            mode = Mode.Shoot;
+            baseTankLogic.stationary = true;
             yield return new WaitForSeconds(Random.Range(fireDelay[0], fireDelay[1]));
             StartCoroutine(GetComponent<FireControl>().Shoot());
+            shooting = false;
+            baseTankLogic.stationary = false;
         }
-
-        mode = Mode.Move;
-        shooting = false;
     }
 }

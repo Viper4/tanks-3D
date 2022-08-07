@@ -1,3 +1,4 @@
+using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -51,7 +52,35 @@ public class BaseUIHandler : MonoBehaviour
 
     public void LoadScene(string sceneName)
     {
-        GameManager.gameManager.LoadScene(sceneName, 0, false, false);
+        if (PhotonNetwork.OfflineMode)
+        {
+            GameManager.gameManager.LoadScene(sceneName, 0, false, false);
+        }
+        else
+        {
+            Hashtable parameters = new Hashtable
+            {
+                { "sceneName", sceneName },
+                { "delay", 0 },
+                { "save", false },
+                { "waitWhilePaused", false }
+            };
+            PhotonNetwork.RaiseEvent(GameManager.gameManager.LoadSceneEventCode, parameters, Photon.Realtime.RaiseEventOptions.Default, ExitGames.Client.Photon.SendOptions.SendUnreliable);
+        }
+    }
+
+    public void MainMenu()
+    {
+        if (!PhotonNetwork.OfflineMode)
+        {
+            PhotonNetwork.Disconnect();
+        }
+        GameManager.gameManager.LoadScene("Main Menu", 0, false, false);
+    }
+
+    public void ResetPlayerData()
+    {
+        SaveSystem.ResetPlayerData("PlayerData");
     }
 
     public void Exit()

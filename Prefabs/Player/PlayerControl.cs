@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
 using PhotonHashtable = ExitGames.Client.Photon.Hashtable;
+using MyUnityAddons.CustomPhoton;
 
 public class PlayerControl : MonoBehaviour
 {
@@ -23,18 +24,13 @@ public class PlayerControl : MonoBehaviour
 
     bool respawning = false;
 
-    [SerializeField] float movementSpeed = 6;
-
     float currentSpeed;
     public float speedSmoothTime = 0.1f;
     float speedSmoothVelocity;
 
     public float turnSmoothTime = 0.2f;
     float turnSmoothVelocity;
-
-    public float gravity = 10;
     float velocityY = 0;
-    [SerializeField] float speedLimit = 15;
 
     [SerializeField] LayerMask ignoreLayerMasks;
 
@@ -60,35 +56,26 @@ public class PlayerControl : MonoBehaviour
                         showHUD = !showHUD;
                     }
 
-                    if (baseTankLogic.IsGrounded())
-                    {
-                        velocityY = 0;
-                    }
-                    else
-                    {
-                        velocityY -= gravity * Time.deltaTime;
-                        velocityY = Mathf.Clamp(velocityY, -speedLimit, speedLimit);
-                    }
-
                     // Moving the tank with player input
                     Vector2 inputDir = new Vector2(GetInputAxis("Horizontal"), GetInputAxis("Vertical")).normalized;
 
-                    float targetSpeed = movementSpeed / 2 * inputDir.magnitude;
+                    float targetSpeed = baseTankLogic.normalSpeed * 0.5f * inputDir.magnitude;
 
                     currentSpeed = Mathf.SmoothDamp(currentSpeed, targetSpeed, ref speedSmoothVelocity, GetModifiedSmoothTime(speedSmoothTime));
 
                     Vector3 velocityDir = tankOrigin.forward;
 
-                    RaycastHit middleHit;
-                    RaycastHit frontHit;
-                    if (Physics.Raycast(tankOrigin.position + tankOrigin.up * 1.22f, -tankOrigin.up, out middleHit, 3, ~ignoreLayerMasks) && Physics.Raycast(tankOrigin.position + tankOrigin.up * 1.22f + tankOrigin.forward, -tankOrigin.up, out frontHit, 3, ~ignoreLayerMasks))
+                    if (Physics.Raycast(tankOrigin.position, -tankOrigin.up, out RaycastHit middleHit, 1, ~ignoreLayerMasks) && Physics.Raycast(tankOrigin.position + tankOrigin.forward, -tankOrigin.up, out RaycastHit frontHit, 1, ~ignoreLayerMasks))
                     {
                         velocityDir = frontHit.point - middleHit.point;
                     }
 
-                    Vector3 velocity = currentSpeed * velocityDir + Vector3.up * velocityY;
+                    Vector3 velocity = currentSpeed * velocityDir;
 
-                    RB.velocity = velocity;
+                    velocityY = !baseTankLogic.IsGrounded() && baseTankLogic.useGravity ? velocityY - Time.deltaTime * baseTankLogic.gravity : 0;
+                    velocityY = Mathf.Clamp(velocityY, -baseTankLogic.velocityLimit, baseTankLogic.velocityLimit);
+
+                    RB.velocity = velocity + Vector3.up * velocityY;
 
                     // Rotating tank with movement
                     if (inputDir != Vector2.zero)
@@ -187,19 +174,50 @@ public class PlayerControl : MonoBehaviour
         return 0;
     }
 
-    public void Respawn()
+    public void OnDeath()
     {
         myData.currentPlayerData.deaths++;
 
         if (!PhotonNetwork.OfflineMode)
         {
-            if (!respawning && clientManager.PV.IsMine)
+            if (clientManager.PV.IsMine)
             {
-                PhotonHashtable playerProperties = PhotonNetwork.LocalPlayer.CustomProperties;
-                playerProperties["Deaths"] = myData.currentPlayerData.deaths;
-                PhotonNetwork.LocalPlayer.SetCustomProperties(playerProperties);
+                PhotonHashtable playerProperties = new PhotonHashtable();
+                PhotonHashtable roomProperties = new PhotonHashtable();
 
-                StartCoroutine(MultiplayerRespawn());
+                RoomSettings roomSettings = (RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["RoomSettings"];
+
+                switch (roomSettings.primaryMode)
+                {
+                    case "Co-Op":
+                        int totalLives = (int)PhotonNetwork.CurrentRoom.CustomProperties["Total Lives"];
+                        totalLives--;
+                        roomProperties.Add("Total Lives", totalLives);
+
+                        PhotonNetwork.CurrentRoom.SetCustomProperties(roomProperties);
+
+                        if (FindObjectsOfType<PlayerControl>().Length <= 1)
+                        {
+                            if (totalLives > 0)
+                            {
+                                GameManager.gameManager.PhotonLoadScene(-1, 3, true, false);
+                            }
+                            else
+                            {
+                                GameManager.gameManager.PhotonLoadScene("End Scene", 3, true, false);
+                            }
+                        }
+                        break;
+                    default:
+                        if (!respawning)
+                        {
+                            playerProperties.Add("Deaths", myData.currentPlayerData.deaths);
+                            PhotonNetwork.LocalPlayer.SetCustomProperties(playerProperties);
+
+                            StartCoroutine(MultiplayerRespawn());
+                        }
+                        break;
+                }
             }
         }
         else

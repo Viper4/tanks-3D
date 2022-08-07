@@ -8,11 +8,21 @@ public class MineControl : MonoBehaviour
     [SerializeField] PhotonView PV;
     [SerializeField] Transform tankOrigin;
     [SerializeField] Transform mine;
+    [SerializeField] Transform mineParent;
 
     public int mineLimit = 2;
     public int minesLaid { get; set; } = 0;
-    [SerializeField] float layCooldown = 2;
+    [SerializeField] float[] layCooldown = { 2f, 4f };
+    public float explosionRadius = 7f;
     public bool canLay = true;
+
+    private void Start()
+    {
+        if (GameManager.autoPlay)
+        {
+            mineParent = GameObject.Find("ToClear").transform;
+        }
+    }
 
     public IEnumerator LayMine()
     {
@@ -24,7 +34,7 @@ public class MineControl : MonoBehaviour
 
             Transform newMine = InstantiateMine();
 
-            if (!PhotonNetwork.OfflineMode)
+            if (!PhotonNetwork.OfflineMode && !GameManager.autoPlay)
             {
                 PV.RPC("InstantiateMine", RpcTarget.Others);
             }
@@ -34,12 +44,13 @@ public class MineControl : MonoBehaviour
             MineBehaviour mineBehaviour = newMine.GetComponent<MineBehaviour>();
             mineBehaviour.owner = transform;
             mineBehaviour.ownerPV = PV;
+            mineBehaviour.explosionRadius = explosionRadius;
             if (transform.CompareTag("Player"))
             {
                 mineBehaviour.dataSystem = GetComponent<DataManager>();
             }
 
-            yield return new WaitForSeconds(layCooldown);
+            yield return new WaitForSeconds(Random.Range(layCooldown[0], layCooldown[1]));
             canLay = true;
         }
     }
@@ -47,15 +58,8 @@ public class MineControl : MonoBehaviour
     [PunRPC]
     Transform InstantiateMine()
     {
-        Transform newMine = Instantiate(mine, tankOrigin.position, Quaternion.identity);
+        Transform newMine = Instantiate(mine, tankOrigin.position, Quaternion.identity, mineParent);
 
         return newMine;
-    }
-
-    [PunRPC]
-    void DestroyMine(GameObject gameObject, Transform explosionEffect)
-    {
-        Instantiate(explosionEffect, gameObject.transform.position, Quaternion.Euler(-90, 0, 0));
-        Destroy(gameObject);
     }
 }

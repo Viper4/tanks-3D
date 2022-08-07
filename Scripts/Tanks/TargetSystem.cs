@@ -1,4 +1,5 @@
 using MyUnityAddons.Math;
+using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -7,27 +8,26 @@ public class TargetSystem : MonoBehaviour
 {
     public Transform primaryTarget;
     public Transform currentTarget;
-    public bool chooseTarget = false;
-
-    [SerializeField] bool predictTargetPos;
-    [SerializeField] float predictionScale = 1;
-    public Vector3 predictedTargetPos { get; set; }
+    [SerializeField] string preferredTargetArea = "Turret";
+    bool chooseTarget = false;
 
     Transform turret;
     Transform barrel;
     public LayerMask ignoreLayerMask;
-    [SerializeField] Transform tankParent;
+    public Transform enemyParent;
 
     private void Start()
     {
         turret = transform.Find("Turret");
         barrel = transform.Find("Barrel");
 
-        if (!chooseTarget && !GameManager.autoPlay)
+        chooseTarget = !PhotonNetwork.OfflineMode || GameManager.autoPlay;
+
+        if (!chooseTarget)
         {
             if (primaryTarget == null)
             {
-                Debug.Log("The variable primaryTarget of BrownBot has been defaulted to the player");
+                Debug.Log("The variable primaryTarget of " + transform.name + " has been defaulted to the player");
                 primaryTarget = GameObject.Find("Player").transform;
             }
             else
@@ -35,69 +35,77 @@ public class TargetSystem : MonoBehaviour
                 currentTarget = primaryTarget;
             }
         }
-
-        if (tankParent == null)
+        
+        if (enemyParent == null)
         {
-            tankParent = transform.parent;
+            enemyParent = transform.parent;
         }
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (chooseTarget || GameManager.autoPlay)
+        if (chooseTarget)
         {
-            if (tankParent.childCount > 1)
+            if (enemyParent.childCount > 1)
             {
-                List<Transform> visibleTanks = new List<Transform>();
-                foreach (Transform tank in tankParent)
+                List<Transform> visibleTargets = new List<Transform>();
+                foreach (Transform tank in enemyParent)
                 {
                     if (tank != transform)
                     {
-                        Transform tankTurret = tank.transform.Find("Turret");
-                        if (Physics.Raycast(tankTurret.position, turret.position - tankTurret.position, out RaycastHit hit, Mathf.Infinity, ~ignoreLayerMask, QueryTriggerInteraction.Ignore))
+                        Transform target;
+                        if (tank.CompareTag("Player"))
                         {
-                            if (hit.transform == transform)
+                            target = tank.transform.Find("Tank Origin").Find(preferredTargetArea);
+                        }
+                        else
+                        {
+                            target = tank.transform.Find(preferredTargetArea);
+                        }
+
+                        if (Physics.Raycast(turret.position, target.position - turret.position, out RaycastHit hit, Mathf.Infinity, ~ignoreLayerMask, QueryTriggerInteraction.Ignore))
+                        {
+                            if (hit.transform.gameObject.layer == target.gameObject.layer)
                             {
-                                visibleTanks.Add(tank);
+                                visibleTargets.Add(target);
                             }
                         }
                     }
                 }
 
-                if (visibleTanks.Count != 0)
+                if (visibleTargets.Count != 0)
                 {
-                    currentTarget = GetClosestTank(visibleTanks);
+                    currentTarget = transform.ClosestTransform(visibleTargets);
                 }
                 else
                 {
-                    currentTarget = GetClosestTank(tankParent);
+                    currentTarget = transform.ClosestTransform(enemyParent);
+                    if (currentTarget.CompareTag("Player"))
+                    {
+                        currentTarget = currentTarget.Find("Tank Origin").Find(preferredTargetArea);
+                    }
+                    else
+                    {
+                        currentTarget = currentTarget.Find(preferredTargetArea);
+                    }
                 }
             }
             else
             {
-                currentTarget = tankParent;
+                currentTarget = enemyParent.GetChild(0).Find(preferredTargetArea);
             }
         }
 
         if (currentTarget == null)
         {
-            try
+            if (primaryTarget != null)
             {
                 currentTarget = primaryTarget;
             }
-            catch
+            else
             {
-                currentTarget = tankParent;
-            }
-        }
-
-        if (predictTargetPos)
-        {
-            if (currentTarget.parent.TryGetComponent(out Rigidbody targetRB))
-            {
-                predictedTargetPos = currentTarget.position + (targetRB.velocity * predictionScale);
-                Debug.DrawLine(turret.position, predictedTargetPos, Color.blue, 0.1f);
+                currentTarget = enemyParent;
             }
         }
     }
@@ -111,13 +119,33 @@ public class TargetSystem : MonoBehaviour
         return false;
     }
 
-    public bool TargetInLineOfFire()
+    public bool TargetInLineOfFire(float maxDistance = Mathf.Infinity)
     {
-        if (Physics.Raycast(barrel.position, barrel.forward, out RaycastHit barrelHit, Mathf.Infinity, ~ignoreLayerMask))
+        if (Physics.Raycast(barrel.position, barrel.forward, out RaycastHit barrelHit, maxDistance, ~ignoreLayerMask))
         {
             return barrelHit.transform.gameObject.layer == currentTarget.gameObject.layer;
         }
         return false;
+    }
+
+    public Vector3 PredictedTargetPosition(float seconds)
+    {
+        if (currentTarget.parent.TryGetComponent<Rigidbody>(out var rigidbody))
+        {
+            Vector3 futurePosition = CustomMath.FuturePosition(currentTarget.position, rigidbody, seconds);
+            if (Physics.Raycast(currentTarget.position, futurePosition - currentTarget.position, out RaycastHit hit, Vector3.Distance(currentTarget.position, futurePosition)))
+            {
+                return hit.point;
+            }
+            else
+            {
+                return futurePosition;
+            }
+        }
+        else
+        {
+            return currentTarget.position;
+        }
     }
 
     Transform GetClosestTank(List<Transform> tanks)

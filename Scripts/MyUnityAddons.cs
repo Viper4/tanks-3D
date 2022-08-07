@@ -229,6 +229,11 @@ namespace MyUnityAddons
                 return xD * xD + yD * yD + zD * zD; // or xD*xD + zD*zD
             }
 
+            public static Vector3 Divide(this Vector3 a, Vector3 b)
+            {
+                return new Vector3(a.x / b.x, a.y / b.y, a.z / b.z);
+            }
+
             public static string FormattedTime(this float time)
             {
                 float minutes = Mathf.FloorToInt(time / 60);
@@ -284,6 +289,99 @@ namespace MyUnityAddons
                     Mathf.Round(vector3.y * multiplier) / multiplier,
                     Mathf.Round(vector3.z * multiplier) / multiplier
                     );
+            }
+
+            public static Vector3 FuturePosition(Vector3 currentPosition, Rigidbody rigidbody, float seconds)
+            {
+                return currentPosition + (rigidbody.velocity * seconds);
+            }
+
+            public static Vector3 FuturePosition(Vector3 currentPosition, Rigidbody rigidbody, int frames)
+            {
+                return currentPosition + (frames * Time.deltaTime * rigidbody.velocity);
+            }
+
+            public static float TravelTime(Vector3 start, Vector3 end, float speed)
+            {
+                return Vector3.Distance(start, end) / speed;
+            }
+
+            public static Transform ClosestTransform(this Transform fromTransform, List<Transform> transforms)
+            {
+                if (transforms.Count > 0)
+                {
+                    float bestDistance = Mathf.Infinity;
+                    Transform closestTransform = transforms[0];
+                    for (int i = 1; i < transforms.Count; i++)
+                    {
+                        if (transforms[i] != null && transforms[i] != fromTransform)
+                        {
+                            float distance = SqrDistance(fromTransform.position, transforms[i].position);
+                            if (distance < bestDistance)
+                            {
+                                bestDistance = distance;
+                                closestTransform = transforms[i];
+                            }
+                        }
+                    }
+                    return closestTransform;
+                }
+                return null;
+            }
+
+            public static Transform ClosestTransform(this Transform fromTransform, Transform parent)
+            {
+                Transform closestTransform = null;
+                if (parent.childCount > 0)
+                {
+                    float bestDistance = Mathf.Infinity;
+                    foreach (Transform child in parent)
+                    {
+                        if (child != fromTransform)
+                        {
+                            float distance = SqrDistance(fromTransform.position, child.position);
+                            if (distance < bestDistance)
+                            {
+                                bestDistance = distance;
+                                closestTransform = child;
+                            }
+                        }
+                    }
+                }
+                return closestTransform;
+            }
+
+            public static Vector3 ClosestAnglePosition(this Transform transform, List<Vector3> positions)
+            {
+                if (positions.Count > 0)
+                {
+                    float bestAngle = Mathf.Infinity;
+                    Vector3 bestPosition = positions[0];
+                    for (int i = 1; i < positions.Count; i++)
+                    {
+                        Vector3 direction = positions[i] - transform.position;
+                        float angle = Vector3.Angle(direction, transform.forward);
+                        if (angle < bestAngle)
+                        {
+                            bestAngle = angle;
+                            bestPosition = positions[i];
+                        }
+                    }
+                    return bestPosition;
+                }
+                return Vector3.zero;
+            }
+
+            public static void AddOrReplace<T1, T2>(this Dictionary<T1, T2> dictionary, T1 key, T2 value)
+            {
+                if (dictionary.ContainsKey(key))
+                {
+                    dictionary[key] = value;
+                }
+                else
+                {
+                    dictionary.Add(key, value);
+                }
             }
         }
     }

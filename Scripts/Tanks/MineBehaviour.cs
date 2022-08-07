@@ -11,6 +11,7 @@ public class MineBehaviour : MonoBehaviour
     public Transform owner { get; set; }
     public PhotonView ownerPV { get; set; }
 
+    [SerializeField] LayerMask overlapIgnore;
     public Transform explosionEffect;
 
     public Material normalMaterial;
@@ -19,7 +20,11 @@ public class MineBehaviour : MonoBehaviour
     public float activateDelay = 1;
     public float timer = 30;
     public float explosionForce = 12f;
-    public float explosionRadius = 4.5f;
+    public float explosionRadius = 7f;
+
+    [SerializeField] AudioSource audioSource;
+    [SerializeField] AudioClip tickOne;
+    [SerializeField] AudioClip tickTwo;
 
     bool canFlash = true;
 
@@ -29,7 +34,7 @@ public class MineBehaviour : MonoBehaviour
         if (!GameManager.frozen)
         {
             activateDelay -= Time.deltaTime * 1;
-
+            
             if (activateDelay <= 0)
             {
                 timer -= Time.deltaTime * 1;
@@ -73,29 +78,44 @@ public class MineBehaviour : MonoBehaviour
                     }
                 }
                 break;
-            case "Bullet":
-                // Exploding if bullet hits the mine
-                if (Vector3.Distance(transform.position, other.transform.position) <= GetComponent<SphereCollider>().radius)
-                {
-                    ExplodeMine(new List<Transform>());
-                }
-                break;
         }
     }
 
-    void IncreaseKills()
+    void MultiplayerAddKills()
     {
-        if (owner != null && owner.CompareTag("Player"))
+        dataSystem.currentPlayerData.kills++;
+
+        PhotonHashtable playerProperties = PhotonNetwork.LocalPlayer.CustomProperties;
+        playerProperties["Kills"] = dataSystem.currentPlayerData.kills;
+        PhotonNetwork.LocalPlayer.SetCustomProperties(playerProperties);
+    }
+
+    void IncreaseKills(Transform other)
+    {
+        if (owner != null && owner.CompareTag("Player") && owner != other)
         {
             if (!PhotonNetwork.OfflineMode)
             {
-                if (ownerPV.IsMine)
+                if (ownerPV != null && ownerPV.IsMine)
                 {
-                    dataSystem.currentPlayerData.kills++;
-
-                    PhotonHashtable playerProperties = PhotonNetwork.LocalPlayer.CustomProperties;
-                    playerProperties["Kills"] = dataSystem.currentPlayerData.kills;
-                    PhotonNetwork.LocalPlayer.SetCustomProperties(playerProperties);
+                    if (other.CompareTag("Tank"))
+                    {
+                        MultiplayerAddKills();
+                    }
+                    else if (other.CompareTag("Player"))
+                    {
+                        if (other.name.Contains("Team"))
+                        {
+                            if (other.name != owner.name)
+                            {
+                                MultiplayerAddKills();
+                            }
+                        }
+                        else
+                        {
+                            MultiplayerAddKills();
+                        }
+                    }
                 }
             }
             else
@@ -107,13 +127,18 @@ public class MineBehaviour : MonoBehaviour
 
     IEnumerator Flash(float timeLeft)
     {
+        audioSource.pitch += 0.01f;
         // Alternating between normal and flash materials
         canFlash = false;
         GetComponent<Renderer>().material = flashMaterial;
+        audioSource.clip = tickOne;
+        audioSource.Play();
 
         yield return new WaitForSeconds(timeLeft * 0.1f);
 
         GetComponent<Renderer>().material = normalMaterial;
+        audioSource.clip = tickTwo;
+        audioSource.Play();
 
         yield return new WaitForSeconds(timeLeft * 0.1f);
         canFlash = true;
@@ -124,67 +149,67 @@ public class MineBehaviour : MonoBehaviour
         chain.Add(transform);
 
         // Getting all colliders within explosionRadius
-        Collider[] colliders = Physics.OverlapSphere(transform.position, explosionRadius);
+        Collider[] colliders = Physics.OverlapSphere(transform.position, explosionRadius, ~overlapIgnore);
         List<Transform> explodedTanks = new List<Transform>();
         foreach (Collider collider in colliders)
         {
-            switch (collider.tag)
+            if(collider != null)
             {
-                case "Tank":
-                    if (collider != null && collider.transform.parent.name != "Tanks" && !explodedTanks.Contains(collider.transform.parent))
-                    {
-                        explodedTanks.Add(collider.transform.parent);
+                switch (collider.tag)
+                {
+                    case "Tank":
+                        if (collider.transform.parent.name != "Tanks" && !explodedTanks.Contains(collider.transform.parent))
+                        {
+                            explodedTanks.Add(collider.transform.parent);
 
-                        if (!PhotonNetwork.OfflineMode)
-                        {
-                            if (ownerPV.IsMine)
+                            if (!PhotonNetwork.OfflineMode && !GameManager.autoPlay)
                             {
-                                collider.transform.parent.GetComponent<PhotonView>().RPC("ExplodeTank", RpcTarget.All);
-                                IncreaseKills();
-                            }
-                        }
-                        else
-                        {
-                            collider.transform.parent.GetComponent<BaseTankLogic>().ExplodeTank();
-                            IncreaseKills();
-                        }
-                    }
-                    break;
-                case "Player":
-                    if (collider != null && !explodedTanks.Contains(collider.transform.parent))
-                    {
-                        explodedTanks.Add(collider.transform.parent);
-                        if (!PhotonNetwork.OfflineMode)
-                        {
-                            if (ownerPV.IsMine)
-                            {
-                                collider.transform.parent.parent.GetComponent<PhotonView>().RPC("ExplodeTank", RpcTarget.All);
-                                if (owner != collider.transform.parent.parent && !(owner.name.Contains("Team") && owner.name == collider.transform.parent.parent.name))
+                                if (ownerPV.IsMine)
                                 {
-                                    IncreaseKills();
+                                    collider.transform.parent.GetComponent<PhotonView>().RPC("ExplodeTank", RpcTarget.All);
                                 }
                             }
+                            else
+                            {
+                                collider.transform.parent.GetComponent<BaseTankLogic>().ExplodeTank();
+                            }
+                            IncreaseKills(collider.transform.parent);
                         }
-                        else
+                        break;
+                    case "Player":
+                        Transform otherPlayer = collider.transform.root;
+                        if (!explodedTanks.Contains(otherPlayer))
                         {
-                            collider.transform.parent.parent.GetComponent<BaseTankLogic>().ExplodeTank();
+                            explodedTanks.Add(otherPlayer);
+                            if (!PhotonNetwork.OfflineMode)
+                            {
+                                if (ownerPV.IsMine)
+                                {
+                                    otherPlayer.GetComponent<PhotonView>().RPC("ExplodeTank", RpcTarget.All);
+                                }
+                            }
+                            else
+                            {
+                                otherPlayer.GetComponent<BaseTankLogic>().ExplodeTank();
+                            }
+                            IncreaseKills(otherPlayer);
                         }
-                    }
-                    break;
-                case "Destructable":
-                    collider.transform.parent.GetComponent<DestructableObject>().DestroyObject();
-                    break;
-                case "Bullet":
-                    // Destroying bullets in explosion
-                    collider.GetComponent<BulletBehaviour>().SafeDestroy();
-                    break;
-                case "Mine":
-                    // Explode other mines not in mine chain
-                    if (!chain.Contains(collider.transform))
-                    {
-                        collider.GetComponent<MineBehaviour>().ExplodeMine(chain);
-                    }
-                    break;
+                        break;
+                    case "Destructable":
+                        collider.transform.parent.GetComponent<DestructableObject>().DestroyObject();
+                        break;
+                    case "Bullet":
+                        // Destroying bullets in explosion
+                        collider.GetComponent<BulletBehaviour>().SafeDestroy();
+                        break;
+                    case "Mine":
+                        // Explode other mines not in mine chain
+                        if (!chain.Contains(collider.transform.parent))
+                        {
+                            collider.transform.parent.GetComponent<MineBehaviour>().ExplodeMine(chain);
+                        }
+                        break;
+                }
             }
 
             Rigidbody rb = collider.GetComponent<Rigidbody>();
@@ -205,7 +230,7 @@ public class MineBehaviour : MonoBehaviour
             owner.GetComponent<MineControl>().minesLaid -= 1;
         }
 
-        Instantiate(explosionEffect, transform.position, Quaternion.Euler(-90, 0, 0));
+        Instantiate(explosionEffect, transform.position, Quaternion.Euler(-90, 0, 0), transform.parent);
         Destroy(gameObject);
     }
 }

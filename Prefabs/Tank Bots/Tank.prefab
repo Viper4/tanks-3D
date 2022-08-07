@@ -24,7 +24,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 178177191797433766}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 1.8}
+  m_LocalPosition: {x: 0, y: 0, z: 1.9}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -162,51 +162,6 @@ TrailRenderer:
   m_MinVertexDistance: 0.5
   m_Autodestruct: 0
   m_Emitting: 0
---- !u!1 &3706962168319075911
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 7429036160398029175}
-  - component: {fileID: 5328167219343814396}
-  m_Layer: 2
-  m_Name: Collider
-  m_TagString: Tank
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &7429036160398029175
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3706962168319075911}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.004999995, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 6492373173433346623}
-  m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!65 &5328167219343814396
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3706962168319075911}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 0.4272948, y: 0.42200983, z: 1.0955627}
-  m_Center: {x: 0.0000053048134, y: -0.009514272, z: 1.1293906}
 --- !u!1 &6208524989886302013
 GameObject:
   m_ObjectHideFlags: 0
@@ -338,6 +293,176 @@ TrailRenderer:
   m_MinVertexDistance: 0.5
   m_Autodestruct: 0
   m_Emitting: 0
+--- !u!1 &6803488870588897540
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2977560759393522236}
+  - component: {fileID: 2945861341707611945}
+  - component: {fileID: 8411636547553498246}
+  m_Layer: 6
+  m_Name: Engine Sounds
+  m_TagString: Tank
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2977560759393522236
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6803488870588897540}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8015774000218417766}
+  m_RootOrder: 4
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2945861341707611945
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6803488870588897540}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7574d37392bd1e644bff070262dd4b39, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rb: {fileID: 5844788160669333172}
+  scale: 0.025
+--- !u!82 &8411636547553498246
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6803488870588897540}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 8300000, guid: 6d7fc0a90993ef64d9e8c7898b681444, type: 3}
+  m_PlayOnAwake: 1
+  m_Volume: 1
+  m_Pitch: 1
+  Loop: 1
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 2
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.17190996
+      value: 0.7161397
+      inSlope: -4.9173336
+      outSlope: -4.9173336
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.19076194
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.2550319
+      value: 0.36515713
+      inSlope: -3.4580731
+      outSlope: -3.4580731
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.67663
+      outWeight: 0.375052
+    - serializedVersion: 3
+      time: 0.42490166
+      value: 0.048013166
+      inSlope: -0.30107778
+      outSlope: -0.30107778
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.28586784
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!1 &6946500866998446565
 GameObject:
   m_ObjectHideFlags: 0
@@ -349,7 +474,7 @@ GameObject:
   - component: {fileID: 5864286255247148983}
   - component: {fileID: 4056567799526924911}
   - component: {fileID: 5412134752811367083}
-  - component: {fileID: 2054228576988698099}
+  - component: {fileID: 9044345748959471476}
   m_Layer: 6
   m_Name: Body
   m_TagString: Tank
@@ -424,7 +549,7 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &2054228576988698099
+--- !u!65 &9044345748959471476
 BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -435,151 +560,8 @@ BoxCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 2.1000001, y: 0.86395407, z: 2.2000003}
+  m_Size: {x: 1.9080905, y: 0.86395395, z: 2.2000003}
   m_Center: {x: 0, y: -0.048248097, z: -0.00000011920929}
---- !u!1 &7119113399500168268
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 864199735705925495}
-  - component: {fileID: 3903496457853741037}
-  - component: {fileID: 3589695543389222673}
-  m_Layer: 7
-  m_Name: Engine Sounds
-  m_TagString: Tank
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &864199735705925495
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7119113399500168268}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 8015774000218417766}
-  m_RootOrder: 4
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &3903496457853741037
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7119113399500168268}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7574d37392bd1e644bff070262dd4b39, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  rb: {fileID: 5844788160669333172}
-  scale: 0.04
---- !u!82 &3589695543389222673
-AudioSource:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7119113399500168268}
-  m_Enabled: 1
-  serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 8300000, guid: 6d7fc0a90993ef64d9e8c7898b681444, type: 3}
-  m_PlayOnAwake: 1
-  m_Volume: 0.3
-  m_Pitch: 1
-  Loop: 1
-  Mute: 0
-  Spatialize: 0
-  SpatializePostEffects: 0
-  Priority: 128
-  DopplerLevel: 1
-  MinDistance: 1
-  MaxDistance: 500
-  Pan2D: 0
-  rolloffMode: 0
-  BypassEffects: 0
-  BypassListenerEffects: 0
-  BypassReverbZones: 0
-  rolloffCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 1
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  panLevelCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  spreadCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  reverbZoneMixCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
 --- !u!1 &7186439372290676570
 GameObject:
   m_ObjectHideFlags: 0
@@ -590,7 +572,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7243328552777515205}
   - component: {fileID: 1898767684357893552}
-  m_Layer: 7
+  m_Layer: 2
   m_Name: TrackMarks
   m_TagString: Tank
   m_Icon: {fileID: 0}
@@ -605,7 +587,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7186439372290676570}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.025, z: -0.5}
+  m_LocalPosition: {x: 0, y: 0.025, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -668,7 +650,7 @@ Transform:
   - {fileID: 5864286255247148983}
   - {fileID: 470245200653378290}
   - {fileID: 7243328552777515205}
-  - {fileID: 864199735705925495}
+  - {fileID: 2977560759393522236}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -690,12 +672,13 @@ MonoBehaviour:
   bullet: {fileID: 4307626717143694363, guid: de9dbd5b8f77ecb4a866f8d8cf75c17d, type: 3}
   spawnPoint: {fileID: 4936167098490846088}
   shootEffect: {fileID: 7275907135579404139, guid: 71b07424ffcb49a41830ab0761db5c07, type: 3}
-  speed: 32
+  bulletParent: {fileID: 0}
+  speed: 16
   explosionRadius: 0
   pierceLevel: 0
   ricochetLevel: 1
   bulletLimit: 1
-  fireCooldown: 4
+  fireCooldown: []
   canFire: 1
   solidLayerMask:
     serializedVersion: 2
@@ -715,8 +698,10 @@ MonoBehaviour:
   PV: {fileID: -2919022130532306940}
   tankOrigin: {fileID: 8015774000218417766}
   mine: {fileID: 4223942867902412960, guid: 8a98f2906960e414d93db694525801d9, type: 3}
+  mineParent: {fileID: 0}
   mineLimit: 2
-  layCooldown: 3
+  layCooldown: []
+  explosionRadius: 7
   canLay: 1
 --- !u!114 &-1708683654604279647
 MonoBehaviour:
@@ -734,17 +719,22 @@ MonoBehaviour:
   playerControl: {fileID: 0}
   explosionEffect: {fileID: 3507901705876011728, guid: 8d9ad67b12c764e4387b9e13b552aa70, type: 3}
   deathMarker: {fileID: 1488974823688567530, guid: b6f86cc02a55019419155e7336e1ee70, type: 3}
-  transparentLayers:
-    serializedVersion: 2
-    m_Bits: 1806
+  effectsParent: {fileID: 0}
   barrierLayers:
     serializedVersion: 2
-    m_Bits: 705
-  nonSlopeLayers:
+    m_Bits: 193217
+  slopeLayers:
     serializedVersion: 2
-    m_Bits: 2030
+    m_Bits: 1
   slopeAlignment: 1
   alignRotationSpeed: 20
+  stationary: 0
+  obstacleAvoidance: 1
+  normalSpeed: 5
+  avoidSpeed: 2.5
+  useGravity: 1
+  gravity: 8
+  velocityLimit: 25
   flipAngleThreshold: 20
   restrictRotation: 0
   pitchRange:
@@ -753,16 +743,21 @@ MonoBehaviour:
   rollRange:
   - -45
   - 45
-  noisyRotation: 1
+  tankNoise: 0
   tankRotSpeed: 250
   tankRotNoiseScale: 5
   tankRotNoiseSpeed: 0.5
+  turretRotation: 1
+  turretNoise: 0
   turretRotSpeed: 35
   inaccuracy: {x: 8, y: 35}
   turretNoiseSpeed: 0.15
   turretRangeX:
   - -20
   - 20
+  overrideRotation: 0
+  targetTurretDir: {x: 0, y: 0, z: 0}
+  targetTankDir: {x: 0, y: 0, z: 0}
   tankOrigin: {fileID: 8015774000218417766}
 --- !u!114 &6691410845055233786
 MonoBehaviour:
@@ -778,14 +773,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   primaryTarget: {fileID: 0}
   currentTarget: {fileID: 0}
-  findTarget: 0
-  predictTargetPos: 0
-  predictionScale: 1
-  turret: {fileID: 470245200653378290}
+  preferredTargetArea: Turret
   ignoreLayerMask:
     serializedVersion: 2
     m_Bits: 1838
-  tankParent: {fileID: 0}
+  enemyParent: {fileID: 0}
 --- !u!54 &5844788160669333172
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -849,7 +841,7 @@ GameObject:
   - component: {fileID: 470245200653378290}
   - component: {fileID: 5188508791628536021}
   - component: {fileID: 6179833452697256270}
-  - component: {fileID: 5812519717308023054}
+  - component: {fileID: 2456165048282391426}
   m_Layer: 6
   m_Name: Turret
   m_TagString: Tank
@@ -922,7 +914,7 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &5812519717308023054
+--- !u!65 &2456165048282391426
 BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -933,8 +925,8 @@ BoxCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 1.1307571, y: 0.6751647, z: 1.1671374}
-  m_Center: {x: 0.000005066395, y: 0.0038772821, z: -0.0019680858}
+  m_Size: {x: 1.0176814, y: 0.6751647, z: 1.0504236}
+  m_Center: {x: 0.000005066395, y: 0.0038772672, z: -0.001989007}
 --- !u!1 &8677571688758299450
 GameObject:
   m_ObjectHideFlags: 0
@@ -946,6 +938,7 @@ GameObject:
   - component: {fileID: 6492373173433346623}
   - component: {fileID: 1985423431081069492}
   - component: {fileID: 6856887618501404105}
+  - component: {fileID: 1091332913795999007}
   m_Layer: 6
   m_Name: Barrel
   m_TagString: Tank
@@ -966,7 +959,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4936167098490846088}
-  - {fileID: 7429036160398029175}
   m_Father: {fileID: 8015774000218417766}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -1022,3 +1014,16 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &1091332913795999007
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8677571688758299450}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.3845653, y: 0.3798088, z: 1.6}
+  m_Center: {x: 0.000005312264, y: -0.009514242, z: 0.79}

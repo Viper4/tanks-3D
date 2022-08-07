@@ -30,5 +30,6 @@ public class ConnectToServer : MonoBehaviourPunCallbacks
     public override void OnDisconnected(DisconnectCause cause)
     {
         GameManager.gameManager.LoadScene("Main Menu");
+        PhotonNetwork.OfflineMode = true;
     }
 }

@@ -7,7 +7,7 @@ public class DestructableObject : MonoBehaviour
     public Transform particles;
     public Material material;
     [SerializeField] float respawnDelay = 0;
-    [SerializeField] GameObject cube;
+    [SerializeField] GameObject solidObject;
 
     public void PlayParticles()
     {
@@ -17,7 +17,7 @@ public class DestructableObject : MonoBehaviour
     
     public void DestroyObject()
     {
-        cube.SetActive(false);
+        solidObject.SetActive(false);
         PlayParticles();
 
         if (respawnDelay > 0)
@@ -29,6 +29,6 @@ public class DestructableObject : MonoBehaviour
     IEnumerator Respawn()
     {
         yield return new WaitForSeconds(respawnDelay);
-        cube.SetActive(true);
+        solidObject.SetActive(true);
     }
 }

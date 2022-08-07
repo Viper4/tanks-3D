@@ -9,6 +9,8 @@ public class BrownBot : MonoBehaviour
 
     [SerializeField] float turretRotSpeed = 20;
 
+    [SerializeField] float visibilityDistance = 3;
+    [SerializeField] float[] fireDelay = { 1.25f, 3f };
     [SerializeField] Vector2 turretScanRange = new Vector2(8, 45);
     [SerializeField] float[] scanChangeDelay = { 3, 6 };
     float scanOffset = 0;
@@ -46,13 +48,19 @@ public class BrownBot : MonoBehaviour
             barrel.localEulerAngles = new Vector3(angleX, currentScanOffset, 0);
 
             // If target is in front of barrel then fire
-            if (!shooting && targetSystem.TargetInLineOfFire())
+            if (!shooting && targetSystem.TargetInLineOfFire(visibilityDistance))
             {
-                StartCoroutine(GetComponent<FireControl>().Shoot());
+                StartCoroutine(Shoot());
             }
         }
     }
     
+    IEnumerator Shoot()
+    {
+        yield return new WaitForSeconds(Random.Range(fireDelay[0], fireDelay[1]));
+        StartCoroutine(GetComponent<FireControl>().Shoot());
+    }
+
     IEnumerator ChangeScan()
     {
         yield return new WaitForSeconds(Random.Range(scanChangeDelay[0], scanChangeDelay[1]));

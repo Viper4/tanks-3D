@@ -7,9 +7,12 @@ public class RoomCustomization : MonoBehaviour
 {
     [SerializeField] DataManager dataManager;
 
+    [SerializeField] RectTransform mapSelection;
+
     [SerializeField] RectTransform FFASettings;
     [SerializeField] RectTransform teamSettings;
     [SerializeField] RectTransform PvESettings;
+    [SerializeField] RectTransform CoOpSettings;
 
     [SerializeField] RectTransform roundSettings;
 
@@ -18,28 +21,33 @@ public class RoomCustomization : MonoBehaviour
         dataManager.currentRoomSettings.map = dropdown.options[dropdown.value].text;
     }
 
+    public void ChangeCampaign(Dropdown dropdown)
+    {
+        dataManager.currentRoomSettings.map = dropdown.options[dropdown.value].text + " 1";
+    }
+
     public void ChangePrimaryMode(Dropdown dropdown)
     {
         string option = dropdown.options[dropdown.value].text;
         dataManager.currentRoomSettings.primaryMode = option;
 
-        switch (option)
+        FFASettings.gameObject.SetActive(option == "FFA");
+        PvESettings.gameObject.SetActive(option == "PvE");
+        teamSettings.gameObject.SetActive(option == "Teams");
+
+        if (option == "Co-Op")
         {
-            case "FFA":
-                FFASettings.gameObject.SetActive(true);
-                PvESettings.gameObject.SetActive(false);
-                teamSettings.gameObject.SetActive(false);
-                break;
-            case "Teams":
-                teamSettings.gameObject.SetActive(true);
-                FFASettings.gameObject.SetActive(false);
-                PvESettings.gameObject.SetActive(false);
-                break;
-            case "PvE":
-                PvESettings.gameObject.SetActive(true);
-                teamSettings.gameObject.SetActive(false);
-                FFASettings.gameObject.SetActive(false);
-                break;
+            CoOpSettings.gameObject.SetActive(true);
+            mapSelection.gameObject.SetActive(false);
+
+            dataManager.currentRoomSettings.map = "Classic 1";
+        }
+        else
+        {
+            CoOpSettings.gameObject.SetActive(false);
+            mapSelection.gameObject.SetActive(true);
+
+            dataManager.currentRoomSettings.map = "Classic";
         }
     }
 

@@ -17,7 +17,7 @@ GameObject:
   - component: {fileID: 8710859505732709096}
   - component: {fileID: 2357316915114492385}
   - component: {fileID: 3473729789501092902}
-  - component: {fileID: 1881009222403047775}
+  - component: {fileID: -6601077420462948118}
   m_Layer: 3
   m_Name: Rocket Bullet
   m_TagString: Bullet
@@ -262,6 +262,9 @@ MonoBehaviour:
   startDelay:
   - 0
   - 0.05
+  pitchRange:
+  - 0.8
+  - 1.2
 --- !u!82 &3473729789501092902
 AudioSource:
   m_ObjectHideFlags: 0
@@ -385,7 +388,7 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
---- !u!64 &1881009222403047775
+--- !u!64 &-6601077420462948118
 MeshCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

@@ -6,9 +6,9 @@ using UnityEngine.Rendering.Universal;
 
 public class SettingsUIHandler : MonoBehaviour
 {
+    [SerializeField] DataManager dataManager;
     [SerializeField] UniversalRendererData forwardRenderer;
     [SerializeField] BaseUIHandler baseUIHandler;
-    [SerializeField] DataManager dataSystem;
     Transform selectedKeyBind;
 
     readonly KeyCode[] mouseKeyCodes = { KeyCode.Mouse0, KeyCode.Mouse1, KeyCode.Mouse2, KeyCode.Mouse3, KeyCode.Mouse4, KeyCode.Mouse5, KeyCode.Mouse6 };
@@ -26,12 +26,12 @@ public class SettingsUIHandler : MonoBehaviour
         {
             if (currentEvent.isKey)
             {
-                dataSystem.currentPlayerSettings.keyBinds[selectedKeyBind.name] = currentEvent.keyCode;
+                dataManager.currentPlayerSettings.keyBinds[selectedKeyBind.name] = currentEvent.keyCode;
                 selectedKeyBind.Find("Button").GetChild(0).GetComponent<Text>().text = currentEvent.keyCode.ToString();
             }
             else if (currentEvent.isMouse)
             {
-                dataSystem.currentPlayerSettings.keyBinds[selectedKeyBind.name] = mouseKeyCodes[currentEvent.button];
+                dataManager.currentPlayerSettings.keyBinds[selectedKeyBind.name] = mouseKeyCodes[currentEvent.button];
                 selectedKeyBind.Find("Button").GetChild(0).GetComponent<Text>().text = mouseKeyCodes[currentEvent.button].ToString();
             }
             selectedKeyBind = null;
@@ -51,25 +51,25 @@ public class SettingsUIHandler : MonoBehaviour
 
     public void ChangeSensitivity(Slider slider)
     {
-        dataSystem.currentPlayerSettings.sensitivity = slider.value;
+        dataManager.currentPlayerSettings.sensitivity = slider.value;
         slider.transform.Find("Value Text").GetComponent<Text>().text = slider.value.ToString();
     }
 
     public void ChangeMasterVolume(Slider slider)
     {
-        dataSystem.currentPlayerSettings.masterVolume = slider.value;
+        dataManager.currentPlayerSettings.masterVolume = slider.value;
         slider.transform.Find("Value Text").GetComponent<Text>().text = slider.value.ToString();
 
         AudioSource[] allAudioSource = Object.FindObjectsOfType<AudioSource>();
         foreach (AudioSource audioSource in allAudioSource)
         {
-            audioSource.volume *= dataSystem.currentPlayerSettings.masterVolume / 100;
+            audioSource.volume *= dataManager.currentPlayerSettings.masterVolume / 100;
         }
     }
 
     public void ToggleSilhouettes(Toggle toggle)
     {
-        dataSystem.currentPlayerSettings.silhouettes = toggle.isOn;
+        dataManager.currentPlayerSettings.silhouettes = toggle.isOn;
 
         foreach (ScriptableRendererFeature feature in forwardRenderer.rendererFeatures)
         {
@@ -82,34 +82,34 @@ public class SettingsUIHandler : MonoBehaviour
 
     public void SetCustomCrosshair(InputField input)
     {
-        dataSystem.currentPlayerSettings.crosshairFileName = input.text;
+        dataManager.currentPlayerSettings.crosshairFileName = input.text;
     }
 
     public void SetCrosshairScale(InputField input)
     {
-        dataSystem.currentPlayerSettings.crosshairScale = float.Parse(input.text);
+        dataManager.currentPlayerSettings.crosshairScale = float.Parse(input.text);
     }
 
     public void SetCrosshairColor(Dropdown dropdown)
     {
-        dataSystem.currentPlayerSettings.crosshairColorIndex = dropdown.value;
+        dataManager.currentPlayerSettings.crosshairColorIndex = dropdown.value;
     }
 
     public void SaveSettings(string fileName)
     {
-        dataSystem.currentPlayerSettings.SavePlayerSettings(fileName);
+        dataManager.currentPlayerSettings.SavePlayerSettings(fileName);
     }
 
     public void LoadSettings(string fileName)
     {
-        dataSystem.currentPlayerSettings = SaveSystem.LoadPlayerSettings(fileName, dataSystem.transform);
+        dataManager.currentPlayerSettings = SaveSystem.LoadPlayerSettings(fileName, dataManager.transform);
 
         UpdateSettingsUI();
     }
 
     public void ResetSettings()
     {
-        dataSystem.currentPlayerSettings = SaveSystem.defaultPlayerSettings;
+        dataManager.currentPlayerSettings = SaveSystem.defaultPlayerSettings;
 
         UpdateSettingsUI();
     }
@@ -121,7 +121,7 @@ public class SettingsUIHandler : MonoBehaviour
         {
             if (feature.name == "TankHidden" || feature.name == "BulletHidden")
             {
-                feature.SetActive(dataSystem.currentPlayerSettings.silhouettes);
+                feature.SetActive(dataManager.currentPlayerSettings.silhouettes);
             }
         }
         // Updating UI elements in settings
@@ -135,7 +135,7 @@ public class SettingsUIHandler : MonoBehaviour
                         switch (setting.name)
                         {
                             case "Sensitivity":
-                                setting.GetComponent<Slider>().value = dataSystem.currentPlayerSettings.sensitivity;
+                                setting.GetComponent<Slider>().value = dataManager.currentPlayerSettings.sensitivity;
                                 break;
                         }
                     }
@@ -143,7 +143,7 @@ public class SettingsUIHandler : MonoBehaviour
                 case "Keybinds":
                     foreach (Transform keybind in content)
                     {
-                        keybind.Find("Button").GetChild(0).GetComponent<Text>().text = dataSystem.currentPlayerSettings.keyBinds[keybind.name].ToString();
+                        keybind.Find("Button").GetChild(0).GetComponent<Text>().text = dataManager.currentPlayerSettings.keyBinds[keybind.name].ToString();
                     }
                     break;
                 case "Video":
@@ -152,16 +152,16 @@ public class SettingsUIHandler : MonoBehaviour
                         switch (setting.name)
                         {
                             case "Silhouettes":
-                                setting.GetComponent<Toggle>().isOn = dataSystem.currentPlayerSettings.silhouettes;
+                                setting.GetComponent<Toggle>().isOn = dataManager.currentPlayerSettings.silhouettes;
                                 break;
                             case "Custom Crosshair":
-                                setting.Find("InputField").GetComponent<InputField>().text = dataSystem.currentPlayerSettings.crosshairFileName;
+                                setting.Find("InputField").GetComponent<InputField>().text = dataManager.currentPlayerSettings.crosshairFileName;
                                 break;
                             case "Crosshair Color":
-                                setting.Find("Dropdown").GetComponent<Dropdown>().value = dataSystem.currentPlayerSettings.crosshairColorIndex;
+                                setting.Find("Dropdown").GetComponent<Dropdown>().value = dataManager.currentPlayerSettings.crosshairColorIndex;
                                 break;
                             case "Crosshair Scale":
-                                setting.Find("InputField").GetComponent<InputField>().text = dataSystem.currentPlayerSettings.crosshairScale.ToString();
+                                setting.Find("InputField").GetComponent<InputField>().text = dataManager.currentPlayerSettings.crosshairScale.ToString();
                                 break;
                         }
                     }
@@ -172,7 +172,7 @@ public class SettingsUIHandler : MonoBehaviour
                         switch (setting.name)
                         {
                             case "Master Volume":
-                                setting.GetComponent<Slider>().value = dataSystem.currentPlayerSettings.masterVolume;
+                                setting.GetComponent<Slider>().value = dataManager.currentPlayerSettings.masterVolume;
                                 break;
                         }
                     }

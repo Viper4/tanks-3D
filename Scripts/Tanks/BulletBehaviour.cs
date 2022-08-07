@@ -50,7 +50,7 @@ public class BulletBehaviour : MonoBehaviour
                     KillTarget(other.transform.parent);
                     break;
                 case "Player":
-                    Transform otherPlayer = other.transform.root.Find("Tank Origin");
+                    Transform otherPlayer = other.transform.root;
                     KillTarget(otherPlayer);
                     break;
             }
@@ -64,10 +64,17 @@ public class BulletBehaviour : MonoBehaviour
             switch (other.transform.tag)
             {
                 case "Tank":
-                    KillTarget(other.transform);
+                    if (other.transform.parent.CompareTag("Tank"))
+                    {
+                        KillTarget(other.transform.parent);
+                    }
+                    else
+                    {
+                        KillTarget(other.transform);
+                    }
                     break;
                 case "Player":
-                    Transform otherPlayer = other.transform.root.Find("Tank Origin");
+                    Transform otherPlayer = other.transform.root;
                     KillTarget(otherPlayer);
                     break;
                 case "Destructable":
@@ -101,6 +108,11 @@ public class BulletBehaviour : MonoBehaviour
                     Destroy(other.gameObject);
                     
                     NormalDestroy();
+                    break;
+                case "Mine":
+                    other.transform.parent.GetComponent<MineBehaviour>().ExplodeMine(new List<Transform>());
+
+                    SafeDestroy();
                     break;
                 default:
                     BounceOff(other);
@@ -153,12 +165,12 @@ public class BulletBehaviour : MonoBehaviour
         }
     }
 
-    void BounceOff(Collision hit)
+    void BounceOff(Collision collision)
     {
         if (bounces < ricochetLevel)
         {
             bounces++;
-            Vector3 reflection = Vector3.Reflect(transform.forward, hit.GetContact(0).normal);
+            Vector3 reflection = Vector3.Reflect(transform.forward, collision.GetContact(0).normal);
 
             Reflect(reflection);
             ResetVelocity();
@@ -185,7 +197,7 @@ public class BulletBehaviour : MonoBehaviour
     {
         if (transform.name != "Rocket Bullet" && target != null)
         {
-            if (!PhotonNetwork.OfflineMode)
+            if (!PhotonNetwork.OfflineMode && !GameManager.autoPlay)
             {
                 if (ownerPV != null && ownerPV.IsMine)
                 {
@@ -196,9 +208,8 @@ public class BulletBehaviour : MonoBehaviour
             else
             {
                 IncreaseKills(target);
-                
-                BaseTankLogic baseTankLogic = target.GetComponent<BaseTankLogic>();
-                if (baseTankLogic != null)
+
+                if (target.TryGetComponent<BaseTankLogic>(out var baseTankLogic))
                 {
                     baseTankLogic.ExplodeTank();
                 }
@@ -276,7 +287,7 @@ public class BulletBehaviour : MonoBehaviour
                         collider.GetComponent<BulletBehaviour>().SafeDestroy();
                         break;
                     case "Mine":
-                        collider.GetComponent<MineBehaviour>().ExplodeMine(new List<Transform>());
+                        collider.transform.parent.GetComponent<MineBehaviour>().ExplodeMine(new List<Transform>());
                         break;
                 }
 

@@ -14,8 +14,9 @@ public class FireControl : MonoBehaviour
     [SerializeField] Transform bullet;
     [SerializeField] Transform spawnPoint;
     [SerializeField] Transform shootEffect;
+    [SerializeField] Transform bulletParent;
 
-    [SerializeField] float speed = 32;
+    public float speed = 32;
     [SerializeField] float explosionRadius = 0;
     [SerializeField] int pierceLevel = 0;
     [SerializeField] int ricochetLevel = 1;
@@ -26,6 +27,14 @@ public class FireControl : MonoBehaviour
     public bool canFire = true;
     
     [SerializeField] LayerMask solidLayerMask;
+
+    private void Start()
+    {
+        if (GameManager.autoPlay)
+        {
+            bulletParent = GameObject.Find("ToClear").transform;
+        }
+    }
 
     public IEnumerator Shoot()
     {
@@ -45,7 +54,7 @@ public class FireControl : MonoBehaviour
 
                 Transform bulletClone = InstantiateBullet(spawnPoint.position, spawnPoint.rotation);
 
-                if (!PhotonNetwork.OfflineMode)
+                if (!PhotonNetwork.OfflineMode && !GameManager.autoPlay)
                 {
                     PV.RPC("InstantiateBullet", RpcTarget.Others, new object[] { spawnPoint.position, spawnPoint.rotation });
                 }
@@ -72,7 +81,6 @@ public class FireControl : MonoBehaviour
                 {
                     bulletsFired--;
                 }
-
                 yield return new WaitForSeconds(Random.Range(fireCooldown[0], fireCooldown[1]));
 
                 canFire = true;
@@ -88,36 +96,9 @@ public class FireControl : MonoBehaviour
     [PunRPC]
     Transform InstantiateBullet(Vector3 position, Quaternion rotation)
     {
-        Transform bulletClone = Instantiate(bullet, position, rotation);
-        Instantiate(shootEffect, position, rotation);
+        Transform bulletClone = Instantiate(bullet, position, rotation, bulletParent);
+        Instantiate(shootEffect, position, rotation, bulletParent);
 
         return bulletClone;
-    }
-
-    [PunRPC]
-    void ReflectBullet(Transform bullet, Vector3 reflection, Transform sparkEffect)
-    {
-        Instantiate(sparkEffect, transform.position, Quaternion.identity);
-
-        bullet.forward = reflection;
-    }
-
-    [PunRPC]
-    void ResetBulletVelocity(Rigidbody bulletRB, float speed)
-    {
-        bulletRB.velocity = bulletRB.transform.forward * speed;
-    }
-
-    [PunRPC]
-    void BulletNormalDestroy(GameObject gameObject, Transform explosionEffect)
-    {
-        Instantiate(explosionEffect, gameObject.transform.position, Quaternion.identity);
-        Destroy(gameObject);
-    }
-
-    [PunRPC]
-    void BulletSafeDestroy(GameObject gameObject)
-    {
-        Destroy(gameObject);
     }
 }

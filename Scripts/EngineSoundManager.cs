@@ -5,7 +5,7 @@ using UnityEngine;
 public class EngineSoundManager : MonoBehaviour
 {
     [SerializeField] Rigidbody rb;
-    AudioSource audioSource;
+    [HideInInspector] public AudioSource audioSource;
     float masterVolume = 100;
 
     [SerializeField] float scale;

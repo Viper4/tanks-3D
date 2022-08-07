@@ -1,6 +1,7 @@
 using UnityEngine;
 using Photon.Pun;
 using MyUnityAddons.Math;
+using MyUnityAddons.CustomPhoton;
 
 public class BaseTankLogic : MonoBehaviour
 {
@@ -11,12 +12,24 @@ public class BaseTankLogic : MonoBehaviour
     [Header("Death")]
     [SerializeField] private Transform explosionEffect;
     [SerializeField] private Transform deathMarker;
+    [SerializeField] Transform effectsParent;
 
     [Header("Slope Settings")]
     public LayerMask barrierLayers;
-    [SerializeField] private LayerMask nonSlopeLayers;
+    [SerializeField] private LayerMask slopeLayers;
     [SerializeField] private bool slopeAlignment = true;
     [SerializeField] private float alignRotationSpeed = 20;
+
+    [Header("Tank Movement")]
+    public bool stationary = false;
+    [SerializeField] bool obstacleAvoidance = true;
+    public float normalSpeed = 5;
+    [SerializeField] float avoidSpeed = 2.5f;
+    public bool useGravity = true;
+    public float gravity = 8;
+    public float velocityLimit = 25;
+    float speed = 5;
+    float velocityY = 0;
 
     [Header("Tank Rotation")]
     public float flipAngleThreshold = 20;
@@ -25,41 +38,50 @@ public class BaseTankLogic : MonoBehaviour
     [SerializeField] private float[] rollRange = { -45, 45 };
 
     [Header("Tank Rotation Noise")]
-    public bool noisyRotation;
+    public bool tankNoise = false;
     [SerializeField] private float tankRotSpeed = 250f;
     [SerializeField] private float tankRotNoiseScale = 5;
     [SerializeField] private float tankRotNoiseSpeed = 0.5f;
 
     [Header("Turret Rotation")]
+    [SerializeField] bool turretRotation = true;
+    [SerializeField] bool turretNoise = false;
     [SerializeField] private float turretRotSpeed = 35f;
-    [SerializeField] private Vector2 inaccuracy = new Vector2(8, 35);
-    [SerializeField] private float turretNoiseSpeed = 0.15f;
+    [SerializeField] private Vector2 inaccuracy = new Vector2(4, 6);
+    [SerializeField] private float turretNoiseSpeed = 0.25f;
     [SerializeField] private float[] turretRangeX = { -20, 20 };
+    [HideInInspector] public bool overrideRotation = false;
 
     private float tankRotSeed = 0;
     private float turretRotSeed = 0;
 
-    Quaternion turretAnchor;
+    public Vector3 targetTurretDir;
+    public Vector3 targetTankDir;
     Vector3 lastEulerAngles;
 
     [SerializeField] private Transform tankOrigin;
-    Rigidbody RB;
+    //Rigidbody RB;
     Transform body;
     Transform turret;
     Transform barrel;
+    Rigidbody RB;
 
-    private void Awake() 
+    private void Start() 
     {
         tankRotSeed = Random.Range(-999.0f, 999.0f);
         turretRotSeed = Random.Range(-999.0f, 999.0f);
         
-        RB = GetComponent<Rigidbody>();
-
         body = tankOrigin.Find("Body");
         turret = tankOrigin.Find("Turret");
         barrel = tankOrigin.Find("Barrel");
-        turretAnchor = turret.rotation;
+        RB = tankOrigin.GetComponent<Rigidbody>();
         lastEulerAngles = tankOrigin.eulerAngles;
+        speed = normalSpeed;
+        targetTankDir = tankOrigin.forward;
+        if (GameManager.autoPlay)
+        {
+            effectsParent = GameObject.Find("ToClear").transform;
+        }
     }
 
     private void Update()
@@ -68,7 +90,7 @@ public class BaseTankLogic : MonoBehaviour
         {
             if (slopeAlignment)
             {
-                if (Physics.Raycast(tankOrigin.position, Vector3.down, out RaycastHit hit, 1, ~nonSlopeLayers))
+                if (Physics.Raycast(tankOrigin.position, Vector3.down, out RaycastHit hit, 1, slopeLayers))
                 {
                     // Rotating to align with slope
                     Quaternion alignedRotation = Quaternion.FromToRotation(tankOrigin.up, hit.normal);
@@ -82,33 +104,159 @@ public class BaseTankLogic : MonoBehaviour
                 tankOrigin.eulerAngles = new Vector3(CustomMath.ClampAngle(tankOrigin.eulerAngles.x, pitchRange[0], pitchRange[1]), tankOrigin.eulerAngles.y, CustomMath.ClampAngle(tankOrigin.eulerAngles.z, rollRange[0], rollRange[1]));
             }
 
-            if (noisyRotation && !player)
-            {
-                // Adding noise to rotation
-                float noise = tankRotNoiseScale * (Mathf.PerlinNoise(tankRotSeed + Time.time * tankRotNoiseSpeed, tankRotSeed + 1 + Time.time * tankRotNoiseSpeed) - 0.5f);
-                Quaternion desiredTankRot = Quaternion.LookRotation(Quaternion.AngleAxis(noise, Vector3.up) * transform.forward);
-                RB.MoveRotation(Quaternion.RotateTowards(transform.rotation, desiredTankRot, Time.deltaTime * tankRotSpeed));
-            }
-
+            Vector3 velocityDirection = Vector3.zero;
             if (!player)
             {
-                // Inaccuracy to rotation with noise
-                float noiseX = inaccuracy.x * (Mathf.PerlinNoise(turretRotSeed + Time.time * turretNoiseSpeed, turretRotSeed + 1f + Time.time * turretNoiseSpeed) - 0.5f);
-                float noiseY = inaccuracy.y * (Mathf.PerlinNoise(turretRotSeed + 4f + Time.time * turretNoiseSpeed, turretRotSeed + 5f + Time.time * turretNoiseSpeed) - 0.5f);
+                if (!stationary)
+                {
+                    if (obstacleAvoidance)
+                    {
+                        float normalAngle = 181;
+                        bool[] pathClear = { true, true };
+                        if (Physics.Raycast(body.position, body.forward, out RaycastHit forwardHit, 3, barrierLayers))
+                        {
+                            normalAngle = Vector3.SignedAngle(body.forward, forwardHit.normal, body.up);
+                            Debug.DrawLine(body.position, forwardHit.point, Color.red, 0.1f);
+                        }
+                        else if (Physics.Raycast(body.position - body.right * 0.75f, body.forward, out RaycastHit forwardHitL, 3, barrierLayers))
+                        {
+                            normalAngle = Vector3.SignedAngle(body.forward, forwardHitL.normal, body.up);
+                            Debug.DrawLine(body.position - body.right * 0.75f, forwardHitL.point, Color.red, 0.1f);
+                        }
+                        else if (Physics.Raycast(body.position + body.right * 0.75f, body.forward, out RaycastHit forwardHitR, 3, barrierLayers))
+                        {
+                            normalAngle = Vector3.SignedAngle(body.forward, forwardHitR.normal, body.up);
+                            Debug.DrawLine(body.position + body.right * 0.75f, forwardHitR.point, Color.red, 0.1f);
+                        }
 
-                // Correcting turret and barrel y rotation to not depend on the parent
-                turret.eulerAngles = new Vector3(turret.eulerAngles.x, turret.eulerAngles.y + lastEulerAngles.y - transform.eulerAngles.y, turret.eulerAngles.z);
-                barrel.eulerAngles = new Vector3(barrel.eulerAngles.x, barrel.eulerAngles.y + lastEulerAngles.y - transform.eulerAngles.y, barrel.eulerAngles.z);
+                        if (normalAngle != 181)
+                        {
+                            speed = avoidSpeed;
 
-                // Zeroing x and z eulers of turret and clamping barrel x euler
-                turret.localEulerAngles = new Vector3(0, turret.localEulerAngles.y + noiseY, 0);
-                barrel.localEulerAngles = new Vector3(CustomMath.ClampAngle(barrel.localEulerAngles.x + noiseX, turretRangeX[0], turretRangeX[1]), barrel.localEulerAngles.y + noiseY, 0);
+                            if (Physics.Raycast(body.position, -body.right, out RaycastHit leftHit, 2.5f, barrierLayers))
+                            {
+                                pathClear[0] = false;
+                                Debug.DrawLine(body.position, leftHit.point, Color.red, 0.1f);
+                            }
+                            else if (Physics.Raycast(body.position + body.forward, -body.right, out RaycastHit leftHitF, 2.5f, barrierLayers))
+                            {
+                                pathClear[0] = false;
+                                Debug.DrawLine(body.position + body.forward, leftHitF.point, Color.red, 0.1f);
+                            }
+                            else if (Physics.Raycast(body.position - body.forward, -body.right, out RaycastHit leftHitB, 2.5f, barrierLayers))
+                            {
+                                pathClear[0] = false;
+                                Debug.DrawLine(body.position - body.forward, leftHitB.point, Color.red, 0.1f);
+                            }
+                            if (Physics.Raycast(body.position, body.right, out RaycastHit rightHit, 2.5f, barrierLayers))
+                            {
+                                pathClear[1] = false;
+                                Debug.DrawLine(body.position, rightHit.point, Color.red, 0.1f);
+                            }
+                            else if (Physics.Raycast(body.position + body.forward, body.right, out RaycastHit rightHitF, 2.5f, barrierLayers))
+                            {
+                                pathClear[1] = false;
+                                Debug.DrawLine(body.position + body.forward, rightHitF.point, Color.red, 0.1f);
+                            }
+                            else if (Physics.Raycast(body.position - body.forward, body.right, out RaycastHit rightHitB, 2.5f, barrierLayers))
+                            {
+                                pathClear[1] = false;
+                                Debug.DrawLine(body.position - body.forward, rightHitB.point, Color.red, 0.1f);
+                            }
 
-                lastEulerAngles = tankOrigin.eulerAngles;
+                            if (pathClear[0])
+                            {
+                                if (pathClear[1])
+                                {
+                                    if (normalAngle < 0)
+                                    {
+                                        targetTankDir = -tankOrigin.right;
+                                    }
+                                    else
+                                    {
+                                        targetTankDir = tankOrigin.right;
+                                    }
+                                }
+                                else
+                                {
+                                    targetTankDir = -tankOrigin.right;
+                                }
+                            }
+                            else if (pathClear[1])
+                            {
+                                targetTankDir = tankOrigin.right;
+                            }
+                            else
+                            {
+                                targetTankDir = -tankOrigin.forward;
+                            }
+                        }
+                        else
+                        {
+                            speed = normalSpeed;
+                        }
+                    }
+
+                    // Tank rotation
+                    float noise = 0;
+                    if (tankNoise)
+                    {
+                        // Adding noise to rotation
+                        noise = tankRotNoiseScale * (Mathf.PerlinNoise(tankRotSeed + Time.time * tankRotNoiseSpeed, tankRotSeed + 1 + Time.time * tankRotNoiseSpeed) - 0.5f);
+                    }
+
+                    RotateTankToVector(Quaternion.AngleAxis(noise, tankOrigin.up) * targetTankDir);
+                }
+
+                // Tank movement
+                if (RB != null)
+                {
+                    velocityDirection = transform.forward;
+                    if (Physics.Raycast(transform.position, -transform.up, out RaycastHit middleHit, 1) && Physics.Raycast(transform.position + transform.forward, -transform.up, out RaycastHit frontHit, 1))
+                    {
+                        velocityDirection = frontHit.point - middleHit.point;
+                    }
+
+                    velocityY = !IsGrounded() && useGravity ? velocityY - Time.deltaTime * gravity : 0;
+                    velocityY = Mathf.Clamp(velocityY, -velocityLimit, velocityLimit);
+
+                    RB.velocity = stationary ? Vector3.up * velocityY : velocityDirection * speed + Vector3.up * velocityY;
+                }
+
+                if (turretRotation)
+                {
+                    float noiseX = 0;
+                    float noiseY = 0;
+
+                    if (turretNoise)
+                    {
+                        // Inaccuracy to rotation with noise
+                        noiseX = inaccuracy.x * (Mathf.PerlinNoise(turretRotSeed + Time.time * turretNoiseSpeed, turretRotSeed + 1f + Time.time * turretNoiseSpeed) - 0.5f);
+                        noiseY = inaccuracy.y * (Mathf.PerlinNoise(turretRotSeed + 4f + Time.time * turretNoiseSpeed, turretRotSeed + 5f + Time.time * turretNoiseSpeed) - 0.5f);
+                    }
+
+                    // Rotating turret and barrel towards vector
+                    Quaternion targetTurretRot = Quaternion.LookRotation(Quaternion.AngleAxis(noiseY, turret.up) * Quaternion.AngleAxis(noiseX, turret.right) * targetTurretDir, turret.up);
+                    turret.rotation = barrel.rotation = Quaternion.RotateTowards(barrel.rotation, targetTurretRot, Time.deltaTime * turretRotSpeed);
+
+                    // Correcting turret and barrel y rotation to not depend on the parent
+                    turret.eulerAngles = new Vector3(turret.eulerAngles.x, turret.eulerAngles.y + lastEulerAngles.y - transform.eulerAngles.y, turret.eulerAngles.z);
+                    barrel.eulerAngles = new Vector3(barrel.eulerAngles.x, barrel.eulerAngles.y + lastEulerAngles.y - transform.eulerAngles.y, barrel.eulerAngles.z);
+
+                    // Zeroing x and z eulers of turret and clamping barrel x euler
+                    turret.localEulerAngles = new Vector3(0, turret.localEulerAngles.y, 0);
+                    barrel.localEulerAngles = new Vector3(CustomMath.ClampAngle(barrel.localEulerAngles.x, turretRangeX[0], turretRangeX[1]), barrel.localEulerAngles.y, 0);
+
+                    lastEulerAngles = tankOrigin.eulerAngles;
+                }                
             }
         }
+        else
+        {
+            RB.velocity = Vector3.zero;
+        }
     }
-    
+
     [PunRPC]
     public void ExplodeTank()
     {
@@ -123,10 +271,10 @@ public class BaseTankLogic : MonoBehaviour
                 barrel.gameObject.SetActive(false);
 
                 playerControl.Dead = true;
-                playerControl.Respawn();
+                playerControl.OnDeath();
 
-                Instantiate(explosionEffect, tankOrigin.position, Quaternion.identity);
-                Instantiate(deathMarker, tankOrigin.position + tankOrigin.up * 0.05f, Quaternion.Euler(new Vector3(tankOrigin.eulerAngles.x, 45, tankOrigin.eulerAngles.z)));
+                Instantiate(explosionEffect, tankOrigin.position, Quaternion.identity, effectsParent);
+                Instantiate(deathMarker, tankOrigin.position + tankOrigin.up * deathMarker.localPosition.y, Quaternion.Euler(new Vector3(tankOrigin.eulerAngles.x, 45, tankOrigin.eulerAngles.z)), effectsParent);
                 if (PhotonNetwork.OfflineMode)
                 {
                     GameManager.frozen = true;
@@ -135,8 +283,15 @@ public class BaseTankLogic : MonoBehaviour
         }
         else
         {
-            Instantiate(explosionEffect, tankOrigin.position, Quaternion.identity);
-            Instantiate(deathMarker, tankOrigin.position + tankOrigin.up * 0.05f, Quaternion.Euler(new Vector3(tankOrigin.eulerAngles.x, 45, tankOrigin.eulerAngles.z)));
+            Instantiate(explosionEffect, tankOrigin.position, Quaternion.identity, effectsParent);
+            if (Physics.Raycast(tankOrigin.position, Vector3.down, out RaycastHit groundHit, Mathf.Infinity, slopeLayers))
+            {
+                Instantiate(deathMarker, groundHit.point + groundHit.normal * deathMarker.localPosition.y, Quaternion.FromToRotation(Vector3.up, groundHit.normal), effectsParent);
+            }
+            else
+            {
+                Instantiate(deathMarker, tankOrigin.position + tankOrigin.up * deathMarker.localPosition.y, Quaternion.Euler(new Vector3(tankOrigin.eulerAngles.x, 45, tankOrigin.eulerAngles.z)), effectsParent);
+            }
 
             Transform trackMarks = tankOrigin.Find("TrackMarks");
 
@@ -146,23 +301,38 @@ public class BaseTankLogic : MonoBehaviour
                 Destroy(trackMarks.GetComponent<TrailEmitter>());
             }
 
-            transform.root.GetComponent<TankManager>().StartCheckTankCount();
+            if (PhotonNetwork.OfflineMode)
+            {
+                transform.root.GetComponent<TankManager>().StartCheckTankCount(null);
+            }
+            else
+            {
+                if (PhotonNetwork.IsMasterClient)
+                {
+                    transform.root.GetComponent<TankManager>().StartCheckTankCount(PhotonNetwork.MasterClient.FindPhotonView());
+                }
+            }
+
             Destroy(gameObject);
         }
     }
 
-    public void RotateTankToVector(Vector3 to)
+    public void RotateTankToVector(Vector3 to, bool master = false)
     {
-        float angle = Vector3.Angle(tankOrigin.forward, to);
-        angle = angle < 0 ? angle + 360 : angle;
+        if (!overrideRotation || master)
+        {
+            float angle = Mathf.Abs(Vector3.SignedAngle(tankOrigin.forward, to, tankOrigin.up));
 
-        if (angle > 180 - flipAngleThreshold && angle < 180 + flipAngleThreshold)
-        {
-            FlipTank();
-        }
-        else
-        {
-            RB.MoveRotation(Quaternion.RotateTowards(tankOrigin.rotation, Quaternion.LookRotation(to), Time.deltaTime * tankRotSpeed * 2));
+            if (angle > 180 - flipAngleThreshold && angle < 180 + flipAngleThreshold)
+            {
+                FlipTank();
+            }
+            else
+            {
+                tankOrigin.rotation = Quaternion.RotateTowards(tankOrigin.rotation, Quaternion.LookRotation(to), Time.deltaTime * tankRotSpeed);
+            }
+
+            Debug.DrawLine(tankOrigin.position, tankOrigin.position + to * 2, Color.blue, 0.1f);
         }
     }
 
@@ -174,72 +344,8 @@ public class BaseTankLogic : MonoBehaviour
         }
     }
 
-    public void RotateTurretTo(Quaternion rotation)
-    {
-        // Rotating turret and barrel towards vector
-        turret.rotation = barrel.rotation = turretAnchor = Quaternion.RotateTowards(turretAnchor, rotation, Time.deltaTime * turretRotSpeed);
-    }
-
-    public void RotateTurretTo(Vector3 direction)
-    {
-        // Rotating turret and barrel towards vector
-        Quaternion targetRotation = Quaternion.LookRotation(direction, turret.up);
-        turret.rotation = barrel.rotation = turretAnchor = Quaternion.RotateTowards(turretAnchor, targetRotation, Time.deltaTime * turretRotSpeed);
-    }
-
-    public void ObstacleAvoidance(RaycastHit forwardHit, float maxDistance, LayerMask barrierLayers)
-    {
-        Debug.DrawLine(tankOrigin.position, forwardHit.point, Color.red, 0.1f);
-
-        bool[] pathClear = { true, true };
-        Vector3 desiredDir;
-
-        // Cross product doesn't give absolute value of angle
-        float dotProductY = Vector3.Dot(Vector3.Cross(transform.forward, forwardHit.normal), transform.up);
-
-        // Checking Left
-        if (Physics.Raycast(tankOrigin.position, -transform.right, maxDistance, barrierLayers))
-        {
-            pathClear[0] = false;
-            Debug.DrawLine(tankOrigin.position, tankOrigin.position - transform.right * 2, Color.red, 0.1f);
-        }
-        // Checking Right
-        if (Physics.Raycast(tankOrigin.position, transform.right, maxDistance, barrierLayers))
-        {
-            pathClear[1] = false;
-            Debug.DrawLine(tankOrigin.position, tankOrigin.position + transform.right * 2, Color.red, 0.1f);
-        }
-
-        if (pathClear[0])
-        {
-            if (pathClear[1])
-            {
-                // Rotate left if obstacle is facing left, vice versa
-                desiredDir = dotProductY < 0 ? -transform.right : transform.right;
-            }
-            else
-            {
-                // Rotate left
-                desiredDir = -transform.right;
-            }
-        }
-        else if (pathClear[1])
-        {
-            // Rotate right
-            desiredDir = transform.right;
-        }
-        else
-        {
-            // Go backward
-            desiredDir = -transform.forward;
-        }
-
-        // Applying rotation
-        RotateTankToVector(desiredDir);
-    }
-
     public bool IsGrounded()
     {
-        return Physics.Raycast(tankOrigin.position + Vector3.up * 0.05f, -tankOrigin.up, 0.1f, ~nonSlopeLayers);
+        return Physics.Raycast(tankOrigin.position + Vector3.up * 0.05f, -tankOrigin.up, 0.1f, slopeLayers);
     }
 }

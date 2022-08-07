@@ -8,6 +8,7 @@ public class LevelGenerator : MonoBehaviour
     [SerializeField] LayerMask ignoreLayerMask;
     [SerializeField] Transform obstacleParent;
     [SerializeField] Transform tankParent;
+    [SerializeField] Transform clearParent;
 
     [SerializeField] BoxCollider boundingCollider;
 
@@ -30,6 +31,19 @@ public class LevelGenerator : MonoBehaviour
 
     public void GenerateLevel()
     {
+        foreach (Transform tankChild in tankParent)
+        {
+            Destroy(tankChild.gameObject);
+        }
+        foreach (Transform obstacleChild in obstacleParent)
+        {
+            Destroy(obstacleChild.gameObject);
+        }
+        foreach(Transform child in clearParent)
+        {
+            Destroy(child.gameObject);
+        }
+
         GameObject obstacle = Instantiate(obstacles[0], CustomRandom.GetSpawnPointInCollider(boundingCollider, Vector3.down, ignoreLayerMask, obstacles[0].GetComponent<BoxCollider>()), obstacles[0].transform.rotation, obstacleParent);
         GenerateObstacles(obstacle.GetComponent<ObstacleGeneration>());
         GenerateTanks(tankParent.GetComponent<TankGeneration>());

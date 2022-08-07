@@ -127,17 +127,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6b3d386ba5cd94485973aee1479b272e, type: 3}
-  m_Name: Tank Visible
+  m_Name: Layers Visible
   m_EditorClassIdentifier: 
   m_Active: 1
   settings:
-    passTag: Tank Visible
+    passTag: Layers Visible
     Event: 300
     filterSettings:
       RenderQueueType: 0
       LayerMask:
         serializedVersion: 2
-        m_Bits: 129216
+        m_Bits: 260288
       PassNames: []
     overrideMaterial: {fileID: 0}
     overrideMaterialPassIndex: 0
@@ -180,8 +180,9 @@ MonoBehaviour:
   - {fileID: 8716675394768272972}
   - {fileID: -4001502282404131102}
   - {fileID: 1472263855911026509}
+  - {fileID: 873105782857576553}
   - {fileID: -1749398730071828732}
-  m_RendererFeatureMap: 60f25603fb9260cb82f6106b37f101b291b47e604afe3a74fe94e632b0d140114c988ba57da8d076d9846d90a498ca714cfe8caf16daf778e20e6301e0ce77c84d3f39332d886e1404978cab1fe3b8e7
+  m_RendererFeatureMap: 60f25603fb9260cb82f6106b37f101b291b47e604afe3a74fe94e632b0d140114c988ba57da8d076d9846d90a498ca714cfe8caf16daf778e20e6301e0ce77c84d3f39332d886e1469b0906615e51d0c04978cab1fe3b8e7
   m_UseNativeRenderPass: 0
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}
@@ -218,6 +219,45 @@ MonoBehaviour:
   m_ClusteredRendering: 0
   m_TileSize: 32
   m_IntermediateTextureMode: 1
+--- !u!114 &873105782857576553
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b3d386ba5cd94485973aee1479b272e, type: 3}
+  m_Name: Purple Tank Hidden
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  settings:
+    passTag: Purple Tank Hidden
+    Event: 300
+    filterSettings:
+      RenderQueueType: 0
+      LayerMask:
+        serializedVersion: 2
+        m_Bits: 131072
+      PassNames: []
+    overrideMaterial: {fileID: 2100000, guid: 4aaae576ffc6f0c4f89bee7bcd5deae6, type: 2}
+    overrideMaterialPassIndex: 0
+    overrideDepthState: 1
+    depthCompareFunction: 5
+    enableWrite: 0
+    stencilSettings:
+      overrideStencilState: 0
+      stencilReference: 0
+      stencilCompareFunction: 8
+      passOperation: 0
+      failOperation: 0
+      zFailOperation: 0
+    cameraSettings:
+      overrideCamera: 0
+      restoreCamera: 1
+      offset: {x: 0, y: 0, z: 0, w: 0}
+      cameraFieldOfView: 60
 --- !u!114 &1243224051852678398
 MonoBehaviour:
   m_ObjectHideFlags: 0

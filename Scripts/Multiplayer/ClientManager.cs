@@ -3,6 +3,8 @@ using Photon.Pun;
 
 public class ClientManager : MonoBehaviourPunCallbacks
 {
+    public bool deleteOnMultiplayer = false;
+
     public PhotonView PV;
     [SerializeField] DataManager clientData;
 
@@ -11,15 +13,22 @@ public class ClientManager : MonoBehaviourPunCallbacks
     {
         if (!PhotonNetwork.OfflineMode)
         {
-            EngineSoundManager[] allEngineSounds = FindObjectsOfType<EngineSoundManager>();
-            foreach (EngineSoundManager engineSound in allEngineSounds)
+            if (deleteOnMultiplayer)
             {
-                engineSound.UpdateMasterVolume(clientData.currentPlayerSettings.masterVolume);
+                Destroy(gameObject);
+            }
+            else
+            {
+                EngineSoundManager[] allEngineSounds = FindObjectsOfType<EngineSoundManager>();
+                foreach (EngineSoundManager engineSound in allEngineSounds)
+                {
+                    engineSound.UpdateMasterVolume(clientData.currentPlayerSettings.masterVolume);
+                }
             }
         }
     }
 
-    public void UpdateSoundManagerOnClient(SoundManager soundManager)
+    public void UpdateVolumeOnClient(SoundManager soundManager)
     {
         soundManager.UpdateVolume(clientData.currentPlayerSettings.masterVolume);
     }

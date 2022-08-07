@@ -100,7 +100,9 @@ public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
             PhotonHashtable roomProperties = new PhotonHashtable
             {
                 { "RoomSettings", dataManager.currentRoomSettings },
-                { "Waiting", true }
+                { "Waiting", true },
+                { "Ready Players", 0 },
+                { "Total Lives", 6 }
             };
             PhotonNetwork.CurrentRoom.SetCustomProperties(roomProperties);
 
