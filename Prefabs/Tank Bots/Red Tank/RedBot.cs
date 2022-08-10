@@ -16,6 +16,7 @@ public class RedBot : MonoBehaviour
     public float[] fireDelay = { 0.28f, 0.425f };
 
     [SerializeField] float maxShootAngle = 5;
+    [SerializeField] float maxTargetAngle = 100;
 
     FireControl fireControl;
     bool shooting = false;
@@ -41,7 +42,8 @@ public class RedBot : MonoBehaviour
     {
         if (!GameManager.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null)
         {
-            baseTankLogic.targetTurretDir = targetSystem.currentTarget.position - turret.position;
+            Vector3 targetDir = targetSystem.currentTarget.position - turret.position;
+            baseTankLogic.targetTurretDir = targetDir;
 
             if (fireControl.canFire && fireControl.bulletsFired < fireControl.bulletLimit && !shooting && targetSystem.TargetVisible())
             {
@@ -50,7 +52,16 @@ public class RedBot : MonoBehaviour
 
             if (nearbyMine == null)
             {
-                baseTankLogic.targetTankDir = transform.forward;
+                // Rotating towards target when target is getting behind this tank
+                if (Mathf.Abs(Vector3.SignedAngle(transform.forward, targetDir, transform.up)) > maxTargetAngle)
+                {
+                    baseTankLogic.targetTankDir = targetDir;
+                }
+                else
+                {
+                    baseTankLogic.targetTankDir = transform.forward;
+                }
+
             }
             else
             {

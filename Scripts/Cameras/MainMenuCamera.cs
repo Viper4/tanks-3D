@@ -19,6 +19,28 @@ public class MainMenuCamera : MonoBehaviour
     [SerializeField] GameObject mainMenuObject;
     [SerializeField] DataManager dataManager;
 
+    void SwitchTarget()
+    {
+        target.gameObject.SetActive(true);
+        if (targetIndex > tankParent.childCount - 1)
+        {
+            targetDstLimit = targetDstMinMaxFar;
+            targetIndex = -1;
+            target = tankParent;
+        }
+        else if (targetIndex < 0)
+        {
+            targetDstLimit = targetDstMinMaxFar;
+            targetIndex = tankParent.childCount;
+            target = tankParent;
+        }
+        else
+        {
+            targetDstLimit = targetDstMinMaxTank;
+            target = tankParent.GetChild(targetIndex).Find("Barrel");
+        }
+    }
+
     // Update is called once per frame
     void Update()
     {
@@ -28,21 +50,15 @@ public class MainMenuCamera : MonoBehaviour
             targetIndex = -1;
             target = tankParent;
         }
-        if (Input.GetKeyDown(dataManager.currentPlayerSettings.keyBinds["Shoot"]))
+        if (Input.GetMouseButtonDown(0))
         {
-            target.gameObject.SetActive(true);
             targetIndex++;
-            if (targetIndex > tankParent.childCount - 1)
-            {
-                targetDstLimit = targetDstMinMaxFar;
-                targetIndex = -1;
-                target = tankParent;
-            }
-            else
-            {
-                targetDstLimit = targetDstMinMaxTank;
-                target = tankParent.GetChild(targetIndex).Find("Barrel");
-            }
+            SwitchTarget();
+        }
+        else if (Input.GetMouseButtonDown(1))
+        {
+            targetIndex--;
+            SwitchTarget();
         }
         else if (Input.GetKeyDown(dataManager.currentPlayerSettings.keyBinds["Toggle HUD"]))
         {

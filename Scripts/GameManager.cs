@@ -36,6 +36,8 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     public readonly int multiplayerSceneIndexEnd = 4;
 
+    int lastSceneIndex = -1;
+
     void Start()
     {
         Cursor.visible = true;
@@ -82,6 +84,7 @@ public class GameManager : MonoBehaviourPunCallbacks
         switch (currentSceneName)
         {
             case "Main Menu":
+                lastSceneIndex = -1;
                 PhotonNetwork.OfflineMode = true;
                 offlineMode = true;
                 SaveSystem.ResetPlayerData("PlayerData");                 // Resetting lives, kills, deaths, etc... but keeping bestTime
@@ -144,7 +147,8 @@ public class GameManager : MonoBehaviourPunCallbacks
                 }
                 else
                 {
-                    int levelNumber = int.Parse(Regex.Match(currentSceneName, @"\d+").Value);
+                    int.TryParse(Regex.Match(currentSceneName, @"\d+").Value, out int levelIndex);
+                    levelIndex--;
 
                     dataManager.timing = false;
                     dataManager.currentPlayerData = SaveSystem.LoadPlayerData("PlayerData");
@@ -159,7 +163,7 @@ public class GameManager : MonoBehaviourPunCallbacks
                     {
                         gameManager.startButton.gameObject.SetActive(true);
                         readyButton.gameObject.SetActive(false);
-                        if (levelNumber % 5 == 0)
+                        if (lastSceneIndex != currentSceneIndex && levelIndex != 0 && levelIndex % 5 == 0)
                         {
                             dataManager.currentPlayerData.lives++;
                             StartCoroutine(PopupExtraLife(2.25f));
@@ -171,7 +175,7 @@ public class GameManager : MonoBehaviourPunCallbacks
                     {
                         gameManager.readyButton.gameObject.SetActive(true);
                         startButton.gameObject.SetActive(false);
-                        if (levelNumber % 5 == 0)
+                        if (lastSceneIndex != currentSceneIndex && levelIndex != 0 && levelIndex % 5 == 0)
                         {
                             PhotonHashtable roomProperties = new PhotonHashtable
                             {
@@ -184,9 +188,17 @@ public class GameManager : MonoBehaviourPunCallbacks
                         gameManager.label.Find("Lives").GetComponent<Text>().text = "Lives: " + (int)PhotonNetwork.CurrentRoom.CustomProperties["Total Lives"];
                     }
 
-                    gameManager.label.Find("Level").GetComponent<Text>().text = currentSceneName;
+                    if (!FindObjectOfType<TankManager>().lastCampaignScene)
+                    {
+                        gameManager.label.Find("Level").GetComponent<Text>().text = currentSceneName;
+                    }
+                    else
+                    {
+                        gameManager.label.Find("Level").GetComponent<Text>().text = "Final " + Regex.Match(currentSceneName, @"(.*?)[ ][0-9]+$").Groups[1] + " Mission";
+                    }
                     gameManager.label.Find("EnemyTanks").GetComponent<Text>().text = "Enemy tanks: " + GameObject.Find("Tanks").transform.childCount;
                 }
+                lastSceneIndex = currentSceneIndex;
                 break;
         }
     }
@@ -304,7 +316,6 @@ public class GameManager : MonoBehaviourPunCallbacks
 
             if (dataManager != null && save)
             {
-                Debug.Log("Here");
                 dataManager.currentPlayerData.SavePlayerData("PlayerData", sceneName == "End Scene");
             }
 

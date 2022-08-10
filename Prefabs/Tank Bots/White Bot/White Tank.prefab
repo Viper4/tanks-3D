@@ -43,7 +43,7 @@ SphereCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 5
+  m_Radius: 5.5
   m_Center: {x: 0, y: 0.8, z: 0}
 --- !u!1 &4217632215379142864
 GameObject:
@@ -56,7 +56,7 @@ GameObject:
   - component: {fileID: 2351105480973969798}
   - component: {fileID: 1463264494746814847}
   - component: {fileID: 268702098409813898}
-  m_Layer: 6
+  m_Layer: 18
   m_Name: Engine Sounds
   m_TagString: Tank
   m_Icon: {fileID: 0}
@@ -226,7 +226,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4612882154067720755}
   - component: {fileID: 7968080951278322270}
-  m_Layer: 6
+  m_Layer: 18
   m_Name: TrackMarks
   m_TagString: Tank
   m_Icon: {fileID: 0}
@@ -241,7 +241,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5459586628171892748}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.025, z: 0}
+  m_LocalPosition: {x: 0, y: 0.05, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -350,7 +350,7 @@ TrailRenderer:
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: f3cd696bb8f33ac44b1675a4c43ead4a, type: 2}
-  - {fileID: 2100000, guid: f47c18e91dc37b940a862250a4189f80, type: 2}
+  - {fileID: 2100000, guid: a24ae366ad9f59f4e8fdc81d1e377aa4, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -440,7 +440,7 @@ GameObject:
   - component: {fileID: 1069808370206507889}
   - component: {fileID: 5367608962587421964}
   - component: {fileID: 4804574292447541101}
-  m_Layer: 6
+  m_Layer: 18
   m_Name: Barrel
   m_TagString: Tank
   m_Icon: {fileID: 0}
@@ -540,7 +540,7 @@ GameObject:
   - component: {fileID: 6725092904239861776}
   - component: {fileID: 4653960954150488459}
   - component: {fileID: 3636005960742249039}
-  m_Layer: 6
+  m_Layer: 18
   m_Name: Turret
   m_TagString: Tank
   m_Icon: {fileID: 0}
@@ -644,7 +644,7 @@ GameObject:
   - component: {fileID: -563639079389155497}
   - component: {fileID: 7576510698517756716}
   - component: {fileID: 7904251344502137440}
-  m_Layer: 6
+  m_Layer: 18
   m_Name: White Tank
   m_TagString: Tank
   m_Icon: {fileID: 0}
@@ -697,8 +697,8 @@ MonoBehaviour:
   ricochetLevel: 1
   bulletLimit: 5
   fireCooldown:
-  - 0.3
-  - 0.6
+  - 0.5
+  - 0.8
   canFire: 1
   solidLayerMask:
     serializedVersion: 2
@@ -721,8 +721,8 @@ MonoBehaviour:
   mineParent: {fileID: 0}
   mineLimit: 2
   layCooldown:
-  - 2
-  - 6
+  - 4
+  - 10
   explosionRadius: 7
   canLay: 1
 --- !u!114 &-4089808789469299082
@@ -763,15 +763,15 @@ MonoBehaviour:
   effectsParent: {fileID: 0}
   barrierLayers:
     serializedVersion: 2
-    m_Bits: 193217
+    m_Bits: 2028225
   slopeLayers:
     serializedVersion: 2
-    m_Bits: 1
+    m_Bits: 1048577
   slopeAlignment: 1
   alignRotationSpeed: 20
   stationary: 0
   obstacleAvoidance: 1
-  normalSpeed: 4
+  normalSpeed: 5
   avoidSpeed: 2.5
   useGravity: 1
   gravity: 8
@@ -785,14 +785,14 @@ MonoBehaviour:
   - -45
   - 45
   tankNoise: 1
-  tankRotSpeed: 300
-  tankRotNoiseScale: 5
+  tankRotSpeed: 250
+  tankRotNoiseScale: 3
   tankRotNoiseSpeed: 0.5
   turretRotation: 1
   turretNoise: 0
-  turretRotSpeed: 50
-  inaccuracy: {x: 0, y: 0}
-  turretNoiseSpeed: 0.15
+  turretRotSpeed: 75
+  inaccuracy: {x: 0, y: 1}
+  turretNoiseSpeed: 1
   turretRangeX:
   - -20
   - 20
@@ -821,9 +821,9 @@ MonoBehaviour:
   - 0.1
   layDistance: 10
   modeResetDelay:
-  - 4.5
-  - 8
-  maxShootAngle: 1
+  - 2.5
+  - 5
+  maxShootAngle: 2
   maxRicochetAngle: 90
   maxTargetAngle: 110
   minTargetAngle: 30
@@ -844,6 +844,7 @@ MonoBehaviour:
   offensePitch: 1.2
   defensePitch: 0.8
   disappearEffect: {fileID: 5384122212087700693, guid: 36c6a8771c7b842458562c3fc23b1d88, type: 3}
+  circleEffect: {fileID: 3732310306430455072, guid: a88fa7b3b3d05f745885137d7d198915, type: 3}
 --- !u!114 &1673415735734285976
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -863,9 +864,14 @@ MonoBehaviour:
   nonObstructLayerMask:
     serializedVersion: 2
     m_Bits: 1854
-  drawDuration: 1
+  drawDuration: 5
   ricochetPredictions: 1
-  testRays: 60
+  horizontalSteps: 60
+  verticalSteps: 15
+  maxHorizontalAngle: 180
+  maxVerticalAngle: 20
+  doubleScanHorizontal: 1
+  doubleScanVertical: 1
   shootPosition: {x: 0, y: 0, z: 0}
   lookPositions: []
 --- !u!54 &-563639079389155497
@@ -974,7 +980,7 @@ TrailRenderer:
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: f3cd696bb8f33ac44b1675a4c43ead4a, type: 2}
-  - {fileID: 2100000, guid: f47c18e91dc37b940a862250a4189f80, type: 2}
+  - {fileID: 2100000, guid: a24ae366ad9f59f4e8fdc81d1e377aa4, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1064,7 +1070,7 @@ GameObject:
   - component: {fileID: 3251264644054133418}
   - component: {fileID: 6795614070258741870}
   - component: {fileID: 451881882180253765}
-  m_Layer: 6
+  m_Layer: 18
   m_Name: Body
   m_TagString: Tank
   m_Icon: {fileID: 0}

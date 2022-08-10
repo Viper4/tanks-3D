@@ -9,7 +9,7 @@ using PhotonHashtable = ExitGames.Client.Photon.Hashtable;
 
 public class TankManager : MonoBehaviour
 {
-    [SerializeField] bool lastCampaignScene = false;
+    public bool lastCampaignScene = false;
     bool checking = false;
 
     public void StartCheckTankCount(PhotonView playerPV)

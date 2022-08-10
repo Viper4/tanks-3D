@@ -219,7 +219,7 @@ SphereCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 6
+  m_Radius: 5.5
   m_Center: {x: 0, y: 0.8, z: 0}
 --- !u!1 &1954722336099330320
 GameObject:
@@ -910,8 +910,8 @@ GameObject:
   - component: {fileID: 8530993442464327376}
   - component: {fileID: 9020707831748607084}
   - component: {fileID: 4060378702649525591}
-  - component: {fileID: 8147042413594737687}
   - component: {fileID: 5009471853096854092}
+  - component: {fileID: 8147042413594737687}
   - component: {fileID: -2896793128741677329}
   - component: {fileID: 7367240953964095723}
   - component: {fileID: 5207649292017990146}
@@ -971,8 +971,8 @@ MonoBehaviour:
   ricochetLevel: 1
   bulletLimit: 5
   fireCooldown:
-  - 0.3
-  - 0.6
+  - 0.5
+  - 0.75
   canFire: 1
   solidLayerMask:
     serializedVersion: 2
@@ -993,12 +993,31 @@ MonoBehaviour:
   tankOrigin: {fileID: 8530993442464327376}
   mine: {fileID: 4223942867902412960, guid: 8a98f2906960e414d93db694525801d9, type: 3}
   mineParent: {fileID: 0}
-  mineLimit: 5
+  mineLimit: 2
   layCooldown:
-  - 2
-  - 6
+  - 4
+  - 10
   explosionRadius: 7
   canLay: 1
+--- !u!114 &5009471853096854092
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9020707831748607082}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 42b2840cfbe33ae41a58aa074894804d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  primaryTarget: {fileID: 0}
+  currentTarget: {fileID: 0}
+  preferredTargetArea: Body
+  ignoreLayerMask:
+    serializedVersion: 2
+    m_Bits: 1838
+  enemyParent: {fileID: 0}
 --- !u!114 &8147042413594737687
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1018,10 +1037,10 @@ MonoBehaviour:
   effectsParent: {fileID: 0}
   barrierLayers:
     serializedVersion: 2
-    m_Bits: 193217
+    m_Bits: 2028225
   slopeLayers:
     serializedVersion: 2
-    m_Bits: 1
+    m_Bits: 1048577
   slopeAlignment: 1
   alignRotationSpeed: 20
   stationary: 0
@@ -1045,7 +1064,7 @@ MonoBehaviour:
   tankRotNoiseSpeed: 0.5
   turretRotation: 1
   turretNoise: 0
-  turretRotSpeed: 80
+  turretRotSpeed: 75
   inaccuracy: {x: 0, y: 0}
   turretNoiseSpeed: 1
   turretRangeX:
@@ -1055,25 +1074,6 @@ MonoBehaviour:
   targetTurretDir: {x: 0, y: 0, z: 0}
   targetTankDir: {x: 0, y: 0, z: 0}
   tankOrigin: {fileID: 8530993442464327376}
---- !u!114 &5009471853096854092
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9020707831748607082}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 42b2840cfbe33ae41a58aa074894804d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  primaryTarget: {fileID: 0}
-  currentTarget: {fileID: 0}
-  preferredTargetArea: Body
-  ignoreLayerMask:
-    serializedVersion: 2
-    m_Bits: 1838
-  enemyParent: {fileID: 0}
 --- !u!114 &-2896793128741677329
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1097,7 +1097,7 @@ MonoBehaviour:
   modeResetDelay:
   - 4.5
   - 8
-  maxShootAngle: 1
+  maxShootAngle: 2
   maxRicochetAngle: 90
   maxTargetAngle: 110
   minTargetAngle: 30
@@ -1124,7 +1124,12 @@ MonoBehaviour:
     m_Bits: 1854
   drawDuration: 5
   ricochetPredictions: 1
-  testRays: 40
+  horizontalSteps: 60
+  verticalSteps: 15
+  maxHorizontalAngle: 180
+  maxVerticalAngle: 20
+  doubleScanHorizontal: 1
+  doubleScanVertical: 1
   shootPosition: {x: 0, y: 0, z: 0}
   lookPositions: []
 --- !u!54 &5207649292017990146

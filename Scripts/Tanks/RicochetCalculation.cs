@@ -12,9 +12,15 @@ public class RicochetCalculation : MonoBehaviour
     [SerializeField] LayerMask nonObstructLayerMask;
     [SerializeField] float drawDuration = 1;
     [SerializeField] int ricochetPredictions = 1;
-    [SerializeField] int testRays = 60;
+    [SerializeField] int horizontalSteps = 60;
+    [SerializeField] int verticalSteps = 10;
+    [SerializeField] float maxHorizontalAngle = 180;
+    [SerializeField] float maxVerticalAngle = 20;
+    [SerializeField] bool doubleScanHorizontal = true;
+    [SerializeField] bool doubleScanVertical = true;
 
     Dictionary<Transform, List<List<Vector3>>> mirrorPositionPairs = new Dictionary<Transform, List<List<Vector3>>>();
+    List<RaycastHit> mirrorHits = new List<RaycastHit>();
 
     [HideInInspector] public Dictionary<Vector3, float> shootPositions = new Dictionary<Vector3, float>();
     [HideInInspector] public Vector3 shootPosition;
@@ -31,16 +37,11 @@ public class RicochetCalculation : MonoBehaviour
         return mirrorHit.point + (reflectedVector * mirrorDistance);
     }
 
-    public void ScanArea(Vector3 origin)
+    void HorizontalScan(Vector3 origin, Vector3 verticalVector, float angleOffset)
     {
-        mirrorPositionPairs.Clear();
-        List<RaycastHit> mirrorHits = new List<RaycastHit>();
-
-        float angleOffset = 360 / testRays;
-        // Finding valid mirrors by casting testRays number of rays in 360 degrees
-        for (int i = 0; i < testRays; i++)
+        for (int j = 0; j < horizontalSteps; j++)
         {
-            Vector3 testDirection = Quaternion.AngleAxis(angleOffset * i, Vector3.up) * Vector3.forward;
+            Vector3 testDirection = Quaternion.AngleAxis(angleOffset * j, transform.up) * verticalVector;
             if (Physics.Raycast(origin, testDirection, out RaycastHit mirrorHit, Mathf.Infinity, mirrorLayerMask))
             {
                 // Populating first ricochet mirror positions
@@ -48,7 +49,7 @@ public class RicochetCalculation : MonoBehaviour
                 {
                     Vector3 mirroredPosition = Mirror(testDirection, mirrorHit);
                     mirrorPositionPairs.Add(mirrorHit.transform, new List<List<Vector3>>());
-                    for (int j = 0; j < ricochetPredictions; j++)
+                    for (int k = 0; k < ricochetPredictions; k++)
                     {
                         mirrorPositionPairs[mirrorHit.transform].Add(new List<Vector3>() { mirroredPosition });
                     }
@@ -68,6 +69,44 @@ public class RicochetCalculation : MonoBehaviour
             else if (showRays)
             {
                 Debug.DrawRay(origin, testDirection, Color.red, drawDuration);
+            }
+        }
+    }
+
+    public void ScanArea(Vector3 origin)
+    {
+        mirrorPositionPairs.Clear();
+        mirrorHits.Clear();
+
+        float angleOffsetH = maxHorizontalAngle / horizontalSteps;
+        float angleOffsetV = maxVerticalAngle / verticalSteps;
+
+        // Finding valid mirrors by casting rays in every angleOffsetY horizontal, every angleOffsetX degree vertical
+        if (doubleScanVertical)
+        {
+            for (int i = 0; i < verticalSteps; i++)
+            {
+                Vector3 verticalVectorPos = Quaternion.AngleAxis(angleOffsetV * i, transform.right) * transform.forward;
+                Vector3 verticalVectorNeg = Quaternion.AngleAxis(-angleOffsetV * i, transform.right) * transform.forward;
+                HorizontalScan(origin, verticalVectorPos, angleOffsetH);
+                HorizontalScan(origin, verticalVectorNeg, angleOffsetH);
+                if (doubleScanHorizontal)
+                {
+                    HorizontalScan(origin, verticalVectorPos, -angleOffsetH);
+                    HorizontalScan(origin, verticalVectorNeg, -angleOffsetH);
+                }
+            }
+        }
+        else
+        {
+            for (int i = 0; i < verticalSteps; i++)
+            {
+                Vector3 verticalVector = Quaternion.AngleAxis(angleOffsetV * i, transform.right) * transform.forward;
+                HorizontalScan(origin, verticalVector, angleOffsetH);
+                if (doubleScanHorizontal)
+                {
+                    HorizontalScan(origin, verticalVector, -angleOffsetH);
+                }
             }
         }
 
@@ -109,7 +148,7 @@ public class RicochetCalculation : MonoBehaviour
                 // Checking if destination is in line of sight of mirroredPosition
                 if (Physics.Raycast(destination, LOSDir, out RaycastHit LOSHit, Vector3.Distance(destination, mirroredPosition), mirrorLayerMask))
                 {
-                    float path1Dst = Vector3.Distance(destination, LOSHit.point) - 0.25f;
+                    float path1Dst = Vector3.Distance(destination, LOSHit.point) - 0.05f;
                     // Checking bullet path
                     if (!Physics.Raycast(destination, LOSDir, out RaycastHit bulletObstruct1, path1Dst, ~nonObstructLayerMask))
                     {
@@ -127,11 +166,11 @@ public class RicochetCalculation : MonoBehaviour
                                     Vector3 reflectedDir = Vector3.Reflect(lastReflectHit.point - lastDestination, lastReflectHit.normal);
                                     if (Physics.Raycast(lastReflectHit.point, reflectedDir, out RaycastHit reflectHit, Mathf.Infinity, ~nonObstructLayerMask))
                                     {
-                                        float reflectDst = Vector3.Distance(lastReflectHit.point, reflectHit.point) - 0.25f;
-                                        // Checking bullet path
-                                        if (!Physics.Raycast(lastReflectHit.point, reflectedDir, out RaycastHit bulletObstruct, reflectDst, ~nonObstructLayerMask))
+                                        float reflectDst = Vector3.Distance(lastReflectHit.point, reflectHit.point) - 0.05f;
+                                        totalDistance += reflectDst;
+                                        // Checking bullet path of reflection
+                                        if (!Physics.Raycast(reflectHit.point, lastReflectHit.point - reflectHit.point, out RaycastHit bulletObstruct, reflectDst - 0.05f, ~nonObstructLayerMask))
                                         {
-                                            totalDistance += reflectDst;
                                             if (showRays)
                                             {
                                                 Debug.DrawLine(lastReflectHit.point, lastDestination, Color.green, halfdrawDuration);
@@ -144,7 +183,7 @@ public class RicochetCalculation : MonoBehaviour
                                             }
                                             else
                                             {
-                                                float finalReflectDst = Vector3.Distance(origin.position, reflectHit.point) - 0.25f;
+                                                float finalReflectDst = Vector3.Distance(origin.position, reflectHit.point) - 0.05f;
                                                 if (!Physics.Raycast(origin.position, reflectHit.point - origin.position, out RaycastHit finalReflectHit, finalReflectDst, ~nonObstructLayerMask))
                                                 {
                                                     totalDistance += finalReflectDst;
@@ -157,7 +196,7 @@ public class RicochetCalculation : MonoBehaviour
 
                                                         if (showRays)
                                                         {
-                                                            Debug.DrawLine(origin.position, reflectHit.point, Color.green, drawDuration);
+                                                            Debug.DrawLine(origin.position, reflectHit.point, Color.green, halfdrawDuration);
                                                         }
                                                     }
                                                     else
@@ -166,7 +205,7 @@ public class RicochetCalculation : MonoBehaviour
 
                                                         if (showRays)
                                                         {
-                                                            Debug.DrawLine(origin.position, reflectHit.point, Color.cyan, drawDuration);
+                                                            Debug.DrawLine(origin.position, reflectHit.point, Color.cyan, halfdrawDuration);
                                                         }
                                                     }
                                                 }
@@ -186,15 +225,9 @@ public class RicochetCalculation : MonoBehaviour
                                             if (showRays)
                                             {
                                                 Debug.DrawLine(lastReflectHit.point, lastDestination, Color.cyan, halfdrawDuration);
-                                                Debug.DrawLine(lastReflectHit.point, reflectHit.point, Color.cyan, halfdrawDuration);
                                                 Debug.DrawLine(lastReflectHit.point, bulletObstruct.point, Color.red, halfdrawDuration);
                                             }
-                                            break;
                                         }
-                                    }
-                                    else
-                                    {
-                                        break;
                                     }
                                 }
                             }
@@ -214,7 +247,7 @@ public class RicochetCalculation : MonoBehaviour
 
                                         if (showRays)
                                         {
-                                            Debug.DrawLine(origin.position, LOSHit.point, Color.green, drawDuration);
+                                            Debug.DrawLine(origin.position, LOSHit.point, Color.green, halfdrawDuration);
                                         }
                                     }
                                     else
@@ -223,15 +256,15 @@ public class RicochetCalculation : MonoBehaviour
 
                                         if (showRays)
                                         {
-                                            Debug.DrawLine(origin.position, LOSHit.point, Color.cyan, drawDuration);
+                                            Debug.DrawLine(origin.position, LOSHit.point, Color.cyan, halfdrawDuration);
                                         }
                                     }
 
                                     if (showRays)
                                     {
-                                        Debug.DrawLine(origin.position, LOSHit.point, Color.green, drawDuration);
-                                        Debug.DrawLine(LOSHit.point, LOSHit.point, Color.green, drawDuration);
-                                        Debug.DrawLine(LOSHit.point, destination, Color.green, drawDuration);
+                                        Debug.DrawLine(origin.position, LOSHit.point, Color.green, halfdrawDuration);
+                                        Debug.DrawLine(LOSHit.point, LOSHit.point, Color.green, halfdrawDuration);
+                                        Debug.DrawLine(LOSHit.point, destination, Color.green, halfdrawDuration);
                                     }
                                 }
                                 else
@@ -239,8 +272,8 @@ public class RicochetCalculation : MonoBehaviour
                                     lookPositions.Add(LOSHit.point);
                                     if (showRays)
                                     {
-                                        Debug.DrawLine(origin.position, LOSHit.point, Color.cyan, drawDuration);
-                                        Debug.DrawLine(origin.position, bulletObstruct.point, Color.red, drawDuration);
+                                        Debug.DrawLine(origin.position, LOSHit.point, Color.cyan, halfdrawDuration);
+                                        Debug.DrawLine(origin.position, bulletObstruct.point, Color.red, halfdrawDuration);
                                     }
                                 }
                             }
@@ -252,14 +285,14 @@ public class RicochetCalculation : MonoBehaviour
 
                         if (showRays)
                         {
-                            Debug.DrawLine(destination, LOSHit.point, Color.cyan, drawDuration);
-                            Debug.DrawLine(destination, bulletObstruct1.point, Color.red, drawDuration);
+                            Debug.DrawLine(destination, LOSHit.point, Color.cyan, halfdrawDuration);
+                            Debug.DrawLine(destination, bulletObstruct1.point, Color.red, halfdrawDuration);
                         }
                     }
                 }
                 else if (showRays)
                 {
-                    Debug.DrawLine(destination, mirroredPosition, Color.white, drawDuration);
+                    Debug.DrawLine(destination, mirroredPosition, Color.white, halfdrawDuration);
                 }
             }
         }

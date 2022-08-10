@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEditor;
+using System.Linq;
 
 public class LevelEditor : EditorWindow
 {
@@ -8,6 +9,8 @@ public class LevelEditor : EditorWindow
     [SerializeField] Vector3 scale = new Vector3(2, 2, 2);
     [SerializeField] private Vector3 direction;
     [SerializeField] float distanceAway;
+
+    [SerializeField] float dissolveStrength = 0.25f;
 
     [MenuItem("Tools/Level Editor")]
     static void CreateReplaceWithPrefab()
@@ -22,6 +25,7 @@ public class LevelEditor : EditorWindow
         scale = EditorGUILayout.Vector3Field("Scale", scale);
         direction = EditorGUILayout.Vector3Field("Direction", direction);
         distanceAway = EditorGUILayout.FloatField("Distance Away", distanceAway);
+        dissolveStrength = EditorGUILayout.FloatField("Dissolve Strength", dissolveStrength);
 
         if (GUILayout.Button("Clone"))
         {
@@ -49,6 +53,26 @@ public class LevelEditor : EditorWindow
             {
                 Undo.DestroyObjectImmediate(selected);
             }
+        }
+
+        if (GUILayout.Button("Dissolve"))
+        {
+            var selection = Selection.gameObjects;
+            int dissolvedAmount = 0;
+
+            foreach (GameObject parent in selection)
+            {
+                foreach (Transform child in parent.transform.Cast<Transform>().ToList())
+                {
+                    if (Random.value < dissolveStrength)
+                    {
+                        Undo.DestroyObjectImmediate(child.gameObject);
+
+                        dissolvedAmount++;
+                    }
+                }
+            }
+            Debug.Log("Dissolved " + dissolvedAmount + " objects");
         }
 
         if (GUILayout.Button("Generate Random"))

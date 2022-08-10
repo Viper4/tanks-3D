@@ -86,7 +86,6 @@ public class GreenBot : MonoBehaviour
 
         Vector3 predictedPos = targetSystem.PredictedTargetPosition(CustomMath.TravelTime(turret.position, targetSystem.currentTarget.position, fireControl.speed * predictionScale));
         bulletRicochet.CalculateBulletRicochets(barrel, predictedPos);
-        Debug.DrawLine(turret.position, predictedPos, Color.yellow, updateDelay);
 
         if (bulletRicochet.shootPositions.ContainsKey(bulletRicochet.shootPosition))
         {

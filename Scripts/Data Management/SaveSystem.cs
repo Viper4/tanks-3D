@@ -20,6 +20,7 @@ public static class SaveSystem
     public static readonly PlayerSettings defaultPlayerSettings = new PlayerSettings
     {
         sensitivity = 15,
+        FOV = 60,
         keyBinds = new Dictionary<string, KeyCode>()
         {
             { "Forward", KeyCode.W },
@@ -68,6 +69,7 @@ public static class SaveSystem
         deaths = 0,
         time = -1,
         bestTime = -1,
+        sceneIndex = -1
     };
 
     public static void Init()

@@ -104,7 +104,6 @@ public class BaseTankLogic : MonoBehaviour
                 tankOrigin.eulerAngles = new Vector3(CustomMath.ClampAngle(tankOrigin.eulerAngles.x, pitchRange[0], pitchRange[1]), tankOrigin.eulerAngles.y, CustomMath.ClampAngle(tankOrigin.eulerAngles.z, rollRange[0], rollRange[1]));
             }
 
-            Vector3 velocityDirection = Vector3.zero;
             if (!player)
             {
                 if (!stationary)
@@ -113,17 +112,17 @@ public class BaseTankLogic : MonoBehaviour
                     {
                         float normalAngle = 181;
                         bool[] pathClear = { true, true };
-                        if (Physics.Raycast(body.position, body.forward, out RaycastHit forwardHit, 3, barrierLayers))
+                        if (Physics.Raycast(body.position, body.forward, out RaycastHit forwardHit, 2, barrierLayers))
                         {
                             normalAngle = Vector3.SignedAngle(body.forward, forwardHit.normal, body.up);
                             Debug.DrawLine(body.position, forwardHit.point, Color.red, 0.1f);
                         }
-                        else if (Physics.Raycast(body.position - body.right * 0.75f, body.forward, out RaycastHit forwardHitL, 3, barrierLayers))
+                        else if (Physics.Raycast(body.position - body.right * 0.75f, body.forward, out RaycastHit forwardHitL, 2, barrierLayers))
                         {
                             normalAngle = Vector3.SignedAngle(body.forward, forwardHitL.normal, body.up);
                             Debug.DrawLine(body.position - body.right * 0.75f, forwardHitL.point, Color.red, 0.1f);
                         }
-                        else if (Physics.Raycast(body.position + body.right * 0.75f, body.forward, out RaycastHit forwardHitR, 3, barrierLayers))
+                        else if (Physics.Raycast(body.position + body.right * 0.75f, body.forward, out RaycastHit forwardHitR, 2, barrierLayers))
                         {
                             normalAngle = Vector3.SignedAngle(body.forward, forwardHitR.normal, body.up);
                             Debug.DrawLine(body.position + body.right * 0.75f, forwardHitR.point, Color.red, 0.1f);
@@ -138,12 +137,12 @@ public class BaseTankLogic : MonoBehaviour
                                 pathClear[0] = false;
                                 Debug.DrawLine(body.position, leftHit.point, Color.red, 0.1f);
                             }
-                            else if (Physics.Raycast(body.position + body.forward, -body.right, out RaycastHit leftHitF, 2.5f, barrierLayers))
+                            else if (Physics.Raycast(body.position + body.forward, -body.right, out RaycastHit leftHitF, 2, barrierLayers))
                             {
                                 pathClear[0] = false;
                                 Debug.DrawLine(body.position + body.forward, leftHitF.point, Color.red, 0.1f);
                             }
-                            else if (Physics.Raycast(body.position - body.forward, -body.right, out RaycastHit leftHitB, 2.5f, barrierLayers))
+                            else if (Physics.Raycast(body.position - body.forward, -body.right, out RaycastHit leftHitB, 2, barrierLayers))
                             {
                                 pathClear[0] = false;
                                 Debug.DrawLine(body.position - body.forward, leftHitB.point, Color.red, 0.1f);
@@ -153,12 +152,12 @@ public class BaseTankLogic : MonoBehaviour
                                 pathClear[1] = false;
                                 Debug.DrawLine(body.position, rightHit.point, Color.red, 0.1f);
                             }
-                            else if (Physics.Raycast(body.position + body.forward, body.right, out RaycastHit rightHitF, 2.5f, barrierLayers))
+                            else if (Physics.Raycast(body.position + body.forward, body.right, out RaycastHit rightHitF, 2, barrierLayers))
                             {
                                 pathClear[1] = false;
                                 Debug.DrawLine(body.position + body.forward, rightHitF.point, Color.red, 0.1f);
                             }
-                            else if (Physics.Raycast(body.position - body.forward, body.right, out RaycastHit rightHitB, 2.5f, barrierLayers))
+                            else if (Physics.Raycast(body.position - body.forward, body.right, out RaycastHit rightHitB, 2, barrierLayers))
                             {
                                 pathClear[1] = false;
                                 Debug.DrawLine(body.position - body.forward, rightHitB.point, Color.red, 0.1f);
@@ -211,16 +210,23 @@ public class BaseTankLogic : MonoBehaviour
                 // Tank movement
                 if (RB != null)
                 {
-                    velocityDirection = transform.forward;
+                    Vector3 velocityDirection = transform.forward;
                     if (Physics.Raycast(transform.position, -transform.up, out RaycastHit middleHit, 1) && Physics.Raycast(transform.position + transform.forward, -transform.up, out RaycastHit frontHit, 1))
                     {
                         velocityDirection = frontHit.point - middleHit.point;
                     }
 
-                    velocityY = !IsGrounded() && useGravity ? velocityY - Time.deltaTime * gravity : 0;
-                    velocityY = Mathf.Clamp(velocityY, -velocityLimit, velocityLimit);
+                    if (useGravity)
+                    {
+                        velocityY = !IsGrounded() ? velocityY - Time.deltaTime * gravity : 0;
+                        velocityY = Mathf.Clamp(velocityY, -velocityLimit, velocityLimit);
 
-                    RB.velocity = stationary ? Vector3.up * velocityY : velocityDirection * speed + Vector3.up * velocityY;
+                        RB.velocity = stationary ? Vector3.up * velocityY : velocityDirection * speed + Vector3.up * velocityY;
+                    }
+                    else // Using rigidbody gravity instead
+                    {
+                        RB.velocity = stationary ? Vector3.up * RB.velocity.y : velocityDirection * speed + Vector3.up * RB.velocity.y;
+                    }
                 }
 
                 if (turretRotation)
@@ -260,6 +266,17 @@ public class BaseTankLogic : MonoBehaviour
     [PunRPC]
     public void ExplodeTank()
     {
+        Instantiate(explosionEffect, tankOrigin.position, Quaternion.identity, effectsParent);
+        if (Physics.Raycast(tankOrigin.position + Vector3.up, Vector3.down, out RaycastHit groundHit, Mathf.Infinity, slopeLayers))
+        {
+            Transform newMarker = Instantiate(deathMarker, groundHit.point + groundHit.normal * deathMarker.localPosition.y, Quaternion.identity, effectsParent);
+            newMarker.up = groundHit.normal;
+        }
+        else
+        {
+            Instantiate(deathMarker, tankOrigin.position + tankOrigin.up * deathMarker.localPosition.y, Quaternion.Euler(new Vector3(tankOrigin.eulerAngles.x, 45, tankOrigin.eulerAngles.z)), effectsParent);
+        }
+
         if (player)
         {
             if (!playerControl.godMode)
@@ -273,8 +290,6 @@ public class BaseTankLogic : MonoBehaviour
                 playerControl.Dead = true;
                 playerControl.OnDeath();
 
-                Instantiate(explosionEffect, tankOrigin.position, Quaternion.identity, effectsParent);
-                Instantiate(deathMarker, tankOrigin.position + tankOrigin.up * deathMarker.localPosition.y, Quaternion.Euler(new Vector3(tankOrigin.eulerAngles.x, 45, tankOrigin.eulerAngles.z)), effectsParent);
                 if (PhotonNetwork.OfflineMode)
                 {
                     GameManager.frozen = true;
@@ -283,21 +298,11 @@ public class BaseTankLogic : MonoBehaviour
         }
         else
         {
-            Instantiate(explosionEffect, tankOrigin.position, Quaternion.identity, effectsParent);
-            if (Physics.Raycast(tankOrigin.position, Vector3.down, out RaycastHit groundHit, Mathf.Infinity, slopeLayers))
-            {
-                Instantiate(deathMarker, groundHit.point + groundHit.normal * deathMarker.localPosition.y, Quaternion.FromToRotation(Vector3.up, groundHit.normal), effectsParent);
-            }
-            else
-            {
-                Instantiate(deathMarker, tankOrigin.position + tankOrigin.up * deathMarker.localPosition.y, Quaternion.Euler(new Vector3(tankOrigin.eulerAngles.x, 45, tankOrigin.eulerAngles.z)), effectsParent);
-            }
-
             Transform trackMarks = tankOrigin.Find("TrackMarks");
 
             if (trackMarks != null)
             {
-                trackMarks.parent = null;
+                trackMarks.parent = effectsParent;
                 Destroy(trackMarks.GetComponent<TrailEmitter>());
             }
 

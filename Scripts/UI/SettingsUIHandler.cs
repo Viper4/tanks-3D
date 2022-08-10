@@ -55,6 +55,13 @@ public class SettingsUIHandler : MonoBehaviour
         slider.transform.Find("Value Text").GetComponent<Text>().text = slider.value.ToString();
     }
 
+    public void ChangeFOV(Slider slider)
+    {
+        dataManager.currentPlayerSettings.FOV = slider.value;
+        slider.transform.Find("Value Text").GetComponent<Text>().text = slider.value.ToString();
+        Camera.main.fieldOfView = slider.value;
+    }
+
     public void ChangeMasterVolume(Slider slider)
     {
         dataManager.currentPlayerSettings.masterVolume = slider.value;
@@ -151,6 +158,9 @@ public class SettingsUIHandler : MonoBehaviour
                     {
                         switch (setting.name)
                         {
+                            case "FOV":
+                                setting.GetComponent<Slider>().value = dataManager.currentPlayerSettings.FOV;
+                                break;
                             case "Silhouettes":
                                 setting.GetComponent<Toggle>().isOn = dataManager.currentPlayerSettings.silhouettes;
                                 break;

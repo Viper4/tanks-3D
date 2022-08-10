@@ -422,8 +422,8 @@ GameObject:
   - component: {fileID: 6009521869144415273}
   - component: {fileID: 6353959912858125973}
   - component: {fileID: 6353959912858125972}
-  - component: {fileID: -1282805828423814551}
   - component: {fileID: -7805956923958026188}
+  - component: {fileID: -1282805828423814551}
   - component: {fileID: 2164580800702390093}
   - component: {fileID: 2417470595023533493}
   m_Layer: 11
@@ -504,6 +504,25 @@ MonoBehaviour:
   scanChangeDelay:
   - 6
   - 16
+--- !u!114 &-7805956923958026188
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6353959912858125971}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 42b2840cfbe33ae41a58aa074894804d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  primaryTarget: {fileID: 0}
+  currentTarget: {fileID: 0}
+  preferredTargetArea: Turret
+  ignoreLayerMask:
+    serializedVersion: 2
+    m_Bits: 1838
+  enemyParent: {fileID: 0}
 --- !u!114 &-1282805828423814551
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -523,10 +542,10 @@ MonoBehaviour:
   effectsParent: {fileID: 0}
   barrierLayers:
     serializedVersion: 2
-    m_Bits: 193217
+    m_Bits: 2028225
   slopeLayers:
     serializedVersion: 2
-    m_Bits: 1
+    m_Bits: 1048577
   slopeAlignment: 0
   alignRotationSpeed: 20
   stationary: 1
@@ -560,25 +579,6 @@ MonoBehaviour:
   targetTurretDir: {x: 0, y: 0, z: 0}
   targetTankDir: {x: 0, y: 0, z: 0}
   tankOrigin: {fileID: 6009521869144415273}
---- !u!114 &-7805956923958026188
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6353959912858125971}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 42b2840cfbe33ae41a58aa074894804d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  primaryTarget: {fileID: 0}
-  currentTarget: {fileID: 0}
-  preferredTargetArea: Turret
-  ignoreLayerMask:
-    serializedVersion: 2
-    m_Bits: 1838
-  enemyParent: {fileID: 0}
 --- !u!54 &2164580800702390093
 Rigidbody:
   m_ObjectHideFlags: 0

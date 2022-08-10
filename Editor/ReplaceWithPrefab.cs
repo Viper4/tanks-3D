@@ -1,9 +1,13 @@
 using UnityEngine;
 using UnityEditor;
+using System.Linq;
+using System.Collections.Generic;
 
 public class ReplaceWithPrefab : EditorWindow
 {
     [SerializeField] private GameObject prefab;
+    [SerializeField] bool keepChildren = true;
+    [SerializeField] bool removeDuplicateChildren = true;
 
     [MenuItem("Tools/Replace With Prefab")]
     static void CreateReplaceWithPrefab()
@@ -14,6 +18,8 @@ public class ReplaceWithPrefab : EditorWindow
     private void OnGUI()
     {
         prefab = (GameObject)EditorGUILayout.ObjectField("Prefab", prefab, typeof(GameObject), false);
+        keepChildren = EditorGUILayout.Toggle("Keep Children", keepChildren);
+        removeDuplicateChildren = EditorGUILayout.Toggle("Remove Duplicate Children", removeDuplicateChildren);
 
         if (GUILayout.Button("Replace"))
         {
@@ -47,6 +53,19 @@ public class ReplaceWithPrefab : EditorWindow
                 newObject.transform.localRotation = selected.transform.localRotation;
                 newObject.transform.localScale = selected.transform.localScale;
                 newObject.transform.SetSiblingIndex(selected.transform.GetSiblingIndex());
+                if (keepChildren)
+                {
+                    List<Transform> newObjectChildren = newObject.transform.Cast<Transform>().ToList();
+                    foreach (Transform child in selected.transform.Cast<Transform>().ToList())
+                    {
+                        Transform duplicate = newObjectChildren.FirstOrDefault(x => x.name == child.name);
+                        if (duplicate == null)
+                        {
+                            Undo.SetTransformParent(child, newObject.transform, "Replace With Prefabs");
+                        }
+                    }
+                }
+
                 Undo.DestroyObjectImmediate(selected);
             }
         }

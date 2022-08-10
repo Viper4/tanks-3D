@@ -21,7 +21,7 @@ public class TargetSystem : MonoBehaviour
         turret = transform.Find("Turret");
         barrel = transform.Find("Barrel");
 
-        chooseTarget = !PhotonNetwork.OfflineMode || GameManager.autoPlay;
+        chooseTarget = GameManager.gameManager != null && (!PhotonNetwork.OfflineMode || GameManager.autoPlay);
 
         if (!chooseTarget)
         {
@@ -133,9 +133,10 @@ public class TargetSystem : MonoBehaviour
         if (currentTarget.parent.TryGetComponent<Rigidbody>(out var rigidbody))
         {
             Vector3 futurePosition = CustomMath.FuturePosition(currentTarget.position, rigidbody, seconds);
-            if (Physics.Raycast(currentTarget.position, futurePosition - currentTarget.position, out RaycastHit hit, Vector3.Distance(currentTarget.position, futurePosition)))
+            Vector3 futureDirection = futurePosition - currentTarget.position;
+            if (Physics.Raycast(currentTarget.position, futureDirection, out RaycastHit hit, Vector3.Distance(currentTarget.position, futurePosition)))
             {
-                return hit.point;
+                return hit.point - futureDirection * 0.05f; // subtracting so the point returned isn't inside a collider
             }
             else
             {
@@ -146,45 +147,5 @@ public class TargetSystem : MonoBehaviour
         {
             return currentTarget.position;
         }
-    }
-
-    Transform GetClosestTank(List<Transform> tanks)
-    {
-        Transform closestTank = null;
-        float closestTankDst = Mathf.Infinity;
-        foreach (Transform tank in tanks)
-        {
-            if (tank != transform)
-            {
-                float dstToTank = CustomMath.SqrDistance(tank.transform.position, transform.position);
-
-                if (dstToTank < closestTankDst)
-                {
-                    closestTankDst = dstToTank;
-                    closestTank = tank;
-                }
-            }
-        }
-        return closestTank.Find("Turret");
-    }
-
-    Transform GetClosestTank(Transform parent)
-    {
-        Transform closestTank = null;
-        float closestTankDst = Mathf.Infinity;
-        foreach (Transform tank in parent)
-        {
-            if (tank != transform)
-            {
-                float dstToTank = CustomMath.SqrDistance(tank.transform.position, transform.position);
-
-                if (dstToTank < closestTankDst)
-                {
-                    closestTankDst = dstToTank;
-                    closestTank = tank;
-                }
-            }
-        }
-        return closestTank.Find("Turret");
     }
 }

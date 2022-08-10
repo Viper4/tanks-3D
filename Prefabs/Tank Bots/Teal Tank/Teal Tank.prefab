@@ -91,6 +91,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rb: {fileID: -563639079389155497}
+  audioSource: {fileID: 0}
   scale: 0.025
 --- !u!82 &268702098409813898
 AudioSource:
@@ -686,7 +687,7 @@ MonoBehaviour:
   spawnPoint: {fileID: 6901609897244754546}
   shootEffect: {fileID: 7891438045153574773, guid: 4d61908da1eaf274aa82edf86c9a5c95, type: 3}
   bulletParent: {fileID: 0}
-  speed: 32
+  speed: 26
   explosionRadius: 0
   pierceLevel: 0
   ricochetLevel: 0
@@ -736,15 +737,15 @@ MonoBehaviour:
   effectsParent: {fileID: 0}
   barrierLayers:
     serializedVersion: 2
-    m_Bits: 193217
+    m_Bits: 2028225
   slopeLayers:
     serializedVersion: 2
-    m_Bits: 1
+    m_Bits: 1048577
   slopeAlignment: 1
   alignRotationSpeed: 20
   stationary: 0
   obstacleAvoidance: 1
-  normalSpeed: 4
+  normalSpeed: 3
   avoidSpeed: 2.5
   useGravity: 1
   gravity: 8
@@ -758,8 +759,8 @@ MonoBehaviour:
   - -45
   - 45
   tankNoise: 1
-  tankRotSpeed: 300
-  tankRotNoiseScale: 5
+  tankRotSpeed: 200
+  tankRotNoiseScale: 4
   tankRotNoiseSpeed: 0.5
   turretRotation: 1
   turretNoise: 0

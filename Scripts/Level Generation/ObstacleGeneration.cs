@@ -106,15 +106,19 @@ public class ObstacleGeneration : MonoBehaviour
                         }
                     }
 
+                    int yMultiplier = Random.Range(0, 5);
+                    int xMultiplier = Random.Range(0, 5);
+                    Quaternion newRotation = Quaternion.AngleAxis(90 * yMultiplier, Vector3.up) * Quaternion.AngleAxis(90 * xMultiplier, Vector3.right) * transform.rotation;
                     // If user wants to generate obstacles with gravity in mind
                     if (logicalStructure)
                     {
                         // Checking if the new position is above ground
-                        if (Physics.Raycast(newPosition, Vector3.down, out RaycastHit groundHit, Mathf.Infinity))
+                        if (Physics.Raycast(newPosition, Vector3.down, out RaycastHit groundHit, Mathf.Infinity, ~2, QueryTriggerInteraction.Collide))
                         {
                             // Setting new position to the distance to ground, instantiating the object, and updating last position
                             newPosition -= Vector3.up * (groundHit.distance - (obstacle.GetComponent<BoxCollider>().size.y * obstacle.transform.localScale.y * 0.5f));
-                            clonedObstacles.Add(Instantiate(obstacle, newPosition, transform.rotation, transform.parent));
+
+                            clonedObstacles.Add(Instantiate(obstacle, newPosition, newRotation, transform.parent));
                             lastPosition = newPosition;
                         }
                         else // When new position is not above ground then log warning and stop the recursion
@@ -126,7 +130,7 @@ public class ObstacleGeneration : MonoBehaviour
                     else
                     {
                         // Instantiating obstacle at new position and updating last position
-                        clonedObstacles.Add(Instantiate(obstacle, newPosition, transform.rotation, transform.parent));
+                        clonedObstacles.Add(Instantiate(obstacle, newPosition, newRotation, transform.parent));
                         lastPosition = newPosition;
                     }
                 }

@@ -77,6 +77,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rb: {fileID: 8904019260715276304}
+  audioSource: {fileID: 0}
   scale: 0.025
 --- !u!82 &3144664368079777017
 AudioSource:
@@ -616,15 +617,15 @@ MonoBehaviour:
   effectsParent: {fileID: 0}
   barrierLayers:
     serializedVersion: 2
-    m_Bits: 193217
+    m_Bits: 2028225
   slopeLayers:
     serializedVersion: 2
-    m_Bits: 1
+    m_Bits: 1048577
   slopeAlignment: 1
   alignRotationSpeed: 20
   stationary: 0
   obstacleAvoidance: 1
-  normalSpeed: 6
+  normalSpeed: 4
   avoidSpeed: 2.5
   useGravity: 1
   gravity: 8
@@ -638,7 +639,7 @@ MonoBehaviour:
   - -45
   - 45
   tankNoise: 1
-  tankRotSpeed: 400
+  tankRotSpeed: 300
   tankRotNoiseScale: 5
   tankRotNoiseSpeed: 0.5
   turretRotation: 1

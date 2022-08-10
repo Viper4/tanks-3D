@@ -203,7 +203,7 @@ public class TrapBot : MonoBehaviour
             if (firePattern == FirePattern.None)
             {
                 baseTankLogic.targetTurretDir = targetDir;
-                if (mode != Mode.Pincer && mineControl.canLay && mineControl.minesLaid < 2 && !layingMine && (turretAngleToTarget > maxRicochetAngle || !targetSystem.TargetVisible()))
+                if (mode == Mode.Defense && mineControl.canLay && !layingMine && (turretAngleToTarget > maxRicochetAngle || !targetSystem.TargetVisible() || fireControl.bulletLimit >= fireControl.bulletsFired))
                 {
                     Transform closestTank = transform.ClosestTransform(transform.parent);
                     float closestTankDst = closestTank == null ? Mathf.Infinity : Vector3.Distance(closestTank.position, transform.position);

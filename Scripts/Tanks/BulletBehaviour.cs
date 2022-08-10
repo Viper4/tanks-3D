@@ -15,6 +15,8 @@ public class BulletBehaviour : MonoBehaviour
     [SerializeField] Transform explosionEffect;
     [SerializeField] Transform sparkEffect;
 
+    List<Transform> collidedTransforms = new List<Transform>();
+
     public float speed { get; set; } = 32f;
     public float explosionRadius { get; set; } = 0;
 
@@ -47,11 +49,19 @@ public class BulletBehaviour : MonoBehaviour
             switch (other.tag)
             {
                 case "Tank":
-                    KillTarget(other.transform.parent);
+                    if (!collidedTransforms.Contains(other.transform.parent))
+                    {
+                        KillTarget(other.transform.parent);
+                        collidedTransforms.Add(other.transform.parent);
+                    }
                     break;
                 case "Player":
                     Transform otherPlayer = other.transform.root;
-                    KillTarget(otherPlayer);
+                    if (!collidedTransforms.Contains(otherPlayer))
+                    {
+                        KillTarget(otherPlayer);
+                        collidedTransforms.Add(otherPlayer);
+                    }
                     break;
             }
         }
@@ -66,16 +76,28 @@ public class BulletBehaviour : MonoBehaviour
                 case "Tank":
                     if (other.transform.parent.CompareTag("Tank"))
                     {
-                        KillTarget(other.transform.parent);
+                        if (!collidedTransforms.Contains(other.transform.parent))
+                        {
+                            KillTarget(other.transform.parent);
+                            collidedTransforms.Add(other.transform.parent);
+                        }
                     }
                     else
                     {
-                        KillTarget(other.transform);
+                        if (!collidedTransforms.Contains(other.transform))
+                        {
+                            KillTarget(other.transform);
+                            collidedTransforms.Add(other.transform);
+                        }
                     }
                     break;
                 case "Player":
                     Transform otherPlayer = other.transform.root;
-                    KillTarget(otherPlayer);
+                    if (!collidedTransforms.Contains(otherPlayer))
+                    {
+                        KillTarget(otherPlayer);
+                        collidedTransforms.Add(otherPlayer);
+                    }
                     break;
                 case "Destructable":
                     // If can pierce, destroy the hit object, otherwise bounce off

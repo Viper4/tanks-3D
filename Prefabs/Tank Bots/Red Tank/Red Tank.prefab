@@ -200,8 +200,8 @@ MonoBehaviour:
   ricochetLevel: 1
   bulletLimit: 3
   fireCooldown:
-  - 0.35
-  - 0.6
+  - 0.65
+  - 1
   canFire: 1
   solidLayerMask:
     serializedVersion: 2
@@ -244,15 +244,15 @@ MonoBehaviour:
   effectsParent: {fileID: 0}
   barrierLayers:
     serializedVersion: 2
-    m_Bits: 193217
+    m_Bits: 2028225
   slopeLayers:
     serializedVersion: 2
-    m_Bits: 1
+    m_Bits: 1048577
   slopeAlignment: 1
   alignRotationSpeed: 20
   stationary: 0
   obstacleAvoidance: 1
-  normalSpeed: 5
+  normalSpeed: 4
   avoidSpeed: 2.5
   useGravity: 1
   gravity: 8
@@ -266,7 +266,7 @@ MonoBehaviour:
   - -45
   - 45
   tankNoise: 1
-  tankRotSpeed: 300
+  tankRotSpeed: 200
   tankRotNoiseScale: 5
   tankRotNoiseSpeed: 0.5
   turretRotation: 1

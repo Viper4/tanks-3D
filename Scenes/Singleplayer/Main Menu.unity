@@ -234,7 +234,7 @@ GameObject:
   - component: {fileID: 307781876}
   - component: {fileID: 307781875}
   - component: {fileID: 307781874}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Kill Boundary
   m_TagString: Kill Boundary
   m_Icon: {fileID: 0}
@@ -400,7 +400,7 @@ GameObject:
   - component: {fileID: 515383219}
   - component: {fileID: 515383218}
   - component: {fileID: 515383217}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Kill Boundary
   m_TagString: Kill Boundary
   m_Icon: {fileID: 0}
@@ -734,7 +734,7 @@ GameObject:
   - component: {fileID: 981394281}
   - component: {fileID: 981394280}
   - component: {fileID: 981394279}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Kill Boundary
   m_TagString: Kill Boundary
   m_Icon: {fileID: 0}
@@ -829,8 +829,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1025239422}
   - component: {fileID: 1025239425}
-  - component: {fileID: 1025239424}
   - component: {fileID: 1025239423}
+  - component: {fileID: 1025239426}
   m_Layer: 0
   m_Name: Wall
   m_TagString: Untagged
@@ -866,7 +866,15 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!23 &1025239424
+--- !u!33 &1025239425
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1025239421}
+  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!23 &1025239426
 MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -886,7 +894,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: f5a78b46afbee9d43bc4aef0367447b1, type: 2}
+  - {fileID: 2100000, guid: c9993e7e08b4e8640bcac43f21aa3b03, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -908,14 +916,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!33 &1025239425
-MeshFilter:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1025239421}
-  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!1 &1160739163
 GameObject:
   m_ObjectHideFlags: 0
@@ -928,7 +928,7 @@ GameObject:
   - component: {fileID: 1160739167}
   - component: {fileID: 1160739166}
   - component: {fileID: 1160739165}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Kill Boundary
   m_TagString: Kill Boundary
   m_Icon: {fileID: 0}
@@ -1373,8 +1373,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1454316712}
   - component: {fileID: 1454316715}
-  - component: {fileID: 1454316714}
   - component: {fileID: 1454316713}
+  - component: {fileID: 1454316716}
   m_Layer: 0
   m_Name: Wall
   m_TagString: Untagged
@@ -1410,7 +1410,15 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!23 &1454316714
+--- !u!33 &1454316715
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1454316711}
+  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!23 &1454316716
 MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1430,7 +1438,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: f5a78b46afbee9d43bc4aef0367447b1, type: 2}
+  - {fileID: 2100000, guid: c9993e7e08b4e8640bcac43f21aa3b03, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1452,14 +1460,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!33 &1454316715
-MeshFilter:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1454316711}
-  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!1 &1502060545
 GameObject:
   m_ObjectHideFlags: 0
@@ -1470,8 +1470,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1502060546}
   - component: {fileID: 1502060549}
-  - component: {fileID: 1502060548}
   - component: {fileID: 1502060547}
+  - component: {fileID: 1502060550}
   m_Layer: 0
   m_Name: Wall
   m_TagString: Untagged
@@ -1507,7 +1507,15 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!23 &1502060548
+--- !u!33 &1502060549
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1502060545}
+  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!23 &1502060550
 MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1527,7 +1535,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: f5a78b46afbee9d43bc4aef0367447b1, type: 2}
+  - {fileID: 2100000, guid: c9993e7e08b4e8640bcac43f21aa3b03, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1549,14 +1557,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!33 &1502060549
-MeshFilter:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1502060545}
-  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!1 &1584311404
 GameObject:
   m_ObjectHideFlags: 0
@@ -1567,8 +1567,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1584311405}
   - component: {fileID: 1584311408}
-  - component: {fileID: 1584311407}
   - component: {fileID: 1584311406}
+  - component: {fileID: 1584311409}
   m_Layer: 0
   m_Name: Wall
   m_TagString: Untagged
@@ -1604,7 +1604,15 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!23 &1584311407
+--- !u!33 &1584311408
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1584311404}
+  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!23 &1584311409
 MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1624,7 +1632,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: f5a78b46afbee9d43bc4aef0367447b1, type: 2}
+  - {fileID: 2100000, guid: c9993e7e08b4e8640bcac43f21aa3b03, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1646,14 +1654,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!33 &1584311408
-MeshFilter:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1584311404}
-  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!1 &1698736998
 GameObject:
   m_ObjectHideFlags: 0
@@ -1697,7 +1697,7 @@ GameObject:
   - component: {fileID: 1728515873}
   - component: {fileID: 1728515872}
   - component: {fileID: 1728515871}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Kill Boundary
   m_TagString: Kill Boundary
   m_Icon: {fileID: 0}
@@ -1818,7 +1818,7 @@ MonoBehaviour:
   tankParent: {fileID: 417648472}
   clearParent: {fileID: 12162871}
   boundingCollider: {fileID: 1975074187}
-  tankLimit: 10
+  tankLimit: 16
   tanks:
   - {fileID: 6353959912858125971, guid: c9f541d7851ab9a47a33057f6c146edd, type: 3}
   - {fileID: 4033695715270616719, guid: 8c192097c6438ea419f6b4c11af8dd65, type: 3}
@@ -1827,10 +1827,14 @@ MonoBehaviour:
   - {fileID: 1323752777862920504, guid: debcf5b4aa7147a4da9c55ed29c20294, type: 3}
   - {fileID: 4033695715270616719, guid: a9a3826477b88174fa5e0688e442dcae, type: 3}
   - {fileID: 9020707831748607082, guid: cb64a51ec564b42458a7ffa1d700509f, type: 3}
+  - {fileID: 8152485418157340697, guid: 013dcda7d98c1ff44a08d58dc3401393, type: 3}
+  - {fileID: 5631725004334847937, guid: 8cacd9a3d9b692a438ac9612d5ea47e3, type: 3}
   obstacleLimit: 100
   obstacles:
   - {fileID: 474112292520302916, guid: 966e4c9e2448c9846bfe93aec5074577, type: 3}
   - {fileID: 1789137517761687661, guid: 716ebcd9db95e4540a052e5f9f478e48, type: 3}
+  - {fileID: 8628183819059575296, guid: ff2520d73f903f148a067071ade7c29e, type: 3}
+  - {fileID: 6011413356270360582, guid: a1c3af60c2dd9f64083a6e9a8f1f54fc, type: 3}
   possibleDistances:
   - value: 2
     weight: 10
@@ -1896,7 +1900,7 @@ GameObject:
   - component: {fileID: 1959967217}
   - component: {fileID: 1959967216}
   - component: {fileID: 1959967215}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Kill Boundary
   m_TagString: Kill Boundary
   m_Icon: {fileID: 0}

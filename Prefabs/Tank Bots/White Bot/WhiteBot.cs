@@ -10,6 +10,8 @@ public class WhiteBot : MonoBehaviour
     [SerializeField] float defensePitch;
 
     [SerializeField] Transform disappearEffect;
+    [SerializeField] Transform circleEffect;
+
     EngineSoundManager engineSoundManager;
     TrapBot trapBot;
 
@@ -26,6 +28,7 @@ public class WhiteBot : MonoBehaviour
         barrelRenderer = transform.Find("Barrel").GetComponent<MeshRenderer>();
         yield return new WaitUntil(() => !GameManager.frozen && Time.timeScale != 0);
         Instantiate(disappearEffect, transform.position, transform.rotation);
+        Instantiate(circleEffect, transform);
     }
 
     private void Update()

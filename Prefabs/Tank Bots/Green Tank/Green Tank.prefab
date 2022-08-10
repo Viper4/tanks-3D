@@ -504,8 +504,8 @@ GameObject:
   m_Component:
   - component: {fileID: 4373347413315304501}
   - component: {fileID: 4033695715270616713}
-  - component: {fileID: 4306979400757749490}
   - component: {fileID: 348678474553284728}
+  - component: {fileID: 4306979400757749490}
   - component: {fileID: 8612216023859630566}
   - component: {fileID: 2939642877174810091}
   - component: {fileID: -1444549703756494348}
@@ -556,7 +556,7 @@ MonoBehaviour:
   spawnPoint: {fileID: 8960685113855324647}
   shootEffect: {fileID: 7891438045153574773, guid: 4d61908da1eaf274aa82edf86c9a5c95, type: 3}
   bulletParent: {fileID: 0}
-  speed: 32
+  speed: 26
   explosionRadius: 0
   pierceLevel: 0
   ricochetLevel: 2
@@ -568,6 +568,25 @@ MonoBehaviour:
   solidLayerMask:
     serializedVersion: 2
     m_Bits: 1
+--- !u!114 &348678474553284728
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4033695715270616719}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 42b2840cfbe33ae41a58aa074894804d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  primaryTarget: {fileID: 0}
+  currentTarget: {fileID: 0}
+  preferredTargetArea: Body
+  ignoreLayerMask:
+    serializedVersion: 2
+    m_Bits: 1838
+  enemyParent: {fileID: 0}
 --- !u!114 &4306979400757749490
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -587,10 +606,10 @@ MonoBehaviour:
   effectsParent: {fileID: 0}
   barrierLayers:
     serializedVersion: 2
-    m_Bits: 193217
+    m_Bits: 2028225
   slopeLayers:
     serializedVersion: 2
-    m_Bits: 1
+    m_Bits: 1048577
   slopeAlignment: 0
   alignRotationSpeed: 20
   stationary: 1
@@ -624,25 +643,6 @@ MonoBehaviour:
   targetTurretDir: {x: 0, y: 0, z: 0}
   targetTankDir: {x: 0, y: 0, z: 0}
   tankOrigin: {fileID: 4373347413315304501}
---- !u!114 &348678474553284728
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4033695715270616719}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 42b2840cfbe33ae41a58aa074894804d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  primaryTarget: {fileID: 0}
-  currentTarget: {fileID: 0}
-  preferredTargetArea: Body
-  ignoreLayerMask:
-    serializedVersion: 2
-    m_Bits: 1838
-  enemyParent: {fileID: 0}
 --- !u!114 &8612216023859630566
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -683,9 +683,14 @@ MonoBehaviour:
   nonObstructLayerMask:
     serializedVersion: 2
     m_Bits: 1982
-  drawDuration: 1
+  drawDuration: 0.25
   ricochetPredictions: 2
-  testRays: 60
+  horizontalSteps: 60
+  verticalSteps: 15
+  maxHorizontalAngle: 180
+  maxVerticalAngle: 20
+  doubleScanHorizontal: 1
+  doubleScanVertical: 1
   shootPosition: {x: 0, y: 0, z: 0}
   lookPositions: []
 --- !u!54 &-1444549703756494348

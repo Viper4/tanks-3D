@@ -11,4 +11,5 @@ public class PlayerData
     public int deaths;
     public float time;
     public float bestTime;
+    public int sceneIndex;
 }
