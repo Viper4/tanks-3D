@@ -187,12 +187,12 @@ public class MineBehaviour : MonoBehaviour
                                 {
                                     otherPlayer.GetComponent<PhotonView>().RPC("ExplodeTank", RpcTarget.All);
                                 }
+                                IncreaseKills(otherPlayer);
                             }
                             else
                             {
                                 otherPlayer.GetComponent<BaseTankLogic>().ExplodeTank();
                             }
-                            IncreaseKills(otherPlayer);
                         }
                         break;
                     case "Destructable":

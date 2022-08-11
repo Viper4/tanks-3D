@@ -148,7 +148,7 @@ public class RicochetCalculation : MonoBehaviour
                 // Checking if destination is in line of sight of mirroredPosition
                 if (Physics.Raycast(destination, LOSDir, out RaycastHit LOSHit, Vector3.Distance(destination, mirroredPosition), mirrorLayerMask))
                 {
-                    float path1Dst = Vector3.Distance(destination, LOSHit.point) - 0.05f;
+                    float path1Dst = Vector3.Distance(destination, LOSHit.point) - 0.1f;
                     // Checking bullet path
                     if (!Physics.Raycast(destination, LOSDir, out RaycastHit bulletObstruct1, path1Dst, ~nonObstructLayerMask))
                     {
@@ -166,10 +166,10 @@ public class RicochetCalculation : MonoBehaviour
                                     Vector3 reflectedDir = Vector3.Reflect(lastReflectHit.point - lastDestination, lastReflectHit.normal);
                                     if (Physics.Raycast(lastReflectHit.point, reflectedDir, out RaycastHit reflectHit, Mathf.Infinity, ~nonObstructLayerMask))
                                     {
-                                        float reflectDst = Vector3.Distance(lastReflectHit.point, reflectHit.point) - 0.05f;
+                                        float reflectDst = Vector3.Distance(lastReflectHit.point, reflectHit.point) - 0.1f;
                                         totalDistance += reflectDst;
                                         // Checking bullet path of reflection
-                                        if (!Physics.Raycast(reflectHit.point, lastReflectHit.point - reflectHit.point, out RaycastHit bulletObstruct, reflectDst - 0.05f, ~nonObstructLayerMask))
+                                        if (!Physics.Raycast(reflectHit.point, lastReflectHit.point - reflectHit.point, out RaycastHit bulletObstruct, reflectDst - 0.1f, ~nonObstructLayerMask))
                                         {
                                             if (showRays)
                                             {
@@ -183,7 +183,7 @@ public class RicochetCalculation : MonoBehaviour
                                             }
                                             else
                                             {
-                                                float finalReflectDst = Vector3.Distance(origin.position, reflectHit.point) - 0.05f;
+                                                float finalReflectDst = Vector3.Distance(origin.position, reflectHit.point) - 0.1f;
                                                 if (!Physics.Raycast(origin.position, reflectHit.point - origin.position, out RaycastHit finalReflectHit, finalReflectDst, ~nonObstructLayerMask))
                                                 {
                                                     totalDistance += finalReflectDst;

@@ -17,6 +17,7 @@ public class GameManager : MonoBehaviourPunCallbacks
     public bool offlineMode = true;
     public static bool frozen;
     public static bool autoPlay;
+    public bool reachedLastLevel = false;
 
     bool loadingScene = false;
 
@@ -106,8 +107,25 @@ public class GameManager : MonoBehaviourPunCallbacks
                 {
                     PlayerData playerData = SaveSystem.LoadPlayerData("PlayerData");
 
+                    Text labelText = baseUIHandler.UIElements["EndMenu"].Find("LabelBackground").GetChild(0).GetComponent<Text>();
                     Transform stats = baseUIHandler.UIElements["StatsMenu"].Find("Stats");
                     gameManager.loadingScreen.gameObject.SetActive(false);
+
+                    labelText.text = "Game over";
+                    if (gameManager.reachedLastLevel)
+                    {
+                        if (PhotonNetwork.OfflineMode)
+                        {
+                            if (playerData.lives > 0)
+                            {
+                                labelText.text = "Campaign complete!";
+                            }
+                        }
+                        else if ((int)PhotonNetwork.CurrentRoom.CustomProperties["Total Lives"] > 0)
+                        {
+                            labelText.text = "Campaign complete!";
+                        }
+                    }
 
                     stats.Find("Time").GetComponent<Text>().text = "Time: " + playerData.time.FormattedTime();
                     stats.Find("Best Time").GetComponent<Text>().text = "Best Time: " + playerData.bestTime.FormattedTime();
@@ -194,6 +212,7 @@ public class GameManager : MonoBehaviourPunCallbacks
                     }
                     else
                     {
+                        gameManager.reachedLastLevel = true;
                         gameManager.label.Find("Level").GetComponent<Text>().text = "Final " + Regex.Match(currentSceneName, @"(.*?)[ ][0-9]+$").Groups[1] + " Mission";
                     }
                     gameManager.label.Find("EnemyTanks").GetComponent<Text>().text = "Enemy tanks: " + GameObject.Find("Tanks").transform.childCount;

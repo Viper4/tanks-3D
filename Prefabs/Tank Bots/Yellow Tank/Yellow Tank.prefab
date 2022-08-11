@@ -575,10 +575,9 @@ MonoBehaviour:
   mineParent: {fileID: 0}
   mineLimit: 4
   layCooldown:
-  - 2
   - 4
+  - 8
   explosionRadius: 7
-  canLay: 1
 --- !u!114 &8514043713273510450
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -622,7 +621,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 1048577
   slopeAlignment: 1
-  alignRotationSpeed: 20
+  alignRotationSpeed: 300
+  maxSlopeAngle: 35
   stationary: 0
   obstacleAvoidance: 1
   normalSpeed: 4
@@ -639,8 +639,8 @@ MonoBehaviour:
   - -45
   - 45
   tankNoise: 1
-  tankRotSpeed: 300
-  tankRotNoiseScale: 5
+  tankRotSpeed: 250
+  tankRotNoiseScale: 4
   tankRotNoiseSpeed: 0.5
   turretRotation: 1
   turretNoise: 1

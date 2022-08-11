@@ -21,6 +21,7 @@ public class BaseTankLogic : MonoBehaviour
     [SerializeField] private float alignRotationSpeed = 20;
 
     [Header("Tank Movement")]
+    [SerializeField] float maxSlopeAngle = 35;
     public bool stationary = false;
     [SerializeField] bool obstacleAvoidance = true;
     public float normalSpeed = 5;
@@ -77,7 +78,7 @@ public class BaseTankLogic : MonoBehaviour
         RB = tankOrigin.GetComponent<Rigidbody>();
         lastEulerAngles = tankOrigin.eulerAngles;
         speed = normalSpeed;
-        targetTankDir = tankOrigin.forward;
+        targetTankDir = body.forward;
         if (GameManager.autoPlay)
         {
             effectsParent = GameObject.Find("ToClear").transform;
@@ -94,7 +95,7 @@ public class BaseTankLogic : MonoBehaviour
                 {
                     // Rotating to align with slope
                     Quaternion alignedRotation = Quaternion.FromToRotation(tankOrigin.up, hit.normal);
-                    tankOrigin.rotation = Quaternion.Slerp(tankOrigin.rotation, alignedRotation * tankOrigin.rotation, alignRotationSpeed * Time.deltaTime);
+                    tankOrigin.rotation = Quaternion.RotateTowards(tankOrigin.rotation, alignedRotation * tankOrigin.rotation, alignRotationSpeed * Time.deltaTime);
                 }
             }
 
@@ -110,89 +111,98 @@ public class BaseTankLogic : MonoBehaviour
                 {
                     if (obstacleAvoidance)
                     {
-                        float normalAngle = 181;
+                        speed = normalSpeed;
+
+                        float normalAngleY = 181;
+                        float slopeAngle = 0; 
+
                         bool[] pathClear = { true, true };
-                        if (Physics.Raycast(body.position, body.forward, out RaycastHit forwardHit, 2, barrierLayers))
+                        if (Physics.Raycast(body.position, body.forward, out RaycastHit forwardHit, 1.5f, barrierLayers))
                         {
-                            normalAngle = Vector3.SignedAngle(body.forward, forwardHit.normal, body.up);
+                            normalAngleY = Vector3.SignedAngle(body.forward, forwardHit.normal, body.up);
+                            slopeAngle = Vector3.Angle(forwardHit.normal, Vector3.up);
+
                             Debug.DrawLine(body.position, forwardHit.point, Color.red, 0.1f);
                         }
-                        else if (Physics.Raycast(body.position - body.right * 0.75f, body.forward, out RaycastHit forwardHitL, 2, barrierLayers))
+                        else if (Physics.Raycast(body.position - body.right * 0.75f, body.forward, out RaycastHit forwardHitL, 1.5f, barrierLayers))
                         {
-                            normalAngle = Vector3.SignedAngle(body.forward, forwardHitL.normal, body.up);
+                            normalAngleY = Vector3.SignedAngle(body.forward, forwardHitL.normal, body.up);
+                            slopeAngle = Vector3.Angle(forwardHitL.normal, Vector3.up);
+
                             Debug.DrawLine(body.position - body.right * 0.75f, forwardHitL.point, Color.red, 0.1f);
                         }
-                        else if (Physics.Raycast(body.position + body.right * 0.75f, body.forward, out RaycastHit forwardHitR, 2, barrierLayers))
+                        else if (Physics.Raycast(body.position + body.right * 0.75f, body.forward, out RaycastHit forwardHitR, 1.5f, barrierLayers))
                         {
-                            normalAngle = Vector3.SignedAngle(body.forward, forwardHitR.normal, body.up);
+                            normalAngleY = Vector3.SignedAngle(body.forward, forwardHitR.normal, body.up);
+                            slopeAngle = Vector3.Angle(forwardHitR.normal, Vector3.up);
+
                             Debug.DrawLine(body.position + body.right * 0.75f, forwardHitR.point, Color.red, 0.1f);
                         }
 
-                        if (normalAngle != 181)
+                        if (slopeAngle > maxSlopeAngle)
                         {
-                            speed = avoidSpeed;
+                            if (normalAngleY != 181)
+                            {
+                                speed = avoidSpeed;
 
-                            if (Physics.Raycast(body.position, -body.right, out RaycastHit leftHit, 2.5f, barrierLayers))
-                            {
-                                pathClear[0] = false;
-                                Debug.DrawLine(body.position, leftHit.point, Color.red, 0.1f);
-                            }
-                            else if (Physics.Raycast(body.position + body.forward, -body.right, out RaycastHit leftHitF, 2, barrierLayers))
-                            {
-                                pathClear[0] = false;
-                                Debug.DrawLine(body.position + body.forward, leftHitF.point, Color.red, 0.1f);
-                            }
-                            else if (Physics.Raycast(body.position - body.forward, -body.right, out RaycastHit leftHitB, 2, barrierLayers))
-                            {
-                                pathClear[0] = false;
-                                Debug.DrawLine(body.position - body.forward, leftHitB.point, Color.red, 0.1f);
-                            }
-                            if (Physics.Raycast(body.position, body.right, out RaycastHit rightHit, 2.5f, barrierLayers))
-                            {
-                                pathClear[1] = false;
-                                Debug.DrawLine(body.position, rightHit.point, Color.red, 0.1f);
-                            }
-                            else if (Physics.Raycast(body.position + body.forward, body.right, out RaycastHit rightHitF, 2, barrierLayers))
-                            {
-                                pathClear[1] = false;
-                                Debug.DrawLine(body.position + body.forward, rightHitF.point, Color.red, 0.1f);
-                            }
-                            else if (Physics.Raycast(body.position - body.forward, body.right, out RaycastHit rightHitB, 2, barrierLayers))
-                            {
-                                pathClear[1] = false;
-                                Debug.DrawLine(body.position - body.forward, rightHitB.point, Color.red, 0.1f);
-                            }
-
-                            if (pathClear[0])
-                            {
-                                if (pathClear[1])
+                                if (Physics.Raycast(body.position, -body.right, out RaycastHit leftHit, 1.5f, barrierLayers))
                                 {
-                                    if (normalAngle < 0)
+                                    pathClear[0] = false;
+                                    Debug.DrawLine(body.position, leftHit.point, Color.red, 0.1f);
+                                }
+                                else if (Physics.Raycast(body.position + body.forward, -body.right, out RaycastHit leftHitF, 1.5f, barrierLayers))
+                                {
+                                    pathClear[0] = false;
+                                    Debug.DrawLine(body.position + body.forward, leftHitF.point, Color.red, 0.1f);
+                                }
+                                else if (Physics.Raycast(body.position - body.forward, -body.right, out RaycastHit leftHitB, 1.5f, barrierLayers))
+                                {
+                                    pathClear[0] = false;
+                                    Debug.DrawLine(body.position - body.forward, leftHitB.point, Color.red, 0.1f);
+                                }
+                                if (Physics.Raycast(body.position, body.right, out RaycastHit rightHit, 1.5f, barrierLayers))
+                                {
+                                    pathClear[1] = false;
+                                    Debug.DrawLine(body.position, rightHit.point, Color.red, 0.1f);
+                                }
+                                else if (Physics.Raycast(body.position + body.forward, body.right, out RaycastHit rightHitF, 1.5f, barrierLayers))
+                                {
+                                    pathClear[1] = false;
+                                    Debug.DrawLine(body.position + body.forward, rightHitF.point, Color.red, 0.1f);
+                                }
+                                else if (Physics.Raycast(body.position - body.forward, body.right, out RaycastHit rightHitB, 1.5f, barrierLayers))
+                                {
+                                    pathClear[1] = false;
+                                    Debug.DrawLine(body.position - body.forward, rightHitB.point, Color.red, 0.1f);
+                                }
+
+                                if (pathClear[0])
+                                {
+                                    if (pathClear[1])
                                     {
-                                        targetTankDir = -tankOrigin.right;
+                                        if (normalAngleY < 0)
+                                        {
+                                            targetTankDir = -body.right;
+                                        }
+                                        else
+                                        {
+                                            targetTankDir = body.right;
+                                        }
                                     }
                                     else
                                     {
-                                        targetTankDir = tankOrigin.right;
+                                        targetTankDir = -body.right;
                                     }
+                                }
+                                else if (pathClear[1])
+                                {
+                                    targetTankDir = body.right;
                                 }
                                 else
                                 {
-                                    targetTankDir = -tankOrigin.right;
+                                    targetTankDir = -body.forward;
                                 }
                             }
-                            else if (pathClear[1])
-                            {
-                                targetTankDir = tankOrigin.right;
-                            }
-                            else
-                            {
-                                targetTankDir = -tankOrigin.forward;
-                            }
-                        }
-                        else
-                        {
-                            speed = normalSpeed;
                         }
                     }
 

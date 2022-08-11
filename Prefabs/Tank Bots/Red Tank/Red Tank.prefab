@@ -200,8 +200,8 @@ MonoBehaviour:
   ricochetLevel: 1
   bulletLimit: 3
   fireCooldown:
-  - 0.65
-  - 1
+  - 0.6
+  - 0.85
   canFire: 1
   solidLayerMask:
     serializedVersion: 2
@@ -249,7 +249,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 1048577
   slopeAlignment: 1
-  alignRotationSpeed: 20
+  alignRotationSpeed: 300
+  maxSlopeAngle: 35
   stationary: 0
   obstacleAvoidance: 1
   normalSpeed: 4
@@ -271,7 +272,7 @@ MonoBehaviour:
   tankRotNoiseSpeed: 0.5
   turretRotation: 1
   turretNoise: 1
-  turretRotSpeed: 60
+  turretRotSpeed: 65
   inaccuracy: {x: 5, y: 35}
   turretNoiseSpeed: 1
   turretRangeX:
@@ -296,7 +297,8 @@ MonoBehaviour:
   fireDelay:
   - 0.08
   - 0.1
-  maxShootAngle: 4
+  maxShootAngle: 5
+  maxTargetAngle: 100
 --- !u!54 &2824986948199448400
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -939,7 +941,7 @@ SphereCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 6
+  m_Radius: 5
   m_Center: {x: 0, y: 0.8, z: 0}
 --- !u!1 &8720733653133506505
 GameObject:

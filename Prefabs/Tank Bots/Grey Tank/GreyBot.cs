@@ -45,6 +45,7 @@ public class GreyBot : MonoBehaviour
                 StartCoroutine(Shoot());
             }
 
+            baseTankLogic.targetTankDir = body.forward;
             // Rotating turret and barrel towards target
             baseTankLogic.targetTurretDir = targetSystem.currentTarget.position - turret.position;
         }

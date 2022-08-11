@@ -12,16 +12,19 @@ public class MineControl : MonoBehaviour
 
     public int mineLimit = 2;
     public int minesLaid { get; set; } = 0;
-    [SerializeField] float[] layCooldown = { 2f, 4f };
+    public float[] layCooldown = { 2f, 4f };
     public float explosionRadius = 7f;
-    public bool canLay = true;
+    public bool canLay { get; set; } = false;
 
-    private void Start()
+    private IEnumerator Start()
     {
         if (GameManager.autoPlay)
         {
             mineParent = GameObject.Find("ToClear").transform;
         }
+
+        yield return new WaitForSeconds(Random.Range(layCooldown[0], layCooldown[1]));
+        canLay = true;
     }
 
     public IEnumerator LayMine()

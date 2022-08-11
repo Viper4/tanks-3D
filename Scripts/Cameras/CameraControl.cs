@@ -112,7 +112,6 @@ public class CameraControl : MonoBehaviour
             {
                 Cursor.lockState = CursorLockMode.Locked;
                 pitchMinMax = pitchMinMaxL;
-
                 turret.rotation = barrel.rotation = transform.rotation;
                 reticle.position = new Vector3(Screen.width * 0.5f, Screen.height * 0.5f, 0);
 
@@ -159,10 +158,12 @@ public class CameraControl : MonoBehaviour
                 // Translating inputs from mouse into smoothed rotation of camera
                 yaw += Input.GetAxis("Mouse X") * sensitivity / 4;
                 pitch -= Input.GetAxis("Mouse Y") * sensitivity / 4;
-                pitch = Mathf.Clamp(pitch, pitchMinMax.x, pitchMinMax.y);
-
+                float pitchOffset = dstFromTarget == 0 ? CustomMath.FormattedAngle(turret.eulerAngles.x) : 0;
+                pitch = Mathf.Clamp(pitch, pitchOffset + pitchMinMax.x, pitchOffset + pitchMinMax.y);
+                
                 currentRotation = Vector3.SmoothDamp(currentRotation, new Vector3(pitch, yaw), ref rotationSmoothVelocity, rotationSmoothTime);
                 // Setting rotation and position of camera on previous params and target and dstFromTarget
+
                 transform.eulerAngles = currentRotation;
             }
             transform.position = target.position - transform.forward * dstFromTarget;

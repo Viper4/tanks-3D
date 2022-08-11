@@ -32,6 +32,7 @@ public class BulletBehaviour : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody>();
+        ResetVelocity();
     }
 
     void Update()

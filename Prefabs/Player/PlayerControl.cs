@@ -4,6 +4,7 @@ using UnityEngine;
 using Photon.Pun;
 using PhotonHashtable = ExitGames.Client.Photon.Hashtable;
 using MyUnityAddons.CustomPhoton;
+using MyUnityAddons.Math;
 
 public class PlayerControl : MonoBehaviour
 {

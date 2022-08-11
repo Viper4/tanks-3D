@@ -243,12 +243,14 @@ namespace MyUnityAddons
                 return string.Format("{0:00}:{1:00}.{2:000}", minutes, seconds, milliSeconds);
             }
 
+            public static float FormattedAngle(float angle)
+            {
+                return angle > 180 ? angle - 360 : angle;
+            }
+
             public static float ClampAngle(float angle, float min, float max)
             {
-                // Formatting angle
-                angle = angle > 180 ? angle - 360 : angle;
-
-                return Mathf.Clamp(angle, min, max);
+                return Mathf.Clamp(FormattedAngle(angle), min, max);
             }
 
             public static Sprite ImageToSprite(string filePath, float pixelsPerUnit = 100.0f, SpriteMeshType spriteType = SpriteMeshType.Tight)
