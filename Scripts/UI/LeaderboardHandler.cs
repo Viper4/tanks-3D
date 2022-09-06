@@ -13,15 +13,14 @@ public class LeaderboardHandler : MonoBehaviour
     [SerializeField] GameObject playerSlot;
     [SerializeField] GameObject[] teamPlayerSlots;
 
-    [SerializeField] ClientManager ClientManager;
-    [SerializeField] DataManager clientDataSystem;
+    [SerializeField] ClientManager clientManager;
 
     // Update is called once per frame
     void LateUpdate()
     {
-        if (ClientManager.PV.IsMine)
+        if (clientManager.photonView.IsMine)
         {
-            if (Input.GetKeyDown(clientDataSystem.currentPlayerSettings.keyBinds["Leaderboard"]))
+            if (Input.GetKeyDown(DataManager.playerSettings.keyBinds["Leaderboard"]))
             {
                 if (leaderboardCanvas.gameObject.activeSelf)
                 {
@@ -47,15 +46,14 @@ public class LeaderboardHandler : MonoBehaviour
 
         foreach (Player player in CustomNetworkHandling.NonSpectatorList)
         {
-            PlayerData playerData = player.FindPhotonView().GetComponent<DataManager>().currentPlayerData;
             LeaderboardData leaderboardData = new LeaderboardData()
             {
-                kills = playerData.kills,
-                deaths = playerData.deaths,
+                kills = (int)player.CustomProperties["Kills"],
+                deaths = (int)player.CustomProperties["Deaths"],
                 teamName = player.GetPhotonTeam().Name,
             };
 
-            leaderboardData.KD = playerData.deaths == 0 ? playerData.kills : (Mathf.Round((float)playerData.kills / playerData.deaths * 100) / 100);
+            leaderboardData.KD = leaderboardData.deaths == 0 ? leaderboardData.kills : (Mathf.Round((float)leaderboardData.kills / leaderboardData.deaths * 100) / 100);
 
             leaderboard[player.NickName] = leaderboardData;
         }
@@ -68,27 +66,14 @@ public class LeaderboardHandler : MonoBehaviour
         {
             string username = orderedDictionary[i].Key;
             LeaderboardData leaderboardData = orderedDictionary[i].Value;
-
-            GameObject newPlayerSlot;
-
-            switch (leaderboardData.teamName)
+            GameObject newPlayerSlot = leaderboardData.teamName switch
             {
-                case "Team 1":
-                    newPlayerSlot = Instantiate(teamPlayerSlots[0], playerList);
-                    break;
-                case "Team 2":
-                    newPlayerSlot = Instantiate(teamPlayerSlots[1], playerList);
-                    break;
-                case "Team 3":
-                    newPlayerSlot = Instantiate(teamPlayerSlots[2], playerList);
-                    break;
-                case "Team 4":
-                    newPlayerSlot = Instantiate(teamPlayerSlots[3], playerList);
-                    break;
-                default:
-                    newPlayerSlot = Instantiate(playerSlot, playerList);
-                    break;
-            }
+                "Team 1" => Instantiate(teamPlayerSlots[0], playerList),
+                "Team 2" => Instantiate(teamPlayerSlots[1], playerList),
+                "Team 3" => Instantiate(teamPlayerSlots[2], playerList),
+                "Team 4" => Instantiate(teamPlayerSlots[3], playerList),
+                _ => Instantiate(playerSlot, playerList),
+            };
             newPlayerSlot.transform.Find("Name").GetComponent<TextMeshProUGUI>().text = username;
             newPlayerSlot.transform.Find("Kills").GetComponent<TextMeshProUGUI>().text = leaderboardData.kills.ToString();
             newPlayerSlot.transform.Find("Deaths").GetComponent<TextMeshProUGUI>().text = leaderboardData.deaths.ToString();

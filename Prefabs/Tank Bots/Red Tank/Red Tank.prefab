@@ -147,7 +147,8 @@ GameObject:
   - component: {fileID: 2824986948199448400}
   - component: {fileID: 5971857906689901440}
   - component: {fileID: 5315314118918684429}
-  m_Layer: 15
+  - component: {fileID: 4005516063062427649}
+  m_Layer: 25
   m_Name: Red Tank
   m_TagString: Tank
   m_Icon: {fileID: 0}
@@ -195,8 +196,8 @@ MonoBehaviour:
   shootEffect: {fileID: 7891438045153574773, guid: 4d61908da1eaf274aa82edf86c9a5c95, type: 3}
   bulletParent: {fileID: 0}
   speed: 16
-  explosionRadius: 0
   pierceLevel: 0
+  pierceLimit: 0
   ricochetLevel: 1
   bulletLimit: 3
   fireCooldown:
@@ -205,7 +206,7 @@ MonoBehaviour:
   canFire: 1
   solidLayerMask:
     serializedVersion: 2
-    m_Bits: 1
+    m_Bits: 605028353
 --- !u!114 &7128904291512063631
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -221,9 +222,10 @@ MonoBehaviour:
   primaryTarget: {fileID: 0}
   currentTarget: {fileID: 0}
   preferredTargetArea: Turret
+  chooseTarget: 0
   ignoreLayerMask:
     serializedVersion: 2
-    m_Bits: 1838
+    m_Bits: 268437294
   enemyParent: {fileID: 0}
 --- !u!114 &2189044298125408581
 MonoBehaviour:
@@ -244,13 +246,13 @@ MonoBehaviour:
   effectsParent: {fileID: 0}
   barrierLayers:
     serializedVersion: 2
-    m_Bits: 2028225
+    m_Bits: 1004466881
   slopeLayers:
     serializedVersion: 2
-    m_Bits: 1048577
+    m_Bits: 873463809
   slopeAlignment: 1
   alignRotationSpeed: 300
-  maxSlopeAngle: 35
+  maxSlopeAngle: 40
   stationary: 0
   obstacleAvoidance: 1
   normalSpeed: 4
@@ -258,7 +260,7 @@ MonoBehaviour:
   useGravity: 1
   gravity: 8
   velocityLimit: 25
-  flipAngleThreshold: 20
+  flipAngleThreshold: 25
   restrictRotation: 0
   pitchRange:
   - -45
@@ -278,6 +280,9 @@ MonoBehaviour:
   turretRangeX:
   - -20
   - 20
+  turretRangeY:
+  - -180
+  - 180
   overrideRotation: 0
   targetTurretDir: {x: 0, y: 0, z: 0}
   targetTankDir: {x: 0, y: 0, z: 0}
@@ -307,7 +312,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1323752777862920504}
   serializedVersion: 2
-  m_Mass: 10
+  m_Mass: 1
   m_Drag: 0
   m_AngularDrag: 0.05
   m_UseGravity: 0
@@ -344,13 +349,36 @@ MonoBehaviour:
   ObservedComponentsFoldoutOpen: 1
   Group: 0
   prefixField: -1
-  Synchronization: 3
+  Synchronization: 2
   OwnershipTransfer: 0
   observableSearch: 2
-  ObservedComponents: []
+  ObservedComponents:
+  - {fileID: 4005516063062427649}
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
+--- !u!114 &4005516063062427649
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1323752777862920504}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef3ca8b855933ee4ba50c8bce855cbd3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  player: 0
+  ownerComponents:
+  - {fileID: -3049139407162140918}
+  - {fileID: 7128904291512063631}
+  tankOrigin: {fileID: 1807415214875140994}
+  rb: {fileID: 2824986948199448400}
+  turret: {fileID: 8119463396326681366}
+  barrel: {fileID: 3184342306150245339}
+  teleportDistance: 10
+  rotateTowardsSpeed: 180
 --- !u!1 &1417340831735424559
 GameObject:
   m_ObjectHideFlags: 0
@@ -774,7 +802,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rb: {fileID: 2824986948199448400}
   audioSource: {fileID: 0}
-  scale: 0.025
+  scale: 0.015
 --- !u!82 &3830193943978007854
 AudioSource:
   m_ObjectHideFlags: 0
@@ -787,7 +815,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 8300000, guid: 6d7fc0a90993ef64d9e8c7898b681444, type: 3}
   m_PlayOnAwake: 1
-  m_Volume: 1
+  m_Volume: 0
   m_Pitch: 1
   Loop: 1
   Mute: 0
@@ -941,7 +969,7 @@ SphereCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 5
+  m_Radius: 5.5
   m_Center: {x: 0, y: 0.8, z: 0}
 --- !u!1 &8720733653133506505
 GameObject:

@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
 using System.Linq;
-using MyUnityAddons.Math;
+using MyUnityAddons.Calculations;
 
 public class MergeBoxColliders : EditorWindow
 {

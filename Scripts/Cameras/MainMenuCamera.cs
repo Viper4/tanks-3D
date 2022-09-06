@@ -60,7 +60,7 @@ public class MainMenuCamera : MonoBehaviour
             targetIndex--;
             SwitchTarget();
         }
-        else if (Input.GetKeyDown(dataManager.currentPlayerSettings.keyBinds["Toggle HUD"]))
+        else if (Input.GetKeyDown(DataManager.playerSettings.keyBinds["Toggle HUD"]))
         {
             mainMenuObject.SetActive(!mainMenuObject.activeSelf);
         }

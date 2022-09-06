@@ -5,20 +5,22 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Hashtable = ExitGames.Client.Photon.Hashtable;
 using PhotonHashtable = ExitGames.Client.Photon.Hashtable;
 
 public class TankManager : MonoBehaviour
 {
     public bool lastCampaignScene = false;
+    public List<Transform> deadBots = new List<Transform>();
     bool checking = false;
 
-    public void StartCheckTankCount(PhotonView playerPV)
+    public void StartCheckTankCount()
     {
-        StartCoroutine(CheckTankCount(playerPV));
+        StartCoroutine(CheckTankCount());
     }
 
     // Have to wait before checking childCount since mines can blow up multiple tanks simultaneously
-    IEnumerator CheckTankCount(PhotonView playerPV)
+    IEnumerator CheckTankCount()
     {
         if (!checking)
         {
@@ -41,23 +43,37 @@ public class TankManager : MonoBehaviour
                             GameManager.gameManager.LoadNextScene(3, true);
                         }
                     }
-                    else if (playerPV.IsMine && PhotonNetwork.IsMasterClient)
+                    else
                     {
-                        PhotonHashtable roomProperties = new PhotonHashtable()
+                        if (PhotonNetwork.IsMasterClient)
                         {
-                            { "RoomSettings", (RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["RoomSettings"]}
-                        };
-                        if (lastCampaignScene)
-                        {
-                            ((RoomSettings)roomProperties["RoomSettings"]).map = "End Scene";
-                            GameManager.gameManager.PhotonLoadScene("End Scene", 3, true);
+                            PhotonHashtable roomProperties = new PhotonHashtable()
+                            {
+                                { "RoomSettings", (RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["RoomSettings"]}
+                            };
+                            if (lastCampaignScene)
+                            {
+                                ((RoomSettings)roomProperties["RoomSettings"]).map = "End Scene";
+                                GameManager.gameManager.PhotonLoadScene("End Scene", 3, true, false);
+                            }
+                            else
+                            {
+                                ((RoomSettings)roomProperties["RoomSettings"]).map = SceneManager.GetSceneByBuildIndex(SceneManager.GetActiveScene().buildIndex + 1).name;
+                                GameManager.gameManager.PhotonLoadNextScene(3, true);
+                            }
+                            PhotonNetwork.CurrentRoom.SetCustomProperties(roomProperties);
                         }
                         else
                         {
-                            ((RoomSettings)roomProperties["RoomSettings"]).map = SceneManager.GetSceneByBuildIndex(SceneManager.GetActiveScene().buildIndex + 1).name;
-                            GameManager.gameManager.PhotonLoadNextScene(3, true);
+                            if (lastCampaignScene)
+                            {
+                                GameManager.gameManager.PhotonLoadScene("End Scene", 3, true, false);
+                            }
+                            else
+                            {
+                                GameManager.gameManager.PhotonLoadNextScene(3, true);
+                            }
                         }
-                        PhotonNetwork.CurrentRoom.SetCustomProperties(roomProperties);
                     }
                 }
             }

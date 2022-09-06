@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using MyUnityAddons.Math;
+using MyUnityAddons.Calculations;
 
 public class LevelGenerator : MonoBehaviour
 {
@@ -44,7 +44,7 @@ public class LevelGenerator : MonoBehaviour
             Destroy(child.gameObject);
         }
 
-        GameObject obstacle = Instantiate(obstacles[0], CustomRandom.GetSpawnPointInCollider(boundingCollider, Vector3.down, ignoreLayerMask, obstacles[0].GetComponent<BoxCollider>()), obstacles[0].transform.rotation, obstacleParent);
+        GameObject obstacle = Instantiate(obstacles[0], CustomRandom.GetSpawnPointInCollider(boundingCollider, Vector3.down, ignoreLayerMask, obstacles[0].GetComponent<BoxCollider>(), obstacles[0].transform.rotation, true), obstacles[0].transform.rotation, obstacleParent);
         GenerateObstacles(obstacle.GetComponent<ObstacleGeneration>());
         GenerateTanks(tankParent.GetComponent<TankGeneration>());
     }

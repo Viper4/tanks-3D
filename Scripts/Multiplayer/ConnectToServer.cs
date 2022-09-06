@@ -2,13 +2,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
-using Photon.Realtime;
+using UnityEngine.SceneManagement;
 
 public class ConnectToServer : MonoBehaviourPunCallbacks
 {
     // Start is called before the first frame update
     void Start()
     {
+        PhotonNetwork.GameVersion = Application.version;
         PhotonNetwork.ConnectUsingSettings();
     }
 
@@ -24,12 +25,6 @@ public class ConnectToServer : MonoBehaviourPunCallbacks
 
     public override void OnJoinedLobby()
     {
-        GameManager.gameManager.LoadScene("Lobby");
-    }
-
-    public override void OnDisconnected(DisconnectCause cause)
-    {
-        GameManager.gameManager.LoadScene("Main Menu");
-        PhotonNetwork.OfflineMode = true;
+        SceneManager.LoadScene("Lobby");
     }
 }

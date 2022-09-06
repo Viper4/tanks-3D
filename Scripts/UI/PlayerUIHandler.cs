@@ -15,7 +15,7 @@ public class PlayerUIHandler : MonoBehaviour
 
         if (!PhotonNetwork.OfflineMode)
         {
-            if (playerControl.clientManager.PV.IsMine)
+            if (playerControl.photonView.IsMine)
             {
 
                 if (((RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["RoomSettings"]).primaryMode != "Co-Op")
@@ -30,14 +30,14 @@ public class PlayerUIHandler : MonoBehaviour
                     baseUIHandler.UIElements["HUD"].Find("Level Background").GetChild(0).GetComponent<Text>().text = PhotonNetwork.CurrentRoom.Name + " | " + sceneName;
                 }
 
-                GameObject[] allUIs = GameObject.FindGameObjectsWithTag("PlayerUI");
+                /*GameObject[] allUIs = GameObject.FindGameObjectsWithTag("PlayerUI");
                 foreach (GameObject UI in allUIs)
                 {
                     if (UI != gameObject)
                     {
                         UI.SetActive(false);
                     }
-                }
+                }*/
             }
             else
             {
@@ -54,7 +54,7 @@ public class PlayerUIHandler : MonoBehaviour
 
     private void LateUpdate()
     {
-        if (PhotonNetwork.OfflineMode || playerControl.clientManager.PV.IsMine)
+        if (PhotonNetwork.OfflineMode || playerControl.photonView.IsMine)
         {
             if (Input.GetKeyDown(KeyCode.Escape))
             {
@@ -68,12 +68,12 @@ public class PlayerUIHandler : MonoBehaviour
                 }
             }
 
-            if (Input.GetKeyDown(playerControl.myData.currentPlayerSettings.keyBinds["Shoot"]))
+            if (Input.GetKeyDown(DataManager.playerSettings.keyBinds["Shoot"]))
             {
                 RectTransform rt = baseUIHandler.UIElements["InGame"].Find("Reticle").GetComponent<RectTransform>();
                 rt.sizeDelta = new Vector2(rt.sizeDelta.x * 1.25f, rt.sizeDelta.y * 1.25f);
             }
-            else if (Input.GetKeyUp(playerControl.myData.currentPlayerSettings.keyBinds["Shoot"]))
+            else if (Input.GetKeyUp(DataManager.playerSettings.keyBinds["Shoot"]))
             {
                 RectTransform rt = baseUIHandler.UIElements["InGame"].Find("Reticle").GetComponent<RectTransform>();
                 rt.sizeDelta = new Vector2(rt.sizeDelta.x / 1.25f, rt.sizeDelta.y / 1.25f);
@@ -85,7 +85,7 @@ public class PlayerUIHandler : MonoBehaviour
 
                 // Blacking out used bullets and mines
                 int bulletLimit = playerControl.GetComponent<FireControl>().bulletLimit;
-                int bulletsLeft = bulletLimit - playerControl.GetComponent<FireControl>().bulletsFired;
+                int bulletsLeft = bulletLimit - playerControl.GetComponent<FireControl>().firedBullets.Count;
                 for (int i = 0; i < bulletLimit; i++)
                 {
                     if (i < bulletsLeft)
@@ -99,7 +99,7 @@ public class PlayerUIHandler : MonoBehaviour
                 }
 
                 int mineLimit = playerControl.GetComponent<MineControl>().mineLimit;
-                int minesLeft = mineLimit - playerControl.GetComponent<MineControl>().minesLaid;
+                int minesLeft = mineLimit - playerControl.GetComponent<MineControl>().laidMines.Count;
                 for (int i = 0; i < mineLimit; i++)
                 {
                     if (i < minesLeft)
@@ -112,14 +112,14 @@ public class PlayerUIHandler : MonoBehaviour
                     }
                 }
 
-                baseUIHandler.UIElements["HUD"].Find("Kills").GetComponent<Text>().text = "Kills: " + playerControl.myData.currentPlayerData.kills;
+                baseUIHandler.UIElements["HUD"].Find("Kills").GetComponent<Text>().text = "Kills: " + DataManager.playerData.kills;
                 if (!PhotonNetwork.OfflineMode)
                 {
-                    baseUIHandler.UIElements["HUD"].Find("Deaths").GetComponent<Text>().text = "Deaths: " + playerControl.myData.currentPlayerData.deaths;
+                    baseUIHandler.UIElements["HUD"].Find("Deaths").GetComponent<Text>().text = "Deaths: " + DataManager.playerData.deaths;
                 }
                 else
                 {
-                    baseUIHandler.UIElements["HUD"].Find("Lives").GetComponent<Text>().text = "Lives: " + playerControl.myData.currentPlayerData.lives;
+                    baseUIHandler.UIElements["HUD"].Find("Lives").GetComponent<Text>().text = "Lives: " + DataManager.playerData.lives;
                 }
             }
             else
@@ -171,6 +171,5 @@ public class PlayerUIHandler : MonoBehaviour
     public void Leave()
     {
         PhotonNetwork.LeaveRoom();
-        SceneManager.LoadScene("Lobby");
     }
 }

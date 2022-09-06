@@ -1,43 +1,28 @@
 using UnityEngine;
 using Photon.Pun;
+using Photon.Realtime;
+using MyUnityAddons.Calculations;
 
 public class ClientManager : MonoBehaviourPunCallbacks
 {
     public bool deleteOnMultiplayer = false;
 
-    public PhotonView PV;
-    [SerializeField] DataManager clientData;
-
     // Start is called before the first frame update
     void Start()
     {
-        if (!PhotonNetwork.OfflineMode)
+        if (!PhotonNetwork.OfflineMode && deleteOnMultiplayer)
         {
-            if (deleteOnMultiplayer)
-            {
-                Destroy(gameObject);
-            }
-            else
-            {
-                EngineSoundManager[] allEngineSounds = FindObjectsOfType<EngineSoundManager>();
-                foreach (EngineSoundManager engineSound in allEngineSounds)
-                {
-                    engineSound.UpdateMasterVolume(clientData.currentPlayerSettings.masterVolume);
-                }
-            }
+            Destroy(gameObject);
         }
     }
 
-    public void UpdateVolumeOnClient(SoundManager soundManager)
-    {
-        soundManager.UpdateVolume(clientData.currentPlayerSettings.masterVolume);
-    }
-
     [PunRPC]
-    void RandomizeMaterialColors()
+    void InitializePlayer(float[] primaryColorArray, float[] secondaryColorArray)
     {
-        Color primaryColor = new Color(Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f));
-        Color secondaryColor = new Color(Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f));
+        transform.SetParent(FindObjectOfType<PlayerManager>().transform);
+
+        Color primaryColor = new Color(primaryColorArray[0], primaryColorArray[1], primaryColorArray[2], primaryColorArray[3]);
+        Color secondaryColor = new Color(secondaryColorArray[0], secondaryColorArray[1], secondaryColorArray[2], secondaryColorArray[3]);
 
         Transform tankOrigin = transform.Find("Tank Origin");
         MeshRenderer bodyRenderer = tankOrigin.Find("Body").GetComponent<MeshRenderer>();

@@ -1,7 +1,5 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using MyUnityAddons.Math;
 
 public class YellowBot : MonoBehaviour
 {
@@ -58,7 +56,7 @@ public class YellowBot : MonoBehaviour
             {
                 if (nearbyMine != null)
                 {
-                    baseTankLogic.targetTankDir = transform.position - nearbyMine.position;
+                    baseTankLogic.AvoidMine(nearbyMine, 100);
                 }
                 else
                 {
@@ -97,21 +95,17 @@ public class YellowBot : MonoBehaviour
     IEnumerator Shoot()
     {
         // When angle between barrel and target is less than maxShootAngle, then stop and fire
-        float angle = Vector3.Angle(barrel.forward, baseTankLogic.targetTurretDir);
-        if (angle < maxShootAngle)
-        {
-            shooting = true;
-            yield return new WaitForSeconds(Random.Range(fireDelay[0], fireDelay[1]));
+        shooting = true;
+        yield return new WaitUntil(() => Vector3.Angle(barrel.forward, baseTankLogic.targetTurretDir) < maxShootAngle);
 
-            // Stops moving and delay in firing
-            baseTankLogic.stationary = true;
+        // Stops moving and delay in firing
+        baseTankLogic.stationary = true;
 
-            yield return new WaitForSeconds(Random.Range(fireDelay[0], fireDelay[1]));
-            StartCoroutine(GetComponent<FireControl>().Shoot());
+        yield return new WaitForSeconds(Random.Range(fireDelay[0], fireDelay[1]));
+        StartCoroutine(GetComponent<FireControl>().Shoot());
 
-            shooting = false;
-            baseTankLogic.stationary = false;
-        }
+        shooting = false;
+        baseTankLogic.stationary = false;
     }
 
     IEnumerator LayMine()
@@ -121,11 +115,8 @@ public class YellowBot : MonoBehaviour
 
         yield return new WaitForSeconds(Random.Range(layDelay[0], layDelay[1]));
         StartCoroutine(GetComponent<MineControl>().LayMine());
-        transform.position += transform.forward * 0.1f;
-        Vector3 desiredDir = Quaternion.AngleAxis(Random.Range(-180.0f, 180.0f), transform.up) * transform.forward;
-        baseTankLogic.targetTankDir = desiredDir;
+        transform.position += Quaternion.AngleAxis(Random.Range(-180, 180), transform.up) * transform.forward * 0.1f;
         baseTankLogic.stationary = false;
-        yield return new WaitUntil(() => Vector3.SignedAngle(transform.forward, desiredDir, transform.up) < 2.5f);
 
         layingMine = false;
     }

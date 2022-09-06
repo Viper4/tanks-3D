@@ -907,6 +907,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3149388286793973794}
   - component: {fileID: 8698615684007924165}
+  - component: {fileID: 2801430073492525547}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -943,12 +944,25 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   offlineMode: 1
+  reachedLastLevel: 0
   loadingScreen: {fileID: 3149388286652276417}
   progressBar: {fileID: 4560589372626774468}
   label: {fileID: 2423318918443738718}
   extraLifePopup: {fileID: 7693391558634966756}
   startButton: {fileID: 7825370536258997069}
   readyButton: {fileID: 3998579669134604594}
+--- !u!114 &2801430073492525547
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3149388286793973795}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a2b7102c88bbfc04db5f465f52067b8d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &3326103807671859039
 GameObject:
   m_ObjectHideFlags: 0

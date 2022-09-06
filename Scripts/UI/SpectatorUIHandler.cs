@@ -15,7 +15,7 @@ public class SpectatorUIHandler : MonoBehaviour
 
         baseUIHandler.UIElements["PauseMenu"].Find("LabelBackground").GetChild(0).GetComponent<Text>().text = "Paused\n " + PhotonNetwork.CurrentRoom.Name;
 
-        if (clientManager.PV.IsMine)
+        if (clientManager.photonView.IsMine)
         {
             GameObject[] allUIs = GameObject.FindGameObjectsWithTag("PlayerUI");
             foreach (GameObject UI in allUIs)

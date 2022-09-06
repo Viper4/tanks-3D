@@ -115,33 +115,33 @@ public class SpectatorControl : MonoBehaviour
         {
             case "x":
                 float x = 0;
-                if (Input.GetKey(dataSystem.currentPlayerSettings.keyBinds["Right"]))
+                if (Input.GetKey(DataManager.playerSettings.keyBinds["Right"]))
                 {
                     x += 1;
                 }
-                if (Input.GetKey(dataSystem.currentPlayerSettings.keyBinds["Left"]))
+                if (Input.GetKey(DataManager.playerSettings.keyBinds["Left"]))
                 {
                     x -= 1;
                 }
                 return x;
             case "y":
                 float y = 0;
-                if (Input.GetKey(dataSystem.currentPlayerSettings.keyBinds["Up"]))
+                if (Input.GetKey(DataManager.playerSettings.keyBinds["Up"]))
                 {
                     y += 1;
                 }
-                if (Input.GetKey(dataSystem.currentPlayerSettings.keyBinds["Down"]))
+                if (Input.GetKey(DataManager.playerSettings.keyBinds["Down"]))
                 {
                     y -= 1;
                 }
                 return y;
             case "z":
                 float z = 0;
-                if (Input.GetKey(dataSystem.currentPlayerSettings.keyBinds["Forward"]))
+                if (Input.GetKey(DataManager.playerSettings.keyBinds["Forward"]))
                 {
                     z += 1;
                 }
-                if (Input.GetKey(dataSystem.currentPlayerSettings.keyBinds["Backward"]))
+                if (Input.GetKey(DataManager.playerSettings.keyBinds["Backward"]))
                 {
                     z -= 1;
                 }

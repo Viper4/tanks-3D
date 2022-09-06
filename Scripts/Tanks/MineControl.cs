@@ -8,10 +8,10 @@ public class MineControl : MonoBehaviour
     [SerializeField] PhotonView PV;
     [SerializeField] Transform tankOrigin;
     [SerializeField] Transform mine;
-    [SerializeField] Transform mineParent;
+    public Transform mineParent;
 
     public int mineLimit = 2;
-    public int minesLaid { get; set; } = 0;
+    public List<Transform> laidMines { get; private set; } = new List<Transform>();
     public float[] layCooldown = { 2f, 4f };
     public float explosionRadius = 7f;
     public bool canLay { get; set; } = false;
@@ -29,28 +29,15 @@ public class MineControl : MonoBehaviour
 
     public IEnumerator LayMine()
     {
-        if (canLay && minesLaid < mineLimit)
+        if (canLay && laidMines.Count < mineLimit)
         {
-            minesLaid++;
-
             canLay = false;
 
-            Transform newMine = InstantiateMine();
+            InstantiateMine();
 
             if (!PhotonNetwork.OfflineMode && !GameManager.autoPlay)
             {
                 PV.RPC("InstantiateMine", RpcTarget.Others);
-            }
-
-            yield return new WaitWhile(() => newMine.GetComponent<MineBehaviour>() == null);
-
-            MineBehaviour mineBehaviour = newMine.GetComponent<MineBehaviour>();
-            mineBehaviour.owner = transform;
-            mineBehaviour.ownerPV = PV;
-            mineBehaviour.explosionRadius = explosionRadius;
-            if (transform.CompareTag("Player"))
-            {
-                mineBehaviour.dataSystem = GetComponent<DataManager>();
             }
 
             yield return new WaitForSeconds(Random.Range(layCooldown[0], layCooldown[1]));
@@ -62,7 +49,27 @@ public class MineControl : MonoBehaviour
     Transform InstantiateMine()
     {
         Transform newMine = Instantiate(mine, tankOrigin.position, Quaternion.identity, mineParent);
-
+        laidMines.Add(newMine);
+        StartCoroutine(InitializeMine(newMine));
         return newMine;
+    }
+
+    IEnumerator InitializeMine(Transform mine)
+    {
+        mine.gameObject.SetActive(false);
+        yield return new WaitUntil(() => mine.GetComponent<MineBehaviour>() != null);
+        if (mine != null)
+        {
+            mine.gameObject.SetActive(true);
+
+            MineBehaviour mineBehaviour = mine.GetComponent<MineBehaviour>();
+            mineBehaviour.owner = transform;
+            mineBehaviour.ownerPV = PV;
+            mineBehaviour.explosionRadius = explosionRadius;
+        }
+        else
+        {
+            laidMines.Remove(mine);
+        }
     }
 }

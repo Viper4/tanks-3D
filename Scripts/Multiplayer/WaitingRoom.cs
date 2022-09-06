@@ -15,14 +15,12 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
 {
     readonly byte UpdateUIEventCode = 0;
     readonly byte UpdateTeamsEventCode = 1;
-    
+    readonly byte LoadSceneCode = 2;
+
     [SerializeField] GameObject playerSlotPrefab;
 
     [SerializeField] List<StringTransformDictionary> rosterContentList = new List<StringTransformDictionary>();
     private Dictionary<string, Transform> rosterContent = new Dictionary<string, Transform>();
-
-    [SerializeField] DataManager dataManager;
-    [SerializeField] PhotonTeamsManager teamManager;
 
     [SerializeField] GameObject[] ownerElements;
 
@@ -38,6 +36,8 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
     [SerializeField] Transform playerList;
     [SerializeField] Transform teamsTab;
 
+    PhotonTeamsManager teamManager;
+
     Dictionary<string, int> tempTeamsCount = new Dictionary<string, int>()
     {
         { "Team 4", -1 },
@@ -49,6 +49,8 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
     // Start is called before the first frame update
     IEnumerator Start()
     {
+        teamManager = PhotonTeamsManager.Instance;
+        DontDestroyOnLoad(teamManager.gameObject);
         foreach (StringTransformDictionary keyValuePair in rosterContentList)
         {
             rosterContent.Add(keyValuePair.key, keyValuePair.value);
@@ -70,12 +72,12 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
         }
         else
         {
-            dataManager.currentRoomSettings = (RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["RoomSettings"];
+            DataManager.roomSettings = (RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["RoomSettings"];
         }
         UpdateBasicUI();
 
-        playerList.gameObject.SetActive(dataManager.currentRoomSettings.primaryMode != "Teams");
-        teamsTab.gameObject.SetActive(dataManager.currentRoomSettings.primaryMode == "Teams");
+        playerList.gameObject.SetActive(DataManager.roomSettings.primaryMode != "Teams");
+        teamsTab.gameObject.SetActive(DataManager.roomSettings.primaryMode == "Teams");
         AllocatePlayerToTeam(PhotonNetwork.LocalPlayer);
         yield return new WaitUntil(() => PhotonNetwork.LocalPlayer.GetPhotonTeam() != null);
         StartCoroutine(MasterUpdateTeamRosters());
@@ -117,18 +119,19 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
         PhotonHashtable roomProperties = new PhotonHashtable
         {
             ["Waiting"] = false,
-            ["RoomSettings"] = dataManager.currentRoomSettings
+            ["RoomSettings"] = DataManager.roomSettings
         };
         PhotonNetwork.CurrentRoom.SetCustomProperties(roomProperties);
+        PhotonNetwork.RaiseEvent(LoadSceneCode, null, RaiseEventOptions.Default, SendOptions.SendUnreliable);
 
-        PhotonNetwork.LoadLevel(dataManager.currentRoomSettings.map);
+        PhotonNetwork.LoadLevel(DataManager.roomSettings.map);
     }
 
     public void ChangePrimaryMode(string mode) // Accessable only by MasterClient
     {
-        if (dataManager.currentRoomSettings.primaryMode != mode)
+        if (DataManager.roomSettings.primaryMode != mode)
         {
-            dataManager.currentRoomSettings.primaryMode = mode;
+            DataManager.roomSettings.primaryMode = mode;
             UpdateRoomSettingsProperty();
 
             tempTeamsCount["Team 4"] = teamManager.GetTeamMembersCount("Team 4");
@@ -151,21 +154,21 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
         switch (((RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["RoomSettings"]).primaryMode)
         {
             case "Teams":
-                if (tempTeamsCount.Values.Sum() < dataManager.currentRoomSettings.playerLimit)
+                if (tempTeamsCount.Values.Sum() < DataManager.roomSettings.playerLimit)
                 {
                     PhotonTeam smallestTeam = null;
                     foreach (string key in tempTeamsCount.Keys)
                     {
                         if (smallestTeam == null)
                         {
-                            if (tempTeamsCount[key] < dataManager.currentRoomSettings.teamSize)
+                            if (tempTeamsCount[key] < DataManager.roomSettings.teamSize)
                             {
                                 teamManager.TryGetTeamByName(key, out smallestTeam);
                             }
                         }
                         else
                         {
-                            if (tempTeamsCount[smallestTeam.Name] < dataManager.currentRoomSettings.teamSize && tempTeamsCount[key] <= tempTeamsCount[smallestTeam.Name])
+                            if (tempTeamsCount[smallestTeam.Name] < DataManager.roomSettings.teamSize && tempTeamsCount[key] <= tempTeamsCount[smallestTeam.Name])
                             {
                                 teamManager.TryGetTeamByName(key, out smallestTeam);
                             }
@@ -192,7 +195,7 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
                 }
                 break;
             default: // FFA, PvE, Co-Op
-                if (teamManager.GetTeamMembersCount("Players") < dataManager.currentRoomSettings.playerLimit)
+                if (teamManager.GetTeamMembersCount("Players") < DataManager.roomSettings.playerLimit)
                 {
                     if (currentTeam != null)
                     {
@@ -208,7 +211,6 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
                     }
                     else
                     {
-                        Debug.Log("Joined Team");
                         player.JoinTeam("Players");
                         return;
                     }
@@ -223,7 +225,7 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
     {
         PhotonHashtable roomProperties = new PhotonHashtable
         {
-            ["RoomSettings"] = dataManager.currentRoomSettings
+            ["RoomSettings"] = DataManager.roomSettings
         };
         PhotonNetwork.CurrentRoom.SetCustomProperties(roomProperties);
         StartCoroutine(MasterUpdateTeamRosters());
@@ -232,7 +234,6 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
     private IEnumerator MasterUpdateTeamRosters()
     {
         yield return new WaitForSecondsRealtime(0.15f); // Wait for teams to sync
-        Debug.Log("Updated Team Rosters");
         PhotonNetwork.RaiseEvent(UpdateTeamsEventCode, null, RaiseEventOptions.Default, SendOptions.SendUnreliable);
         UpdateTeamRosters();
     }
@@ -302,15 +303,17 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
 
     private void OnEnable()
     {
+        base.OnEnable();
         PhotonNetwork.NetworkingClient.EventReceived += OnEvent;
     }
 
     private void OnDisable()
     {
+        base.OnDisable();
         PhotonNetwork.NetworkingClient.EventReceived -= OnEvent;
     }
 
-    private void OnEvent(EventData eventData)
+    void OnEvent(EventData eventData)
     {
         if (eventData.Code == UpdateUIEventCode)
         {
@@ -322,15 +325,15 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
             Debug.Log("Raised UpdateTeamsEventCode");
             UpdateTeamRosters();
         }
+        else if (eventData.Code == LoadSceneCode)
+        {
+            PhotonNetwork.LoadLevel(((RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["RoomSettings"]).map);
+        }
     }
 
     public void LeaveRoom()
     {
         PhotonNetwork.LeaveRoom();
-        PhotonNetwork.LocalPlayer.LeaveCurrentTeam();
-        StartCoroutine(MasterUpdateTeamRosters());
-
-        SceneManager.LoadScene("Lobby");
     }
 
     public override void OnPlayerLeftRoom(Player otherPlayer)

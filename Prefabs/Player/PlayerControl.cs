@@ -1,15 +1,15 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
 using PhotonHashtable = ExitGames.Client.Photon.Hashtable;
-using MyUnityAddons.CustomPhoton;
-using MyUnityAddons.Math;
+using ExitGames.Client.Photon;
+using Photon.Realtime;
+using Photon.Pun.UtilityScripts;
+using Hashtable = ExitGames.Client.Photon.Hashtable;
 
-public class PlayerControl : MonoBehaviour
+public class PlayerControl : MonoBehaviourPunCallbacks
 {
     public ClientManager clientManager;
-    public DataManager myData;
 
     [SerializeField] Rigidbody RB;
     [SerializeField] BaseTankLogic baseTankLogic;
@@ -38,27 +38,32 @@ public class PlayerControl : MonoBehaviour
     // Update is called once per frame
     void LateUpdate()
     {
-        if (PhotonNetwork.OfflineMode || clientManager.PV.IsMine)
+        if (PhotonNetwork.OfflineMode || clientManager.photonView.IsMine)
         {
-            if (!Dead && !GameManager.frozen && !Paused)
+            if (!Dead && !GameManager.frozen)
             {
                 if (Time.timeScale != 0)
                 {
-                    if (Input.GetKeyDown(myData.currentPlayerSettings.keyBinds["Shoot"]))
+                    Vector2 inputDir = Vector2.zero;
+
+                    if (!Paused)
                     {
-                        StartCoroutine(GetComponent<FireControl>().Shoot());
-                    }
-                    else if (Input.GetKeyDown(myData.currentPlayerSettings.keyBinds["Lay Mine"]) && baseTankLogic.IsGrounded())
-                    {
-                        StartCoroutine(GetComponent<MineControl>().LayMine());
-                    }
-                    else if (Input.GetKeyDown(myData.currentPlayerSettings.keyBinds["Toggle HUD"]))
-                    {
-                        showHUD = !showHUD;
+                        if (Input.GetKeyDown(DataManager.playerSettings.keyBinds["Shoot"]))
+                        {
+                            StartCoroutine(GetComponent<FireControl>().Shoot());
+                        }
+                        else if (Input.GetKeyDown(DataManager.playerSettings.keyBinds["Lay Mine"]) && baseTankLogic.IsGrounded())
+                        {
+                            StartCoroutine(GetComponent<MineControl>().LayMine());
+                        }
+                        else if (Input.GetKeyDown(DataManager.playerSettings.keyBinds["Toggle HUD"]))
+                        {
+                            showHUD = !showHUD;
+                        }
+                        inputDir = new Vector2(GetInputAxis("Horizontal"), GetInputAxis("Vertical")).normalized;
                     }
 
                     // Moving the tank with player input
-                    Vector2 inputDir = new Vector2(GetInputAxis("Horizontal"), GetInputAxis("Vertical")).normalized;
 
                     float targetSpeed = baseTankLogic.normalSpeed * 0.5f * inputDir.magnitude;
 
@@ -150,22 +155,22 @@ public class PlayerControl : MonoBehaviour
         {
             case "Horizontal":
                 float horizontal = 0;
-                if (Input.GetKey(myData.currentPlayerSettings.keyBinds["Right"]))
+                if (Input.GetKey(DataManager.playerSettings.keyBinds["Right"]))
                 {
                     horizontal += 1;
                 }
-                if (Input.GetKey(myData.currentPlayerSettings.keyBinds["Left"]))
+                if (Input.GetKey(DataManager.playerSettings.keyBinds["Left"]))
                 {
                     horizontal -= 1;
                 }
                 return horizontal;
             case "Vertical":
                 float vertical = 0;
-                if (Input.GetKey(myData.currentPlayerSettings.keyBinds["Forward"]))
+                if (Input.GetKey(DataManager.playerSettings.keyBinds["Forward"]))
                 {
                     vertical += 1;
                 }
-                if (Input.GetKey(myData.currentPlayerSettings.keyBinds["Backward"]))
+                if (Input.GetKey(DataManager.playerSettings.keyBinds["Backward"]))
                 {
                     vertical -= 1;
                 }
@@ -177,12 +182,14 @@ public class PlayerControl : MonoBehaviour
 
     public void OnDeath()
     {
-        myData.currentPlayerData.deaths++;
-
         if (!PhotonNetwork.OfflineMode)
         {
-            if (clientManager.PV.IsMine)
+            transform.SetParent(null);
+
+            if (clientManager.photonView.IsMine)
             {
+                DataManager.playerData.deaths++;
+
                 PhotonHashtable playerProperties = new PhotonHashtable();
                 PhotonHashtable roomProperties = new PhotonHashtable();
 
@@ -197,22 +204,39 @@ public class PlayerControl : MonoBehaviour
 
                         PhotonNetwork.CurrentRoom.SetCustomProperties(roomProperties);
 
-                        if (FindObjectsOfType<PlayerControl>().Length <= 1)
+                        if (FindObjectOfType<PlayerManager>().transform.childCount < 1)
                         {
+                            GameManager.frozen = true;
                             if (totalLives > 0)
                             {
                                 GameManager.gameManager.PhotonLoadScene(-1, 3, true, false);
+                                Hashtable parameters = new Hashtable
+                                {
+                                    { "sceneIndex", -1 },
+                                    { "delay", 3 },
+                                    { "save", true },
+                                    { "waitWhilePaused", false }
+                                };
+                                PhotonNetwork.RaiseEvent(GameManager.gameManager.LoadSceneEventCode, parameters, RaiseEventOptions.Default, SendOptions.SendUnreliable);
                             }
                             else
                             {
                                 GameManager.gameManager.PhotonLoadScene("End Scene", 3, true, false);
+                                Hashtable parameters = new Hashtable
+                                {
+                                    { "sceneName", "End Scene" },
+                                    { "delay", 3 },
+                                    { "save", true },
+                                    { "waitWhilePaused", false }
+                                };
+                                PhotonNetwork.RaiseEvent(GameManager.gameManager.LoadSceneEventCode, parameters, RaiseEventOptions.Default, SendOptions.SendUnreliable);
                             }
                         }
                         break;
                     default:
                         if (!respawning)
                         {
-                            playerProperties.Add("Deaths", myData.currentPlayerData.deaths);
+                            playerProperties.Add("Deaths", DataManager.playerData.deaths);
                             PhotonNetwork.LocalPlayer.SetCustomProperties(playerProperties);
 
                             StartCoroutine(MultiplayerRespawn());
@@ -223,9 +247,10 @@ public class PlayerControl : MonoBehaviour
         }
         else
         {
-            myData.currentPlayerData.lives--;
+            DataManager.playerData.deaths++;
+            DataManager.playerData.lives--;
 
-            if (myData.currentPlayerData.lives > 0)
+            if (DataManager.playerData.lives > 0)
             {
                 GameManager.gameManager.LoadScene(-1, 3, true);
             }

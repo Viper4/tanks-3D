@@ -2,7 +2,7 @@ using UnityEngine;
 using Photon.Pun;
 using PhotonHashtable = ExitGames.Client.Photon.Hashtable;
 using MyUnityAddons.CustomPhoton;
-using MyUnityAddons.Math;
+using MyUnityAddons.Calculations;
 using Photon.Pun.UtilityScripts;
 
 public class PlayerManager : MonoBehaviour
@@ -70,20 +70,32 @@ public class PlayerManager : MonoBehaviour
                         newPlayer = PhotonNetwork.Instantiate(teamPlayerPrefabs[teamIndex].name, spawnPosition, teamSpawnPoints[teamIndex].rotation);
                         newPlayer.name = teamPlayerPrefabs[teamIndex].name;
                         break;
-                    default: // PvE, Co-Op
+                    default:
                         newPlayer = SpawnPlayer(CustomRandom.GetSpawnPointInCollider(defaultSpawnPoints[defaultSpawnIndex].GetComponent<Collider>(), Vector3.down, ignoreLayers), defaultSpawnPoints[defaultSpawnIndex].rotation);
+                        playerProperties["Kills"] = DataManager.playerData.kills;
+                        playerProperties["Deaths"] = DataManager.playerData.deaths;
                         break;
                 }
 
                 newPhotonView = newPlayer.GetComponent<PhotonView>();
                 playerProperties.Add("ViewID", newPhotonView.ViewID);
+                if (newPhotonView.IsMine)
+                {
+                    newPlayer.transform.Find("Camera").gameObject.SetActive(true);
+                    newPlayer.transform.Find("Player UI").gameObject.SetActive(true);
+                }
+
+                DataManager.playerSettings = SaveSystem.LoadPlayerSettings("PlayerSettings", newPlayer.transform);
             }
             else
             {
                 GameObject newSpectator = PhotonNetwork.Instantiate(spectatorPrefab.name, Vector3.zero, Quaternion.identity);
                 newPhotonView = newSpectator.GetComponent<PhotonView>();
                 playerProperties.Add("ViewID", newPhotonView.ViewID);
+
+                DataManager.playerSettings = SaveSystem.LoadPlayerSettings("PlayerSettings", newSpectator.transform);
             }
+
             PhotonNetwork.LocalPlayer.SetCustomProperties(playerProperties);
             GameManager.gameManager.UpdatePlayerVariables(newPhotonView);
         }
@@ -92,8 +104,7 @@ public class PlayerManager : MonoBehaviour
     private GameObject SpawnPlayer(Vector3 position, Quaternion rotation)
     {
         GameObject newPlayer = PhotonNetwork.Instantiate(playerPrefab.name, position, rotation);
-        newPlayer.transform.parent = transform;
-        newPlayer.GetComponent<PhotonView>().RPC("RandomizeMaterialColors", RpcTarget.All);
+        newPlayer.GetComponent<PhotonView>().RPC("InitializePlayer", RpcTarget.All, new object[] { new float[] { Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), 1 }, new float[] { Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), 1 } });
         newPlayer.name = playerPrefab.name;
 
         return newPlayer;

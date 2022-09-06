@@ -1,7 +1,5 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using MyUnityAddons.Math;
 
 public class RedBot : MonoBehaviour
 {
@@ -45,7 +43,7 @@ public class RedBot : MonoBehaviour
             Vector3 targetDir = targetSystem.currentTarget.position - turret.position;
             baseTankLogic.targetTurretDir = targetDir;
 
-            if (fireControl.canFire && fireControl.bulletsFired < fireControl.bulletLimit && !shooting && targetSystem.TargetVisible())
+            if (fireControl.canFire && fireControl.firedBullets.Count < fireControl.bulletLimit && !shooting && targetSystem.TargetVisible())
             {
                 StartCoroutine(Shoot());
             }
@@ -61,11 +59,10 @@ public class RedBot : MonoBehaviour
                 {
                     baseTankLogic.targetTankDir = transform.forward;
                 }
-
             }
             else
             {
-                baseTankLogic.targetTankDir = transform.position - nearbyMine.position;
+                baseTankLogic.AvoidMine(nearbyMine, 100);
             }
         }
     }

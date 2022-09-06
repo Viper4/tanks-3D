@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using MyUnityAddons.Math;
+using MyUnityAddons.Calculations;
 using System.Collections;
 
 /* Cites

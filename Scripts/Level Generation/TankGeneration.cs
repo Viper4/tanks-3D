@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using MyUnityAddons.Math;
+using MyUnityAddons.Calculations;
 
 public class TankGeneration : MonoBehaviour
 {
@@ -51,7 +51,9 @@ public class TankGeneration : MonoBehaviour
                     Vector3 spawnPosition = CustomRandom.GetSpawnPointInCollider(boundingCollider, Vector3.down, ignoreLayerMask, tank.transform.Find("Body").GetComponent<BoxCollider>(), rotation);
                     if (spawnPosition != Vector3.zero)
                     {
-                        clonedObjects.Add(Instantiate(tank, spawnPosition, rotation, tankParent));
+                        GameObject newTank = Instantiate(tank, spawnPosition, rotation, tankParent);
+                        newTank.transform.position = spawnPosition;
+                        clonedObjects.Add(newTank);
                         break;
                     }
                 }

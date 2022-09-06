@@ -1,8 +1,5 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using MyUnityAddons.Math;
-using System.Linq;
 
 public class WhiteBot : MonoBehaviour
 {

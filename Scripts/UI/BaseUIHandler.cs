@@ -27,6 +27,10 @@ public class BaseUIHandler : MonoBehaviour
         if (UIElements.ContainsKey("InGame"))
         {
             UIElements["HUD"] = UIElements["InGame"].Find("HUD");
+            UIElements["Lock Turret"] = UIElements["HUD"].Find("Lock Turret");
+            UIElements["Lock Camera"] = UIElements["HUD"].Find("Lock Camera");
+            UIElements["Lock Turret"].gameObject.SetActive(false);
+            UIElements["Lock Camera"].gameObject.SetActive(false);
         }
     }
 
@@ -75,7 +79,6 @@ public class BaseUIHandler : MonoBehaviour
         {
             PhotonNetwork.Disconnect();
         }
-        GameManager.gameManager.LoadScene("Main Menu", 0, false, false);
     }
 
     public void ResetPlayerData()

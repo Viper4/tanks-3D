@@ -1,6 +1,5 @@
-using MyUnityAddons.Math;
+using MyUnityAddons.Calculations;
 using Photon.Pun;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -9,7 +8,7 @@ public class TargetSystem : MonoBehaviour
     public Transform primaryTarget;
     public Transform currentTarget;
     [SerializeField] string preferredTargetArea = "Turret";
-    bool chooseTarget = false;
+    public bool chooseTarget = false;
 
     Transform turret;
     Transform barrel;
@@ -21,7 +20,10 @@ public class TargetSystem : MonoBehaviour
         turret = transform.Find("Turret");
         barrel = transform.Find("Barrel");
 
-        chooseTarget = GameManager.gameManager != null && (!PhotonNetwork.OfflineMode || GameManager.autoPlay);
+        if (GameManager.gameManager != null)
+        {
+            chooseTarget = !PhotonNetwork.OfflineMode || GameManager.autoPlay;
+        }
 
         if (!chooseTarget)
         {
@@ -66,7 +68,7 @@ public class TargetSystem : MonoBehaviour
 
                         if (Physics.Raycast(turret.position, target.position - turret.position, out RaycastHit hit, Mathf.Infinity, ~ignoreLayerMask, QueryTriggerInteraction.Ignore))
                         {
-                            if (hit.transform.gameObject.layer == target.gameObject.layer)
+                            if (hit.transform.CompareTag(target.transform.tag))
                             {
                                 visibleTargets.Add(target);
                             }
@@ -91,9 +93,17 @@ public class TargetSystem : MonoBehaviour
                     }
                 }
             }
-            else
+            else if (enemyParent.childCount == 1)
             {
-                currentTarget = enemyParent.GetChild(0).Find(preferredTargetArea);
+                Transform enemyChild = enemyParent.GetChild(0);
+                if (enemyChild.CompareTag("Player"))
+                {
+                    currentTarget = enemyChild.Find("Tank Origin").Find(preferredTargetArea);
+                }
+                else
+                {
+                    currentTarget = enemyChild.Find(preferredTargetArea);
+                }
             }
         }
 
@@ -114,7 +124,7 @@ public class TargetSystem : MonoBehaviour
     {
         if (Physics.Raycast(turret.position, currentTarget.position - turret.position, out RaycastHit hit, Mathf.Infinity, ~ignoreLayerMask))
         {
-            return currentTarget.gameObject.layer == hit.transform.gameObject.layer;
+            return hit.transform.CompareTag(currentTarget.tag);
         }
         return false;
     }
@@ -123,14 +133,14 @@ public class TargetSystem : MonoBehaviour
     {
         if (Physics.Raycast(barrel.position, barrel.forward, out RaycastHit barrelHit, maxDistance, ~ignoreLayerMask))
         {
-            return barrelHit.transform.gameObject.layer == currentTarget.gameObject.layer;
+            return barrelHit.transform.CompareTag(currentTarget.tag);
         }
         return false;
     }
 
     public Vector3 PredictedTargetPosition(float seconds)
     {
-        if (currentTarget.parent.TryGetComponent<Rigidbody>(out var rigidbody))
+        if (currentTarget.parent != null && currentTarget.parent.TryGetComponent<Rigidbody>(out var rigidbody))
         {
             Vector3 futurePosition = CustomMath.FuturePosition(currentTarget.position, rigidbody, seconds);
             Vector3 futureDirection = futurePosition - currentTarget.position;

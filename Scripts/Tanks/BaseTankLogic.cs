@@ -1,7 +1,8 @@
 using UnityEngine;
 using Photon.Pun;
-using MyUnityAddons.Math;
+using MyUnityAddons.Calculations;
 using MyUnityAddons.CustomPhoton;
+using System.Collections;
 
 public class BaseTankLogic : MonoBehaviour
 {
@@ -12,7 +13,7 @@ public class BaseTankLogic : MonoBehaviour
     [Header("Death")]
     [SerializeField] private Transform explosionEffect;
     [SerializeField] private Transform deathMarker;
-    [SerializeField] Transform effectsParent;
+    public Transform effectsParent;
 
     [Header("Slope Settings")]
     public LayerMask barrierLayers;
@@ -50,7 +51,8 @@ public class BaseTankLogic : MonoBehaviour
     [SerializeField] private float turretRotSpeed = 35f;
     [SerializeField] private Vector2 inaccuracy = new Vector2(4, 6);
     [SerializeField] private float turretNoiseSpeed = 0.25f;
-    [SerializeField] private float[] turretRangeX = { -20, 20 };
+    public float[] turretRangeX = { -20, 20 };
+    public float[] turretRangeY = { -180, 180 };
     [HideInInspector] public bool overrideRotation = false;
 
     private float tankRotSeed = 0;
@@ -60,22 +62,30 @@ public class BaseTankLogic : MonoBehaviour
     public Vector3 targetTankDir;
     Vector3 lastEulerAngles;
 
+    public bool disabled = false;
     [SerializeField] private Transform tankOrigin;
-    //Rigidbody RB;
+    Collider tankCollider;
+    float colliderExtentsY = 0;
     Transform body;
     Transform turret;
     Transform barrel;
-    Rigidbody RB;
+    Rigidbody rb;
 
     private void Start() 
     {
         tankRotSeed = Random.Range(-999.0f, 999.0f);
         turretRotSeed = Random.Range(-999.0f, 999.0f);
-        
+
+        tankCollider = tankOrigin.GetComponent<Collider>();
+        Quaternion storedRotation = tankOrigin.rotation;
+        tankOrigin.rotation = Quaternion.identity;
+        colliderExtentsY = tankCollider.bounds.extents.y;
+        tankOrigin.rotation = storedRotation;
+
         body = tankOrigin.Find("Body");
         turret = tankOrigin.Find("Turret");
         barrel = tankOrigin.Find("Barrel");
-        RB = tankOrigin.GetComponent<Rigidbody>();
+        rb = tankOrigin.GetComponent<Rigidbody>();
         lastEulerAngles = tankOrigin.eulerAngles;
         speed = normalSpeed;
         targetTankDir = body.forward;
@@ -87,11 +97,13 @@ public class BaseTankLogic : MonoBehaviour
 
     private void Update()
     {
-        if (!GameManager.frozen && Time.timeScale != 0)
+        if (!disabled && !GameManager.frozen && Time.timeScale != 0)
         {
+            speed = normalSpeed;
+
             if (slopeAlignment)
             {
-                if (Physics.Raycast(tankOrigin.position, Vector3.down, out RaycastHit hit, 1, slopeLayers))
+                if (Physics.Raycast(tankCollider.bounds.center, Vector3.down, out RaycastHit hit, colliderExtentsY + 0.2f, slopeLayers))
                 {
                     // Rotating to align with slope
                     Quaternion alignedRotation = Quaternion.FromToRotation(tankOrigin.up, hit.normal);
@@ -111,8 +123,6 @@ public class BaseTankLogic : MonoBehaviour
                 {
                     if (obstacleAvoidance)
                     {
-                        speed = normalSpeed;
-
                         float normalAngleY = 181;
                         float slopeAngle = 0; 
 
@@ -124,19 +134,19 @@ public class BaseTankLogic : MonoBehaviour
 
                             Debug.DrawLine(body.position, forwardHit.point, Color.red, 0.1f);
                         }
-                        else if (Physics.Raycast(body.position - body.right * 0.75f, body.forward, out RaycastHit forwardHitL, 1.5f, barrierLayers))
+                        else if (Physics.Raycast(body.position, body.forward - body.right, out RaycastHit forwardHitL, 1.5f, barrierLayers))
                         {
                             normalAngleY = Vector3.SignedAngle(body.forward, forwardHitL.normal, body.up);
                             slopeAngle = Vector3.Angle(forwardHitL.normal, Vector3.up);
 
-                            Debug.DrawLine(body.position - body.right * 0.75f, forwardHitL.point, Color.red, 0.1f);
+                            Debug.DrawLine(body.position, forwardHitL.point, Color.red, 0.1f);
                         }
-                        else if (Physics.Raycast(body.position + body.right * 0.75f, body.forward, out RaycastHit forwardHitR, 1.5f, barrierLayers))
+                        else if (Physics.Raycast(body.position, body.forward + body.right, out RaycastHit forwardHitR, 1.5f, barrierLayers))
                         {
                             normalAngleY = Vector3.SignedAngle(body.forward, forwardHitR.normal, body.up);
                             slopeAngle = Vector3.Angle(forwardHitR.normal, Vector3.up);
 
-                            Debug.DrawLine(body.position + body.right * 0.75f, forwardHitR.point, Color.red, 0.1f);
+                            Debug.DrawLine(body.position, forwardHitR.point, Color.red, 0.1f);
                         }
 
                         if (slopeAngle > maxSlopeAngle)
@@ -160,7 +170,7 @@ public class BaseTankLogic : MonoBehaviour
                                     pathClear[0] = false;
                                     Debug.DrawLine(body.position - body.forward, leftHitB.point, Color.red, 0.1f);
                                 }
-                                if (Physics.Raycast(body.position, body.right, out RaycastHit rightHit, 1.5f, barrierLayers))
+                                if (Physics.Raycast(body.position, body.right, out RaycastHit rightHit, 1.25f, barrierLayers))
                                 {
                                     pathClear[1] = false;
                                     Debug.DrawLine(body.position, rightHit.point, Color.red, 0.1f);
@@ -207,18 +217,20 @@ public class BaseTankLogic : MonoBehaviour
                     }
 
                     // Tank rotation
-                    float noise = 0;
                     if (tankNoise)
                     {
                         // Adding noise to rotation
-                        noise = tankRotNoiseScale * (Mathf.PerlinNoise(tankRotSeed + Time.time * tankRotNoiseSpeed, tankRotSeed + 1 + Time.time * tankRotNoiseSpeed) - 0.5f);
+                        float noise = tankRotNoiseScale * (Mathf.PerlinNoise(tankRotSeed + Time.time * tankRotNoiseSpeed, tankRotSeed + 1 + Time.time * tankRotNoiseSpeed) - 0.5f);
+                        RotateTankToVector(Quaternion.AngleAxis(noise, tankOrigin.up) * targetTankDir);
                     }
-
-                    RotateTankToVector(Quaternion.AngleAxis(noise, tankOrigin.up) * targetTankDir);
+                    else
+                    {
+                        RotateTankToVector(targetTankDir);
+                    }
                 }
 
                 // Tank movement
-                if (RB != null)
+                if (rb != null)
                 {
                     Vector3 velocityDirection = transform.forward;
                     if (Physics.Raycast(transform.position, -transform.up, out RaycastHit middleHit, 1) && Physics.Raycast(transform.position + transform.forward, -transform.up, out RaycastHit frontHit, 1))
@@ -231,15 +243,15 @@ public class BaseTankLogic : MonoBehaviour
                         velocityY = !IsGrounded() ? velocityY - Time.deltaTime * gravity : 0;
                         velocityY = Mathf.Clamp(velocityY, -velocityLimit, velocityLimit);
 
-                        RB.velocity = stationary ? Vector3.up * velocityY : velocityDirection * speed + Vector3.up * velocityY;
+                        rb.velocity = stationary ? Vector3.up * velocityY : velocityDirection * speed + Vector3.up * velocityY;
                     }
                     else // Using rigidbody gravity instead
                     {
-                        RB.velocity = stationary ? Vector3.up * RB.velocity.y : velocityDirection * speed + Vector3.up * RB.velocity.y;
+                        rb.velocity = stationary ? Vector3.up * rb.velocity.y : velocityDirection * speed + Vector3.up * rb.velocity.y;
                     }
                 }
 
-                if (turretRotation)
+                if (turretRotation && targetTurretDir != Vector3.zero)
                 {
                     float noiseX = 0;
                     float noiseY = 0;
@@ -259,9 +271,12 @@ public class BaseTankLogic : MonoBehaviour
                     turret.eulerAngles = new Vector3(turret.eulerAngles.x, turret.eulerAngles.y + lastEulerAngles.y - transform.eulerAngles.y, turret.eulerAngles.z);
                     barrel.eulerAngles = new Vector3(barrel.eulerAngles.x, barrel.eulerAngles.y + lastEulerAngles.y - transform.eulerAngles.y, barrel.eulerAngles.z);
 
-                    // Zeroing x and z eulers of turret and clamping barrel x euler
-                    turret.localEulerAngles = new Vector3(0, turret.localEulerAngles.y, 0);
-                    barrel.localEulerAngles = new Vector3(CustomMath.ClampAngle(barrel.localEulerAngles.x, turretRangeX[0], turretRangeX[1]), barrel.localEulerAngles.y, 0);
+                    // Zeroing x and z eulers of turret and clamping x and y eulers
+                    float clampedX = CustomMath.ClampAngle(barrel.localEulerAngles.x, turretRangeX[0], turretRangeX[1]);
+                    float clampedY = CustomMath.ClampAngle(turret.localEulerAngles.y, turretRangeY[0], turretRangeY[1]);
+
+                    turret.localEulerAngles = new Vector3(0, clampedY, 0);
+                    barrel.localEulerAngles = new Vector3(clampedX, clampedY, 0);
 
                     lastEulerAngles = tankOrigin.eulerAngles;
                 }                
@@ -269,9 +284,11 @@ public class BaseTankLogic : MonoBehaviour
         }
         else
         {
-            RB.velocity = Vector3.zero;
+            rb.velocity = Vector3.zero;
         }
     }
+
+
 
     [PunRPC]
     public void ExplodeTank()
@@ -292,7 +309,6 @@ public class BaseTankLogic : MonoBehaviour
             if (!playerControl.godMode)
             {
                 tankOrigin.GetComponent<Collider>().enabled = false;
-
                 body.gameObject.SetActive(false);
                 turret.gameObject.SetActive(false);
                 barrel.gameObject.SetActive(false);
@@ -316,19 +332,94 @@ public class BaseTankLogic : MonoBehaviour
                 Destroy(trackMarks.GetComponent<TrailEmitter>());
             }
 
-            if (PhotonNetwork.OfflineMode)
+            if (transform.CompareTag("AI Tank"))
             {
-                transform.root.GetComponent<TankManager>().StartCheckTankCount(null);
+                GeneticAlgorithmBot bot = GetComponent<GeneticAlgorithmBot>();
+                bot.Dead = true;
+                transform.parent = null;
+
+                tankOrigin.GetComponent<Collider>().enabled = false;
+                body.gameObject.SetActive(false);
+                turret.gameObject.SetActive(false);
+                barrel.gameObject.SetActive(false);
             }
             else
             {
-                if (PhotonNetwork.IsMasterClient)
+                if (transform.root.TryGetComponent<TankManager>(out var tankManager))
                 {
-                    transform.root.GetComponent<TankManager>().StartCheckTankCount(PhotonNetwork.MasterClient.FindPhotonView());
+                    tankManager.deadBots.Add(transform);
+                    if (PhotonNetwork.OfflineMode)
+                    {
+                        tankManager.StartCheckTankCount();
+                    }
+                    else
+                    {
+                        tankManager.StartCheckTankCount();
+                    }
+                }
+
+                Destroy(gameObject);
+            }
+        }
+    }
+
+    public void AvoidMine(Transform mine, float angle = 90)
+    {
+        stationary = false;
+        Vector3 mineDirection = mine.position - transform.position;
+        mineDirection.y = tankOrigin.forward.y;
+        Vector3 clockwise = Quaternion.AngleAxis(angle, turret.up) * mineDirection;
+        Vector3 counterClockwise = Quaternion.AngleAxis(-angle, turret.up) * mineDirection;
+
+        bool oppositeHit = Physics.Raycast(body.position, -mineDirection, 5, barrierLayers);
+        bool clockwiseHit = Physics.Raycast(body.position, clockwise, 5, barrierLayers);
+        bool counterClockwiseHit = Physics.Raycast(body.position, counterClockwise, 5, barrierLayers);
+
+        if (!oppositeHit)
+        {
+            targetTankDir = -mineDirection;
+        }
+        else
+        {
+            if (!clockwiseHit && !counterClockwiseHit)
+            {
+                if (Mathf.Abs(Vector3.SignedAngle(tankOrigin.forward, clockwise, transform.up)) <= Mathf.Abs(Vector3.SignedAngle(tankOrigin.forward, counterClockwise, transform.up)))
+                {
+                    targetTankDir = clockwise;
+                }
+                else
+                {
+                    targetTankDir = counterClockwise;
                 }
             }
+            else if (!clockwiseHit)
+            {
+                targetTankDir = clockwise;
+            }
+            else if (!counterClockwiseHit)
+            {
+                targetTankDir = counterClockwise;
+            }
+        }
+    }
 
-            Destroy(gameObject);
+    public void AvoidBullet(Transform bullet, float angle = 90)
+    {
+        stationary = false;
+        Vector3 otherForward = bullet.forward;
+        otherForward.y = tankOrigin.forward.y;
+        Vector3 clockwise = Quaternion.AngleAxis(angle, tankOrigin.up) * otherForward;
+        Vector3 counterClockwise = Quaternion.AngleAxis(-angle, tankOrigin.up) * otherForward;
+        Debug.DrawLine(tankOrigin.position, tankOrigin.position + clockwise, Color.green, 1);
+        Debug.DrawLine(tankOrigin.position, tankOrigin.position + counterClockwise, Color.green, 1);
+
+        if (CustomMath.SqrDistance(tankOrigin.position + clockwise, bullet.position) >= CustomMath.SqrDistance(tankOrigin.position + counterClockwise, bullet.position))
+        {
+            targetTankDir = clockwise;
+        }
+        else
+        {
+            targetTankDir = counterClockwise;
         }
     }
 
@@ -361,6 +452,6 @@ public class BaseTankLogic : MonoBehaviour
 
     public bool IsGrounded()
     {
-        return Physics.Raycast(tankOrigin.position + Vector3.up * 0.05f, -tankOrigin.up, 0.1f, slopeLayers);
+        return Physics.Raycast(tankCollider.bounds.center, -tankOrigin.up, colliderExtentsY + 0.01f, slopeLayers);
     }
 }

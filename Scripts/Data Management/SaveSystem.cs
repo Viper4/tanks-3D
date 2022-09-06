@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using UnityEngine;
 using System.Runtime.Serialization.Formatters.Binary;
-using MyUnityAddons.Math;
+using MyUnityAddons.Calculations;
 
 public static class SaveSystem
 {
@@ -20,7 +20,8 @@ public static class SaveSystem
     public static readonly PlayerSettings defaultPlayerSettings = new PlayerSettings
     {
         sensitivity = 15,
-        FOV = 60,
+        cameraSmoothing = 0.1f,
+        fieldOfView = 60,
         keyBinds = new Dictionary<string, KeyCode>()
         {
             { "Forward", KeyCode.W },
@@ -46,7 +47,7 @@ public static class SaveSystem
 
     public static readonly RoomSettings defaultRoomSettings = new RoomSettings
     {
-        version = "0.0.1",
+        isPublic = true,
         map = "Classic",
         primaryMode = "FFA",
         secondaryMode = "Endless",
@@ -145,8 +146,6 @@ public static class SaveSystem
 
     public static PlayerSettings LoadPlayerSettings(string fileName, Transform player)
     {
-        PlayerSettings newSettings = new PlayerSettings();
-
         if (File.Exists(SAVE_FOLDER + fileName + playerSettingsExtension))
         {
             string json = File.ReadAllText(SAVE_FOLDER + fileName + playerSettingsExtension);
@@ -155,7 +154,40 @@ public static class SaveSystem
             {
                 PlayerSettings loadedSettings = JsonConvert.DeserializeObject<PlayerSettings>(json);
 
-                newSettings = loadedSettings;
+                string crosshairFilePath = CROSSHAIR_FOLDER + loadedSettings.crosshairFileName + ".png";
+                crosshair = CustomMath.ImageToSprite(crosshairFilePath);
+                Transform playerUI = player.Find("Player UI");
+                if (playerUI != null)
+                {
+                    BaseUIHandler baseUIHandler = playerUI.GetComponent<BaseUIHandler>();
+                    if (baseUIHandler != null && baseUIHandler.UIElements.ContainsKey("InGame"))
+                    {
+                        Transform reticle = baseUIHandler.UIElements["InGame"].Find("Reticle");
+                        reticle.GetComponent<CrosshairManager>().UpdateReticleSprite(crosshair, loadedSettings.crosshairColorIndex, loadedSettings.crosshairScale);
+                    }
+                }
+
+                Transform camera = player.Find("Camera");
+                if (camera != null)
+                {
+                    CameraControl cameraS = camera.GetComponent<CameraControl>();
+                    MultiplayerCameraControl cameraM = camera.GetComponent<MultiplayerCameraControl>();
+
+                    if (cameraS != null)
+                    {
+                        cameraS.sensitivity = loadedSettings.sensitivity;
+                        cameraS.rotationSmoothTime = loadedSettings.cameraSmoothing;
+                    }
+                    else if (cameraM != null)
+                    {
+                        cameraM.sensitivity = loadedSettings.sensitivity;
+                        cameraM.rotationSmoothTime = loadedSettings.cameraSmoothing;
+                    }
+                }
+
+                AudioListener.volume = loadedSettings.masterVolume / 100;
+
+                return loadedSettings;
             }
         }
         else
@@ -163,55 +195,8 @@ public static class SaveSystem
             Debug.LogWarning("Could not find file '" + SAVE_FOLDER + fileName + playerSettingsExtension + "', saving and loading defaults.");
 
             defaultPlayerSettings.SavePlayerSettings(fileName);
-
-            newSettings = defaultPlayerSettings;
         }
-
-        if (player.CompareTag("Player"))
-        {
-            string crosshairFilePath = CROSSHAIR_FOLDER + newSettings.crosshairFileName + ".png";
-            crosshair = CustomMath.ImageToSprite(crosshairFilePath);
-            Transform playerUI = player.Find("Player UI");
-            if (playerUI != null)
-            {
-                BaseUIHandler baseUIHandler = playerUI.GetComponent<BaseUIHandler>();
-                if (baseUIHandler != null && baseUIHandler.UIElements.ContainsKey("InGame"))
-                {
-                    Transform reticle = baseUIHandler.UIElements["InGame"].Find("Reticle");
-                    reticle.GetComponent<CrosshairManager>().UpdateReticleSprite(crosshair, newSettings.crosshairColorIndex, newSettings.crosshairScale);
-                }
-            }
-
-            Transform camera = player.Find("Main Camera");
-            if (camera != null)
-            {
-                CameraControl cameraS = camera.GetComponent<CameraControl>();
-                MultiplayerCameraControl cameraM = camera.GetComponent<MultiplayerCameraControl>();
-
-                if (cameraS != null)
-                {
-                    cameraS.sensitivity = newSettings.sensitivity;
-                }
-                else if (cameraM != null)
-                {
-                    cameraM.sensitivity = newSettings.sensitivity;
-                }
-            }
-        }
-
-        SoundManager[] allSounds = Object.FindObjectsOfType<SoundManager>();
-        foreach (SoundManager sound in allSounds)
-        {
-            sound.UpdateVolume(newSettings.masterVolume);
-        }
-
-        EngineSoundManager[] allEngineSounds = Object.FindObjectsOfType<EngineSoundManager>();
-        foreach (EngineSoundManager engineSound in allEngineSounds)
-        {
-            engineSound.UpdateMasterVolume(newSettings.masterVolume);
-        }
-
-        return newSettings;
+        return defaultPlayerSettings;
     }
 
     public static void SaveRoomSettings(this RoomSettings fromSettings, string fileName)

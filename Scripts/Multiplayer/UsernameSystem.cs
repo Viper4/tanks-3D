@@ -1,6 +1,5 @@
 using UnityEngine;
 using Photon.Pun;
-using MyUnityAddons.Math;
 
 public class UsernameSystem : MonoBehaviour
 {
@@ -18,6 +17,6 @@ public class UsernameSystem : MonoBehaviour
     public void UpdateTextMeshTo(Transform camera, bool altCam)
     {
         transform.rotation = camera.rotation;
-        textMesh.fontSize = altCam ? (int)CustomMath.SingleAxisDistance(camera.position.y, transform.position.y) * fontScaler / 2: (int)Vector3.Distance(camera.position, transform.position) * fontScaler;
+        textMesh.fontSize = altCam ? (int)Mathf.Abs(camera.position.y - transform.position.y) * fontScaler / 2: (int)Vector3.Distance(camera.position, transform.position) * fontScaler;
     }
 }

@@ -28,7 +28,7 @@ MonoBehaviour:
     AuthMode: 0
     EnableLobbyStatistics: 0
     NetworkLogging: 1
-  DevRegion: us
+  DevRegion: usw
   PunLogging: 0
   EnableSupportLogger: 0
   RunInBackground: 1
@@ -36,27 +36,13 @@ MonoBehaviour:
   RpcList:
   - ClickRpc
   - DestroyRpc
-  - Explode
   - ExplodeTank
-  - Reflect
-  - ResetVelocity
-  - UpdateText
+  - InstantiateBullet
+  - InstantiateMine
+  - RandomizeMaterialColors
   - ReactivatePlayer
   - ResetTrails
-  - LoadPlayerDataForAll
-  - MultiplayerExplodeTank
-  - UpdateLeaderboard
-  - IncreaseKills
-  - RandomizeMaterialColors
-  - InstantiateBullet
-  - BulletNormalDestroy
-  - BulletSafeDestroy
-  - ReflectBullet
-  - ResetBulletVelocity
-  - DestroyMine
-  - InstantiateMine
-  - UpdateUI
-  - StartGame
+  - InitializePlayer
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 1

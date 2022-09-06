@@ -55,7 +55,7 @@ public class SaveFileSelection : MonoBehaviour
         {
             if (!allSaveFiles.Contains(fileName))
             {
-                dataManager.currentRoomSettings.SaveRoomSettings(fileName);
+                DataManager.roomSettings.SaveRoomSettings(fileName);
 
                 InstantiateSaveSlot(fileName);
             }
@@ -74,7 +74,7 @@ public class SaveFileSelection : MonoBehaviour
     {
         if (selectedSaveSlot != null)
         {
-            dataManager.currentRoomSettings.SaveRoomSettings(selectedSaveSlot.Find("Label").GetComponent<Text>().text);
+            DataManager.roomSettings.SaveRoomSettings(selectedSaveSlot.Find("Label").GetComponent<Text>().text);
         }
         else
         {
@@ -86,7 +86,7 @@ public class SaveFileSelection : MonoBehaviour
     {
         if (selectedSaveSlot != null)
         {
-            dataManager.currentRoomSettings = SaveSystem.LoadRoomSettings(selectedSaveSlot.Find("Label").GetComponent<Text>().text);
+            DataManager.roomSettings = SaveSystem.LoadRoomSettings(selectedSaveSlot.Find("Label").GetComponent<Text>().text);
         }
         else
         {

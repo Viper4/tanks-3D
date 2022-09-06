@@ -1,7 +1,5 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using MyUnityAddons.Math;
 
 public class TealBot : MonoBehaviour
 {
@@ -48,7 +46,7 @@ public class TealBot : MonoBehaviour
             }
             else
             {
-                baseTankLogic.targetTankDir = transform.position - nearbyMine.position;
+                baseTankLogic.AvoidMine(nearbyMine, 100);
             }
 
             // Rotating turret and barrel towards player

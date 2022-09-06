@@ -1,5 +1,5 @@
 using UnityEngine;
-using MyUnityAddons.Math;
+using MyUnityAddons.Calculations;
 
 public class MultiplayerCameraControl : MonoBehaviour
 {
@@ -26,7 +26,7 @@ public class MultiplayerCameraControl : MonoBehaviour
 
     Vector2 pitchMinMax = new Vector2(-40, 80);
 
-    [SerializeField] float rotationSmoothTime = 0.1f;
+    public float rotationSmoothTime = 0.1f;
     Vector3 rotationSmoothVelocity;
     Vector3 currentRotation;
 
@@ -42,7 +42,7 @@ public class MultiplayerCameraControl : MonoBehaviour
     // Start is called before the first frame Update
     void Start()
     {
-        if (playerControl.clientManager.PV.IsMine)
+        if (playerControl.photonView.IsMine)
         {
             thisCamera = GetComponent<Camera>();
 
@@ -61,16 +61,6 @@ public class MultiplayerCameraControl : MonoBehaviour
             Cursor.lockState = CursorLockMode.None;
 
             lastEulerAngles = tankOrigin.eulerAngles;
-
-            // Disabling all other cameras except for this client's
-            GameObject[] allCameras = GameObject.FindGameObjectsWithTag("Camera");
-            foreach (GameObject camera in allCameras)
-            {
-                if (camera != gameObject)
-                {
-                    camera.SetActive(false);
-                }
-            }
         }
         else
         {
@@ -79,9 +69,9 @@ public class MultiplayerCameraControl : MonoBehaviour
     }
 
     // Update is called once per frame
-    void LateUpdate()
+    void Update()
     {
-        if (playerControl.clientManager.PV.IsMine && !playerControl.Paused)
+        if (playerControl.photonView.IsMine && !playerControl.Paused)
         {
             // Updating every username to rotate to this camera for this client
             UsernameSystem[] allUsernames = FindObjectsOfType<UsernameSystem>();
@@ -102,15 +92,15 @@ public class MultiplayerCameraControl : MonoBehaviour
             }
 
             // Lock turret toggle
-            if (Input.GetKeyDown(playerControl.myData.currentPlayerSettings.keyBinds["Lock Turret"]))
+            if (Input.GetKeyDown(DataManager.playerSettings.keyBinds["Lock Turret"]))
             {
                 lockTurret = !lockTurret;
             }
-            else if (!alternateCamera && Input.GetKeyDown(playerControl.myData.currentPlayerSettings.keyBinds["Lock Camera"]))
+            else if (!alternateCamera && Input.GetKeyDown(DataManager.playerSettings.keyBinds["Lock Camera"]))
             {
                 lockCamera = !lockCamera;
             }
-            else if (Input.GetKeyDown(playerControl.myData.currentPlayerSettings.keyBinds["Switch Camera"]))
+            else if (Input.GetKeyDown(DataManager.playerSettings.keyBinds["Switch Camera"]))
             {
                 alternateCamera = !alternateCamera;
                 lockCamera = false;

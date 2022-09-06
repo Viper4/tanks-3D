@@ -4,21 +4,27 @@ using UnityEngine;
 
 public class DestructableObject : MonoBehaviour
 {
-    public Transform particles;
-    public Material material;
+    public ParticleSystem particles;
+    public int destroyResistance = 1;
     [SerializeField] float respawnDelay = 0;
     [SerializeField] GameObject solidObject;
+    [SerializeField] float[] pitchRange = { 0.9f, 1.1f };
+    AudioSource audioSource;
 
-    public void PlayParticles()
+    private void Start()
     {
-        Transform newParticles = Instantiate(particles, transform.position, Quaternion.Euler(-90, 0, 0));
-        newParticles.GetComponent<Renderer>().material = material;
+        audioSource = GetComponent<AudioSource>();
     }
-    
+
     public void DestroyObject()
     {
         solidObject.SetActive(false);
-        PlayParticles();
+        particles.Play();
+        if (audioSource != null)
+        {
+            audioSource.pitch = Random.Range(pitchRange[0], pitchRange[1]);
+            audioSource.Play();
+        }
 
         if (respawnDelay > 0)
         {

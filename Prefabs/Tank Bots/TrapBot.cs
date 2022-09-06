@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using MyUnityAddons.Math;
+using MyUnityAddons.Calculations;
 using System.Linq;
 
 public class TrapBot : MonoBehaviour
@@ -184,16 +184,17 @@ public class TrapBot : MonoBehaviour
             float turretAngleToTarget = Mathf.Abs(Vector3.SignedAngle(turret.forward, targetDir, transform.up));
             if (targetSystem.TargetVisible())
             {
-                if (turretAngleToTarget < 15 && fireControl.canFire && fireControl.bulletsFired < fireControl.bulletLimit && firePattern == FirePattern.None)
+                if (turretAngleToTarget < 15 && fireControl.canFire && fireControl.firedBullets.Count < fireControl.bulletLimit && firePattern == FirePattern.None)
                 {
                     fireRoutine = StartCoroutine(TrapFirePattern());
                 }
             }
             else
             {
-                if (fireRoutine != null)
+                if (firePattern != FirePattern.None)
                 {
                     StopCoroutine(fireRoutine);
+                    fireRoutine = null;
                     firePattern = FirePattern.None;
                     mode = previousMode;
                     baseTankLogic.stationary = false;
@@ -203,7 +204,7 @@ public class TrapBot : MonoBehaviour
             if (firePattern == FirePattern.None)
             {
                 baseTankLogic.targetTurretDir = targetDir;
-                if (mode == Mode.Defense && mineControl.canLay && !layingMine && (turretAngleToTarget > maxRicochetAngle || !targetSystem.TargetVisible() || fireControl.bulletLimit >= fireControl.bulletsFired))
+                if (mode == Mode.Defense && mineControl.canLay && !layingMine && (turretAngleToTarget > maxRicochetAngle || !targetSystem.TargetVisible() || fireControl.bulletLimit >= fireControl.firedBullets.Count))
                 {
                     Transform closestTank = transform.ClosestTransform(transform.parent);
                     float closestTankDst = closestTank == null ? Mathf.Infinity : Vector3.Distance(closestTank.position, transform.position);
@@ -216,34 +217,12 @@ public class TrapBot : MonoBehaviour
 
             if (nearbyMine != null)
             {
-                Vector3 oppositeDir = transform.position - nearbyMine.position;
-                if (!Physics.Raycast(body.position, oppositeDir, 2.5f, ~targetSystem.ignoreLayerMask))
-                {
-                    baseTankLogic.targetTankDir = oppositeDir;
-                }
+                baseTankLogic.AvoidMine(nearbyMine, 100);
             }
 
             if (nearbyBullet != null)
             {
-                Vector3 otherForward = nearbyBullet.forward;
-                otherForward.y = 0;
-                Vector3 clockwise = Quaternion.AngleAxis(90, turret.up) * otherForward;
-                Vector3 counterClockwise = Quaternion.AngleAxis(-90, turret.up) * otherForward;
-                Vector3 newTargetDir;
-
-                if (Mathf.Abs(Vector3.SignedAngle(transform.position - nearbyBullet.position, clockwise, transform.up)) <= Mathf.Abs(Vector3.SignedAngle(transform.position - nearbyBullet.position, counterClockwise, transform.up)))
-                {
-                    newTargetDir = clockwise;
-                }
-                else
-                {
-                    newTargetDir = counterClockwise;
-                }
-                if (!Physics.Raycast(body.position, newTargetDir, 2.5f, ~targetSystem.ignoreLayerMask))
-                {
-                    Debug.DrawLine(transform.position, transform.position + newTargetDir, Color.cyan, 0.1f);
-                    baseTankLogic.targetTankDir = newTargetDir;
-                }
+                baseTankLogic.AvoidBullet(nearbyBullet);
             }
         }
     }
@@ -255,18 +234,6 @@ public class TrapBot : MonoBehaviour
             // Avoiding bullets and mines
             switch (other.tag)
             {
-                case "Tank":
-                    if (other.transform.parent != transform)
-                    {
-                        // Stay away from other tanks to prevent collateral 
-                        Vector3 oppositeDir = transform.position - other.transform.position;
-                        oppositeDir.y = 0;
-                        if (!Physics.Raycast(body.position, oppositeDir, 2.5f, ~targetSystem.ignoreLayerMask))
-                        {
-                            baseTankLogic.RotateTankToVector(oppositeDir);
-                        }
-                    }
-                    break;
                 case "Bullet":
                     // Move perpendicular to bullets
                     if (other.TryGetComponent<BulletBehaviour>(out var bulletBehaviour))
@@ -322,10 +289,10 @@ public class TrapBot : MonoBehaviour
         Debug.DrawLine(targetSystem.currentTarget.position, rightTarget, Color.blue, 5f);
 
         // Firing to left of target
-        baseTankLogic.targetTurretDir = leftTarget - turret.position;
-        yield return new WaitUntil(() => Vector3.Angle(barrel.forward, baseTankLogic.targetTurretDir) < maxShootAngle);
         if (!Physics.Linecast(turret.position, leftTarget, ~targetSystem.ignoreLayerMask))
         {
+            baseTankLogic.targetTurretDir = leftTarget - turret.position;
+            yield return new WaitUntil(() => Vector3.Angle(barrel.forward, baseTankLogic.targetTurretDir) < maxShootAngle);
             baseTankLogic.stationary = true;
             yield return new WaitForSeconds(Random.Range(fireDelay[0], fireDelay[1]));
             StartCoroutine(fireControl.Shoot());
@@ -333,10 +300,10 @@ public class TrapBot : MonoBehaviour
         }
 
         // Firing to right of target
-        baseTankLogic.targetTurretDir = rightTarget - turret.position;
-        yield return new WaitUntil(() => fireControl.canFire && Vector3.Angle(barrel.forward, baseTankLogic.targetTurretDir) < maxShootAngle);
         if (!Physics.Linecast(turret.position, rightTarget, ~targetSystem.ignoreLayerMask))
         {
+            baseTankLogic.targetTurretDir = rightTarget - turret.position;
+            yield return new WaitUntil(() => fireControl.canFire && Vector3.Angle(barrel.forward, baseTankLogic.targetTurretDir) < maxShootAngle);
             baseTankLogic.stationary = true;
             yield return new WaitForSeconds(Random.Range(fireDelay[0], fireDelay[1]));
             StartCoroutine(fireControl.Shoot());
@@ -345,13 +312,14 @@ public class TrapBot : MonoBehaviour
 
         bulletRicochet.ScanArea(turret.position);
         bulletRicochet.CalculateBulletRicochets(barrel, targetSystem.currentTarget.position);
-        baseTankLogic.targetTurretDir = bulletRicochet.shootPosition - turret.position;
-        if (bulletRicochet.shootPositions.Count > 0 && Vector3.Angle(barrel.forward, bulletRicochet.shootPosition - turret.position) <= maxRicochetAngle)
+        Vector3 shootPosition = bulletRicochet.SelectShootPosition(barrel, bulletRicochet.selectionMode);
+        baseTankLogic.targetTurretDir = shootPosition - turret.position;
+        if (bulletRicochet.shootPositions.Count > 0 && (Mathf.Abs(Vector3.SignedAngle(turret.forward, shootPosition - turret.position, turret.up)) < maxRicochetAngle || !turret.CanRotateTo(targetDir, baseTankLogic.turretRangeX, baseTankLogic.turretRangeY)))
         {
             // Firing ricochet bullet to target
             baseTankLogic.stationary = true;
-            yield return new WaitUntil(() => fireControl.canFire && Vector3.Angle(barrel.forward, baseTankLogic.targetTurretDir) < maxShootAngle);
             yield return new WaitForSeconds(Random.Range(fireDelay[0], fireDelay[1]));
+            yield return new WaitUntil(() => fireControl.canFire && Vector3.Angle(barrel.forward, baseTankLogic.targetTurretDir) < maxShootAngle);
             StartCoroutine(fireControl.Shoot());
             baseTankLogic.stationary = false;
         }
@@ -359,9 +327,9 @@ public class TrapBot : MonoBehaviour
         {
             // Firing bullet straight to target
             baseTankLogic.targetTurretDir = targetDir;
-            yield return new WaitUntil(() => fireControl.canFire && Vector3.Angle(barrel.forward, baseTankLogic.targetTurretDir) < maxShootAngle);
             baseTankLogic.stationary = true;
             yield return new WaitForSeconds(Random.Range(fireDelay[0], fireDelay[1]));
+            yield return new WaitUntil(() => fireControl.canFire && Vector3.Angle(barrel.forward, baseTankLogic.targetTurretDir) < maxShootAngle);
             StartCoroutine(fireControl.Shoot());
             baseTankLogic.stationary = false;
         }
@@ -426,7 +394,7 @@ public class TrapBot : MonoBehaviour
             Vector3 newLayPosition = movePositions[Random.Range(0, movePositions.Count)];
             baseTankLogic.targetTankDir = newLayPosition - transform.position;
             yield return new WaitUntil(() => Vector3.Distance(transform.position, newLayPosition) < 1);
-            if (mineControl.mineLimit - mineControl.minesLaid > 0 && mineControl.canLay)
+            if (mineControl.mineLimit - mineControl.laidMines.Count > 0 && mineControl.canLay)
             {
                 layingMine = true;
                 baseTankLogic.stationary = true;

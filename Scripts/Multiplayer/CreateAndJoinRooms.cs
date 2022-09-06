@@ -4,20 +4,17 @@ using UnityEngine;
 using UnityEngine.UI;
 using Photon.Pun;
 using Photon.Realtime;
+using TMPro;
 using PhotonHashtable = ExitGames.Client.Photon.Hashtable;
-using UnityEngine.SceneManagement;
 
 public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
 {
-    [SerializeField] DataManager dataManager;
-
     public InputField createInput;
     public InputField joinInput;
     public InputField usernameInput;
 
-    Coroutine createPlaceholderRoutine;
-    Coroutine joinPlaceholderRoutine;
-    Coroutine usernamePlaceholderRoutine;
+    [SerializeField] Transform popup;
+    Coroutine popupRoutine;
 
     public void CreateRoom()
     {
@@ -26,6 +23,8 @@ public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
             RoomOptions roomOptions = new RoomOptions
             {
                 PublishUserId = true,
+                CleanupCacheOnLeave = true,
+                IsVisible = DataManager.roomSettings.isPublic,
             };
             PhotonNetwork.CreateRoom(createInput.text, roomOptions);
         }
@@ -51,11 +50,7 @@ public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
     {
         if (createInput.text.Length == 0)
         {
-            if (createPlaceholderRoutine != null)
-            {
-                StopCoroutine(createPlaceholderRoutine);
-            }
-            createPlaceholderRoutine = StartCoroutine(ShowPlaceholderError(createInput, "Room name is empty", 2.5f));
+            StartShowPopup("Room name is empty", 2.5f);
             return false;
         }
         return true;
@@ -65,11 +60,7 @@ public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
     {
         if (joinInput.text.Length == 0)
         {
-            if (joinPlaceholderRoutine != null)
-            {
-                StopCoroutine(joinPlaceholderRoutine);
-            }
-            joinPlaceholderRoutine = StartCoroutine(ShowPlaceholderError(joinInput, "Room name is empty", 2.5f));
+            StartShowPopup("Room name is empty", 2.5f);
             return false;
         }
         return true;
@@ -79,11 +70,7 @@ public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
     {
         if (usernameInput.text.Length == 0)
         {
-            if (usernamePlaceholderRoutine != null)
-            {
-                StopCoroutine(usernamePlaceholderRoutine);
-            }
-            usernamePlaceholderRoutine = StartCoroutine(ShowPlaceholderError(usernameInput, "Username is empty", 2.5f));
+            StartShowPopup("Username is empty", 2.5f);
             return false;
         }
         return true;
@@ -99,7 +86,7 @@ public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
 
             PhotonHashtable roomProperties = new PhotonHashtable
             {
-                { "RoomSettings", dataManager.currentRoomSettings },
+                { "RoomSettings", DataManager.roomSettings },
                 { "Waiting", true },
                 { "Ready Players", 0 },
                 { "Total Lives", 6 }
@@ -145,7 +132,7 @@ public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
 
     IEnumerator DelayedPhotonLoad(string sceneName)
     {
-        yield return new WaitForSecondsRealtime(0.15f); // Wait until CustomProperties are synched and updated across the network
+        yield return new WaitForSecondsRealtime(0.2f); // Wait until CustomProperties are synched and updated across the network
         PhotonNetwork.LoadLevel(sceneName);
     }
 
@@ -162,44 +149,41 @@ public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
         input.placeholder.gameObject.SetActive(true);
     }
 
+    void StartShowPopup(string message, float delay)
+    {
+        if (popupRoutine != null)
+        {
+            StopCoroutine(popupRoutine);
+        }
+        popupRoutine = StartCoroutine(ShowPopup(message, delay));
+    }
+
+    IEnumerator ShowPopup(string message, float delay)
+    {
+        popup.gameObject.SetActive(true);
+        popup.GetChild(0).GetComponent<TMP_Text>().text = message;
+        yield return new WaitForSecondsRealtime(delay);
+        popup.gameObject.SetActive(false);
+        popupRoutine = null;
+    }
+
     public void LeaveLobby()
     {
         PhotonNetwork.Disconnect();
     }
 
-    public override void OnDisconnected(DisconnectCause cause)
-    {
-        Debug.Log("Disconnected: " + cause);
-        SceneManager.LoadScene("Main Menu");
-    }
-
     public override void OnCreateRoomFailed(short returnCode, string message)
     {
-        Debug.LogWarning("Failed to create room '" + createInput.text + "': " + message);
-        if (createPlaceholderRoutine != null)
-        {
-            StopCoroutine(createPlaceholderRoutine);
-        }
-        createPlaceholderRoutine = StartCoroutine(ShowPlaceholderError(createInput, "Create failed", 2.5f));
+        StartShowPopup("Create failed: " + message, 2.5f);
     }
 
     public override void OnJoinRoomFailed(short returnCode, string message)
     {
-        Debug.LogWarning("Failed to join room '" + joinInput.text + "': " + message);
-        if (joinPlaceholderRoutine != null)
-        {
-            StopCoroutine(joinPlaceholderRoutine);
-        }
-        joinPlaceholderRoutine = StartCoroutine(ShowPlaceholderError(joinInput, "Join failed", 2.5f));
+        StartShowPopup("Join failed: " + message, 2.5f);
     }
 
     public override void OnJoinRandomFailed(short returnCode, string message)
     {
-        Debug.LogWarning("Failed to join a random room: " + message);
-        if (joinPlaceholderRoutine != null)
-        {
-            StopCoroutine(joinPlaceholderRoutine);
-        }
-        joinPlaceholderRoutine = StartCoroutine(ShowPlaceholderError(joinInput, "Join failed", 2.5f));
+        StartShowPopup("Join failed: " + message, 2.5f);
     }
 }

@@ -1,5 +1,5 @@
 using UnityEngine;
-using MyUnityAddons.Math;
+using MyUnityAddons.Calculations;
 
 public class CameraControl : MonoBehaviour
 {
@@ -10,6 +10,7 @@ public class CameraControl : MonoBehaviour
     public Transform reticle;
 
     [SerializeField] PlayerControl playerControl;
+    BaseUIHandler baseUIHandler;
 
     Transform tankOrigin;
     Transform body;
@@ -26,7 +27,7 @@ public class CameraControl : MonoBehaviour
 
     Vector2 pitchMinMax = new Vector2(-40, 80);
 
-    [SerializeField] float rotationSmoothTime = 0.1f;
+    public float rotationSmoothTime = 0.1f;
     Vector3 rotationSmoothVelocity;
     Vector3 currentRotation;
 
@@ -50,6 +51,8 @@ public class CameraControl : MonoBehaviour
             target = transform.parent;
         }
 
+        baseUIHandler = transform.parent.Find("Player UI").GetComponent<BaseUIHandler>();
+
         tankOrigin = transform.parent.Find("Tank Origin");
         body = tankOrigin.Find("Body");
         turret = tankOrigin.Find("Turret");
@@ -62,7 +65,7 @@ public class CameraControl : MonoBehaviour
     }
 
     // Update is called once per frame
-    void LateUpdate()
+    void Update()
     {
         float zoomRate = Input.GetKey(KeyCode.LeftShift) ? 0.5f : 5f;
         // Zoom with scroll
@@ -76,15 +79,17 @@ public class CameraControl : MonoBehaviour
         }
 
         // Lock turret toggle
-        if (Input.GetKeyDown(playerControl.myData.currentPlayerSettings.keyBinds["Lock Turret"]))
+        if (Input.GetKeyDown(DataManager.playerSettings.keyBinds["Lock Turret"]))
         {
             lockTurret = !lockTurret;
+            baseUIHandler.UIElements["Lock Turret"].gameObject.SetActive(lockTurret);
         }
-        else if (!alternateCamera && Input.GetKeyDown(playerControl.myData.currentPlayerSettings.keyBinds["Lock Camera"]))
+        else if (!alternateCamera && Input.GetKeyDown(DataManager.playerSettings.keyBinds["Lock Camera"]))
         {
             lockCamera = !lockCamera;
+            baseUIHandler.UIElements["Lock Camera"].gameObject.SetActive(lockCamera);
         }
-        else if (Input.GetKeyDown(playerControl.myData.currentPlayerSettings.keyBinds["Switch Camera"]))
+        else if (Input.GetKeyDown(DataManager.playerSettings.keyBinds["Switch Camera"]))
         {
             alternateCamera = !alternateCamera;
             lockCamera = false;

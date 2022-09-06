@@ -1,8 +1,6 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using MyUnityAddons.Math;
-using System.Linq;
+using MyUnityAddons.Calculations;
 
 public class BlackBot : MonoBehaviour
 {
@@ -37,7 +35,6 @@ public class BlackBot : MonoBehaviour
 
     Transform nearbyMine = null;
     Transform nearbyBullet = null;
-
     bool resettingMode = false;
     enum Mode
     {
@@ -66,10 +63,20 @@ public class BlackBot : MonoBehaviour
     {
         if (!GameManager.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null)
         {
-            predictedTargetPosition = targetSystem.PredictedTargetPosition(CustomMath.TravelTime(turret.position, targetSystem.currentTarget.position, fireControl.speed));
-            targetDir = predictedTargetPosition - turret.position;
+            targetDir = targetSystem.currentTarget.position - turret.position;
             angleToTarget = Mathf.Abs(Vector3.SignedAngle(transform.forward, targetDir, transform.up));
-            baseTankLogic.targetTurretDir = targetDir;
+
+            predictedTargetPosition = targetSystem.PredictedTargetPosition(CustomMath.TravelTime(turret.position, targetSystem.currentTarget.position, fireControl.speed));
+            bool targetVisible = targetSystem.TargetVisible();
+            bool predictedPosVisible = !Physics.Linecast(turret.position, predictedTargetPosition, ~targetSystem.ignoreLayerMask);
+            if (predictedPosVisible)
+            {
+                baseTankLogic.targetTurretDir = predictedTargetPosition - turret.position;
+            }
+            else
+            {
+                baseTankLogic.targetTurretDir = targetDir;
+            }
 
             switch (mode)
             {
@@ -101,7 +108,7 @@ public class BlackBot : MonoBehaviour
                     break;
             }
 
-            if (!shooting && Vector3.Angle(barrel.forward, targetDir) < maxShootAngle && fireControl.canFire && fireControl.bulletsFired < fireControl.bulletLimit && targetSystem.TargetVisible())
+            if ((targetVisible || predictedPosVisible) && !shooting && Vector3.Angle(barrel.forward, targetDir) < maxShootAngle && fireControl.canFire && fireControl.firedBullets.Count < fireControl.bulletLimit)
             {
                 StartCoroutine(Shoot());
             }
@@ -120,34 +127,12 @@ public class BlackBot : MonoBehaviour
 
             if (nearbyMine != null)
             {
-                Vector3 oppositeDir = transform.position - nearbyMine.position;
-                if (!Physics.Raycast(body.position, oppositeDir, 2.5f, ~targetSystem.ignoreLayerMask))
-                {
-                    baseTankLogic.targetTankDir = oppositeDir;
-                }
+                baseTankLogic.AvoidMine(nearbyMine, 100);
             }
 
             if (nearbyBullet != null)
             {
-                Vector3 otherForward = nearbyBullet.forward;
-                otherForward.y = 0;
-                Vector3 clockwise = Quaternion.AngleAxis(90, turret.up) * otherForward;
-                Vector3 counterClockwise = Quaternion.AngleAxis(-90, turret.up) * otherForward;
-                Vector3 newTargetDir;
-
-                if (Mathf.Abs(Vector3.SignedAngle(transform.position - nearbyBullet.position, clockwise, transform.up)) <= Mathf.Abs(Vector3.SignedAngle(transform.position - nearbyBullet.position, counterClockwise, transform.up)))
-                {
-                    newTargetDir = clockwise;
-                }
-                else
-                {
-                    newTargetDir = counterClockwise;
-                }
-                if (!Physics.Raycast(body.position, newTargetDir, 2.5f, ~targetSystem.ignoreLayerMask))
-                {
-                    Debug.DrawLine(transform.position, transform.position + newTargetDir, Color.cyan, 0.1f);
-                    baseTankLogic.targetTankDir = newTargetDir;
-                }
+                baseTankLogic.AvoidBullet(nearbyBullet);
             }
         }
     }

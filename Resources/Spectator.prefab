@@ -740,6 +740,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   currentPlayerSettings:
     sensitivity: 0
+    FOV: 0
     silhouettes: 0
     masterVolume: 0
     crosshairFileName: 
@@ -766,7 +767,7 @@ MonoBehaviour:
     deaths: 0
     time: 0
     bestTime: 0
-  timing: 0
+    sceneIndex: 0
 --- !u!114 &1800493497886942107
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2991,6 +2992,10 @@ PrefabInstance:
       propertyPath: m_AnchorMax.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8266226543487680839, guid: 8c4f1a850c4e3ca4fb46cd97bbac48de, type: 3}
+      propertyPath: myCamera
+      value: 
+      objectReference: {fileID: 1458544633275823483}
     - target: {fileID: 8266226543487680839, guid: 8c4f1a850c4e3ca4fb46cd97bbac48de, type: 3}
       propertyPath: dataSystem
       value: 

@@ -219,7 +219,7 @@ SphereCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 5.5
+  m_Radius: 6
   m_Center: {x: 0, y: 0.8, z: 0}
 --- !u!1 &1954722336099330320
 GameObject:
@@ -299,7 +299,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rb: {fileID: 5207649292017990146}
   audioSource: {fileID: 0}
-  scale: 0.025
+  scale: 0.015
 --- !u!82 &7957407468838870181
 AudioSource:
   m_ObjectHideFlags: 0
@@ -312,7 +312,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 8300000, guid: 6d7fc0a90993ef64d9e8c7898b681444, type: 3}
   m_PlayOnAwake: 1
-  m_Volume: 1
+  m_Volume: 0
   m_Pitch: 1
   Loop: 1
   Mute: 0
@@ -917,7 +917,8 @@ GameObject:
   - component: {fileID: 5207649292017990146}
   - component: {fileID: 4436427137093535442}
   - component: {fileID: 5630658949621447858}
-  m_Layer: 17
+  - component: {fileID: 222640088891493764}
+  m_Layer: 25
   m_Name: Purple Tank
   m_TagString: Tank
   m_Icon: {fileID: 0}
@@ -966,8 +967,8 @@ MonoBehaviour:
   shootEffect: {fileID: 7275907135579404139, guid: 71b07424ffcb49a41830ab0761db5c07, type: 3}
   bulletParent: {fileID: 0}
   speed: 16
-  explosionRadius: 0
   pierceLevel: 0
+  pierceLimit: 0
   ricochetLevel: 1
   bulletLimit: 5
   fireCooldown:
@@ -976,7 +977,7 @@ MonoBehaviour:
   canFire: 1
   solidLayerMask:
     serializedVersion: 2
-    m_Bits: 1
+    m_Bits: 605028353
 --- !u!114 &4060378702649525591
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -998,7 +999,6 @@ MonoBehaviour:
   - 4
   - 10
   explosionRadius: 7
-  canLay: 1
 --- !u!114 &5009471853096854092
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1014,9 +1014,10 @@ MonoBehaviour:
   primaryTarget: {fileID: 0}
   currentTarget: {fileID: 0}
   preferredTargetArea: Body
+  chooseTarget: 0
   ignoreLayerMask:
     serializedVersion: 2
-    m_Bits: 1838
+    m_Bits: 268437294
   enemyParent: {fileID: 0}
 --- !u!114 &8147042413594737687
 MonoBehaviour:
@@ -1037,13 +1038,13 @@ MonoBehaviour:
   effectsParent: {fileID: 0}
   barrierLayers:
     serializedVersion: 2
-    m_Bits: 2028225
+    m_Bits: 1004466881
   slopeLayers:
     serializedVersion: 2
-    m_Bits: 1048577
+    m_Bits: 873463809
   slopeAlignment: 1
   alignRotationSpeed: 300
-  maxSlopeAngle: 35
+  maxSlopeAngle: 40
   stationary: 0
   obstacleAvoidance: 1
   normalSpeed: 5
@@ -1051,7 +1052,7 @@ MonoBehaviour:
   useGravity: 1
   gravity: 8
   velocityLimit: 25
-  flipAngleThreshold: 20
+  flipAngleThreshold: 25
   restrictRotation: 0
   pitchRange:
   - -45
@@ -1071,6 +1072,9 @@ MonoBehaviour:
   turretRangeX:
   - -20
   - 20
+  turretRangeY:
+  - -180
+  - 180
   overrideRotation: 0
   targetTurretDir: {x: 0, y: 0, z: 0}
   targetTankDir: {x: 0, y: 0, z: 0}
@@ -1099,11 +1103,11 @@ MonoBehaviour:
   - 4.5
   - 8
   maxShootAngle: 2
-  maxRicochetAngle: 90
+  maxRicochetAngle: 60
   maxTargetAngle: 110
   minTargetAngle: 30
   partner: {fileID: 0}
-  mode: 0
+  mode: 1
 --- !u!114 &7367240953964095723
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1119,20 +1123,20 @@ MonoBehaviour:
   showRays: 0
   mirrorLayerMask:
     serializedVersion: 2
-    m_Bits: 1
+    m_Bits: 603979777
   nonObstructLayerMask:
     serializedVersion: 2
-    m_Bits: 1854
+    m_Bits: 301991742
   drawDuration: 5
   ricochetPredictions: 1
-  horizontalSteps: 60
-  verticalSteps: 15
-  maxHorizontalAngle: 180
-  maxVerticalAngle: 20
-  doubleScanHorizontal: 1
-  doubleScanVertical: 1
-  shootPosition: {x: 0, y: 0, z: 0}
-  lookPositions: []
+  viewDistance: 50
+  maxHorizontalAngle:
+  - -180
+  - 180
+  maxVerticalAngle:
+  - -20
+  - 20
+  selectionMode: 1
 --- !u!54 &5207649292017990146
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1141,7 +1145,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 9020707831748607082}
   serializedVersion: 2
-  m_Mass: 10
+  m_Mass: 1
   m_Drag: 0
   m_AngularDrag: 0.05
   m_UseGravity: 0
@@ -1178,10 +1182,33 @@ MonoBehaviour:
   ObservedComponentsFoldoutOpen: 1
   Group: 0
   prefixField: -1
-  Synchronization: 3
+  Synchronization: 2
   OwnershipTransfer: 0
   observableSearch: 2
-  ObservedComponents: []
+  ObservedComponents:
+  - {fileID: 222640088891493764}
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
+--- !u!114 &222640088891493764
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9020707831748607082}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef3ca8b855933ee4ba50c8bce855cbd3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  player: 0
+  ownerComponents:
+  - {fileID: -2896793128741677329}
+  - {fileID: 5009471853096854092}
+  tankOrigin: {fileID: 8530993442464327376}
+  rb: {fileID: 5207649292017990146}
+  turret: {fileID: 2296614985622072900}
+  barrel: {fileID: 4845901430446646921}
+  teleportDistance: 10
+  rotateTowardsSpeed: 180

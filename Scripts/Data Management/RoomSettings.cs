@@ -5,7 +5,7 @@ using UnityEngine;
 [System.Serializable]
 public class RoomSettings
 {
-    public string version;
+    public bool isPublic;
     public string map;
     public string primaryMode;
     public string secondaryMode;

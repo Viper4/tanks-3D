@@ -6,12 +6,10 @@ using PhotonHashtable = ExitGames.Client.Photon.Hashtable;
 
 public class MineBehaviour : MonoBehaviour
 {
-    public DataManager dataSystem { get; set; }
-
     public Transform owner { get; set; }
     public PhotonView ownerPV { get; set; }
 
-    [SerializeField] LayerMask overlapIgnore;
+    [SerializeField] LayerMask overlapInteract;
     public Transform explosionEffect;
 
     public Material normalMaterial;
@@ -34,7 +32,7 @@ public class MineBehaviour : MonoBehaviour
         if (!GameManager.frozen)
         {
             activateDelay -= Time.deltaTime * 1;
-            
+
             if (activateDelay <= 0)
             {
                 timer -= Time.deltaTime * 1;
@@ -58,69 +56,68 @@ public class MineBehaviour : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        switch (other.tag)
+        if (other.CompareTag("Tank") || other.CompareTag("Player") || other.CompareTag("AI Tank"))
         {
-            case "Tank":
-                if (activateDelay <= 0 && timer > 1.5f) 
+            if (activateDelay <= 0 && timer > 1.5f)
+            {
+                if (timer > 2)
                 {
-                    if (timer > 2)
-                    {
-                        timer = 2;
-                    }
+                    timer = 2;
                 }
-                break;
-            case "Player":
-                if (activateDelay <= 0 && timer > 1.5f)
-                {
-                    if (timer > 2)
-                    {
-                        timer = 2;
-                    }
-                }
-                break;
+            }
         }
     }
 
     void MultiplayerAddKills()
     {
-        dataSystem.currentPlayerData.kills++;
+        DataManager.playerData.kills++;
 
-        PhotonHashtable playerProperties = PhotonNetwork.LocalPlayer.CustomProperties;
-        playerProperties["Kills"] = dataSystem.currentPlayerData.kills;
+        PhotonHashtable playerProperties = new PhotonHashtable
+        {
+            { "Kills", DataManager.playerData.kills }
+        };
         PhotonNetwork.LocalPlayer.SetCustomProperties(playerProperties);
     }
 
     void IncreaseKills(Transform other)
     {
-        if (owner != null && owner.CompareTag("Player") && owner != other)
+        if (owner != null && owner != other)
         {
-            if (!PhotonNetwork.OfflineMode)
+            if (owner.CompareTag("Player"))
             {
-                if (ownerPV != null && ownerPV.IsMine)
+                if (!PhotonNetwork.OfflineMode)
                 {
-                    if (other.CompareTag("Tank"))
+                    if (ownerPV != null && ownerPV.IsMine)
                     {
-                        MultiplayerAddKills();
-                    }
-                    else if (other.CompareTag("Player"))
-                    {
-                        if (other.name.Contains("Team"))
+                        if (other.CompareTag("Tank"))
                         {
-                            if (other.name != owner.name)
+                            MultiplayerAddKills();
+                        }
+                        else if (other.CompareTag("Player"))
+                        {
+                            if (other.name.Contains("Team"))
+                            {
+                                if (other.name != owner.name)
+                                {
+                                    MultiplayerAddKills();
+                                }
+                            }
+                            else
                             {
                                 MultiplayerAddKills();
                             }
                         }
-                        else
-                        {
-                            MultiplayerAddKills();
-                        }
                     }
                 }
+                else
+                {
+                    DataManager.playerData.kills++;
+                }
             }
-            else
+            else if (owner.CompareTag("AI Tank"))
             {
-                dataSystem.currentPlayerData.kills++;
+                GeneticAlgorithmBot bot = owner.GetComponent<GeneticAlgorithmBot>();
+                bot.Kills++;
             }
         }
     }
@@ -149,51 +146,64 @@ public class MineBehaviour : MonoBehaviour
         chain.Add(transform);
 
         // Getting all colliders within explosionRadius
-        Collider[] colliders = Physics.OverlapSphere(transform.position, explosionRadius, ~overlapIgnore);
-        List<Transform> explodedTanks = new List<Transform>();
+        Collider[] colliders = Physics.OverlapSphere(transform.position, explosionRadius, overlapInteract);
         foreach (Collider collider in colliders)
         {
-            if(collider != null)
+            if (collider != null && !chain.Contains(collider.transform))
             {
                 switch (collider.tag)
                 {
                     case "Tank":
-                        if (collider.transform.parent.name != "Tanks" && !explodedTanks.Contains(collider.transform.parent))
-                        {
-                            explodedTanks.Add(collider.transform.parent);
+                        chain.Add(collider.transform);
 
-                            if (!PhotonNetwork.OfflineMode && !GameManager.autoPlay)
+                        if (!PhotonNetwork.OfflineMode && !GameManager.autoPlay)
+                        {
+                            if (ownerPV.IsMine)
                             {
-                                if (ownerPV.IsMine)
-                                {
-                                    collider.transform.parent.GetComponent<PhotonView>().RPC("ExplodeTank", RpcTarget.All);
-                                }
+                                collider.transform.GetComponent<PhotonView>().RPC("ExplodeTank", RpcTarget.All);
                             }
-                            else
-                            {
-                                collider.transform.parent.GetComponent<BaseTankLogic>().ExplodeTank();
-                            }
-                            IncreaseKills(collider.transform.parent);
                         }
+                        else
+                        {
+                            collider.transform.GetComponent<BaseTankLogic>().ExplodeTank();
+                        }
+                        IncreaseKills(collider.transform);
+                        
                         break;
                     case "Player":
-                        Transform otherPlayer = collider.transform.root;
-                        if (!explodedTanks.Contains(otherPlayer))
+                        Transform otherPlayer = collider.transform.parent;
+                        if (!chain.Contains(otherPlayer))
                         {
-                            explodedTanks.Add(otherPlayer);
+                            chain.Add(otherPlayer);
                             if (!PhotonNetwork.OfflineMode)
                             {
                                 if (ownerPV.IsMine)
                                 {
                                     otherPlayer.GetComponent<PhotonView>().RPC("ExplodeTank", RpcTarget.All);
                                 }
-                                IncreaseKills(otherPlayer);
                             }
                             else
                             {
                                 otherPlayer.GetComponent<BaseTankLogic>().ExplodeTank();
                             }
+                            IncreaseKills(otherPlayer);
                         }
+                        break;
+                    case "AI Tank":
+                        chain.Add(collider.transform);
+
+                        if (!PhotonNetwork.OfflineMode && !GameManager.autoPlay)
+                        {
+                            if (ownerPV.IsMine)
+                            {
+                                collider.transform.GetComponent<PhotonView>().RPC("ExplodeTank", RpcTarget.All);
+                            }
+                        }
+                        else
+                        {
+                            collider.transform.GetComponent<BaseTankLogic>().ExplodeTank();
+                        }
+                        IncreaseKills(collider.transform);
                         break;
                     case "Destructable":
                         collider.transform.parent.GetComponent<DestructableObject>().DestroyObject();
@@ -212,9 +222,8 @@ public class MineBehaviour : MonoBehaviour
                 }
             }
 
-            Rigidbody rb = collider.GetComponent<Rigidbody>();
             // Applying explosion force to rigid bodies of hit colliders
-            if (rb != null)
+            if (collider.TryGetComponent<Rigidbody>(out var rb))
             {
                 rb.AddExplosionForce(explosionForce, transform.position, explosionRadius, 3);
             }
@@ -227,7 +236,7 @@ public class MineBehaviour : MonoBehaviour
     {
         if (owner != null)
         {
-            owner.GetComponent<MineControl>().minesLaid -= 1;
+            owner.GetComponent<MineControl>().laidMines.Remove(transform);
         }
 
         Instantiate(explosionEffect, transform.position, Quaternion.Euler(-90, 0, 0), transform.parent);

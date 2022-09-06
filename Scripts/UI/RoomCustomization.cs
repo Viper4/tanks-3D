@@ -5,8 +5,6 @@ using UnityEngine.UI;
 
 public class RoomCustomization : MonoBehaviour
 {
-    [SerializeField] DataManager dataManager;
-
     [SerializeField] RectTransform mapSelection;
 
     [SerializeField] RectTransform FFASettings;
@@ -16,20 +14,25 @@ public class RoomCustomization : MonoBehaviour
 
     [SerializeField] RectTransform roundSettings;
 
+    public void TogglePublic(Toggle toggle)
+    {
+        DataManager.roomSettings.isPublic = toggle.isOn;
+    }
+
     public void ChangeMap(Dropdown dropdown)
     {
-        dataManager.currentRoomSettings.map = dropdown.options[dropdown.value].text;
+        DataManager.roomSettings.map = dropdown.options[dropdown.value].text;
     }
 
     public void ChangeCampaign(Dropdown dropdown)
     {
-        dataManager.currentRoomSettings.map = dropdown.options[dropdown.value].text + " 1";
+        DataManager.roomSettings.map = dropdown.options[dropdown.value].text + " 1";
     }
 
     public void ChangePrimaryMode(Dropdown dropdown)
     {
         string option = dropdown.options[dropdown.value].text;
-        dataManager.currentRoomSettings.primaryMode = option;
+        DataManager.roomSettings.primaryMode = option;
 
         FFASettings.gameObject.SetActive(option == "FFA");
         PvESettings.gameObject.SetActive(option == "PvE");
@@ -40,21 +43,21 @@ public class RoomCustomization : MonoBehaviour
             CoOpSettings.gameObject.SetActive(true);
             mapSelection.gameObject.SetActive(false);
 
-            dataManager.currentRoomSettings.map = "Classic 1";
+            DataManager.roomSettings.map = "Classic 1";
         }
         else
         {
             CoOpSettings.gameObject.SetActive(false);
             mapSelection.gameObject.SetActive(true);
 
-            dataManager.currentRoomSettings.map = "Classic";
+            DataManager.roomSettings.map = "Classic";
         }
     }
 
     public void ChangeSecondaryMode(Dropdown dropdown)
     {
         string option = dropdown.options[dropdown.value].text;
-        dataManager.currentRoomSettings.secondaryMode = option;
+        DataManager.roomSettings.secondaryMode = option;
 
         switch (option)
         {
@@ -69,50 +72,50 @@ public class RoomCustomization : MonoBehaviour
 
     public void ChangeTeamAmount(Dropdown dropdown)
     {
-        int.TryParse(dropdown.options[dropdown.value].text, out dataManager.currentRoomSettings.teamLimit);
+        int.TryParse(dropdown.options[dropdown.value].text, out DataManager.roomSettings.teamLimit);
     }
 
     public void ChangeTeamSize(InputField input)
     {
-        int.TryParse(input.text, out dataManager.currentRoomSettings.teamSize);
+        int.TryParse(input.text, out DataManager.roomSettings.teamSize);
     }
 
     public void ChangeWaveSize(Dropdown dropdown)
     {
-        dataManager.currentRoomSettings.waveSize = dropdown.value;
+        DataManager.roomSettings.waveSize = dropdown.value;
     }
 
     public void ChangeDifficulty(Dropdown dropdown)
     {
-        dataManager.currentRoomSettings.difficulty = dropdown.value;
+        DataManager.roomSettings.difficulty = dropdown.value;
     }
 
     public void ChangePlayerLimit(InputField input)
     {
-        int.TryParse(input.text, out dataManager.currentRoomSettings.playerLimit);
+        int.TryParse(input.text, out DataManager.roomSettings.playerLimit);
     }
 
     public void ChangeBotSelection(MultiDropdown multiDropdown)
     {
         foreach (int value in multiDropdown.values)
         {
-            dataManager.currentRoomSettings.bots.Add(multiDropdown.options[value].text);
+            DataManager.roomSettings.bots.Add(multiDropdown.options[value].text);
         }
     }
 
     public void ChangeRoundAmount(InputField input)
     {
-        int.TryParse(input.text, out dataManager.currentRoomSettings.roundAmount);
+        int.TryParse(input.text, out DataManager.roomSettings.roundAmount);
     }
 
     public void ChangeBotLimit(InputField input)
     {
-        int.TryParse(input.text, out dataManager.currentRoomSettings.botLimit);
+        int.TryParse(input.text, out DataManager.roomSettings.botLimit);
     }
 
     public void ChangeFillLobby(Toggle toggle)
     {
-        dataManager.currentRoomSettings.fillLobby = toggle.isOn;
+        DataManager.roomSettings.fillLobby = toggle.isOn;
     }
 
     public void UpdateSettingsUI()
@@ -123,45 +126,45 @@ public class RoomCustomization : MonoBehaviour
             switch (setting.name)
             {
                 case "Map Dropdown":
-                    SetValueToOption(setting.GetComponent<Dropdown>(), dataManager.currentRoomSettings.map);
+                    SetValueToOption(setting.GetComponent<Dropdown>(), DataManager.roomSettings.map);
                     break;
                 case "Map Preview":
 
                     break;
                 case "Mode 1 Dropdown":
-                    SetValueToOption(setting.GetComponent<Dropdown>(), dataManager.currentRoomSettings.primaryMode);
+                    SetValueToOption(setting.GetComponent<Dropdown>(), DataManager.roomSettings.primaryMode);
                     ChangePrimaryMode(setting.GetComponent<Dropdown>()); // Enable/disable gameobjects
                     break;
                 case "Mode 2 Dropdown":
-                    SetValueToOption(setting.GetComponent<Dropdown>(), dataManager.currentRoomSettings.secondaryMode);
+                    SetValueToOption(setting.GetComponent<Dropdown>(), DataManager.roomSettings.secondaryMode);
                     ChangeSecondaryMode(setting.GetComponent<Dropdown>()); // Enable/disable gameobjects
                     break;
                 case "Team Limit":
-                    SetValueToOption(setting.GetComponent<Dropdown>(), dataManager.currentRoomSettings.teamLimit.ToString());
+                    SetValueToOption(setting.GetComponent<Dropdown>(), DataManager.roomSettings.teamLimit.ToString());
                     break;
                 case "Team Size":
-                    setting.GetComponent<InputField>().text = dataManager.currentRoomSettings.teamSize.ToString();
+                    setting.GetComponent<InputField>().text = DataManager.roomSettings.teamSize.ToString();
                     break;
                 case "Wave Size":
-                    SetValueToOption(setting.GetComponent<Dropdown>(), dataManager.currentRoomSettings.waveSize.ToString());
+                    SetValueToOption(setting.GetComponent<Dropdown>(), DataManager.roomSettings.waveSize.ToString());
                     break;
                 case "Difficulty":
-                    setting.GetComponent<Dropdown>().value = dataManager.currentRoomSettings.difficulty;
+                    setting.GetComponent<Dropdown>().value = DataManager.roomSettings.difficulty;
                     break;
                 case "Round Amount":
-                    setting.GetComponent<InputField>().text = dataManager.currentRoomSettings.roundAmount.ToString();
+                    setting.GetComponent<InputField>().text = DataManager.roomSettings.roundAmount.ToString();
                     break;
                 case "Player Limit":
-                    setting.GetComponent<InputField>().text = dataManager.currentRoomSettings.playerLimit.ToString();
+                    setting.GetComponent<InputField>().text = DataManager.roomSettings.playerLimit.ToString();
                     break;
                 case "Bot Selection":
-                    SetValuesToOptions(setting.GetComponent<MultiDropdown>(), dataManager.currentRoomSettings.bots);
+                    SetValuesToOptions(setting.GetComponent<MultiDropdown>(), DataManager.roomSettings.bots);
                     break;
                 case "Bot Limit":
-                    setting.GetComponent<InputField>().text = dataManager.currentRoomSettings.botLimit.ToString();
+                    setting.GetComponent<InputField>().text = DataManager.roomSettings.botLimit.ToString();
                     break;
                 case "Fill Lobby":
-                    setting.GetComponent<Toggle>().isOn = dataManager.currentRoomSettings.fillLobby;
+                    setting.GetComponent<Toggle>().isOn = DataManager.roomSettings.fillLobby;
                     break;
             }
         }

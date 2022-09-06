@@ -6,7 +6,8 @@ using UnityEngine;
 public class PlayerSettings
 {
     public float sensitivity;
-    public float FOV;
+    public float cameraSmoothing;
+    public float fieldOfView;
     public Dictionary<string, KeyCode> keyBinds;
     public bool silhouettes;
     public float masterVolume;

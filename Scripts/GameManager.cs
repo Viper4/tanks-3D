@@ -4,11 +4,12 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using Photon.Pun;
 using MyUnityAddons.CustomPhoton;
-using MyUnityAddons.Math;
+using MyUnityAddons.Calculations;
 using PhotonHashtable = ExitGames.Client.Photon.Hashtable;
 using ExitGames.Client.Photon;
 using Photon.Realtime;
 using System.Text.RegularExpressions;
+using Photon.Pun.UtilityScripts;
 
 public class GameManager : MonoBehaviourPunCallbacks
 {
@@ -21,8 +22,10 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     bool loadingScene = false;
 
-    readonly byte StartEventCode = 2;
-    public readonly byte LoadSceneEventCode = 3;
+    readonly byte StartEventCode = 3;
+    public readonly byte LoadSceneEventCode = 4;
+    readonly byte AddReadyPlayerCode = 5;
+    readonly byte RemoveReadyPlayerCode = 6;
 
     public Transform loadingScreen;
     [SerializeField] Transform progressBar;
@@ -32,12 +35,12 @@ public class GameManager : MonoBehaviourPunCallbacks
     [SerializeField] Transform readyButton;
 
     PhotonView playerPV;
-    DataManager dataManager;
     BaseUIHandler baseUIHandler;
 
     public readonly int multiplayerSceneIndexEnd = 4;
-
     int lastSceneIndex = -1;
+
+    int readyPlayers = 0;
 
     void Start()
     {
@@ -45,7 +48,8 @@ public class GameManager : MonoBehaviourPunCallbacks
         Cursor.lockState = CursorLockMode.None;
         
         SaveSystem.Init();
-
+        PhotonNetwork.SendRate = 30;
+        PhotonNetwork.SerializationRate = 15;
         if (gameManager == null)
         {
             PhotonNetwork.OfflineMode = offlineMode;
@@ -65,7 +69,6 @@ public class GameManager : MonoBehaviourPunCallbacks
     public void UpdatePlayerVariables(PhotonView PV)
     {
         playerPV = PV;
-        dataManager = PV.GetComponent<DataManager>();
         baseUIHandler = PV.transform.Find("Player UI").GetComponent<BaseUIHandler>();
     }
 
@@ -75,10 +78,10 @@ public class GameManager : MonoBehaviourPunCallbacks
         loadingScene = false;
         string currentSceneName = SceneManager.GetActiveScene().name;
         int currentSceneIndex = SceneManager.GetActiveScene().buildIndex;
+        Time.timeScale = 1;
 
         if (PhotonNetwork.OfflineMode)
         {
-            dataManager = FindObjectOfType<DataManager>();
             baseUIHandler = FindObjectOfType<BaseUIHandler>();
         }
 
@@ -153,41 +156,38 @@ public class GameManager : MonoBehaviourPunCallbacks
                 }
                 break;
             default:
+                autoPlay = false;
+
                 if (currentSceneIndex <= multiplayerSceneIndexEnd)
                 {
                     PhotonNetwork.OfflineMode = false;
                     offlineMode = false;
 
                     gameManager.loadingScreen.gameObject.SetActive(false);
-                    Time.timeScale = 1;
-                    autoPlay = false;
                     frozen = false;
                 }
                 else
                 {
                     int.TryParse(Regex.Match(currentSceneName, @"\d+").Value, out int levelIndex);
                     levelIndex--;
-
-                    dataManager.timing = false;
-                    dataManager.currentPlayerData = SaveSystem.LoadPlayerData("PlayerData");
-
                     Time.timeScale = 0;
-                    autoPlay = false;
                     frozen = true;
 
                     gameManager.loadingScreen.gameObject.SetActive(true);
                     gameManager.progressBar.gameObject.SetActive(false);
                     if (PhotonNetwork.OfflineMode)
                     {
+                        DataManager.playerData = SaveSystem.LoadPlayerData("PlayerData");
+
                         gameManager.startButton.gameObject.SetActive(true);
                         readyButton.gameObject.SetActive(false);
                         if (lastSceneIndex != currentSceneIndex && levelIndex != 0 && levelIndex % 5 == 0)
                         {
-                            dataManager.currentPlayerData.lives++;
+                            DataManager.playerData.lives++;
                             StartCoroutine(PopupExtraLife(2.25f));
                         }
 
-                        gameManager.label.Find("Lives").GetComponent<Text>().text = "Lives: " + dataManager.currentPlayerData.lives;
+                        gameManager.label.Find("Lives").GetComponent<Text>().text = "Lives: " + DataManager.playerData.lives;
                     }
                     else
                     {
@@ -201,9 +201,13 @@ public class GameManager : MonoBehaviourPunCallbacks
                             };
                             PhotonNetwork.CurrentRoom.SetCustomProperties(roomProperties);
                             StartCoroutine(PopupExtraLife(2.25f));
-                        }
 
-                        gameManager.label.Find("Lives").GetComponent<Text>().text = "Lives: " + (int)PhotonNetwork.CurrentRoom.CustomProperties["Total Lives"];
+                            gameManager.label.Find("Lives").GetComponent<Text>().text = "Lives: " + (int)PhotonNetwork.CurrentRoom.CustomProperties["Total Lives"] + 1;
+                        }
+                        else
+                        {
+                            gameManager.label.Find("Lives").GetComponent<Text>().text = "Lives: " + (int)PhotonNetwork.CurrentRoom.CustomProperties["Total Lives"];
+                        }
                     }
 
                     if (!FindObjectOfType<TankManager>().lastCampaignScene)
@@ -226,12 +230,12 @@ public class GameManager : MonoBehaviourPunCallbacks
     public void LoadNextScene(float delay = 0, bool save = false)
     {
         int activeSceneIndex = SceneManager.GetActiveScene().buildIndex;
-        StartCoroutine(LoadSceneRoutine(activeSceneIndex + 1, delay, false, save));
+        StartCoroutine(LoadSceneRoutine(activeSceneIndex + 1, delay, false, save, true));
     }
     public void PhotonLoadNextScene(float delay = 0, bool save = false)
     {
         int activeSceneIndex = SceneManager.GetActiveScene().buildIndex;
-        StartCoroutine(LoadSceneRoutine(activeSceneIndex + 1, delay, true, save));
+        StartCoroutine(LoadSceneRoutine(activeSceneIndex + 1, delay, true, save, false));
     }
 
     public void LoadScene(int sceneIndex = -1, float delay = 0, bool save = false, bool waitWhilePaused = true)
@@ -254,7 +258,7 @@ public class GameManager : MonoBehaviourPunCallbacks
         StartCoroutine(LoadSceneRoutine(sceneName, delay, true, save, waitWhilePaused));
     }
 
-    private IEnumerator LoadSceneRoutine(int sceneIndex, float delay, bool photon, bool save = false, bool waitWhilePaused = true)
+    private IEnumerator LoadSceneRoutine(int sceneIndex, float delay, bool photon, bool save, bool waitWhilePaused)
     {
         if (!loadingScene)
         {
@@ -265,9 +269,9 @@ public class GameManager : MonoBehaviourPunCallbacks
                 sceneIndex = SceneManager.GetActiveScene().buildIndex;
             }
 
-            if (dataManager != null && save)
+            if (save)
             {
-                dataManager.currentPlayerData.SavePlayerData("PlayerData", sceneIndex == SceneManager.sceneCountInBuildSettings - 1);
+                DataManager.playerData.SavePlayerData("PlayerData", sceneIndex == SceneManager.sceneCountInBuildSettings - 1);
             }
 
             yield return new WaitForSecondsRealtime(delay);
@@ -322,7 +326,7 @@ public class GameManager : MonoBehaviourPunCallbacks
         }
     }
 
-    private IEnumerator LoadSceneRoutine(string sceneName, float delay, bool photon, bool save = false, bool waitWhilePaused = true)
+    private IEnumerator LoadSceneRoutine(string sceneName, float delay, bool photon, bool save, bool waitWhilePaused)
     {
         if (!loadingScene)
         {
@@ -333,9 +337,9 @@ public class GameManager : MonoBehaviourPunCallbacks
                 sceneName = SceneManager.GetActiveScene().name;
             }
 
-            if (dataManager != null && save)
+            if (save)
             {
-                dataManager.currentPlayerData.SavePlayerData("PlayerData", sceneName == "End Scene");
+                DataManager.playerData.SavePlayerData("PlayerData", sceneName == "End Scene");
             }
 
             yield return new WaitForSecondsRealtime(delay);
@@ -420,59 +424,76 @@ public class GameManager : MonoBehaviourPunCallbacks
         if (playerPV.IsMine)
         {
             Image readyImage = readyButton.GetComponent<Image>();
-            int readyPlayers = (int)PhotonNetwork.CurrentRoom.CustomProperties["Ready Players"];
 
             if (readyImage.color == Color.green)
             {
-                Debug.Log("Removed players");
                 readyPlayers--;
+                PhotonNetwork.RaiseEvent(RemoveReadyPlayerCode, null, RaiseEventOptions.Default, SendOptions.SendUnreliable);
                 readyImage.color = Color.red;
             }
             else
             {
-                Debug.Log("Added players");
                 readyPlayers++;
+                PhotonNetwork.RaiseEvent(AddReadyPlayerCode, null, RaiseEventOptions.Default, SendOptions.SendUnreliable);
                 readyImage.color = Color.green;
             }
 
             if (readyPlayers >= CustomNetworkHandling.NonSpectatorList.Length)
             {
-                Debug.Log("Here");
+                readyImage.color = Color.red;
+                readyPlayers = 0;
                 PhotonNetwork.RaiseEvent(StartEventCode, null, RaiseEventOptions.Default, SendOptions.SendUnreliable);
                 StartGame();
-                readyImage.color = Color.red;
             }
-            PhotonHashtable roomProperties = new PhotonHashtable
-            {
-                { "Ready Players", readyPlayers }
-            };
-            PhotonNetwork.LocalPlayer.SetCustomProperties(roomProperties);
         }
     }
 
     private void OnEnable()
     {
+        base.OnEnable();
+        Debug.Log("Enabled");
+        PhotonNetwork.MinimalTimeScaleToDispatchInFixedUpdate = 0;
         PhotonNetwork.NetworkingClient.EventReceived += OnEvent;
     }
 
     private void OnDisable()
     {
+        base.OnDisable();
+        Debug.Log("Disabled");
         PhotonNetwork.NetworkingClient.EventReceived -= OnEvent;
     }
 
-    private void OnEvent(EventData eventData)
+    void OnEvent(EventData eventData)
     {
-        Debug.Log(eventData.Code);
         if (eventData.Code == StartEventCode)
         {
-            Debug.Log("Raised StartEventCode");
+            readyButton.GetComponent<Image>().color = Color.red;
+            readyPlayers = 0;
             StartGame();
         }
         else if (eventData.Code == LoadSceneEventCode)
         {
-            System.Collections.Hashtable parameters = (System.Collections.Hashtable)eventData.Parameters[ParameterCode.Data];
-            Debug.Log("Raised LoadSceneEventCode");
-            LoadScene((string)parameters["sceneName"], (int)parameters["delay"], (bool)parameters["save"], (bool)parameters["waitWhilePaused"]);
+            PhotonHashtable parameters = (PhotonHashtable)eventData.Parameters[ParameterCode.Data];
+            if (parameters.ContainsKey("sceneName"))
+            {
+                PhotonLoadScene((string)parameters["sceneName"], (int)parameters["delay"], (bool)parameters["save"], (bool)parameters["waitWhilePaused"]);
+            }
+            else if (parameters.ContainsKey("sceneIndex"))
+            {
+                PhotonLoadScene((int)parameters["sceneIndex"], (int)parameters["delay"], (bool)parameters["save"], (bool)parameters["waitWhilePaused"]);
+            }
+        }
+        else if (eventData.Code == AddReadyPlayerCode)
+        {
+            readyPlayers++;
+            Debug.Log(readyPlayers);
+            readyPlayers = Mathf.Clamp(readyPlayers, 0, CustomNetworkHandling.NonSpectatorList.Length);
+        }
+        else if (eventData.Code == RemoveReadyPlayerCode)
+        {
+            readyPlayers--;
+            Debug.Log(readyPlayers);
+            readyPlayers = Mathf.Clamp(readyPlayers, 0, CustomNetworkHandling.NonSpectatorList.Length);
         }
     }
 
@@ -486,6 +507,7 @@ public class GameManager : MonoBehaviourPunCallbacks
         }
         else if (playerPV.IsMine)
         {
+            DataManager.playerData = SaveSystem.LoadPlayerData("PlayerData");
             baseUIHandler.GetComponent<PlayerUIHandler>().Resume();
         }
 
@@ -495,8 +517,6 @@ public class GameManager : MonoBehaviourPunCallbacks
             yield return new WaitWhile(() => baseUIHandler.PauseUIActive());
         }
         frozen = false;
-        Time.timeScale = 1;
-        dataManager.timing = true;
     }
 
     public void MainMenu()
@@ -508,7 +528,18 @@ public class GameManager : MonoBehaviourPunCallbacks
         else
         {
             PhotonNetwork.Disconnect();
-            LoadScene("Main Menu", 0, false, false);
         }
+    }
+
+    public override void OnLeftRoom()
+    {
+        SceneManager.LoadScene("Lobby");
+    }
+
+
+    public override void OnDisconnected(DisconnectCause cause)
+    {
+        SceneManager.LoadScene("Main Menu");
+        Debug.Log("Disconnected: " + cause.ToString());
     }
 }
