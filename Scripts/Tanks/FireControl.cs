@@ -2,11 +2,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
-using Photon.Pun.UtilityScripts;
+using Photon.Realtime;
+using ExitGames.Client.Photon;
+using PhotonHashtable = ExitGames.Client.Photon.Hashtable;
 
-public class FireControl : MonoBehaviour
+public class FireControl : MonoBehaviourPun
 {
-    [SerializeField] PhotonView PV;
     [SerializeField] PlayerControl playerControl;
 
     [SerializeField] Transform barrel;
@@ -51,13 +52,8 @@ public class FireControl : MonoBehaviour
             {
                 DataManager.playerData.shots++;
             }
-            
-            InstantiateBullet(spawnPoint.position, spawnPoint.rotation);
 
-            if (!PhotonNetwork.OfflineMode && !GameManager.autoPlay)
-            {
-                PV.RPC("InstantiateBullet", RpcTarget.Others, new object[] { spawnPoint.position, spawnPoint.rotation });
-            }
+            InstantiateBullet(spawnPoint.position, spawnPoint.rotation);
 
             yield return new WaitForSeconds(Random.Range(fireCooldown[0], fireCooldown[1]));
 
@@ -71,17 +67,23 @@ public class FireControl : MonoBehaviour
     }
 
     [PunRPC]
-    Transform InstantiateBullet(Vector3 position, Quaternion rotation)
+    public void MultiplayerInstantiateBullet(Vector3 position, Quaternion rotation, int bulletID)
     {
         Transform bulletClone = Instantiate(bullet, position, rotation, bulletParent);
         firedBullets.Add(bulletClone);
         Instantiate(shootEffect, position, rotation, bulletParent);
-        StartCoroutine(InitializeBullet(bulletClone));
-
-        return bulletClone;
+        StartCoroutine(InitializeBullet(bulletClone, bulletID));
     }
 
-    IEnumerator InitializeBullet(Transform bullet)
+    void InstantiateBullet(Vector3 position, Quaternion rotation)
+    {
+        Transform bulletClone = Instantiate(bullet, position, rotation, bulletParent);
+        firedBullets.Add(bulletClone);
+        Instantiate(shootEffect, position, rotation, bulletParent);
+        StartCoroutine(InitializeBullet(bulletClone, bulletClone.GetInstanceID()));
+    }
+
+    IEnumerator InitializeBullet(Transform bullet, int ID)
     {
         bullet.gameObject.SetActive(false);
         yield return new WaitUntil(() => bullet.GetComponent<BulletBehaviour>() != null);
@@ -91,12 +93,21 @@ public class FireControl : MonoBehaviour
 
             BulletBehaviour bulletBehaviour = bullet.GetComponent<BulletBehaviour>();
             bulletBehaviour.owner = transform;
-            bulletBehaviour.ownerPV = PV;
+            bulletBehaviour.ownerPV = photonView;
             bulletBehaviour.speed = speed;
             bulletBehaviour.pierceLevel = pierceLevel;
             bulletBehaviour.pierceLimit = pierceLimit;
             bulletBehaviour.ricochetLevel = ricochetLevel;
             bulletBehaviour.ResetVelocity();
+            if (!PhotonNetwork.OfflineMode && !GameManager.autoPlay)
+            {
+                bulletBehaviour.bulletID = ID;
+
+                if (photonView.IsMine)
+                {
+                    photonView.RPC("MultiplayerInstantiateBullet", RpcTarget.Others, new object[] { spawnPoint.position, spawnPoint.rotation, ID });
+                }
+            }
         }
         else
         {

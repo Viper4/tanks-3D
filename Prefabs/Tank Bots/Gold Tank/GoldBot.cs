@@ -177,7 +177,7 @@ public class GoldBot : MonoBehaviour
             bulletRicochet.ScanArea(turret.position);
             if (!mineControl.laidMines.Contains(targetSystem.currentTarget.parent)) // Target isn't a mine
             {
-                targetSystem.chooseTarget = GameManager.gameManager != null && (!PhotonNetwork.OfflineMode || GameManager.autoPlay);
+                targetSystem.chooseTarget = GameManager.Instance != null && (!PhotonNetwork.OfflineMode || GameManager.autoPlay);
                 bulletRicochet.CalculateBulletRicochets(barrel, targetSystem.currentTarget.position);
 
                 Collider[] allMines = Physics.OverlapSphere(turret.position, 50, mineLayerMask);

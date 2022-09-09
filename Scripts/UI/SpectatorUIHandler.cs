@@ -1,38 +1,34 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using Photon.Pun;
 
 public class SpectatorUIHandler : MonoBehaviour
 {
     [SerializeField] SpectatorControl spectatorControl;
-    [SerializeField] ClientManager clientManager;
     BaseUIHandler baseUIHandler;
 
     private void Start()
     {
         baseUIHandler = GetComponent<BaseUIHandler>();
 
-        baseUIHandler.UIElements["PauseMenu"].Find("LabelBackground").GetChild(0).GetComponent<Text>().text = "Paused\n " + PhotonNetwork.CurrentRoom.Name;
-
-        if (clientManager.photonView.IsMine)
+        if (PhotonNetwork.OfflineMode)
         {
-            GameObject[] allUIs = GameObject.FindGameObjectsWithTag("PlayerUI");
-            foreach (GameObject UI in allUIs)
-            {
-                if (UI != gameObject)
-                {
-                    UI.SetActive(false);
-                }
-            }
+            baseUIHandler.UIElements["PauseMenu"].Find("LabelBackground").GetChild(0).GetComponent<Text>().text = "Paused\n" + GameManager.Instance.currentScene.name;
         }
         else
         {
-            Destroy(gameObject);
+            if (((RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["RoomSettings"]).primaryMode != "Co-Op")
+            {
+                baseUIHandler.UIElements["PauseMenu"].Find("LabelBackground").GetChild(0).GetComponent<Text>().text = "Paused\n" + PhotonNetwork.CurrentRoom.Name;
+            }
+            else
+            {
+                baseUIHandler.UIElements["PauseMenu"].Find("LabelBackground").GetChild(0).GetComponent<Text>().text = "Paused\n" + PhotonNetwork.CurrentRoom.Name + "\n" + GameManager.Instance.currentScene.name;
+            }
         }
     }
 
-    private void LateUpdate()
+    private void Update()
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
@@ -51,6 +47,9 @@ public class SpectatorUIHandler : MonoBehaviour
     {
         baseUIHandler.UIElements["PauseMenu"].gameObject.SetActive(false);
         spectatorControl.Paused = false;
+
+        Cursor.visible = false;
+        Cursor.lockState = CursorLockMode.Locked;
     }
 
     public void Pause()
@@ -65,6 +64,5 @@ public class SpectatorUIHandler : MonoBehaviour
     public void Leave()
     {
         PhotonNetwork.LeaveRoom();
-        SceneManager.LoadScene("Lobby");
     }
 }

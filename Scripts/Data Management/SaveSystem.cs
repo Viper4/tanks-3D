@@ -85,15 +85,19 @@ public static class SaveSystem
         }
     }
 
-    public static void ResetPlayerData(string fileName)
+    public static PlayerData ResetPlayerData(string fileName)
     {
         PlayerData playerData = LoadPlayerData(fileName);
         float bestTime = playerData.bestTime;
+        int sceneIndex = playerData.sceneIndex;
 
         playerData = defaultPlayerData;
         playerData.bestTime = bestTime;
+        playerData.sceneIndex = sceneIndex;
 
         playerData.SavePlayerData(fileName, false);
+
+        return playerData;
     }
 
     public static void SavePlayerData(this PlayerData fromPlayerData, string fileName, bool compareTime)
@@ -154,34 +158,42 @@ public static class SaveSystem
             {
                 PlayerSettings loadedSettings = JsonConvert.DeserializeObject<PlayerSettings>(json);
 
-                string crosshairFilePath = CROSSHAIR_FOLDER + loadedSettings.crosshairFileName + ".png";
-                crosshair = CustomMath.ImageToSprite(crosshairFilePath);
-                Transform playerUI = player.Find("Player UI");
-                if (playerUI != null)
+                if (player != null)
                 {
-                    BaseUIHandler baseUIHandler = playerUI.GetComponent<BaseUIHandler>();
-                    if (baseUIHandler != null && baseUIHandler.UIElements.ContainsKey("InGame"))
+                    if (player.TryGetComponent<SpectatorControl>(out var spectatorControl))
                     {
-                        Transform reticle = baseUIHandler.UIElements["InGame"].Find("Reticle");
-                        reticle.GetComponent<CrosshairManager>().UpdateReticleSprite(crosshair, loadedSettings.crosshairColorIndex, loadedSettings.crosshairScale);
+                        spectatorControl.sensitivity = loadedSettings.sensitivity;
+                        spectatorControl.rotationSmoothTime = loadedSettings.cameraSmoothing;
                     }
-                }
-
-                Transform camera = player.Find("Camera");
-                if (camera != null)
-                {
-                    CameraControl cameraS = camera.GetComponent<CameraControl>();
-                    MultiplayerCameraControl cameraM = camera.GetComponent<MultiplayerCameraControl>();
-
-                    if (cameraS != null)
+                    else
                     {
-                        cameraS.sensitivity = loadedSettings.sensitivity;
-                        cameraS.rotationSmoothTime = loadedSettings.cameraSmoothing;
-                    }
-                    else if (cameraM != null)
-                    {
-                        cameraM.sensitivity = loadedSettings.sensitivity;
-                        cameraM.rotationSmoothTime = loadedSettings.cameraSmoothing;
+                        string crosshairFilePath = CROSSHAIR_FOLDER + loadedSettings.crosshairFileName + ".png";
+                        crosshair = CustomMath.ImageToSprite(crosshairFilePath);
+                        Transform playerUI = player.Find("Player UI");
+                        if (playerUI != null)
+                        {
+                            BaseUIHandler baseUIHandler = playerUI.GetComponent<BaseUIHandler>();
+                            if (baseUIHandler != null && baseUIHandler.UIElements.ContainsKey("InGame"))
+                            {
+                                Transform reticle = baseUIHandler.UIElements["InGame"].Find("Reticle");
+                                reticle.GetComponent<CrosshairManager>().UpdateReticleSprite(crosshair, loadedSettings.crosshairColorIndex, loadedSettings.crosshairScale);
+                            }
+                        }
+
+                        Transform camera = player.Find("Camera");
+                        if (camera != null)
+                        {
+                            if (camera.TryGetComponent<CameraControl>(out var cameraS))
+                            {
+                                cameraS.sensitivity = loadedSettings.sensitivity;
+                                cameraS.rotationSmoothTime = loadedSettings.cameraSmoothing;
+                            }
+                            else if (camera.TryGetComponent<MultiplayerCameraControl>(out var cameraM))
+                            {
+                                cameraM.sensitivity = loadedSettings.sensitivity;
+                                cameraM.rotationSmoothTime = loadedSettings.cameraSmoothing;
+                            }
+                        }
                     }
                 }
 

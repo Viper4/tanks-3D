@@ -122,8 +122,9 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
             ["RoomSettings"] = DataManager.roomSettings
         };
         PhotonNetwork.CurrentRoom.SetCustomProperties(roomProperties);
-        PhotonNetwork.RaiseEvent(LoadSceneCode, null, RaiseEventOptions.Default, SendOptions.SendUnreliable);
+        DataManager.playerData = SaveSystem.ResetPlayerData("PlayerData");
 
+        PhotonNetwork.RaiseEvent(LoadSceneCode, null, RaiseEventOptions.Default, SendOptions.SendUnreliable);
         PhotonNetwork.LoadLevel(DataManager.roomSettings.map);
     }
 
@@ -327,6 +328,7 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
         }
         else if (eventData.Code == LoadSceneCode)
         {
+            DataManager.playerData = SaveSystem.ResetPlayerData("PlayerData");
             PhotonNetwork.LoadLevel(((RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["RoomSettings"]).map);
         }
     }
@@ -349,7 +351,7 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
     public override void OnMasterClientSwitched(Player newMasterClient)
     {
         Debug.Log("Switched master client to " + newMasterClient.NickName);
-        if (PhotonNetwork.LocalPlayer == newMasterClient)
+        if (PhotonNetwork.IsMasterClient)
         {
             foreach (GameObject UIElement in ownerElements)
             {

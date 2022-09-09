@@ -20,7 +20,7 @@ public class TargetSystem : MonoBehaviour
         turret = transform.Find("Turret");
         barrel = transform.Find("Barrel");
 
-        if (GameManager.gameManager != null)
+        if (GameManager.Instance != null)
         {
             chooseTarget = !PhotonNetwork.OfflineMode || GameManager.autoPlay;
         }

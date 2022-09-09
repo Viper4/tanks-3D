@@ -17,7 +17,6 @@ public class PlayerUIHandler : MonoBehaviour
         {
             if (playerControl.photonView.IsMine)
             {
-
                 if (((RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["RoomSettings"]).primaryMode != "Co-Op")
                 {
                     baseUIHandler.UIElements["PauseMenu"].Find("LabelBackground").GetChild(0).GetComponent<Text>().text = "Paused\n" + PhotonNetwork.CurrentRoom.Name;
@@ -25,30 +24,15 @@ public class PlayerUIHandler : MonoBehaviour
                 }
                 else
                 {
-                    string sceneName = SceneManager.GetActiveScene().name;
-                    baseUIHandler.UIElements["PauseMenu"].Find("LabelBackground").GetChild(0).GetComponent<Text>().text = "Paused\n" + PhotonNetwork.CurrentRoom.Name + "\n" + sceneName;
-                    baseUIHandler.UIElements["HUD"].Find("Level Background").GetChild(0).GetComponent<Text>().text = PhotonNetwork.CurrentRoom.Name + " | " + sceneName;
+                    baseUIHandler.UIElements["PauseMenu"].Find("LabelBackground").GetChild(0).GetComponent<Text>().text = "Paused\n" + PhotonNetwork.CurrentRoom.Name + "\n" + GameManager.Instance.currentScene.name;
+                    baseUIHandler.UIElements["HUD"].Find("Level Background").GetChild(0).GetComponent<Text>().text = PhotonNetwork.CurrentRoom.Name + " | " + GameManager.Instance.currentScene.name;
                 }
-
-                /*GameObject[] allUIs = GameObject.FindGameObjectsWithTag("PlayerUI");
-                foreach (GameObject UI in allUIs)
-                {
-                    if (UI != gameObject)
-                    {
-                        UI.SetActive(false);
-                    }
-                }*/
-            }
-            else
-            {
-                Destroy(gameObject);
             }
         }
         else
         {
-            string sceneName = SceneManager.GetActiveScene().name;
-            baseUIHandler.UIElements["HUD"].Find("Level Background").GetChild(0).GetComponent<Text>().text = sceneName;
-            baseUIHandler.UIElements["PauseMenu"].Find("LabelBackground").GetChild(0).GetComponent<Text>().text = "Game Paused\n " + sceneName;
+            baseUIHandler.UIElements["HUD"].Find("Level Background").GetChild(0).GetComponent<Text>().text = GameManager.Instance.currentScene.name;
+            baseUIHandler.UIElements["PauseMenu"].Find("LabelBackground").GetChild(0).GetComponent<Text>().text = "Game Paused\n " + GameManager.Instance.currentScene.name;
         }
     }
 
@@ -142,7 +126,7 @@ public class PlayerUIHandler : MonoBehaviour
         }
         else
         {
-            if (!GameManager.gameManager.loadingScreen.gameObject.activeSelf)
+            if (!GameManager.Instance.loadingScreen.gameObject.activeSelf)
             {
                 Time.timeScale = 1;
                 baseUIHandler.UIElements["InGame"].gameObject.SetActive(true);

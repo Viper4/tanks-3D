@@ -550,7 +550,7 @@ namespace MyUnityAddons
             {
                 get
                 {
-                    return PhotonNetwork.PlayerList.Where((x) => x.GetPhotonTeam() != null && x.GetPhotonTeam().Name != "Spectator").ToArray();
+                    return PhotonNetwork.PlayerList.Where((x) => x.GetPhotonTeam() != null && x.GetPhotonTeam().Name != "Spectators").ToArray();
                 }
             }
 
@@ -558,8 +558,27 @@ namespace MyUnityAddons
             {
                 get
                 {
-                    return PhotonNetwork.PlayerList.Where((x) => x.GetPhotonTeam() != null && x.GetPhotonTeam().Name == "Spectator").ToArray();
+                    return PhotonNetwork.PlayerList.Where((x) => x.GetPhotonTeam() != null && x.GetPhotonTeam().Name == "Spectators").ToArray();
                 }
+            }
+
+            public static List<PhotonView> AllPhotonViews(this Player player)
+            {
+                if (player != null)
+                {
+                    List<PhotonView> list = new List<PhotonView>();
+                    int actorNr = player.ActorNumber;
+                    for (int viewId = actorNr * PhotonNetwork.MAX_VIEW_IDS + 1; viewId < (actorNr + 1) * PhotonNetwork.MAX_VIEW_IDS; viewId++)
+                    {
+                        PhotonView photonView = PhotonView.Find(viewId);
+                        if (photonView)
+                        {
+                            list.Add(photonView);
+                        }
+                    }
+                    return list;
+                }
+                return null;
             }
 
             public static PhotonView FindPhotonView(this Player player)

@@ -6,6 +6,7 @@ using Photon.Pun;
 using Photon.Realtime;
 using TMPro;
 using PhotonHashtable = ExitGames.Client.Photon.Hashtable;
+using MyUnityAddons.CustomPhoton;
 
 public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
 {
@@ -27,6 +28,11 @@ public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
                 IsVisible = DataManager.roomSettings.isPublic,
             };
             PhotonNetwork.CreateRoom(createInput.text, roomOptions);
+            PhotonHashtable playerProperties = new PhotonHashtable()
+            {
+                { "New", true }
+            };
+            PhotonNetwork.LocalPlayer.SetCustomProperties(playerProperties);
         }
     } 
     
@@ -35,6 +41,11 @@ public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
         if (JoinInputIsValid() && UsernameInputIsValid())
         {
             PhotonNetwork.JoinRoom(joinInput.text);
+            PhotonHashtable playerProperties = new PhotonHashtable()
+            {
+                { "New", true }
+            };
+            PhotonNetwork.LocalPlayer.SetCustomProperties(playerProperties);
         }
     }
 
@@ -103,6 +114,7 @@ public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
             }
             else
             {
+                Debug.Log(((RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["RoomSettings"]).map);
                 PhotonNetwork.LoadLevel(((RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["RoomSettings"]).map);
             }
         }

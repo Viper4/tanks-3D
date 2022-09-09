@@ -16,26 +16,49 @@ public class PhotonTankView : MonoBehaviourPunCallbacks, IPunObservable
     BaseTankLogic baseTankLogic;
 
     [SerializeField] float teleportDistance = 10;
-    [SerializeField] float rotateTowardsSpeed = 90;
+    [SerializeField] float rotateTowardsSpeed = 180;
+    [SerializeField] float setRotationMinAngle = 90;
+
+    Vector3 targetPosition;
+    Quaternion targetTankRotation;
+    Vector3 targetVelocity;
+    Quaternion targetTurretRotation;
+    Quaternion targetBarrelRotation;
 
     private void Start()
     {
+        targetPosition = tankOrigin.position;
+        targetTankRotation = tankOrigin.rotation;
+        targetVelocity = Vector3.zero;
+        targetTurretRotation = turret.rotation;
+        targetBarrelRotation = barrel.rotation;
         if (!player && !GameManager.autoPlay)
         {
+            baseTankLogic = GetComponent<BaseTankLogic>();
             if (PhotonNetwork.IsMasterClient)
             {
                 photonView.RequestOwnership();
             }
             else
             {
-                baseTankLogic = GetComponent<BaseTankLogic>();
-
                 baseTankLogic.disabled = true;
                 foreach (Behaviour component in ownerComponents)
                 {
                     component.enabled = false;
                 }
             }
+        }
+    }
+
+    private void Update()
+    {
+        if (!GameManager.autoPlay && !photonView.IsMine)
+        {
+            tankOrigin.position = Vector3.MoveTowards(tankOrigin.position, targetPosition, targetVelocity.magnitude * Time.deltaTime);
+            rb.velocity = targetVelocity;
+            tankOrigin.rotation = Quaternion.RotateTowards(tankOrigin.rotation, targetTankRotation, rotateTowardsSpeed * Time.deltaTime);
+            turret.rotation = Quaternion.RotateTowards(turret.rotation, targetTurretRotation, rotateTowardsSpeed * Time.deltaTime);
+            barrel.rotation = Quaternion.RotateTowards(barrel.rotation, targetBarrelRotation, rotateTowardsSpeed * Time.deltaTime);
         }
     }
 
@@ -50,31 +73,37 @@ public class PhotonTankView : MonoBehaviourPunCallbacks, IPunObservable
                 stream.SendNext(rb.velocity);
                 stream.SendNext(turret.rotation);
                 stream.SendNext(barrel.rotation);
-
             }
             else if (stream.IsReading)
             {
-                Vector3 targetPosition = (Vector3)stream.ReceiveNext();
-                tankOrigin.rotation = Quaternion.RotateTowards(tankOrigin.rotation, (Quaternion)stream.ReceiveNext(), rotateTowardsSpeed);
-                Vector3 targetVelocity = (Vector3)stream.ReceiveNext();
-                if (CustomMath.SqrDistance(targetPosition, tankOrigin.position) < teleportDistance * teleportDistance)
-                {
-                    tankOrigin.position = Vector3.MoveTowards(tankOrigin.position, targetPosition, targetVelocity.magnitude);
-                }
-                else
+                targetPosition = (Vector3)stream.ReceiveNext();
+                if (CustomMath.SqrDistance(targetPosition, tankOrigin.position) > teleportDistance * teleportDistance)
                 {
                     tankOrigin.position = targetPosition;
                 }
-                rb.velocity = targetVelocity;
-                turret.rotation = Quaternion.RotateTowards(turret.rotation, (Quaternion)stream.ReceiveNext(), rotateTowardsSpeed);
-                barrel.rotation = Quaternion.RotateTowards(barrel.rotation, (Quaternion)stream.ReceiveNext(), rotateTowardsSpeed);
+                targetTankRotation = (Quaternion)stream.ReceiveNext();
+                if (Quaternion.Angle(targetTankRotation, tankOrigin.rotation) > setRotationMinAngle)
+                {
+                    tankOrigin.rotation = targetTankRotation;
+                }
+                targetVelocity = (Vector3)stream.ReceiveNext();
+                targetTurretRotation = (Quaternion)stream.ReceiveNext();
+                if (Quaternion.Angle(targetTurretRotation, turret.rotation) > setRotationMinAngle)
+                {
+                    turret.rotation = targetTurretRotation;
+                }
+                targetBarrelRotation = (Quaternion)stream.ReceiveNext();
+                if (Quaternion.Angle(targetBarrelRotation, barrel.rotation) > setRotationMinAngle)
+                {
+                    barrel.rotation = targetBarrelRotation;
+                }
             }
         }
     }
 
     public override void OnMasterClientSwitched(Player newMasterClient)
     {
-        if (PhotonNetwork.IsMasterClient)
+        if (!player && !GameManager.autoPlay && PhotonNetwork.IsMasterClient)
         {
             photonView.RequestOwnership();
             baseTankLogic.disabled = false;

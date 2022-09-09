@@ -18,7 +18,7 @@ public class LeaderboardHandler : MonoBehaviour
     // Update is called once per frame
     void LateUpdate()
     {
-        if (clientManager.photonView.IsMine)
+        if (clientManager == null || clientManager.photonView.IsMine)
         {
             if (Input.GetKeyDown(DataManager.playerSettings.keyBinds["Leaderboard"]))
             {
@@ -58,14 +58,10 @@ public class LeaderboardHandler : MonoBehaviour
             leaderboard[player.NickName] = leaderboardData;
         }
 
-        List<KeyValuePair<string, LeaderboardData>> orderedDictionary = leaderboard.ToList();
-
-        orderedDictionary.Sort((pair1, pair2) => pair1.Value.kills.CompareTo(pair2.Value.kills));
-
-        for (int i = 0; i < orderedDictionary.Count; i++)
+        foreach (KeyValuePair<string, LeaderboardData> slot in leaderboard.OrderByDescending((x) => x.Value.kills))
         {
-            string username = orderedDictionary[i].Key;
-            LeaderboardData leaderboardData = orderedDictionary[i].Value;
+            string username = slot.Key;
+            LeaderboardData leaderboardData = slot.Value;
             GameObject newPlayerSlot = leaderboardData.teamName switch
             {
                 "Team 1" => Instantiate(teamPlayerSlots[0], playerList),

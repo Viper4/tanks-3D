@@ -4,8 +4,6 @@ using Photon.Pun;
 using PhotonHashtable = ExitGames.Client.Photon.Hashtable;
 using ExitGames.Client.Photon;
 using Photon.Realtime;
-using Photon.Pun.UtilityScripts;
-using Hashtable = ExitGames.Client.Photon.Hashtable;
 
 public class PlayerControl : MonoBehaviourPunCallbacks
 {
@@ -112,12 +110,12 @@ public class PlayerControl : MonoBehaviourPunCallbacks
                     if (Input.GetKeyDown(KeyCode.N))
                     {
                         Debug.Log("Cheat Next Level");
-                        GameManager.gameManager.LoadNextScene();
+                        GameManager.Instance.LoadNextScene();
                     }
                     else if (Input.GetKeyDown(KeyCode.R))
                     {
                         Debug.Log("Cheat Reload");
-                        GameManager.gameManager.LoadScene(-1);
+                        GameManager.Instance.LoadScene(-1);
                     }
                     else if (Input.GetKeyDown(KeyCode.B))
                     {
@@ -186,63 +184,15 @@ public class PlayerControl : MonoBehaviourPunCallbacks
         {
             transform.SetParent(null);
 
-            if (clientManager.photonView.IsMine)
+            if (photonView.IsMine)
             {
                 DataManager.playerData.deaths++;
-
                 PhotonHashtable playerProperties = new PhotonHashtable();
-                PhotonHashtable roomProperties = new PhotonHashtable();
+                playerProperties.Add("Deaths", DataManager.playerData.deaths);
+                PhotonNetwork.LocalPlayer.SetCustomProperties(playerProperties);
 
-                RoomSettings roomSettings = (RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["RoomSettings"];
-
-                switch (roomSettings.primaryMode)
-                {
-                    case "Co-Op":
-                        int totalLives = (int)PhotonNetwork.CurrentRoom.CustomProperties["Total Lives"];
-                        totalLives--;
-                        roomProperties.Add("Total Lives", totalLives);
-
-                        PhotonNetwork.CurrentRoom.SetCustomProperties(roomProperties);
-
-                        if (FindObjectOfType<PlayerManager>().transform.childCount < 1)
-                        {
-                            GameManager.frozen = true;
-                            if (totalLives > 0)
-                            {
-                                GameManager.gameManager.PhotonLoadScene(-1, 3, true, false);
-                                Hashtable parameters = new Hashtable
-                                {
-                                    { "sceneIndex", -1 },
-                                    { "delay", 3 },
-                                    { "save", true },
-                                    { "waitWhilePaused", false }
-                                };
-                                PhotonNetwork.RaiseEvent(GameManager.gameManager.LoadSceneEventCode, parameters, RaiseEventOptions.Default, SendOptions.SendUnreliable);
-                            }
-                            else
-                            {
-                                GameManager.gameManager.PhotonLoadScene("End Scene", 3, true, false);
-                                Hashtable parameters = new Hashtable
-                                {
-                                    { "sceneName", "End Scene" },
-                                    { "delay", 3 },
-                                    { "save", true },
-                                    { "waitWhilePaused", false }
-                                };
-                                PhotonNetwork.RaiseEvent(GameManager.gameManager.LoadSceneEventCode, parameters, RaiseEventOptions.Default, SendOptions.SendUnreliable);
-                            }
-                        }
-                        break;
-                    default:
-                        if (!respawning)
-                        {
-                            playerProperties.Add("Deaths", DataManager.playerData.deaths);
-                            PhotonNetwork.LocalPlayer.SetCustomProperties(playerProperties);
-
-                            StartCoroutine(MultiplayerRespawn());
-                        }
-                        break;
-                }
+                PlayerManager playerManager = FindObjectOfType<PlayerManager>();
+                playerManager.OnPlayerDeath(tankOrigin);
             }
         }
         else
@@ -252,40 +202,12 @@ public class PlayerControl : MonoBehaviourPunCallbacks
 
             if (DataManager.playerData.lives > 0)
             {
-                GameManager.gameManager.LoadScene(-1, 3, true);
+                GameManager.Instance.LoadScene(-1, 3, true);
             }
             else
             {
-                GameManager.gameManager.LoadScene("End Scene", 3, true);
+                GameManager.Instance.LoadScene("End Scene", 3, true);
             }
         }
-    }
-     
-    IEnumerator MultiplayerRespawn()
-    {
-        respawning = true;
-        yield return new WaitForSeconds(3);
-
-        Dead = false;
-
-        tankOrigin.localPosition = Vector3.zero;
-        tankOrigin.localRotation = Quaternion.identity;
-        FindObjectOfType<PlayerManager>().RespawnPlayer(tankOrigin);
-
-        clientManager.photonView.RPC("ReactivatePlayer", RpcTarget.All);
-
-        respawning = false;
-    }
-    
-    [PunRPC]
-    void ReactivatePlayer()
-    {
-        tankOrigin.GetComponent<CapsuleCollider>().enabled = true;
-
-        tankOrigin.Find("Body").gameObject.SetActive(true);
-        tankOrigin.Find("Turret").gameObject.SetActive(true);
-        tankOrigin.Find("Barrel").gameObject.SetActive(true);
-
-        tankOrigin.Find("TrackMarks").GetComponent<PhotonView>().RPC("ResetTrails", RpcTarget.All);
     }
 }

@@ -1,11 +1,15 @@
+using ExitGames.Client.Photon;
 using Photon.Pun;
+using Photon.Realtime;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using PhotonHashtable = ExitGames.Client.Photon.Hashtable;
 
-public class BulletBehaviour : MonoBehaviour
+public class BulletBehaviour : MonoBehaviourPunCallbacks
 {
+    public int bulletID;
+
     Rigidbody rb;
 
     public Transform owner { get; set; }
@@ -38,6 +42,53 @@ public class BulletBehaviour : MonoBehaviour
         if (GameManager.frozen)
         {
             rb.constraints = RigidbodyConstraints.FreezeAll;
+        }
+    }
+
+    private void OnEnable()
+    {
+        base.OnEnable();
+        if (!GameManager.autoPlay)
+        {
+            PhotonNetwork.NetworkingClient.EventReceived += OnEvent;
+        }
+    }
+
+    private void OnDisable()
+    {
+        base.OnDisable();
+        if (!GameManager.autoPlay)
+        {
+            PhotonNetwork.NetworkingClient.EventReceived -= OnEvent;
+        }
+    }
+
+    void OnEvent(EventData eventData)
+    {
+        if (eventData.Code == GameManager.Instance.SetIDCode)
+        {
+            PhotonHashtable parameters = (PhotonHashtable)eventData.Parameters[ParameterCode.Data];
+            Debug.Log("Try set ID");
+            if (ownerPV != null && ownerPV.ViewID == (int)parameters["ViewID"])
+            {
+                Debug.Log("Set ID: " + (int)parameters["ID"]);
+                bulletID = (int)parameters["ID"];
+            }
+        }
+        else if (eventData.Code == GameManager.Instance.DestroyCode)
+        {
+            PhotonHashtable parameters = (PhotonHashtable)eventData.Parameters[ParameterCode.Data];
+            Debug.Log("Try destroy");
+            if ((int)parameters["ID"] == bulletID)
+            {
+                Debug.Log("Destroyed: " + (int)parameters["ID"]);
+                SubtractBulletsFired();
+                if (!(bool)parameters["Safe"])
+                {
+                    Instantiate(explosionEffect, transform.position, Quaternion.identity);
+                }
+                Destroy(gameObject);
+            }
         }
     }
 
@@ -270,6 +321,12 @@ public class BulletBehaviour : MonoBehaviour
     {
         SubtractBulletsFired();
 
+        PhotonHashtable parameters = new PhotonHashtable
+        {
+            { "ID", bulletID },
+            { "Safe", false },
+        };
+        PhotonNetwork.RaiseEvent(GameManager.Instance.DestroyCode, parameters, RaiseEventOptions.Default, SendOptions.SendUnreliable);
         Instantiate(explosionEffect, transform.position, Quaternion.identity);
         Destroy(gameObject);
     }
@@ -278,6 +335,12 @@ public class BulletBehaviour : MonoBehaviour
     {
         SubtractBulletsFired();
 
+        PhotonHashtable parameters = new PhotonHashtable
+        {
+            { "ID", bulletID },
+            { "Safe", true },
+        };
+        PhotonNetwork.RaiseEvent(GameManager.Instance.DestroyCode, parameters, RaiseEventOptions.Default, SendOptions.SendUnreliable);
         Destroy(gameObject);
     }
 }

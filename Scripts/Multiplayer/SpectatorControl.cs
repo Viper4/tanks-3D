@@ -1,15 +1,9 @@
-using Photon.Pun;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using MyUnityAddons.CustomPhoton;
+using Photon.Realtime;
 
 public class SpectatorControl : MonoBehaviour
 {
-    [SerializeField] PhotonView PV;
-    [SerializeField] DataManager dataSystem;
-
-    [SerializeField] Camera myCamera;
     [SerializeField] Rigidbody RB;
 
     public float sensitivity = 15;
@@ -23,7 +17,7 @@ public class SpectatorControl : MonoBehaviour
     [SerializeField] float movementSpeed = 6;
     [SerializeField] float speedLimit = 100;
 
-    [SerializeField] float rotationSmoothTime = 0.1f;
+    public float rotationSmoothTime = 0.1f;
     Vector3 rotationSmoothVelocity;
     Vector3 currentRotation;
 
@@ -32,80 +26,118 @@ public class SpectatorControl : MonoBehaviour
 
     public bool Paused { get; set; }
 
-    // Update is called once per frame
-    void LateUpdate()
+    private void Start()
     {
-        if (PV.IsMine)
+        currentRotation = transform.eulerAngles;
+        Debug.Log(currentRotation);
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        if (!Paused)
         {
-            if (!Paused)
+            // Updating every username to rotate to this camera for this client
+            UsernameSystem[] allUsernames = FindObjectsOfType<UsernameSystem>();
+            foreach (UsernameSystem username in allUsernames)
             {
-                Cursor.visible = false;
-                Cursor.lockState = CursorLockMode.Locked;
-                float zoomRate = Input.GetKey(KeyCode.LeftShift) ? 0.5f : 5f;
+                username.UpdateTextMeshTo(transform, false);
+            }
 
-                Vector3 inputDir = new Vector3(GetInputAxis("x"), GetInputAxis("y"), GetInputAxis("z")).normalized;
+            Cursor.visible = false;
+            Cursor.lockState = CursorLockMode.Locked;
+            float zoomRate = Input.GetKey(KeyCode.LeftShift) ? 0.5f : 5f;
 
-                float targetSpeed = movementSpeed / 2 * inputDir.magnitude;
+            Vector3 inputDir = new Vector3(GetInputAxis("x"), GetInputAxis("y"), GetInputAxis("z")).normalized;
 
-                if (Input.GetMouseButtonDown(0) && CustomNetworkHandling.NonSpectatorList.Length != 0)
+            float targetSpeed = movementSpeed / 2 * inputDir.magnitude;
+
+            Player[] nonSpectatorList = CustomNetworkHandling.NonSpectatorList;
+            if (Input.GetMouseButtonDown(0) && nonSpectatorList.Length != 0)
+            {
+                if (target != null && target.TryGetComponent<MeshRenderer>(out var oldMeshRenderer))
                 {
-                    targetIndex = targetIndex + 1 > CustomNetworkHandling.NonSpectatorList.Length ? 0 : targetIndex + 1;
-                    target = CustomNetworkHandling.FindPhotonView(CustomNetworkHandling.NonSpectatorList[targetIndex]).transform;
+                    oldMeshRenderer.enabled = true;
                 }
-
-                if (targetIndex == -1)
+                targetIndex++;
+                if (targetIndex > nonSpectatorList.Length - 1)
                 {
-                    // Speed up/down with scroll
-                    if (Input.GetAxisRaw("Mouse ScrollWheel") < 0)
-                    {
-                        movementSpeed = Mathf.Clamp(movementSpeed - zoomRate, 0, speedLimit);
-                    }
-                    else if (Input.GetAxisRaw("Mouse ScrollWheel") > 0)
-                    {
-                        movementSpeed = Mathf.Clamp(movementSpeed + zoomRate, 0, speedLimit);
-                    }
-
-                    MouseCameraRotation();
-
-                    target = transform;
-                    dstFromTarget = 0;
+                    targetIndex = -1;
                 }
                 else
                 {
-                    if (targetSpeed != 0)
+                    target = nonSpectatorList[targetIndex].FindPhotonView().transform.Find("Tank Origin/Barrel");
+                    if (target != null && target.TryGetComponent<MeshRenderer>(out var newMeshRenderer))
                     {
-                        targetIndex = -1;
+                        newMeshRenderer.enabled = false;
                     }
+                }
+            }
 
-                    // Zoom with scroll
-                    if (Input.GetAxisRaw("Mouse ScrollWheel") > 0)
-                    {
-                        dstFromTarget = Mathf.Clamp(dstFromTarget - zoomRate, targetDstLimit.x, targetDstLimit.y);
-                    }
-                    else if (Input.GetAxisRaw("Mouse ScrollWheel") < 0)
-                    {
-                        dstFromTarget = Mathf.Clamp(dstFromTarget + zoomRate, targetDstLimit.x, targetDstLimit.y);
-                    }
-
-                    if (dstFromTarget == 0)
-                    {
-                        myCamera.transform.rotation = target.rotation;
-                    }
-                    else
-                    {
-                        MouseCameraRotation();
-                    }
-
-                    myCamera.transform.position = target.position - myCamera.transform.forward * dstFromTarget;
+            if (targetIndex == -1)
+            {
+                // Speed up/down with scroll
+                if (Input.GetAxisRaw("Mouse ScrollWheel") < 0)
+                {
+                    movementSpeed = Mathf.Clamp(movementSpeed - zoomRate, 0, speedLimit);
+                }
+                else if (Input.GetAxisRaw("Mouse ScrollWheel") > 0)
+                {
+                    movementSpeed = Mathf.Clamp(movementSpeed + zoomRate, 0, speedLimit);
                 }
 
-                Vector3 velocity = targetSpeed * (Quaternion.AngleAxis(myCamera.transform.eulerAngles.y, Vector3.up) * inputDir);
-                RB.velocity = velocity;
+                MouseCameraRotation();
+
+                target = transform;
+                dstFromTarget = 0;
             }
-        }
-        else
-        {
-            Destroy(this);
+            else
+            {
+                if (targetSpeed != 0)
+                {
+                    if (target.TryGetComponent<MeshRenderer>(out var meshRenderer))
+                    {
+                        meshRenderer.enabled = true;
+                    }
+                    targetIndex = -1;
+                }
+
+                // Zoom with scroll
+                if (Input.GetAxisRaw("Mouse ScrollWheel") > 0)
+                {
+                    dstFromTarget = Mathf.Clamp(dstFromTarget - zoomRate, targetDstLimit.x, targetDstLimit.y);
+                    if (dstFromTarget == 0)
+                    {
+                        if (target.TryGetComponent<MeshRenderer>(out var meshRenderer))
+                        {
+                            meshRenderer.enabled = false;
+                        }
+                    }
+                }
+                else if (Input.GetAxisRaw("Mouse ScrollWheel") < 0)
+                {
+                    dstFromTarget = Mathf.Clamp(dstFromTarget + zoomRate, targetDstLimit.x, targetDstLimit.y);
+
+                    if (target.TryGetComponent<MeshRenderer>(out var meshRenderer))
+                    {
+                        meshRenderer.enabled = true;
+                    }
+                }
+
+                if (dstFromTarget == 0)
+                {
+                    transform.rotation = target.rotation;
+                }
+                else
+                {
+                    MouseCameraRotation();
+                }
+
+                transform.position = target.position - transform.forward * dstFromTarget;
+            }
+
+            Vector3 velocity = targetSpeed * (Quaternion.AngleAxis(transform.eulerAngles.y, Vector3.up) * inputDir);
+            RB.velocity = velocity;
         }
     }
 
@@ -160,6 +192,6 @@ public class SpectatorControl : MonoBehaviour
 
         currentRotation = Vector3.SmoothDamp(currentRotation, new Vector3(pitch, yaw), ref rotationSmoothVelocity, rotationSmoothTime);
         // Setting rotation and position of camera on previous params and target and dstFromTarget
-        myCamera.transform.eulerAngles = currentRotation;
+        transform.eulerAngles = currentRotation;
     }
 }

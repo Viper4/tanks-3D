@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
 using UnityEngine.SceneManagement;
+using PhotonHashtable = ExitGames.Client.Photon.Hashtable;
 
 public class ConnectToServer : MonoBehaviourPunCallbacks
 {

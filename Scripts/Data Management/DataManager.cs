@@ -13,6 +13,7 @@ public class DataManager : MonoBehaviourPun
 
     private void Start()
     {
+        playerData = SaveSystem.LoadPlayerData("PlayerData");
         playerSettings = SaveSystem.LoadPlayerSettings("PlayerSettings", transform);
         roomSettings = SaveSystem.LoadRoomSettings(SaveSystem.LatestFileInSaveFolder(false, ".roomsettings"));
 

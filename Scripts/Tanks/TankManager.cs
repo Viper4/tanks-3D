@@ -36,11 +36,11 @@ public class TankManager : MonoBehaviour
                     {
                         if (lastCampaignScene)
                         {
-                            GameManager.gameManager.LoadScene("End Scene", 3, true);
+                            GameManager.Instance.LoadScene("End Scene", 3, true);
                         }
                         else
                         {
-                            GameManager.gameManager.LoadNextScene(3, true);
+                            GameManager.Instance.LoadNextScene(3, true);
                         }
                     }
                     else
@@ -54,12 +54,12 @@ public class TankManager : MonoBehaviour
                             if (lastCampaignScene)
                             {
                                 ((RoomSettings)roomProperties["RoomSettings"]).map = "End Scene";
-                                GameManager.gameManager.PhotonLoadScene("End Scene", 3, true, false);
+                                GameManager.Instance.PhotonLoadScene("End Scene", 3, true, false);
                             }
                             else
                             {
-                                ((RoomSettings)roomProperties["RoomSettings"]).map = SceneManager.GetSceneByBuildIndex(SceneManager.GetActiveScene().buildIndex + 1).name;
-                                GameManager.gameManager.PhotonLoadNextScene(3, true);
+                                ((RoomSettings)roomProperties["RoomSettings"]).map = SceneManager.GetSceneByBuildIndex(GameManager.Instance.currentScene.buildIndex + 1).name;
+                                GameManager.Instance.PhotonLoadNextScene(3, true);
                             }
                             PhotonNetwork.CurrentRoom.SetCustomProperties(roomProperties);
                         }
@@ -67,11 +67,11 @@ public class TankManager : MonoBehaviour
                         {
                             if (lastCampaignScene)
                             {
-                                GameManager.gameManager.PhotonLoadScene("End Scene", 3, true, false);
+                                GameManager.Instance.PhotonLoadScene("End Scene", 3, true, false);
                             }
                             else
                             {
-                                GameManager.gameManager.PhotonLoadNextScene(3, true);
+                                GameManager.Instance.PhotonLoadNextScene(3, true);
                             }
                         }
                     }
@@ -83,7 +83,7 @@ public class TankManager : MonoBehaviour
                 {
                     Time.timeScale = 0.2f;
                     yield return new WaitForSecondsRealtime(4);
-                    StartCoroutine(GameManager.gameManager.ResetAutoPlay(2.5f));
+                    StartCoroutine(GameManager.Instance.ResetAutoPlay(2.5f));
                 }
             }
             checking = false;

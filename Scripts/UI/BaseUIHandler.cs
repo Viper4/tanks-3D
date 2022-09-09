@@ -49,16 +49,12 @@ public class BaseUIHandler : MonoBehaviour
         return false;
     }
 
-    public void LoadNextScene(float delay)
-    {
-        GameManager.gameManager.LoadNextScene(delay);
-    }
 
     public void LoadScene(string sceneName)
     {
         if (PhotonNetwork.OfflineMode)
         {
-            GameManager.gameManager.LoadScene(sceneName, 0, false, false);
+            GameManager.Instance.LoadScene(sceneName, 0, false, false);
         }
         else
         {
@@ -69,21 +65,42 @@ public class BaseUIHandler : MonoBehaviour
                 { "save", false },
                 { "waitWhilePaused", false }
             };
-            PhotonNetwork.RaiseEvent(GameManager.gameManager.LoadSceneEventCode, parameters, Photon.Realtime.RaiseEventOptions.Default, ExitGames.Client.Photon.SendOptions.SendUnreliable);
+            PhotonNetwork.RaiseEvent(GameManager.Instance.LoadSceneEventCode, parameters, Photon.Realtime.RaiseEventOptions.Default, ExitGames.Client.Photon.SendOptions.SendUnreliable);
+            GameManager.Instance.PhotonLoadScene(sceneName, 0, false, false);
+        }
+    }
+
+    public void ResumeGame()
+    {
+        if (DataManager.playerData.sceneIndex != -1)
+        {
+            if (PhotonNetwork.OfflineMode)
+            {
+                GameManager.Instance.LoadScene(DataManager.playerData.sceneIndex, 0, false, false);
+            }
+            else
+            {
+                Hashtable parameters = new Hashtable
+                {
+                    { "sceneIndex", DataManager.playerData.sceneIndex },
+                    { "delay", 0 },
+                    { "save", false },
+                    { "waitWhilePaused", false }
+                };
+                PhotonNetwork.RaiseEvent(GameManager.Instance.LoadSceneEventCode, parameters, Photon.Realtime.RaiseEventOptions.Default, ExitGames.Client.Photon.SendOptions.SendUnreliable);
+                GameManager.Instance.PhotonLoadScene(DataManager.playerData.sceneIndex, 0, false, false);
+            }
         }
     }
 
     public void MainMenu()
     {
-        if (!PhotonNetwork.OfflineMode)
-        {
-            PhotonNetwork.Disconnect();
-        }
+        GameManager.Instance.MainMenu();
     }
 
     public void ResetPlayerData()
     {
-        SaveSystem.ResetPlayerData("PlayerData");
+        DataManager.playerData = SaveSystem.ResetPlayerData("PlayerData");
     }
 
     public void Exit()

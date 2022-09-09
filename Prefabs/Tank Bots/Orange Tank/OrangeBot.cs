@@ -121,7 +121,7 @@ public class OrangeBot : MonoBehaviour
                 if (!targetSystem.TargetVisible())
                 {
                     targetSystem.currentTarget = targetSystem.primaryTarget;
-                    targetSystem.chooseTarget = GameManager.gameManager != null && (!PhotonNetwork.OfflineMode || GameManager.autoPlay);
+                    targetSystem.chooseTarget = GameManager.Instance != null && (!PhotonNetwork.OfflineMode || GameManager.autoPlay);
                 }
             }
 
@@ -182,7 +182,7 @@ public class OrangeBot : MonoBehaviour
         if (targetSystem.currentTarget != targetSystem.primaryTarget)
         {
             targetSystem.currentTarget = targetSystem.primaryTarget;
-            targetSystem.chooseTarget = GameManager.gameManager != null && (!PhotonNetwork.OfflineMode || GameManager.autoPlay);
+            targetSystem.chooseTarget = GameManager.Instance != null && (!PhotonNetwork.OfflineMode || GameManager.autoPlay);
         }
         shooting = false;
         baseTankLogic.stationary = false;

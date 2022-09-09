@@ -504,7 +504,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3c151e8ebee41b84a99874f82a5f7355, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  PV: {fileID: 5959688368386575800}
   playerControl: {fileID: 0}
   barrel: {fileID: 8090730311990742306}
   bullet: {fileID: 439779918157275786, guid: e82b6db23e6ee9f45931e68f161c1c36, type: 3}
@@ -623,6 +622,7 @@ MonoBehaviour:
   overrideRotation: 0
   targetTurretDir: {x: 0, y: 0, z: 0}
   targetTankDir: {x: 0, y: 0, z: 0}
+  disabled: 0
   tankOrigin: {fileID: 5002435551293345147}
 --- !u!114 &-7459745094968870718
 MonoBehaviour:
@@ -694,7 +694,7 @@ MonoBehaviour:
   ObservedComponentsFoldoutOpen: 1
   Group: 0
   prefixField: -1
-  Synchronization: 2
+  Synchronization: 3
   OwnershipTransfer: 0
   observableSearch: 2
   ObservedComponents:
@@ -723,7 +723,8 @@ MonoBehaviour:
   turret: {fileID: 3231089596052948463}
   barrel: {fileID: 8090730311990742306}
   teleportDistance: 10
-  rotateTowardsSpeed: 180
+  rotateTowardsSpeed: 360
+  setRotationMinAngle: 110
 --- !u!1 &5751771638733195478
 GameObject:
   m_ObjectHideFlags: 0

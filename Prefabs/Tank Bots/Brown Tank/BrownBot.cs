@@ -18,6 +18,7 @@ public class BrownBot : MonoBehaviour
     bool shooting = false;
 
     TargetSystem targetSystem;
+    FireControl fireControl;
 
     // Start is called before the first frame Update
     void Start()
@@ -29,6 +30,7 @@ public class BrownBot : MonoBehaviour
         {
             targetSystem = GetComponent<TargetSystem>();
         }
+        fireControl = GetComponent<FireControl>();
 
         StartCoroutine(ChangeScan());
     }
@@ -47,7 +49,7 @@ public class BrownBot : MonoBehaviour
             barrel.localEulerAngles = new Vector3(angleX, currentScanOffset, 0);
 
             // If target is in front of barrel then fire
-            if (!shooting && targetSystem.TargetInLineOfFire(visibilityDistance))
+            if (fireControl.canFire && !shooting && targetSystem.TargetInLineOfFire(visibilityDistance))
             {
                 StartCoroutine(Shoot());
             }
@@ -56,8 +58,10 @@ public class BrownBot : MonoBehaviour
     
     IEnumerator Shoot()
     {
+        shooting = true;
         yield return new WaitForSeconds(Random.Range(fireDelay[0], fireDelay[1]));
-        StartCoroutine(GetComponent<FireControl>().Shoot());
+        StartCoroutine(fireControl.Shoot());
+        shooting = false;
     }
 
     IEnumerator ChangeScan()
