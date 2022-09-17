@@ -31,7 +31,7 @@ public class FireControl : MonoBehaviourPun
 
     private void Start()
     {
-        if (GameManager.autoPlay)
+        if (GameManager.Instance.autoPlay)
         {
             bulletParent = GameObject.Find("ToClear").transform;
         }
@@ -99,7 +99,7 @@ public class FireControl : MonoBehaviourPun
             bulletBehaviour.pierceLimit = pierceLimit;
             bulletBehaviour.ricochetLevel = ricochetLevel;
             bulletBehaviour.ResetVelocity();
-            if (!PhotonNetwork.OfflineMode && !GameManager.autoPlay)
+            if (!PhotonNetwork.OfflineMode && !GameManager.Instance.inLobby)
             {
                 bulletBehaviour.bulletID = ID;
 

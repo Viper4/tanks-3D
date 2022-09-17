@@ -88,7 +88,7 @@ public class LevelEditor : EditorWindow
     }
 }
 
-[CustomEditor(typeof(TankGeneration))]
+[CustomEditor(typeof(TankManager))]
 public class TankEditor : Editor
 {
     public override void OnInspectorGUI()
@@ -97,16 +97,9 @@ public class TankEditor : Editor
 
         GUILayout.BeginHorizontal();
 
-        TankGeneration tank = (TankGeneration)target;
-
-        if (GUILayout.Button("Clear"))
-        {
-            tank.Clear();
-        }
-
         if (GUILayout.Button("Generate Random"))
         {
-            GameObject.Find("Level").GetComponent<LevelGenerator>().GenerateTanks(tank);
+            FindObjectOfType<TankManager>().GenerateTanks();
         }
 
         GUILayout.EndHorizontal();

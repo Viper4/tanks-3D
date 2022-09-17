@@ -10,7 +10,7 @@ public class PhotonTankView : MonoBehaviourPunCallbacks, IPunObservable
     [SerializeField] bool player;
     [SerializeField] Behaviour[] ownerComponents;
     [SerializeField] Transform tankOrigin;
-    [SerializeField] Rigidbody rb;
+    //[SerializeField] Rigidbody rb;
     [SerializeField] Transform turret;
     [SerializeField] Transform barrel;
     BaseTankLogic baseTankLogic;
@@ -21,7 +21,6 @@ public class PhotonTankView : MonoBehaviourPunCallbacks, IPunObservable
 
     Vector3 targetPosition;
     Quaternion targetTankRotation;
-    Vector3 targetVelocity;
     Quaternion targetTurretRotation;
     Quaternion targetBarrelRotation;
 
@@ -29,10 +28,9 @@ public class PhotonTankView : MonoBehaviourPunCallbacks, IPunObservable
     {
         targetPosition = tankOrigin.position;
         targetTankRotation = tankOrigin.rotation;
-        targetVelocity = Vector3.zero;
         targetTurretRotation = turret.rotation;
         targetBarrelRotation = barrel.rotation;
-        if (!player && !GameManager.autoPlay)
+        if (!player && !GameManager.Instance.inLobby)
         {
             baseTankLogic = GetComponent<BaseTankLogic>();
             if (PhotonNetwork.IsMasterClient)
@@ -52,10 +50,9 @@ public class PhotonTankView : MonoBehaviourPunCallbacks, IPunObservable
 
     private void Update()
     {
-        if (!GameManager.autoPlay && !photonView.IsMine)
+        if (!PhotonNetwork.OfflineMode && !GameManager.Instance.inLobby && !photonView.IsMine)
         {
-            tankOrigin.position = Vector3.MoveTowards(tankOrigin.position, targetPosition, targetVelocity.magnitude * Time.deltaTime);
-            rb.velocity = targetVelocity;
+            tankOrigin.position = Vector3.MoveTowards(tankOrigin.position, targetPosition, (targetPosition - tankOrigin.position).magnitude * PhotonNetwork.SerializationRate * Time.deltaTime);
             tankOrigin.rotation = Quaternion.RotateTowards(tankOrigin.rotation, targetTankRotation, rotateTowardsSpeed * Time.deltaTime);
             turret.rotation = Quaternion.RotateTowards(turret.rotation, targetTurretRotation, rotateTowardsSpeed * Time.deltaTime);
             barrel.rotation = Quaternion.RotateTowards(barrel.rotation, targetBarrelRotation, rotateTowardsSpeed * Time.deltaTime);
@@ -70,7 +67,6 @@ public class PhotonTankView : MonoBehaviourPunCallbacks, IPunObservable
             {
                 stream.SendNext(tankOrigin.position);
                 stream.SendNext(tankOrigin.rotation);
-                stream.SendNext(rb.velocity);
                 stream.SendNext(turret.rotation);
                 stream.SendNext(barrel.rotation);
             }
@@ -86,7 +82,6 @@ public class PhotonTankView : MonoBehaviourPunCallbacks, IPunObservable
                 {
                     tankOrigin.rotation = targetTankRotation;
                 }
-                targetVelocity = (Vector3)stream.ReceiveNext();
                 targetTurretRotation = (Quaternion)stream.ReceiveNext();
                 if (Quaternion.Angle(targetTurretRotation, turret.rotation) > setRotationMinAngle)
                 {
@@ -103,7 +98,7 @@ public class PhotonTankView : MonoBehaviourPunCallbacks, IPunObservable
 
     public override void OnMasterClientSwitched(Player newMasterClient)
     {
-        if (!player && !GameManager.autoPlay && PhotonNetwork.IsMasterClient)
+        if (!player && !GameManager.Instance.inLobby && PhotonNetwork.IsMasterClient)
         {
             photonView.RequestOwnership();
             baseTankLogic.disabled = false;

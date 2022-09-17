@@ -17,7 +17,6 @@ public class MainMenuCamera : MonoBehaviour
     [SerializeField] float rotationSpeed = 15;
 
     [SerializeField] GameObject mainMenuObject;
-    [SerializeField] DataManager dataManager;
 
     void SwitchTarget()
     {

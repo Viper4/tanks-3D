@@ -38,7 +38,7 @@ public class RedBot : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!GameManager.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null)
+        if (!GameManager.Instance.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null)
         {
             Vector3 targetDir = targetSystem.currentTarget.position - turret.position;
             baseTankLogic.targetTurretDir = targetDir;

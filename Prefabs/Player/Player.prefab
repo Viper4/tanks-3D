@@ -2282,6 +2282,7 @@ MonoBehaviour:
   target: {fileID: 6161557077281983732}
   reticle: {fileID: 3789980081355412004}
   playerControl: {fileID: 6432079618835187448}
+  baseUIHandler: {fileID: 5649241332685557866}
   dstFromTarget: 6
   targetDstMinMax: {x: 0, y: 25}
   pitchMinMaxN: {x: -40, y: 80}
@@ -2292,7 +2293,7 @@ MonoBehaviour:
     m_Bits: 33556150
   cameraIgnoreLayers:
     serializedVersion: 2
-    m_Bits: 268437246
+    m_Bits: 301991678
 --- !u!114 &9007769207834555923
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2589,7 +2590,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3c151e8ebee41b84a99874f82a5f7355, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  PV: {fileID: 0}
   playerControl: {fileID: 6432079618835187448}
   barrel: {fileID: 7434512807079599132}
   bullet: {fileID: 4307626717143694363, guid: de9dbd5b8f77ecb4a866f8d8cf75c17d, type: 3}
@@ -2688,6 +2688,7 @@ MonoBehaviour:
   overrideRotation: 0
   targetTurretDir: {x: 0, y: 0, z: 0}
   targetTankDir: {x: 0, y: 0, z: 0}
+  disabled: 0
   tankOrigin: {fileID: 5113858065110483005}
 --- !u!114 &714796969137908049
 MonoBehaviour:
@@ -4224,15 +4225,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4524894777953331527, guid: 8c4f1a850c4e3ca4fb46cd97bbac48de, type: 3}
       propertyPath: m_AnchorMax.x
-      value: 0.57894737
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4524894777953331527, guid: 8c4f1a850c4e3ca4fb46cd97bbac48de, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4524894777953331527, guid: 8c4f1a850c4e3ca4fb46cd97bbac48de, type: 3}
       propertyPath: m_AnchorMin.x
-      value: 0.57894737
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5043096371149495199, guid: 8c4f1a850c4e3ca4fb46cd97bbac48de, type: 3}
       propertyPath: m_AnchorMax.x
@@ -4304,19 +4305,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6762227408922676897, guid: 8c4f1a850c4e3ca4fb46cd97bbac48de, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6762227408922676897, guid: 8c4f1a850c4e3ca4fb46cd97bbac48de, type: 3}
       propertyPath: m_AnchorMin.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6762227408922676897, guid: 8c4f1a850c4e3ca4fb46cd97bbac48de, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 910
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6762227408922676897, guid: 8c4f1a850c4e3ca4fb46cd97bbac48de, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -60
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6762799345950076953, guid: 8c4f1a850c4e3ca4fb46cd97bbac48de, type: 3}
       propertyPath: m_AnchorMax.y
@@ -4388,11 +4389,11 @@ PrefabInstance:
       objectReference: {fileID: 5649241332685557866}
     - target: {fileID: 8653684465640852765, guid: 8c4f1a850c4e3ca4fb46cd97bbac48de, type: 3}
       propertyPath: m_AnchorMax.x
-      value: 0.57894737
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8653684465640852765, guid: 8c4f1a850c4e3ca4fb46cd97bbac48de, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 9152244325910063688, guid: 8c4f1a850c4e3ca4fb46cd97bbac48de, type: 3}
       propertyPath: m_AnchorMax.x

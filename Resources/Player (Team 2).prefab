@@ -1639,7 +1639,7 @@ MonoBehaviour:
   ObservedComponentsFoldoutOpen: 1
   Group: 0
   prefixField: -1
-  Synchronization: 3
+  Synchronization: 2
   OwnershipTransfer: 0
   observableSearch: 2
   ObservedComponents:
@@ -1662,10 +1662,9 @@ MonoBehaviour:
   player: 1
   ownerComponents: []
   tankOrigin: {fileID: 4522584760303599940}
-  rb: {fileID: 4852016942272305215}
   turret: {fileID: 4866417256847971752}
   barrel: {fileID: 2240490452950375781}
-  teleportDistance: 10
+  teleportDistance: 5
   rotateTowardsSpeed: 360
   setRotationMinAngle: 110
 --- !u!1 &2561475804862726440
@@ -2553,9 +2552,9 @@ GameObject:
   m_Component:
   - component: {fileID: 3294769829363683680}
   - component: {fileID: 3294769829363683687}
-  - component: {fileID: 3729790394822041476}
   - component: {fileID: 376444670411978602}
   - component: {fileID: 6765687381453624862}
+  - component: {fileID: 6120456207515052346}
   m_Layer: 7
   m_Name: Camera
   m_TagString: Camera
@@ -2621,33 +2620,6 @@ Camera:
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
---- !u!114 &3729790394822041476
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3294769829363683685}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f65bc7d37676cac47bbd57d24a94ac91, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  sensitivity: 15
-  target: {fileID: 3294769830514609549}
-  reticle: {fileID: 5314021987245834027}
-  playerControl: {fileID: 2411737411322316673}
-  dstFromTarget: 6
-  targetDstMinMax: {x: 0, y: 30}
-  pitchMinMaxN: {x: -40, y: 80}
-  pitchMinMaxL: {x: -20, y: 20}
-  rotationSmoothTime: 0.1
-  mouseIgnoreLayers:
-    serializedVersion: 2
-    m_Bits: 1590
-  cameraIgnoreLayers:
-    serializedVersion: 2
-    m_Bits: 268437246
 --- !u!114 &376444670411978602
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2689,6 +2661,34 @@ AudioListener:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3294769829363683685}
   m_Enabled: 1
+--- !u!114 &6120456207515052346
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3294769829363683685}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f2562ed487af46e408c078b5f71bef02, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sensitivity: 15
+  target: {fileID: 3294769830514609549}
+  reticle: {fileID: 5314021987245834027}
+  playerControl: {fileID: 2411737411322316673}
+  baseUIHandler: {fileID: 502632330082631716}
+  dstFromTarget: 4
+  targetDstMinMax: {x: 0, y: 30}
+  pitchMinMaxN: {x: -40, y: 80}
+  pitchMinMaxL: {x: -20, y: 20}
+  rotationSmoothTime: 0.1
+  mouseIgnoreLayers:
+    serializedVersion: 2
+    m_Bits: 2098694
+  cameraIgnoreLayers:
+    serializedVersion: 2
+    m_Bits: 304088974
 --- !u!1 &3294769830514609548
 GameObject:
   m_ObjectHideFlags: 0

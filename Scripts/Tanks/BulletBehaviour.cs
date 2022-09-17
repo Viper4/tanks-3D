@@ -1,14 +1,13 @@
 using ExitGames.Client.Photon;
 using Photon.Pun;
 using Photon.Realtime;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using PhotonHashtable = ExitGames.Client.Photon.Hashtable;
 
 public class BulletBehaviour : MonoBehaviourPunCallbacks
 {
-    public int bulletID;
+    public int bulletID = 0;
 
     Rigidbody rb;
 
@@ -39,25 +38,25 @@ public class BulletBehaviour : MonoBehaviourPunCallbacks
 
     void Update()
     {
-        if (GameManager.frozen)
+        if (GameManager.Instance.frozen)
         {
             rb.constraints = RigidbodyConstraints.FreezeAll;
         }
     }
 
-    private void OnEnable()
+    public override void OnEnable()
     {
         base.OnEnable();
-        if (!GameManager.autoPlay)
+        if (!GameManager.Instance.inLobby)
         {
             PhotonNetwork.NetworkingClient.EventReceived += OnEvent;
         }
     }
 
-    private void OnDisable()
+    public override void OnDisable()
     {
         base.OnDisable();
-        if (!GameManager.autoPlay)
+        if (!GameManager.Instance.inLobby)
         {
             PhotonNetwork.NetworkingClient.EventReceived -= OnEvent;
         }
@@ -65,20 +64,9 @@ public class BulletBehaviour : MonoBehaviourPunCallbacks
 
     void OnEvent(EventData eventData)
     {
-        if (eventData.Code == GameManager.Instance.SetIDCode)
+        if (eventData.Code == GameManager.Instance.DestroyCode)
         {
             PhotonHashtable parameters = (PhotonHashtable)eventData.Parameters[ParameterCode.Data];
-            Debug.Log("Try set ID");
-            if (ownerPV != null && ownerPV.ViewID == (int)parameters["ViewID"])
-            {
-                Debug.Log("Set ID: " + (int)parameters["ID"]);
-                bulletID = (int)parameters["ID"];
-            }
-        }
-        else if (eventData.Code == GameManager.Instance.DestroyCode)
-        {
-            PhotonHashtable parameters = (PhotonHashtable)eventData.Parameters[ParameterCode.Data];
-            Debug.Log("Try destroy");
             if ((int)parameters["ID"] == bulletID)
             {
                 Debug.Log("Destroyed: " + (int)parameters["ID"]);
@@ -94,7 +82,7 @@ public class BulletBehaviour : MonoBehaviourPunCallbacks
 
     private void OnTriggerEnter(Collider other)
     {
-        if (!GameManager.frozen)
+        if (!GameManager.Instance.frozen)
         {
             switch (other.tag)
             {
@@ -126,7 +114,7 @@ public class BulletBehaviour : MonoBehaviourPunCallbacks
 
     private void OnCollisionEnter(Collision other)
     {
-        if (!GameManager.frozen)
+        if (!GameManager.Instance.frozen)
         {
             switch (other.transform.tag)
             {
@@ -287,11 +275,12 @@ public class BulletBehaviour : MonoBehaviourPunCallbacks
     {
         if (transform.name != "Rocket Bullet" && target != null)
         {
-            if (!PhotonNetwork.OfflineMode && !GameManager.autoPlay)
+            if (!PhotonNetwork.OfflineMode && !GameManager.Instance.inLobby)
             {
                 if (ownerPV != null && ownerPV.IsMine)
                 {
                     target.GetComponent<PhotonView>().RPC("ExplodeTank", RpcTarget.All);
+                    NormalDestroy();
                 }
             }
             else
@@ -300,11 +289,10 @@ public class BulletBehaviour : MonoBehaviourPunCallbacks
                 {
                     baseTankLogic.ExplodeTank();
                 }
+                NormalDestroy();
             }
             IncreaseKills(target);
         }
-
-        NormalDestroy();
     }
 
     void SubtractBulletsFired()
@@ -321,12 +309,15 @@ public class BulletBehaviour : MonoBehaviourPunCallbacks
     {
         SubtractBulletsFired();
 
-        PhotonHashtable parameters = new PhotonHashtable
+        if (!PhotonNetwork.OfflineMode && !GameManager.Instance.inLobby && ownerPV.IsMine)
         {
-            { "ID", bulletID },
-            { "Safe", false },
-        };
-        PhotonNetwork.RaiseEvent(GameManager.Instance.DestroyCode, parameters, RaiseEventOptions.Default, SendOptions.SendUnreliable);
+            PhotonHashtable parameters = new PhotonHashtable
+            {
+                { "ID", bulletID },
+                { "Safe", false },
+            };
+            PhotonNetwork.RaiseEvent(GameManager.Instance.DestroyCode, parameters, RaiseEventOptions.Default, SendOptions.SendUnreliable);
+        }
         Instantiate(explosionEffect, transform.position, Quaternion.identity);
         Destroy(gameObject);
     }
@@ -335,12 +326,15 @@ public class BulletBehaviour : MonoBehaviourPunCallbacks
     {
         SubtractBulletsFired();
 
-        PhotonHashtable parameters = new PhotonHashtable
+        if (!PhotonNetwork.OfflineMode && !GameManager.Instance.inLobby && ownerPV.IsMine)
         {
-            { "ID", bulletID },
-            { "Safe", true },
-        };
-        PhotonNetwork.RaiseEvent(GameManager.Instance.DestroyCode, parameters, RaiseEventOptions.Default, SendOptions.SendUnreliable);
+            PhotonHashtable parameters = new PhotonHashtable
+            {
+                { "ID", bulletID },
+                { "Safe", true },
+            };
+            PhotonNetwork.RaiseEvent(GameManager.Instance.DestroyCode, parameters, RaiseEventOptions.Default, SendOptions.SendUnreliable);
+        }
         Destroy(gameObject);
     }
 }

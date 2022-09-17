@@ -12,7 +12,7 @@ public class ReplaceWithPrefab : EditorWindow
     [MenuItem("Tools/Replace With Prefab")]
     static void CreateReplaceWithPrefab()
     {
-        GetWindow<ReplaceWithPrefab>();
+        CreateWindow<ReplaceWithPrefab>();
     }
 
     private void OnGUI()

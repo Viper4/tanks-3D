@@ -89,7 +89,7 @@ public class BaseTankLogic : MonoBehaviour
         lastEulerAngles = tankOrigin.eulerAngles;
         speed = normalSpeed;
         targetTankDir = body.forward;
-        if (GameManager.autoPlay)
+        if (GameManager.Instance.autoPlay)
         {
             effectsParent = GameObject.Find("ToClear").transform;
         }
@@ -97,7 +97,7 @@ public class BaseTankLogic : MonoBehaviour
 
     private void Update()
     {
-        if (!disabled && !GameManager.frozen && Time.timeScale != 0)
+        if (!disabled && !GameManager.Instance.frozen && Time.timeScale != 0)
         {
             speed = normalSpeed;
 
@@ -318,7 +318,7 @@ public class BaseTankLogic : MonoBehaviour
 
                 if (PhotonNetwork.OfflineMode)
                 {
-                    GameManager.frozen = true;
+                    GameManager.Instance.frozen = true;
                 }
             }
         }

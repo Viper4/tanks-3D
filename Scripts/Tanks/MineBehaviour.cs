@@ -1,11 +1,15 @@
+using ExitGames.Client.Photon;
 using Photon.Pun;
+using Photon.Realtime;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using PhotonHashtable = ExitGames.Client.Photon.Hashtable;
 
-public class MineBehaviour : MonoBehaviour
+public class MineBehaviour : MonoBehaviourPunCallbacks
 {
+    public int mineID = 0;
+
     public Transform owner { get; set; }
     public PhotonView ownerPV { get; set; }
 
@@ -29,7 +33,7 @@ public class MineBehaviour : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!GameManager.frozen)
+        if (!GameManager.Instance.frozen)
         {
             activateDelay -= Time.deltaTime * 1;
 
@@ -50,6 +54,37 @@ public class MineBehaviour : MonoBehaviour
                         StartCoroutine(Flash(timer));
                     }
                 }
+            }
+        }
+    }
+
+    public override void OnEnable()
+    {
+        base.OnEnable();
+        if (!GameManager.Instance.inLobby)
+        {
+            PhotonNetwork.NetworkingClient.EventReceived += OnEvent;
+        }
+    }
+
+    public override void OnDisable()
+    {
+        base.OnDisable();
+        if (!GameManager.Instance.inLobby)
+        {
+            PhotonNetwork.NetworkingClient.EventReceived -= OnEvent;
+        }
+    }
+
+    void OnEvent(EventData eventData)
+    {
+        if (eventData.Code == GameManager.Instance.DestroyCode)
+        {
+            PhotonHashtable parameters = (PhotonHashtable)eventData.Parameters[ParameterCode.Data];
+            if ((int)parameters["ID"] == mineID)
+            {
+                Debug.Log("Destroyed: " + (int)parameters["ID"]);
+                ExplodeMine(new List<Transform>());
             }
         }
     }
@@ -143,6 +178,14 @@ public class MineBehaviour : MonoBehaviour
 
     public void ExplodeMine(List<Transform> chain)
     {
+        if (!PhotonNetwork.OfflineMode && !GameManager.Instance.inLobby && ownerPV.IsMine)
+        {
+            PhotonHashtable parameters = new PhotonHashtable
+            {
+                { "ID", mineID },
+            };
+            PhotonNetwork.RaiseEvent(GameManager.Instance.DestroyCode, parameters, RaiseEventOptions.Default, SendOptions.SendUnreliable);
+        }
         chain.Add(transform);
 
         // Getting all colliders within explosionRadius
@@ -156,7 +199,7 @@ public class MineBehaviour : MonoBehaviour
                     case "Tank":
                         chain.Add(collider.transform);
 
-                        if (!PhotonNetwork.OfflineMode && !GameManager.autoPlay)
+                        if (!PhotonNetwork.OfflineMode && !GameManager.Instance.inLobby)
                         {
                             if (ownerPV.IsMine)
                             {
@@ -192,7 +235,7 @@ public class MineBehaviour : MonoBehaviour
                     case "AI Tank":
                         chain.Add(collider.transform);
 
-                        if (!PhotonNetwork.OfflineMode && !GameManager.autoPlay)
+                        if (!PhotonNetwork.OfflineMode && !GameManager.Instance.inLobby)
                         {
                             if (ownerPV.IsMine)
                             {

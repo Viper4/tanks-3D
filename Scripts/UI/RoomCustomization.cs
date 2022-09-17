@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -116,6 +117,11 @@ public class RoomCustomization : MonoBehaviour
     public void ChangeFillLobby(Toggle toggle)
     {
         DataManager.roomSettings.fillLobby = toggle.isOn;
+    }
+
+    public void ChangeTotalLives(TMP_InputField input)
+    {
+        int.TryParse(input.text, out DataManager.roomSettings.totalLives);
     }
 
     public void UpdateSettingsUI()

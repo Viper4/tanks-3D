@@ -100,7 +100,7 @@ public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
                 { "RoomSettings", DataManager.roomSettings },
                 { "Waiting", true },
                 { "Ready Players", 0 },
-                { "Total Lives", 6 }
+                { "Total Lives", DataManager.roomSettings.totalLives }
             };
             PhotonNetwork.CurrentRoom.SetCustomProperties(roomProperties);
 

@@ -19,7 +19,7 @@ public class EngineSoundManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!GameManager.frozen && Time.timeScale > 0)
+        if (!GameManager.Instance.frozen && Time.timeScale > 0)
         {
             audioSource.UnPause();
 

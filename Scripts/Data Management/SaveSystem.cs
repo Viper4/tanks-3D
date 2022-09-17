@@ -36,7 +36,8 @@ public static class SaveSystem
             { "Lock Camera", KeyCode.LeftShift },
             { "Switch Camera", KeyCode.LeftAlt },
             { "Leaderboard", KeyCode.Tab },
-            { "Toggle HUD", KeyCode.F1 }
+            { "Toggle HUD", KeyCode.F1 },
+            { "Screenshot", KeyCode.F11 }
         },
         silhouettes = true,
         masterVolume = 100,
@@ -60,7 +61,8 @@ public static class SaveSystem
         bots = new List<string>(),
         botLimit = 4,
         fillLobby = true,
-};
+        totalLives = 6,
+    };
 
     public static readonly PlayerData defaultPlayerData = new PlayerData
     {
@@ -89,11 +91,15 @@ public static class SaveSystem
     {
         PlayerData playerData = LoadPlayerData(fileName);
         float bestTime = playerData.bestTime;
-        int sceneIndex = playerData.sceneIndex;
 
-        playerData = defaultPlayerData;
+        playerData.lives = defaultPlayerData.lives;
+        playerData.kills = defaultPlayerData.kills;
+        playerData.shots = defaultPlayerData.shots;
+        playerData.deaths = defaultPlayerData.deaths;
+        playerData.time = defaultPlayerData.time;
         playerData.bestTime = bestTime;
-        playerData.sceneIndex = sceneIndex;
+        playerData.sceneIndex = defaultPlayerData.sceneIndex;
+        Debug.Log(playerData.kills + " / " + defaultPlayerData.kills);
 
         playerData.SavePlayerData(fileName, false);
 
@@ -181,18 +187,10 @@ public static class SaveSystem
                         }
 
                         Transform camera = player.Find("Camera");
-                        if (camera != null)
+                        if (camera != null && camera.TryGetComponent<CameraControl>(out var cameraS))
                         {
-                            if (camera.TryGetComponent<CameraControl>(out var cameraS))
-                            {
-                                cameraS.sensitivity = loadedSettings.sensitivity;
-                                cameraS.rotationSmoothTime = loadedSettings.cameraSmoothing;
-                            }
-                            else if (camera.TryGetComponent<MultiplayerCameraControl>(out var cameraM))
-                            {
-                                cameraM.sensitivity = loadedSettings.sensitivity;
-                                cameraM.rotationSmoothTime = loadedSettings.cameraSmoothing;
-                            }
+                            cameraS.sensitivity = loadedSettings.sensitivity;
+                            cameraS.rotationSmoothTime = loadedSettings.cameraSmoothing;
                         }
                     }
                 }

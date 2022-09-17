@@ -23,7 +23,7 @@ public class DataManager : MonoBehaviourPun
     // Update is called once per frame
     void Update()
     {
-        if (!GameManager.autoPlay && !GameManager.frozen && Time.timeScale > 0)
+        if (!GameManager.Instance.inLobby && !GameManager.Instance.frozen && Time.timeScale > 0)
         {
             playerData.time += Time.deltaTime;
         }

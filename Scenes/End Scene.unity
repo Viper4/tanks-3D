@@ -347,7 +347,7 @@ GameObject:
   - component: {fileID: 144047198}
   - component: {fileID: 144047197}
   m_Layer: 5
-  m_Name: UI
+  m_Name: End UI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1208,18 +1208,6 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 144047197}
         m_TargetAssemblyTypeName: BaseUIHandler, Assembly-CSharp
-        m_MethodName: LoadScene
-        m_Mode: 5
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: Regular 1
-          m_BoolArgument: 0
-        m_CallState: 2
-      - m_Target: {fileID: 144047197}
-        m_TargetAssemblyTypeName: BaseUIHandler, Assembly-CSharp
         m_MethodName: ResetPlayerData
         m_Mode: 1
         m_Arguments:
@@ -1228,6 +1216,18 @@ MonoBehaviour:
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 144047197}
+        m_TargetAssemblyTypeName: BaseUIHandler, Assembly-CSharp
+        m_MethodName: LoadScene
+        m_Mode: 5
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: Regular 1
           m_BoolArgument: 0
         m_CallState: 2
 --- !u!114 &560184577
@@ -2688,18 +2688,6 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 144047197}
         m_TargetAssemblyTypeName: BaseUIHandler, Assembly-CSharp
-        m_MethodName: LoadScene
-        m_Mode: 5
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: Classic 1
-          m_BoolArgument: 0
-        m_CallState: 2
-      - m_Target: {fileID: 144047197}
-        m_TargetAssemblyTypeName: BaseUIHandler, Assembly-CSharp
         m_MethodName: ResetPlayerData
         m_Mode: 1
         m_Arguments:
@@ -2708,6 +2696,18 @@ MonoBehaviour:
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 144047197}
+        m_TargetAssemblyTypeName: BaseUIHandler, Assembly-CSharp
+        m_MethodName: LoadScene
+        m_Mode: 5
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: Classic 1
           m_BoolArgument: 0
         m_CallState: 2
 --- !u!114 &1252310704
@@ -3940,7 +3940,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6078113827123582345, guid: 85a5b7f330200974ebf4d3e1f9d4b23d, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 9018274562240278948, guid: 85a5b7f330200974ebf4d3e1f9d4b23d, type: 3}
       propertyPath: m_AnchorMax.y

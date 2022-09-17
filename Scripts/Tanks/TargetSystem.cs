@@ -22,7 +22,7 @@ public class TargetSystem : MonoBehaviour
 
         if (GameManager.Instance != null)
         {
-            chooseTarget = !PhotonNetwork.OfflineMode || GameManager.autoPlay;
+            chooseTarget = !PhotonNetwork.OfflineMode || GameManager.Instance.autoPlay;
         }
 
         if (!chooseTarget)

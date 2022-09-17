@@ -302,13 +302,13 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
         }
     }
 
-    private void OnEnable()
+    public override void OnEnable()
     {
         base.OnEnable();
         PhotonNetwork.NetworkingClient.EventReceived += OnEvent;
     }
 
-    private void OnDisable()
+    public override void OnDisable()
     {
         base.OnDisable();
         PhotonNetwork.NetworkingClient.EventReceived -= OnEvent;

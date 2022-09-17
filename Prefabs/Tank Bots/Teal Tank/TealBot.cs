@@ -33,7 +33,7 @@ public class TealBot : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!GameManager.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null)
+        if (!GameManager.Instance.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null)
         {
             if (fireControl.canFire && !shooting && targetSystem.TargetInLineOfFire())
             {

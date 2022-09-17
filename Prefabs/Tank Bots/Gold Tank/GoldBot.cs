@@ -74,7 +74,7 @@ public class GoldBot : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!GameManager.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null)
+        if (!GameManager.Instance.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null)
         {
             if (mode != Mode.LayRoutine && mode != Mode.Laying && mode != Mode.Escape)
             {
@@ -171,13 +171,13 @@ public class GoldBot : MonoBehaviour
 
     void Loop()
     {
-        if (!GameManager.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null)
+        if (!GameManager.Instance.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null)
         {
 
             bulletRicochet.ScanArea(turret.position);
             if (!mineControl.laidMines.Contains(targetSystem.currentTarget.parent)) // Target isn't a mine
             {
-                targetSystem.chooseTarget = GameManager.Instance != null && (!PhotonNetwork.OfflineMode || GameManager.autoPlay);
+                targetSystem.chooseTarget = GameManager.Instance != null && (!PhotonNetwork.OfflineMode || GameManager.Instance.autoPlay);
                 bulletRicochet.CalculateBulletRicochets(barrel, targetSystem.currentTarget.position);
 
                 Collider[] allMines = Physics.OverlapSphere(turret.position, 50, mineLayerMask);

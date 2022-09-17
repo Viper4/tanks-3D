@@ -95,7 +95,7 @@ public class GeneticAlgorithmBot : MonoBehaviour
 
     void Loop()
     {
-        if (!dead && !GameManager.frozen && Time.timeScale != 0)
+        if (!dead && !GameManager.Instance.frozen && Time.timeScale != 0)
         {
             // Feed mini map of obstacles (-1), tanks (0.5), and dangers (1) in an area of length * width * cellSize of full map
             MiniMap();

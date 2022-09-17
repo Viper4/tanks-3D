@@ -57,7 +57,7 @@ public class OrangeBot : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!GameManager.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null)
+        if (!GameManager.Instance.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null)
         {
             if (fireControl.canFire && !shooting && targetSystem.TargetVisible())
             {
@@ -121,7 +121,7 @@ public class OrangeBot : MonoBehaviour
                 if (!targetSystem.TargetVisible())
                 {
                     targetSystem.currentTarget = targetSystem.primaryTarget;
-                    targetSystem.chooseTarget = GameManager.Instance != null && (!PhotonNetwork.OfflineMode || GameManager.autoPlay);
+                    targetSystem.chooseTarget = GameManager.Instance != null && (!PhotonNetwork.OfflineMode || GameManager.Instance.autoPlay);
                 }
             }
 
@@ -182,7 +182,7 @@ public class OrangeBot : MonoBehaviour
         if (targetSystem.currentTarget != targetSystem.primaryTarget)
         {
             targetSystem.currentTarget = targetSystem.primaryTarget;
-            targetSystem.chooseTarget = GameManager.Instance != null && (!PhotonNetwork.OfflineMode || GameManager.autoPlay);
+            targetSystem.chooseTarget = GameManager.Instance != null && (!PhotonNetwork.OfflineMode || GameManager.Instance.autoPlay);
         }
         shooting = false;
         baseTankLogic.stationary = false;

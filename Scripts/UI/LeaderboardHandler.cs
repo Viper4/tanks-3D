@@ -5,6 +5,7 @@ using TMPro;
 using Photon.Realtime;
 using MyUnityAddons.CustomPhoton;
 using Photon.Pun.UtilityScripts;
+using Photon.Pun;
 
 public class LeaderboardHandler : MonoBehaviour
 {
@@ -44,7 +45,9 @@ public class LeaderboardHandler : MonoBehaviour
 
         Dictionary<string, LeaderboardData> leaderboard = new Dictionary<string, LeaderboardData>();
 
-        foreach (Player player in CustomNetworkHandling.NonSpectatorList)
+        Player[] leaderboardPlayers = ((RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["RoomSettings"]).primaryMode == "Co-Op" ? PhotonNetwork.PlayerList : CustomNetworkHandling.NonSpectatorList;
+
+        foreach (Player player in leaderboardPlayers)
         {
             LeaderboardData leaderboardData = new LeaderboardData()
             {

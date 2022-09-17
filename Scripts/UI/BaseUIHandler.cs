@@ -2,6 +2,8 @@ using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using PhotonHashtable = ExitGames.Client.Photon.Hashtable;
 
 public class BaseUIHandler : MonoBehaviour
 {
@@ -52,13 +54,14 @@ public class BaseUIHandler : MonoBehaviour
 
     public void LoadScene(string sceneName)
     {
+        GameManager.Instance.StopAllLoadRoutines();
         if (PhotonNetwork.OfflineMode)
         {
             GameManager.Instance.LoadScene(sceneName, 0, false, false);
         }
         else
         {
-            Hashtable parameters = new Hashtable
+            PhotonHashtable parameters = new PhotonHashtable()
             {
                 { "sceneName", sceneName },
                 { "delay", 0 },
@@ -80,7 +83,7 @@ public class BaseUIHandler : MonoBehaviour
             }
             else
             {
-                Hashtable parameters = new Hashtable
+                PhotonHashtable parameters = new PhotonHashtable()
                 {
                     { "sceneIndex", DataManager.playerData.sceneIndex },
                     { "delay", 0 },
@@ -93,14 +96,18 @@ public class BaseUIHandler : MonoBehaviour
         }
     }
 
-    public void MainMenu()
-    {
-        GameManager.Instance.MainMenu();
-    }
-
     public void ResetPlayerData()
     {
         DataManager.playerData = SaveSystem.ResetPlayerData("PlayerData");
+        if (!PhotonNetwork.OfflineMode && PhotonNetwork.IsMasterClient)
+        {
+            PhotonHashtable roomProperties = new PhotonHashtable()
+            {
+                { "Total Lives", ((RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["RoomSettings"]).totalLives }
+            };
+            PhotonNetwork.CurrentRoom.SetCustomProperties(roomProperties);
+            PhotonNetwork.RaiseEvent(GameManager.Instance.ResetDataCode, null, Photon.Realtime.RaiseEventOptions.Default, ExitGames.Client.Photon.SendOptions.SendUnreliable);
+        }
     }
 
     public void Exit()

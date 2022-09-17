@@ -50,7 +50,7 @@ public class AquamarineBot : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!GameManager.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null)
+        if (!GameManager.Instance.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null)
         {
             baseTankLogic.targetTankDir = transform.forward;
 
@@ -142,7 +142,7 @@ public class AquamarineBot : MonoBehaviour
 
     void Loop()
     {
-        if (!GameManager.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null)
+        if (!GameManager.Instance.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null)
         {
             bulletRicochet.ScanArea(turret.position);
 
@@ -174,7 +174,7 @@ public class AquamarineBot : MonoBehaviour
 
     void OnTriggerStay(Collider other)
     {
-        if (!GameManager.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null)
+        if (!GameManager.Instance.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null)
         {
             // Avoiding bullets and mines
             switch (other.tag)

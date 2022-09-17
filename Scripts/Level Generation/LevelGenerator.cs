@@ -31,10 +31,6 @@ public class LevelGenerator : MonoBehaviour
 
     public void GenerateLevel()
     {
-        foreach (Transform tankChild in tankParent)
-        {
-            Destroy(tankChild.gameObject);
-        }
         foreach (Transform obstacleChild in obstacleParent)
         {
             Destroy(obstacleChild.gameObject);
@@ -46,30 +42,18 @@ public class LevelGenerator : MonoBehaviour
 
         GameObject obstacle = Instantiate(obstacles[0], CustomRandom.GetSpawnPointInCollider(boundingCollider, Vector3.down, ignoreLayerMask, obstacles[0].GetComponent<BoxCollider>(), obstacles[0].transform.rotation, true), obstacles[0].transform.rotation, obstacleParent);
         GenerateObstacles(obstacle.GetComponent<ObstacleGeneration>());
-        GenerateTanks(tankParent.GetComponent<TankGeneration>());
+        FindObjectOfType<TankManager>().GenerateTanks(true);
     }
 
     public void GenerateObstacles(ObstacleGeneration selectedObject)
     {
         Dictionary<string, int> cloneAmounts = new Dictionary<string, int>();
-        int[] distribution = CustomRandom.Distribute(obstacleLimit, obstacles.Count, amountDeviationMin, amountDeviationMax);
+        int[] distribution = CustomRandom.Distribute(obstacleLimit, obstacles.Count, switchChance, amountDeviationMin, amountDeviationMax);
         for (int i = 0; i < obstacles.Count; i++)
         {
             cloneAmounts[obstacles[i].name] = distribution[i];
         }
 
         selectedObject.RandomObstacleGeneration(obstacles, new List<GameObject>(), switchChance, branchChance, cloneAmounts, selectedObject.transform.position, possibleDirections, logicalStructure, possibleDistances, rangedDistance, boundingCollider);
-    }
-
-    public void GenerateTanks(TankGeneration selectedObject)
-    {
-        Dictionary<string, int> cloneAmounts = new Dictionary<string, int>();
-        int[] distribution = CustomRandom.Distribute(tankLimit, tanks.Count, amountDeviationMin, amountDeviationMax);
-        for (int i = 0; i < tanks.Count; i++)
-        {
-            cloneAmounts[tanks[i].name] = distribution[i];
-        }
-
-        selectedObject.RandomTankGeneration(tanks, cloneAmounts, boundingCollider);
     }
 }

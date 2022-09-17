@@ -18,4 +18,5 @@ public class RoomSettings
     public List<string> bots;
     public int botLimit;
     public bool fillLobby;
+    public int totalLives;
 }

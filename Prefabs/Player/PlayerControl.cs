@@ -21,8 +21,6 @@ public class PlayerControl : MonoBehaviourPunCallbacks
     public bool Paused { get; set; } = false;
     public bool showHUD = true;
 
-    bool respawning = false;
-
     float currentSpeed;
     public float speedSmoothTime = 0.1f;
     float speedSmoothVelocity;
@@ -38,7 +36,7 @@ public class PlayerControl : MonoBehaviourPunCallbacks
     {
         if (PhotonNetwork.OfflineMode || clientManager.photonView.IsMine)
         {
-            if (!Dead && !GameManager.frozen)
+            if (!Dead && !GameManager.Instance.frozen)
             {
                 if (Time.timeScale != 0)
                 {
@@ -190,10 +188,8 @@ public class PlayerControl : MonoBehaviourPunCallbacks
                 PhotonHashtable playerProperties = new PhotonHashtable();
                 playerProperties.Add("Deaths", DataManager.playerData.deaths);
                 PhotonNetwork.LocalPlayer.SetCustomProperties(playerProperties);
-
-                PlayerManager playerManager = FindObjectOfType<PlayerManager>();
-                playerManager.OnPlayerDeath(tankOrigin);
             }
+            FindObjectOfType<PlayerManager>().OnPlayerDeath(tankOrigin);
         }
         else
         {
@@ -209,5 +205,16 @@ public class PlayerControl : MonoBehaviourPunCallbacks
                 GameManager.Instance.LoadScene("End Scene", 3, true);
             }
         }
+    }
+
+    [PunRPC]
+    public void ReactivatePlayer()
+    {
+        Dead = false;
+        tankOrigin.GetComponent<CapsuleCollider>().enabled = true;
+
+        tankOrigin.Find("Body").gameObject.SetActive(true);
+        tankOrigin.Find("Turret").gameObject.SetActive(true);
+        tankOrigin.Find("Barrel").gameObject.SetActive(true);
     }
 }

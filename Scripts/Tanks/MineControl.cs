@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
 
-public class MineControl : MonoBehaviour
+public class MineControl : MonoBehaviourPun
 {
     [SerializeField] PhotonView PV;
     [SerializeField] Transform tankOrigin;
@@ -18,7 +18,7 @@ public class MineControl : MonoBehaviour
 
     private IEnumerator Start()
     {
-        if (GameManager.autoPlay)
+        if (GameManager.Instance.autoPlay)
         {
             mineParent = GameObject.Find("ToClear").transform;
         }
@@ -35,26 +35,28 @@ public class MineControl : MonoBehaviour
 
             InstantiateMine();
 
-            if (!PhotonNetwork.OfflineMode && !GameManager.autoPlay)
-            {
-                PV.RPC("InstantiateMine", RpcTarget.Others);
-            }
-
             yield return new WaitForSeconds(Random.Range(layCooldown[0], layCooldown[1]));
             canLay = true;
         }
     }
 
     [PunRPC]
+    public void MultiplayerInstantiateMine(Vector3 position, int mineID)
+    {
+        Transform newMine = Instantiate(mine, position, Quaternion.identity, mineParent);
+        laidMines.Add(newMine);
+        StartCoroutine(InitializeMine(newMine, mineID));
+    }
+
     Transform InstantiateMine()
     {
         Transform newMine = Instantiate(mine, tankOrigin.position, Quaternion.identity, mineParent);
         laidMines.Add(newMine);
-        StartCoroutine(InitializeMine(newMine));
+        StartCoroutine(InitializeMine(newMine, newMine.GetInstanceID()));
         return newMine;
     }
 
-    IEnumerator InitializeMine(Transform mine)
+    IEnumerator InitializeMine(Transform mine, int ID)
     {
         mine.gameObject.SetActive(false);
         yield return new WaitUntil(() => mine.GetComponent<MineBehaviour>() != null);
@@ -66,6 +68,15 @@ public class MineControl : MonoBehaviour
             mineBehaviour.owner = transform;
             mineBehaviour.ownerPV = PV;
             mineBehaviour.explosionRadius = explosionRadius;
+            if (!PhotonNetwork.OfflineMode && !GameManager.Instance.inLobby)
+            {
+                mineBehaviour.mineID = ID;
+
+                if (photonView.IsMine)
+                {
+                    photonView.RPC("MultiplayerInstantiateMine", RpcTarget.Others, new object[] { tankOrigin.position, ID });
+                }
+            }
         }
         else
         {

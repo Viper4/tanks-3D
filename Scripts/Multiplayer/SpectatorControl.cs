@@ -29,13 +29,12 @@ public class SpectatorControl : MonoBehaviour
     private void Start()
     {
         currentRotation = transform.eulerAngles;
-        Debug.Log(currentRotation);
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (!Paused)
+        if (!Paused && Time.timeScale != 0)
         {
             // Updating every username to rotate to this camera for this client
             UsernameSystem[] allUsernames = FindObjectsOfType<UsernameSystem>();
@@ -53,7 +52,7 @@ public class SpectatorControl : MonoBehaviour
             float targetSpeed = movementSpeed / 2 * inputDir.magnitude;
 
             Player[] nonSpectatorList = CustomNetworkHandling.NonSpectatorList;
-            if (Input.GetMouseButtonDown(0) && nonSpectatorList.Length != 0)
+            if (!GameManager.Instance.frozen && Input.GetMouseButtonDown(0) && nonSpectatorList.Length != 0)
             {
                 if (target != null && target.TryGetComponent<MeshRenderer>(out var oldMeshRenderer))
                 {
@@ -72,6 +71,11 @@ public class SpectatorControl : MonoBehaviour
                         newMeshRenderer.enabled = false;
                     }
                 }
+            }
+
+            if (target == null)
+            {
+                targetIndex = -1;
             }
 
             if (targetIndex == -1)

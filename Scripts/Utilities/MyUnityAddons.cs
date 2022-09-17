@@ -49,7 +49,7 @@ namespace MyUnityAddons
             }
 
             // Array
-            public static int[] Distribute(int numerator, int denominator, int rangeMin, int rangeMax)
+            public static int[] Distribute(int numerator, int denominator, float mutateChance = 0, int rangeMin = 0, int rangeMax = 0)
             {
                 int[] array = new int[denominator];
 
@@ -62,7 +62,10 @@ namespace MyUnityAddons
                     {
                         array[i] = i < remainder ? quotient + 1 : quotient;
 
-                        array[i] += Random.Range(rangeMin, rangeMax + 1);
+                        if (mutateChance > 0 && Random.value <= mutateChance)
+                        {
+                            array[i] += Random.Range(rangeMin, rangeMax + 1);
+                        }
                     }
                     else
                     {
@@ -187,31 +190,34 @@ namespace MyUnityAddons
 
             public static Vector3 GetSpawnPointInCollider(Collider collider, Vector3 direction, LayerMask ignoreLayers, BoxCollider spawnCollider = null, Quaternion? spawnRotation = null, bool onTopOfPoint = false)
             {
-                for (int i = 0; i < 10; i++)
+                for (int i = 0; i < 30; i++)
                 {
                     Vector3 origin = GetPointInCollider(collider);
                     if (Physics.Raycast(origin, direction, out RaycastHit hit, Mathf.Infinity, ~ignoreLayers))
                     {
-                        if (spawnCollider != null)
+                        if (collider.bounds.Contains(hit.point))
                         {
-                            Vector3 testPosition = hit.point - direction * (spawnCollider.size.y + 0.001f);
-                            
-                            Quaternion rotation = spawnRotation == null ? spawnCollider.transform.rotation : (Quaternion)spawnRotation;
-                            if (!Physics.CheckBox(testPosition, spawnCollider.size, rotation, ~ignoreLayers))
+                            if (spawnCollider != null)
                             {
-                                if (onTopOfPoint)
+                                Vector3 testPosition = hit.point - direction * (spawnCollider.size.y + 0.001f);
+
+                                Quaternion rotation = spawnRotation == null ? spawnCollider.transform.rotation : (Quaternion)spawnRotation;
+                                if (!Physics.CheckBox(testPosition, spawnCollider.size, rotation, ~ignoreLayers))
                                 {
-                                    return testPosition;
-                                }
-                                else
-                                {
-                                    return hit.point;
+                                    if (onTopOfPoint)
+                                    {
+                                        return testPosition;
+                                    }
+                                    else
+                                    {
+                                        return hit.point;
+                                    }
                                 }
                             }
-                        }
-                        else
-                        {
-                            return hit.point;
+                            else
+                            {
+                                return hit.point;
+                            }
                         }
                     }
                 }
@@ -264,6 +270,12 @@ namespace MyUnityAddons
                 };
 
                 return shootPositionAngles[0] > horizontalAngleLimits[0] && shootPositionAngles[0] < horizontalAngleLimits[1] && shootPositionAngles[1] > verticalAngleLimits[0] && shootPositionAngles[1] < verticalAngleLimits[1];
+            }
+
+            public static Sprite ImageToSprite(Texture2D imageTexture, float pixelsPerUnit = 100.0f, SpriteMeshType spriteType = SpriteMeshType.Tight)
+            {
+                // Converting Texture2D to sprite
+                return Sprite.Create(imageTexture, new Rect(0, 0, imageTexture.width, imageTexture.height), new Vector2(0, 0), pixelsPerUnit, 0, spriteType);
             }
 
             public static Sprite ImageToSprite(string filePath, float pixelsPerUnit = 100.0f, SpriteMeshType spriteType = SpriteMeshType.Tight)
