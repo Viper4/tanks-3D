@@ -69,6 +69,7 @@ public class BaseTankLogic : MonoBehaviour
     Transform body;
     Transform turret;
     Transform barrel;
+    Transform trackMarks;
     Rigidbody rb;
 
     private void Start() 
@@ -85,6 +86,7 @@ public class BaseTankLogic : MonoBehaviour
         body = tankOrigin.Find("Body");
         turret = tankOrigin.Find("Turret");
         barrel = tankOrigin.Find("Barrel");
+        trackMarks = tankOrigin.Find("TrackMarks");
         rb = tankOrigin.GetComponent<Rigidbody>();
         lastEulerAngles = tankOrigin.eulerAngles;
         speed = normalSpeed;
@@ -336,7 +338,7 @@ public class BaseTankLogic : MonoBehaviour
             {
                 GeneticAlgorithmBot bot = GetComponent<GeneticAlgorithmBot>();
                 bot.Dead = true;
-                transform.parent = null;
+                transform.SetParent(null);
 
                 tankOrigin.GetComponent<Collider>().enabled = false;
                 body.gameObject.SetActive(false);
@@ -345,20 +347,26 @@ public class BaseTankLogic : MonoBehaviour
             }
             else
             {
-                if (transform.root.TryGetComponent<TankManager>(out var tankManager))
+                if (!GameManager.Instance.inLobby && GameManager.Instance.autoPlay)
                 {
-                    tankManager.deadBots.Add(transform);
-                    if (PhotonNetwork.OfflineMode)
+                    if (transform.root.TryGetComponent<TankManager>(out var tankManager))
                     {
-                        tankManager.StartCheckTankCount();
+                        tankManager.RespawnTank(tankOrigin);
                     }
                     else
                     {
-                        tankManager.StartCheckTankCount();
+                        Destroy(gameObject);
                     }
                 }
-
-                Destroy(gameObject);
+                else
+                {
+                    transform.SetParent(null);
+                    if (transform.root.TryGetComponent<TankManager>(out var tankManager))
+                    {
+                        tankManager.StartCheckTankCount();
+                    }
+                    Destroy(gameObject);
+                }
             }
         }
     }
@@ -447,11 +455,26 @@ public class BaseTankLogic : MonoBehaviour
         if (IsGrounded())
         {
             tankOrigin.forward = -tankOrigin.forward;
+            body.forward = -body.forward;
+            turret.forward = -turret.forward;
+            barrel.forward = -barrel.forward;
+            trackMarks.forward = -trackMarks.forward;
         }
     }
 
     public bool IsGrounded()
     {
         return Physics.Raycast(tankCollider.bounds.center, -tankOrigin.up, colliderExtentsY + 0.01f, slopeLayers);
+    }
+
+    [PunRPC]
+    public void ReactivateTank()
+    {
+        disabled = false;
+        tankOrigin.GetComponent<CapsuleCollider>().enabled = true;
+
+        tankOrigin.Find("Body").gameObject.SetActive(true);
+        tankOrigin.Find("Turret").gameObject.SetActive(true);
+        tankOrigin.Find("Barrel").gameObject.SetActive(true);
     }
 }

@@ -18,17 +18,18 @@ public class TankManager : MonoBehaviour
     [SerializeField] float deviateChance;
     [SerializeField] int amountDeviationMin;
     [SerializeField] int amountDeviationMax;
-    [SerializeField] GameObject[] tanks;
+    [SerializeField] List<GameObject> tanks;
     [SerializeField] Collider freeForAllSpawn;
     [SerializeField] Transform teamSpawnParent;
     [SerializeField] Transform PVESpawnParent;
     List<Collider> teamSpawns = new List<Collider>();
     List<Collider> PVESpawns = new List<Collider>();
     [SerializeField] LayerMask ignoreLayerMask;
-    public List<Transform> deadBots { get; set; } = new List<Transform>();
     bool checking = false;
 
     int teamIndex = 0;
+
+    RoomSettings roomSettings;
 
     public enum GenerationMode
     {
@@ -48,6 +49,19 @@ public class TankManager : MonoBehaviour
         {
             PVESpawns.Add(child.GetComponent<Collider>());
         }
+        if (PhotonNetwork.IsMasterClient && !GameManager.Instance.inLobby)
+        {
+            roomSettings = ((RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["RoomSettings"]);
+            for (int i = 0; i < tanks.Count; i++)
+            {
+                if (!roomSettings.bots.Contains(tanks[i].name))
+                {
+                    tanks.RemoveAt(i);
+                }
+            }
+            tankLimit = roomSettings.botLimit;
+            GenerateTanks(true);
+        }
     }
 
     public void GenerateTanks(bool cleanup = false)
@@ -60,8 +74,8 @@ public class TankManager : MonoBehaviour
             }
         }
 
-        int[] distribution = CustomRandom.Distribute(tankLimit, tanks.Length, deviateChance, amountDeviationMin, amountDeviationMax);
-        for (int i = 0; i < tanks.Length; i++)
+        int[] distribution = CustomRandom.Distribute(tankLimit, tanks.Count, deviateChance, amountDeviationMin, amountDeviationMax);
+        for (int i = 0; i < tanks.Count; i++)
         {
             for (int j = 0; j < distribution[i]; j++)
             {
@@ -72,7 +86,6 @@ public class TankManager : MonoBehaviour
 
     public void SpawnTank(GameObject tank)
     {
-
         switch (generationMode)
         {
             case GenerationMode.FFA:
@@ -92,6 +105,44 @@ public class TankManager : MonoBehaviour
                 Instantiate(tank, CustomRandom.GetSpawnPointInCollider(PVESpawns[spawnIndex], -PVESpawns[spawnIndex].transform.up, ignoreLayerMask, tank.transform.Find("Body").GetComponent<BoxCollider>(), PVESpawns[spawnIndex].transform.rotation), PVESpawns[spawnIndex].transform.rotation, tankParent);
                 break;
         }
+    }
+
+    public void RespawnTank(Transform tankOrigin, float respawnDelay = 3)
+    {
+        StartCoroutine(RespawnTankRoutine(tankOrigin, respawnDelay));
+    }
+
+    IEnumerator RespawnTankRoutine(Transform tankOrigin, float delay)
+    {
+        yield return new WaitForSecondsRealtime(delay);
+        switch (generationMode)
+        {
+            case GenerationMode.FFA:
+                tankOrigin.SetPositionAndRotation(CustomRandom.GetSpawnPointInCollider(freeForAllSpawn, Vector3.down, ignoreLayerMask), Quaternion.AngleAxis(Random.Range(-180, 180), Vector3.up));
+                break;
+            case GenerationMode.Teams:
+                int teamSpawnIndex = Random.Range(0, teamSpawns.Count);
+                // Implement team system for bots
+                /*for (int i = 0; i < teamSpawns.Count; i++)
+                {
+                    if (teamSpawns[i].name == playerTeam.Name)
+                    {
+                        teamSpawnIndex = i;
+                        break;
+                    }
+                }*/
+
+                tankOrigin.SetPositionAndRotation(CustomRandom.GetSpawnPointInCollider(teamSpawns[teamSpawnIndex], Vector3.down, ignoreLayerMask), teamSpawns[teamSpawnIndex].transform.rotation);
+                break;
+            case GenerationMode.PVE:
+                int spawnIndex = Random.Range(0, PVESpawns.Count);
+                tankOrigin.SetPositionAndRotation(CustomRandom.GetSpawnPointInCollider(PVESpawns[spawnIndex], Vector3.down, ignoreLayerMask), PVESpawns[spawnIndex].transform.rotation);
+                break;
+        }
+
+        tankOrigin.GetComponent<PhotonView>().RPC("ReactivateTank", RpcTarget.All);
+
+        tankOrigin.Find("TrackMarks").GetComponent<PhotonView>().RPC("ResetTrails", RpcTarget.All);
     }
 
     public void StartCheckTankCount()

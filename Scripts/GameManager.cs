@@ -44,7 +44,7 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     public Scene currentScene;
 
-    public readonly int multiplayerSceneIndexEnd = 4;
+    public readonly int multiplayerSceneIndexEnd = 5;
     int previousLevelIndex = -1;
 
     public int totalLives = -1;

@@ -180,8 +180,6 @@ public class PlayerControl : MonoBehaviourPunCallbacks
     {
         if (!PhotonNetwork.OfflineMode)
         {
-            transform.SetParent(null);
-
             if (photonView.IsMine)
             {
                 DataManager.playerData.deaths++;

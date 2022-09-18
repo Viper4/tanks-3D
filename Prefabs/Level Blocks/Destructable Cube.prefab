@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 7549524306613996966}
   - component: {fileID: 8952849939463885855}
   m_Layer: 2
-  m_Name: Breakable Cube
+  m_Name: Destructable Cube
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -51,6 +51,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   particles: {fileID: 7549524306613996966}
   destroyResistance: 1
+  overlapLayerMask:
+    serializedVersion: 2
+    m_Bits: 1071643080
   respawnDelay: 0
   solidObject: {fileID: 7809306434388904304}
   pitchRange:

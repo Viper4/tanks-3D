@@ -9,8 +9,8 @@ public class PhotonTankView : MonoBehaviourPunCallbacks, IPunObservable
 {
     [SerializeField] bool player;
     [SerializeField] Behaviour[] ownerComponents;
+    [SerializeField] Rigidbody rb;
     [SerializeField] Transform tankOrigin;
-    //[SerializeField] Rigidbody rb;
     [SerializeField] Transform turret;
     [SerializeField] Transform barrel;
     BaseTankLogic baseTankLogic;
@@ -19,6 +19,7 @@ public class PhotonTankView : MonoBehaviourPunCallbacks, IPunObservable
     [SerializeField] float rotateTowardsSpeed = 180;
     [SerializeField] float setRotationMinAngle = 90;
 
+    Vector3 targetVelocity;
     Vector3 targetPosition;
     Quaternion targetTankRotation;
     Quaternion targetTurretRotation;
@@ -26,6 +27,7 @@ public class PhotonTankView : MonoBehaviourPunCallbacks, IPunObservable
 
     private void Start()
     {
+        targetVelocity = Vector3.zero;
         targetPosition = tankOrigin.position;
         targetTankRotation = tankOrigin.rotation;
         targetTurretRotation = turret.rotation;
@@ -52,6 +54,7 @@ public class PhotonTankView : MonoBehaviourPunCallbacks, IPunObservable
     {
         if (!PhotonNetwork.OfflineMode && !GameManager.Instance.inLobby && !photonView.IsMine)
         {
+            rb.velocity = targetVelocity;
             tankOrigin.position = Vector3.MoveTowards(tankOrigin.position, targetPosition, (targetPosition - tankOrigin.position).magnitude * PhotonNetwork.SerializationRate * Time.deltaTime);
             tankOrigin.rotation = Quaternion.RotateTowards(tankOrigin.rotation, targetTankRotation, rotateTowardsSpeed * Time.deltaTime);
             turret.rotation = Quaternion.RotateTowards(turret.rotation, targetTurretRotation, rotateTowardsSpeed * Time.deltaTime);
@@ -65,6 +68,7 @@ public class PhotonTankView : MonoBehaviourPunCallbacks, IPunObservable
         {
             if (stream.IsWriting)
             {
+                stream.SendNext(rb.velocity);
                 stream.SendNext(tankOrigin.position);
                 stream.SendNext(tankOrigin.rotation);
                 stream.SendNext(turret.rotation);
@@ -72,6 +76,7 @@ public class PhotonTankView : MonoBehaviourPunCallbacks, IPunObservable
             }
             else if (stream.IsReading)
             {
+                targetVelocity = (Vector3)stream.ReceiveNext();
                 targetPosition = (Vector3)stream.ReceiveNext();
                 if (CustomMath.SqrDistance(targetPosition, tankOrigin.position) > teleportDistance * teleportDistance)
                 {

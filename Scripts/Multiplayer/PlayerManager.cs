@@ -205,11 +205,11 @@ public class PlayerManager : MonoBehaviourPunCallbacks
     {
         if (roomSettings.primaryMode == "Co-Op")
         {
-            Debug.Log("Removed Total Lives");
+            tankOrigin.parent.SetParent(null);
+
             GameManager.Instance.totalLives--;
             if (transform.childCount < 1)
             {
-                Debug.Log("Here");
                 GameManager.Instance.frozen = true;
                 PhotonNetwork.LocalPlayer.JoinOrSwitchTeam("Players");
                 StopCoroutines();

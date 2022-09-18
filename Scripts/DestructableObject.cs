@@ -4,8 +4,10 @@ using UnityEngine;
 
 public class DestructableObject : MonoBehaviour
 {
+    Collider objectCollider;
     public ParticleSystem particles;
     public int destroyResistance = 1;
+    [SerializeField] LayerMask overlapLayerMask;
     [SerializeField] float respawnDelay = 0;
     [SerializeField] GameObject solidObject;
     [SerializeField] float[] pitchRange = { 0.9f, 1.1f };
@@ -13,6 +15,7 @@ public class DestructableObject : MonoBehaviour
 
     private void Start()
     {
+        objectCollider = transform.GetChild(0).GetComponent<Collider>();
         audioSource = GetComponent<AudioSource>();
     }
 
@@ -35,6 +38,10 @@ public class DestructableObject : MonoBehaviour
     IEnumerator Respawn()
     {
         yield return new WaitForSeconds(respawnDelay);
+        while (Physics.CheckBox(objectCollider.bounds.center, objectCollider.bounds.extents * 0.5f, transform.rotation, overlapLayerMask))
+        {
+            yield return new WaitForSeconds(1f);
+        }
         solidObject.SetActive(true);
     }
 }

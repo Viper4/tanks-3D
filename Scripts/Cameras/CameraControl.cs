@@ -131,7 +131,8 @@ public class CameraControl : MonoBehaviour
                 if (dstFromTarget == 0 && !alternateCamera)
                 {
                     Cursor.lockState = CursorLockMode.Locked;
-                    pitchMinMax = pitchMinMaxL;
+                    float eulerXOffset = CustomMath.FormattedAngle(turret.eulerAngles.x);
+                    pitchMinMax = new Vector2(pitchMinMaxL.x + eulerXOffset, pitchMinMaxL.y + eulerXOffset);
 
                     turret.rotation = barrel.rotation = transform.rotation;
                     reticle.position = new Vector3(Screen.width * 0.5f, Screen.height * 0.5f, 0);
