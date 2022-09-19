@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
 using MyUnityAddons.Calculations;
@@ -13,6 +11,7 @@ public class PhotonTankView : MonoBehaviourPunCallbacks, IPunObservable
     [SerializeField] Transform tankOrigin;
     [SerializeField] Transform turret;
     [SerializeField] Transform barrel;
+    public string teamName = null;
     BaseTankLogic baseTankLogic;
 
     [SerializeField] float teleportDistance = 10;
@@ -32,19 +31,24 @@ public class PhotonTankView : MonoBehaviourPunCallbacks, IPunObservable
         targetTankRotation = tankOrigin.rotation;
         targetTurretRotation = turret.rotation;
         targetBarrelRotation = barrel.rotation;
-        if (!player && !GameManager.Instance.inLobby)
+        if (!player)
         {
-            baseTankLogic = GetComponent<BaseTankLogic>();
-            if (PhotonNetwork.IsMasterClient)
+            transform.SetParent(TankManager.Instance.tankParent);
+            if (!GameManager.Instance.inLobby)
             {
-                photonView.RequestOwnership();
-            }
-            else
-            {
-                baseTankLogic.disabled = true;
-                foreach (Behaviour component in ownerComponents)
+                baseTankLogic = GetComponent<BaseTankLogic>();
+
+                if (PhotonNetwork.IsMasterClient)
                 {
-                    component.enabled = false;
+                    photonView.RequestOwnership();
+                }
+                else
+                {
+                    baseTankLogic.disabled = true;
+                    foreach (Behaviour component in ownerComponents)
+                    {
+                        component.enabled = false;
+                    }
                 }
             }
         }
@@ -73,6 +77,8 @@ public class PhotonTankView : MonoBehaviourPunCallbacks, IPunObservable
                 stream.SendNext(tankOrigin.rotation);
                 stream.SendNext(turret.rotation);
                 stream.SendNext(barrel.rotation);
+
+                stream.SendNext(teamName);
             }
             else if (stream.IsReading)
             {
@@ -97,6 +103,7 @@ public class PhotonTankView : MonoBehaviourPunCallbacks, IPunObservable
                 {
                     barrel.rotation = targetBarrelRotation;
                 }
+                teamName = (string)stream.ReceiveNext();
             }
         }
     }

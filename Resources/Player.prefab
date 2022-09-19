@@ -1643,7 +1643,6 @@ GameObject:
   m_Component:
   - component: {fileID: 6270719373632848196}
   - component: {fileID: 6428929360221051965}
-  - component: {fileID: 7441374316466827520}
   m_Layer: 7
   m_Name: TrackMarks
   m_TagString: Untagged
@@ -1675,7 +1674,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2703059639156161896}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6dd208702654b75488b856b2664059db, type: 3}
   m_Name: 
@@ -1683,28 +1682,6 @@ MonoBehaviour:
   disabled: 0
   trackMarks: {fileID: 6270719373632848196}
   baseTankLogic: {fileID: 1596204444662429922}
---- !u!114 &7441374316466827520
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2703059639156161896}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ObservedComponentsFoldoutOpen: 1
-  Group: 0
-  prefixField: -1
-  Synchronization: 3
-  OwnershipTransfer: 0
-  observableSearch: 2
-  ObservedComponents: []
-  sceneViewId: 0
-  InstantiationId: 0
-  isRuntimeInstantiated: 0
 --- !u!1 &2711077548307209146
 GameObject:
   m_ObjectHideFlags: 0
@@ -1877,6 +1854,7 @@ GameObject:
   - component: {fileID: 1412780543857016976}
   - component: {fileID: 2243231744049258819}
   - component: {fileID: 8366179808463918726}
+  - component: {fileID: 4053865155938460900}
   m_Layer: 7
   m_Name: Player
   m_TagString: Player
@@ -2089,13 +2067,29 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   player: 1
   ownerComponents: []
-  rb: {fileID: 0}
+  rb: {fileID: 5382072997130578355}
   tankOrigin: {fileID: 3973960147865972936}
   turret: {fileID: 5363182311491822628}
   barrel: {fileID: 1653656013202730217}
+  teamName: 
   teleportDistance: 5
   rotateTowardsSpeed: 360
   setRotationMinAngle: 110
+--- !u!114 &4053865155938460900
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2926516457120658954}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6dd208702654b75488b856b2664059db, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  disabled: 0
+  trackMarks: {fileID: 6270719373632848196}
+  baseTankLogic: {fileID: 1596204444662429922}
 --- !u!1 &2983809502732183837
 GameObject:
   m_ObjectHideFlags: 0
@@ -2108,6 +2102,7 @@ GameObject:
   - component: {fileID: 354153935199837699}
   - component: {fileID: 1812788637775857560}
   - component: {fileID: 3824162289900518293}
+  - component: {fileID: 2131386687240594701}
   m_Layer: 7
   m_Name: Turret
   m_TagString: Player
@@ -2193,6 +2188,25 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1.0176814, y: 0.6751647, z: 1.0504236}
   m_Center: {x: 0.000005066395, y: 0.0038772672, z: -0.001989007}
+--- !u!1818360609 &2131386687240594701
+RotationConstraint:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2983809502732183837}
+  m_Enabled: 1
+  m_Weight: 1
+  m_RotationAtRest: {x: 0, y: 0, z: 0}
+  m_RotationOffset: {x: 0, y: 0, z: 0}
+  m_AffectRotationX: 0
+  m_AffectRotationY: 0
+  m_AffectRotationZ: 0
+  m_IsContraintActive: 1
+  m_IsLocked: 0
+  m_Sources:
+  - sourceTransform: {fileID: 2582466506741951664}
+    weight: 1
 --- !u!1 &3043566236340750830
 GameObject:
   m_ObjectHideFlags: 0
@@ -2548,6 +2562,7 @@ GameObject:
   - component: {fileID: 8403908816335348921}
   - component: {fileID: 572167722737613949}
   - component: {fileID: 5533689843808034576}
+  - component: {fileID: 2840502633955729433}
   m_Layer: 7
   m_Name: Body
   m_TagString: Player
@@ -2635,6 +2650,25 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1.9080905, y: 0.86395395, z: 2.2000003}
   m_Center: {x: 0, y: -0.048248097, z: -0.00000011920929}
+--- !u!1818360609 &2840502633955729433
+RotationConstraint:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3210382488312786739}
+  m_Enabled: 1
+  m_Weight: 1
+  m_RotationAtRest: {x: 0, y: 0, z: 0}
+  m_RotationOffset: {x: 0, y: 0, z: 0}
+  m_AffectRotationX: 0
+  m_AffectRotationY: 0
+  m_AffectRotationZ: 0
+  m_IsContraintActive: 1
+  m_IsLocked: 0
+  m_Sources:
+  - sourceTransform: {fileID: 2582466506741951664}
+    weight: 1
 --- !u!1 &3785153546325511660
 GameObject:
   m_ObjectHideFlags: 0
@@ -2647,6 +2681,7 @@ GameObject:
   - component: {fileID: 6297959131352730978}
   - component: {fileID: 1424248627029271327}
   - component: {fileID: 548198819848469261}
+  - component: {fileID: 8706465842334156932}
   m_Layer: 7
   m_Name: Barrel
   m_TagString: Player
@@ -2735,6 +2770,25 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 0.3845653, y: 0.3798088, z: 1.6}
   m_Center: {x: 0.000005312264, y: -0.009514242, z: 0.79}
+--- !u!1818360609 &8706465842334156932
+RotationConstraint:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3785153546325511660}
+  m_Enabled: 1
+  m_Weight: 1
+  m_RotationAtRest: {x: 0, y: 0, z: 0}
+  m_RotationOffset: {x: 0, y: 0, z: 0}
+  m_AffectRotationX: 0
+  m_AffectRotationY: 0
+  m_AffectRotationZ: 0
+  m_IsContraintActive: 1
+  m_IsLocked: 0
+  m_Sources:
+  - sourceTransform: {fileID: 2582466506741951664}
+    weight: 1
 --- !u!1 &4145612425703757153
 GameObject:
   m_ObjectHideFlags: 0

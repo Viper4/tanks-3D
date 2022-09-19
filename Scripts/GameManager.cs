@@ -69,6 +69,8 @@ public class GameManager : MonoBehaviourPunCallbacks
         }
         else if (Instance != this)
         {
+            Instance.autoPlay = autoPlay;
+            Instance.inLobby = inLobby;
             Instance.OnSceneLoad();
 
             Destroy(gameObject);
@@ -99,16 +101,12 @@ public class GameManager : MonoBehaviourPunCallbacks
                 PhotonNetwork.OfflineMode = true;
                 offlineMode = true;
                 loadingScreen.gameObject.SetActive(false);
-                autoPlay = true;
-                inLobby = true;
                 StartCoroutine(ResetAutoPlay(2.5f));
                 break;
             case "Waiting Room":
                 PhotonNetwork.OfflineMode = false;
                 offlineMode = false;
                 loadingScreen.gameObject.SetActive(false);
-                autoPlay = true;
-                inLobby = true;
                 StartCoroutine(ResetAutoPlay(2.5f));
                 break;
             case "End Scene":
@@ -163,9 +161,6 @@ public class GameManager : MonoBehaviourPunCallbacks
                 stats.Find("Deaths").GetComponent<Text>().text = "Deaths: " + DataManager.playerData.deaths;
                 break;
             default:
-                autoPlay = false;
-                inLobby = false;
-
                 if (currentScene.buildIndex <= multiplayerSceneIndexEnd)
                 {
                     PhotonNetwork.OfflineMode = false;

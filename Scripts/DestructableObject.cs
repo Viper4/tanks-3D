@@ -38,7 +38,7 @@ public class DestructableObject : MonoBehaviour
     IEnumerator Respawn()
     {
         yield return new WaitForSeconds(respawnDelay);
-        while (Physics.CheckBox(objectCollider.bounds.center, objectCollider.bounds.extents * 0.5f, transform.rotation, overlapLayerMask))
+        while (Physics.CheckBox(objectCollider.bounds.center, objectCollider.bounds.extents * 0.49f, transform.rotation, overlapLayerMask))
         {
             yield return new WaitForSeconds(1f);
         }

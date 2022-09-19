@@ -90,9 +90,9 @@ public class Trainer : MonoBehaviour
                 GameObject prefab = enemyPrefabs[Random.Range(0, enemyPrefabs.Length)];
                 GameObject newEnemy = Instantiate(prefab, CustomRandom.GetSpawnPointInCollider(spawnCollider, Vector3.down, ignoreLayers, prefab.transform.Find("Body").GetComponent<BoxCollider>(), Quaternion.identity), Quaternion.identity, toClearParent);
                 newEnemy.GetComponent<TargetSystem>().chooseTarget = true;
-                newEnemy.GetComponent<TargetSystem>().enemyParent = botParent;
+                newEnemy.GetComponent<TargetSystem>().enemyParents.Add(botParent);
                 newEnemy.GetComponent<FireControl>().bulletParent = toClearParent;
-                if(newEnemy.TryGetComponent<MineControl>(out var mineControl))
+                if (newEnemy.TryGetComponent<MineControl>(out var mineControl))
                 {
                     mineControl.mineParent = toClearParent;
                 }

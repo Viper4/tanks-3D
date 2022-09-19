@@ -4221,6 +4221,7 @@ GameObject:
   - component: {fileID: 5549030400376562678}
   - component: {fileID: 8503986742886749549}
   - component: {fileID: 1335566757080539461}
+  - component: {fileID: 1419163166616062650}
   m_Layer: 7
   m_Name: Player (Team 3)
   m_TagString: Player
@@ -4433,12 +4434,29 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   player: 1
   ownerComponents: []
+  rb: {fileID: 1452937771472063189}
   tankOrigin: {fileID: 7619948077754586030}
   turret: {fileID: 1510095868425357122}
   barrel: {fileID: 5218509464218668943}
+  teamName: 
   teleportDistance: 5
   rotateTowardsSpeed: 360
   setRotationMinAngle: 110
+--- !u!114 &1419163166616062650
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8503986742886749548}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6dd208702654b75488b856b2664059db, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  disabled: 0
+  trackMarks: {fileID: 693338698614071842}
+  baseTankLogic: {fileID: 5242175298298403716}
 --- !u!1 &8642890626476460667
 GameObject:
   m_ObjectHideFlags: 0
@@ -4955,8 +4973,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 693338698614071842}
-  - component: {fileID: 549734804693303131}
-  - component: {fileID: 4169272601461379686}
   m_Layer: 7
   m_Name: TrackMarks
   m_TagString: Untagged
@@ -4981,43 +4997,6 @@ Transform:
   m_Father: {fileID: 7619948077754586030}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &549734804693303131
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8870432923329666574}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6dd208702654b75488b856b2664059db, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  disabled: 0
-  trackMarks: {fileID: 693338698614071842}
-  baseTankLogic: {fileID: 5242175298298403716}
---- !u!114 &4169272601461379686
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8870432923329666574}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ObservedComponentsFoldoutOpen: 1
-  Group: 0
-  prefixField: -1
-  Synchronization: 3
-  OwnershipTransfer: 0
-  observableSearch: 2
-  ObservedComponents: []
-  sceneViewId: 0
-  InstantiationId: 0
-  isRuntimeInstantiated: 0
 --- !u!1 &8907835706611669946
 GameObject:
   m_ObjectHideFlags: 0

@@ -60,7 +60,7 @@ public class BaseTankLogic : MonoBehaviour
 
     public Vector3 targetTurretDir;
     public Vector3 targetTankDir;
-    Vector3 lastEulerAngles;
+    Quaternion lastParentRotation;
 
     public bool disabled = false;
     [SerializeField] private Transform tankOrigin;
@@ -88,7 +88,7 @@ public class BaseTankLogic : MonoBehaviour
         barrel = tankOrigin.Find("Barrel");
         trackMarks = tankOrigin.Find("TrackMarks");
         rb = tankOrigin.GetComponent<Rigidbody>();
-        lastEulerAngles = tankOrigin.eulerAngles;
+        lastParentRotation = tankOrigin.localRotation;
         speed = normalSpeed;
         targetTankDir = body.forward;
         if (GameManager.Instance.autoPlay)
@@ -129,26 +129,26 @@ public class BaseTankLogic : MonoBehaviour
                         float slopeAngle = 0; 
 
                         bool[] pathClear = { true, true };
-                        if (Physics.Raycast(body.position, body.forward, out RaycastHit forwardHit, 1.5f, barrierLayers))
+                        if (Physics.Raycast(tankOrigin.position, tankOrigin.forward, out RaycastHit forwardHit, 1.5f, barrierLayers))
                         {
-                            normalAngleY = Vector3.SignedAngle(body.forward, forwardHit.normal, body.up);
+                            normalAngleY = Vector3.SignedAngle(tankOrigin.forward, forwardHit.normal, body.up);
                             slopeAngle = Vector3.Angle(forwardHit.normal, Vector3.up);
 
-                            Debug.DrawLine(body.position, forwardHit.point, Color.red, 0.1f);
+                            Debug.DrawLine(tankOrigin.position, forwardHit.point, Color.red, 0.1f);
                         }
-                        else if (Physics.Raycast(body.position, body.forward - body.right, out RaycastHit forwardHitL, 1.5f, barrierLayers))
+                        else if (Physics.Raycast(tankOrigin.position, tankOrigin.forward - tankOrigin.right, out RaycastHit forwardHitL, 1.5f, barrierLayers))
                         {
-                            normalAngleY = Vector3.SignedAngle(body.forward, forwardHitL.normal, body.up);
+                            normalAngleY = Vector3.SignedAngle(tankOrigin.forward, forwardHitL.normal, body.up);
                             slopeAngle = Vector3.Angle(forwardHitL.normal, Vector3.up);
 
-                            Debug.DrawLine(body.position, forwardHitL.point, Color.red, 0.1f);
+                            Debug.DrawLine(tankOrigin.position, forwardHitL.point, Color.red, 0.1f);
                         }
-                        else if (Physics.Raycast(body.position, body.forward + body.right, out RaycastHit forwardHitR, 1.5f, barrierLayers))
+                        else if (Physics.Raycast(tankOrigin.position, tankOrigin.forward + tankOrigin.right, out RaycastHit forwardHitR, 1.5f, barrierLayers))
                         {
-                            normalAngleY = Vector3.SignedAngle(body.forward, forwardHitR.normal, body.up);
+                            normalAngleY = Vector3.SignedAngle(tankOrigin.forward, forwardHitR.normal, tankOrigin.up);
                             slopeAngle = Vector3.Angle(forwardHitR.normal, Vector3.up);
 
-                            Debug.DrawLine(body.position, forwardHitR.point, Color.red, 0.1f);
+                            Debug.DrawLine(tankOrigin.position, forwardHitR.point, Color.red, 0.1f);
                         }
 
                         if (slopeAngle > maxSlopeAngle)
@@ -157,35 +157,35 @@ public class BaseTankLogic : MonoBehaviour
                             {
                                 speed = avoidSpeed;
 
-                                if (Physics.Raycast(body.position, -body.right, out RaycastHit leftHit, 1.5f, barrierLayers))
+                                if (Physics.Raycast(tankOrigin.position, -tankOrigin.right, out RaycastHit leftHit, 1.5f, barrierLayers))
                                 {
                                     pathClear[0] = false;
-                                    Debug.DrawLine(body.position, leftHit.point, Color.red, 0.1f);
+                                    Debug.DrawLine(tankOrigin.position, leftHit.point, Color.red, 0.1f);
                                 }
-                                else if (Physics.Raycast(body.position + body.forward, -body.right, out RaycastHit leftHitF, 1.5f, barrierLayers))
+                                else if (Physics.Raycast(tankOrigin.position + tankOrigin.forward, -tankOrigin.right, out RaycastHit leftHitF, 1.5f, barrierLayers))
                                 {
                                     pathClear[0] = false;
-                                    Debug.DrawLine(body.position + body.forward, leftHitF.point, Color.red, 0.1f);
+                                    Debug.DrawLine(tankOrigin.position + tankOrigin.forward, leftHitF.point, Color.red, 0.1f);
                                 }
-                                else if (Physics.Raycast(body.position - body.forward, -body.right, out RaycastHit leftHitB, 1.5f, barrierLayers))
+                                else if (Physics.Raycast(tankOrigin.position - tankOrigin.forward, -tankOrigin.right, out RaycastHit leftHitB, 1.5f, barrierLayers))
                                 {
                                     pathClear[0] = false;
-                                    Debug.DrawLine(body.position - body.forward, leftHitB.point, Color.red, 0.1f);
+                                    Debug.DrawLine(tankOrigin.position - tankOrigin.forward, leftHitB.point, Color.red, 0.1f);
                                 }
-                                if (Physics.Raycast(body.position, body.right, out RaycastHit rightHit, 1.25f, barrierLayers))
+                                if (Physics.Raycast(tankOrigin.position, tankOrigin.right, out RaycastHit rightHit, 1.25f, barrierLayers))
                                 {
                                     pathClear[1] = false;
-                                    Debug.DrawLine(body.position, rightHit.point, Color.red, 0.1f);
+                                    Debug.DrawLine(tankOrigin.position, rightHit.point, Color.red, 0.1f);
                                 }
-                                else if (Physics.Raycast(body.position + body.forward, body.right, out RaycastHit rightHitF, 1.5f, barrierLayers))
+                                else if (Physics.Raycast(tankOrigin.position + tankOrigin.forward, tankOrigin.right, out RaycastHit rightHitF, 1.5f, barrierLayers))
                                 {
                                     pathClear[1] = false;
-                                    Debug.DrawLine(body.position + body.forward, rightHitF.point, Color.red, 0.1f);
+                                    Debug.DrawLine(tankOrigin.position + tankOrigin.forward, rightHitF.point, Color.red, 0.1f);
                                 }
-                                else if (Physics.Raycast(body.position - body.forward, body.right, out RaycastHit rightHitB, 1.5f, barrierLayers))
+                                else if (Physics.Raycast(tankOrigin.position - tankOrigin.forward, tankOrigin.right, out RaycastHit rightHitB, 1.5f, barrierLayers))
                                 {
                                     pathClear[1] = false;
-                                    Debug.DrawLine(body.position - body.forward, rightHitB.point, Color.red, 0.1f);
+                                    Debug.DrawLine(tankOrigin.position - tankOrigin.forward, rightHitB.point, Color.red, 0.1f);
                                 }
 
                                 if (pathClear[0])
@@ -194,25 +194,25 @@ public class BaseTankLogic : MonoBehaviour
                                     {
                                         if (normalAngleY < 0)
                                         {
-                                            targetTankDir = -body.right;
+                                            targetTankDir = -tankOrigin.right;
                                         }
                                         else
                                         {
-                                            targetTankDir = body.right;
+                                            targetTankDir = tankOrigin.right;
                                         }
                                     }
                                     else
                                     {
-                                        targetTankDir = -body.right;
+                                        targetTankDir = -tankOrigin.right;
                                     }
                                 }
                                 else if (pathClear[1])
                                 {
-                                    targetTankDir = body.right;
+                                    targetTankDir = tankOrigin.right;
                                 }
                                 else
                                 {
-                                    targetTankDir = -body.forward;
+                                    targetTankDir = -tankOrigin.forward;
                                 }
                             }
                         }
@@ -270,8 +270,8 @@ public class BaseTankLogic : MonoBehaviour
                     turret.rotation = barrel.rotation = Quaternion.RotateTowards(barrel.rotation, targetTurretRot, Time.deltaTime * turretRotSpeed);
 
                     // Correcting turret and barrel y rotation to not depend on the parent
-                    turret.eulerAngles = new Vector3(turret.eulerAngles.x, turret.eulerAngles.y + lastEulerAngles.y - transform.eulerAngles.y, turret.eulerAngles.z);
-                    barrel.eulerAngles = new Vector3(barrel.eulerAngles.x, barrel.eulerAngles.y + lastEulerAngles.y - transform.eulerAngles.y, barrel.eulerAngles.z);
+                    turret.localRotation = Quaternion.Inverse(tankOrigin.localRotation) * lastParentRotation * turret.localRotation;
+                    barrel.localRotation = Quaternion.Inverse(tankOrigin.localRotation) * lastParentRotation * barrel.localRotation;
 
                     // Zeroing x and z eulers of turret and clamping x and y eulers
                     float clampedX = CustomMath.ClampAngle(barrel.localEulerAngles.x, turretRangeX[0], turretRangeX[1]);
@@ -280,8 +280,8 @@ public class BaseTankLogic : MonoBehaviour
                     turret.localEulerAngles = new Vector3(0, clampedY, 0);
                     barrel.localEulerAngles = new Vector3(clampedX, clampedY, 0);
 
-                    lastEulerAngles = tankOrigin.eulerAngles;
-                }                
+                    lastParentRotation = tankOrigin.localRotation;
+                }
             }
         }
         else
@@ -349,6 +349,7 @@ public class BaseTankLogic : MonoBehaviour
             {
                 if (!GameManager.Instance.inLobby && GameManager.Instance.autoPlay)
                 {
+                    Debug.Log("Here");
                     if (transform.root.TryGetComponent<TankManager>(out var tankManager))
                     {
                         tankManager.RespawnTank(tankOrigin);
@@ -360,7 +361,6 @@ public class BaseTankLogic : MonoBehaviour
                 }
                 else
                 {
-                    transform.SetParent(null);
                     if (transform.root.TryGetComponent<TankManager>(out var tankManager))
                     {
                         tankManager.StartCheckTankCount();
@@ -456,8 +456,8 @@ public class BaseTankLogic : MonoBehaviour
         {
             tankOrigin.forward = -tankOrigin.forward;
             body.forward = -body.forward;
-            turret.forward = -turret.forward;
-            barrel.forward = -barrel.forward;
+            //turret.forward = -turret.forward;
+            //barrel.forward = -barrel.forward;
             trackMarks.forward = -trackMarks.forward;
         }
     }

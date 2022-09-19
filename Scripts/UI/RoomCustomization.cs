@@ -44,14 +44,20 @@ public class RoomCustomization : MonoBehaviour
             CoOpSettings.gameObject.SetActive(true);
             mapSelection.gameObject.SetActive(false);
 
-            DataManager.roomSettings.map = "Classic 1";
+            if (DataManager.roomSettings.map != "Classic 1" && DataManager.roomSettings.map != "Regular 1")
+            {
+                DataManager.roomSettings.map = "Classic 1";
+            }
         }
         else
         {
             CoOpSettings.gameObject.SetActive(false);
             mapSelection.gameObject.SetActive(true);
 
-            DataManager.roomSettings.map = "Classic";
+            if (DataManager.roomSettings.map == "Classic 1" || DataManager.roomSettings.map == "Regular 1")
+            {
+                DataManager.roomSettings.map = "Classic";
+            }
         }
     }
 
@@ -100,7 +106,10 @@ public class RoomCustomization : MonoBehaviour
     {
         foreach (int value in multiDropdown.values)
         {
-            DataManager.roomSettings.bots.Add(multiDropdown.options[value].text);
+            if (!DataManager.roomSettings.bots.Contains(multiDropdown.options[value].text))
+            {
+                DataManager.roomSettings.bots.Add(multiDropdown.options[value].text);
+            }
         }
     }
 
@@ -126,6 +135,7 @@ public class RoomCustomization : MonoBehaviour
 
     public void UpdateSettingsUI()
     {
+        Debug.Log("Updated");
         GameObject[] allUISettings = GameObject.FindGameObjectsWithTag("UI Setting");
         foreach (GameObject setting in allUISettings)
         {
@@ -196,7 +206,7 @@ public class RoomCustomization : MonoBehaviour
             {
                 if (multiDropdown.options[j].text == optionTexts[i])
                 {
-                    multiDropdown.values.Add(j);
+                    multiDropdown.AddValue(j);
                     break;
                 }
             }

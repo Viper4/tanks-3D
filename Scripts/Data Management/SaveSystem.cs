@@ -99,7 +99,6 @@ public static class SaveSystem
         playerData.time = defaultPlayerData.time;
         playerData.bestTime = bestTime;
         playerData.sceneIndex = defaultPlayerData.sceneIndex;
-        Debug.Log(playerData.kills + " / " + defaultPlayerData.kills);
 
         playerData.SavePlayerData(fileName, false);
 
@@ -218,6 +217,7 @@ public static class SaveSystem
 
     public static RoomSettings LoadRoomSettings(string fileName)
     {
+        Debug.Log("Loaded");
         RoomSettings newSettings = new RoomSettings();
         if (File.Exists(SAVE_FOLDER + fileName + roomSettingsExtension))
         {

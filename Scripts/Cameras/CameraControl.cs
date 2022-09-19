@@ -18,7 +18,7 @@ public class CameraControl : MonoBehaviour
     Transform turret;
     Transform barrel;
 
-    Vector3 lastEulerAngles;
+    Quaternion lastParentRotation;
 
     [SerializeField] float dstFromTarget = 4;
     [SerializeField] Vector2 targetDstMinMax = new Vector2(0, 30);
@@ -62,7 +62,7 @@ public class CameraControl : MonoBehaviour
             Cursor.visible = true;
             Cursor.lockState = CursorLockMode.None;
 
-            lastEulerAngles = tankOrigin.eulerAngles;
+            lastParentRotation = tankOrigin.localRotation;
         }
         else
         {
@@ -118,8 +118,8 @@ public class CameraControl : MonoBehaviour
             if (!playerControl.Dead && Time.timeScale != 0)
             {
                 // Unlinking y eulers of turret, barrel, and target from parent
-                turret.eulerAngles = new Vector3(turret.eulerAngles.x, turret.eulerAngles.y + lastEulerAngles.y - tankOrigin.eulerAngles.y, turret.eulerAngles.z);
-                barrel.eulerAngles = target.eulerAngles = new Vector3(barrel.eulerAngles.x, barrel.eulerAngles.y + lastEulerAngles.y - tankOrigin.eulerAngles.y, barrel.eulerAngles.z);
+                turret.localRotation = Quaternion.Inverse(tankOrigin.localRotation) * lastParentRotation * turret.localRotation;
+                barrel.localRotation = Quaternion.Inverse(tankOrigin.localRotation) * lastParentRotation * barrel.localRotation;
 
                 reticle.gameObject.SetActive(true);
                 Cursor.visible = false;
@@ -158,7 +158,7 @@ public class CameraControl : MonoBehaviour
                         }
 
                         // When locking the turret, the barrel and turret start drifting when turning the tank on slopes
-                        turret.localEulerAngles = new Vector3(0, barrel.localEulerAngles.y, 0);
+                        //turret.localEulerAngles = new Vector3(0, barrel.localEulerAngles.y, 0);
                     }
                 }
 
@@ -166,7 +166,7 @@ public class CameraControl : MonoBehaviour
                 turret.localEulerAngles = new Vector3(0, turret.localEulerAngles.y, 0);
                 barrel.localEulerAngles = new Vector3(CustomMath.ClampAngle(barrel.localEulerAngles.x, pitchMinMaxL.x, pitchMinMaxL.y), barrel.localEulerAngles.y, 0);
 
-                lastEulerAngles = tankOrigin.eulerAngles;
+                lastParentRotation = tankOrigin.localRotation;
             }
             else
             {

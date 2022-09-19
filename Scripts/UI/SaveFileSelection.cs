@@ -88,7 +88,7 @@ public class SaveFileSelection : MonoBehaviour
         {
             DataManager.roomSettings = SaveSystem.LoadRoomSettings(selectedSaveSlot.Find("Label").GetComponent<Text>().text);
         }
-        else
+        else if (popupText.gameObject.activeInHierarchy)
         {
             ShowPopup(2.5f, "No file selected");
         }

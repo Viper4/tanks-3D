@@ -11,6 +11,8 @@ using System.Collections.Generic;
 
 public class PlayerManager : MonoBehaviourPunCallbacks
 {
+    public static PlayerManager Instance;
+
     // Prefabs must be in Resources folder
     public Transform playerParent;
     [SerializeField] Transform playerPrefab;
@@ -34,6 +36,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks
         }
         else
         {
+            Instance = this;
             foreach (Transform child in teamSpawnParent)
             {
                 teamSpawns.Add(child.GetComponent<Collider>());
@@ -183,9 +186,10 @@ public class PlayerManager : MonoBehaviourPunCallbacks
                     break;
             }
 
-            tankOrigin.parent.GetComponent<PhotonView>().RPC("ReactivatePlayer", RpcTarget.All);
+            PhotonView PV = tankOrigin.parent.GetComponent<PhotonView>();
 
-            tankOrigin.Find("TrackMarks").GetComponent<PhotonView>().RPC("ResetTrails", RpcTarget.All);
+            PV.RPC("ReactivatePlayer", RpcTarget.All);
+            PV.RPC("ResetTrails", RpcTarget.All);
         }
         else
         {

@@ -10,7 +10,7 @@ public class MultiDropdown : MonoBehaviour
     public List<Dropdown.OptionData> options;
     [SerializeField] RectTransform optionTemplate;
 
-    public List<int> values;
+    public List<int> values = new List<int>();
 
     List<RectTransform> optionToggles = new List<RectTransform>();
 
@@ -41,6 +41,12 @@ public class MultiDropdown : MonoBehaviour
         }
     }
 
+    public void AddValue(int value)
+    {
+        Toggle toggleComponent = optionToggles[value].GetComponent<Toggle>();
+        toggleComponent.isOn = true;
+    }
+
     void UpdateCaptionText()
     {
         if (values.Count == 0)
@@ -59,7 +65,6 @@ public class MultiDropdown : MonoBehaviour
 
     public void OnOptionToggle(RectTransform toggle)
     {
-
         if (optionToggles.Contains(toggle))
         {
             int value = optionToggles.IndexOf(toggle);

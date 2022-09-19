@@ -762,7 +762,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 9069381433934400627}
-  - component: {fileID: 216266841708159238}
   m_Layer: 2
   m_Name: TrackMarks
   m_TagString: Tank
@@ -787,21 +786,6 @@ Transform:
   m_Father: {fileID: 8530993442464327376}
   m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &216266841708159238
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8854866476961962988}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6dd208702654b75488b856b2664059db, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  disabled: 0
-  trackMarks: {fileID: 9069381433934400627}
-  baseTankLogic: {fileID: 8147042413594737687}
 --- !u!1 &8996626504511005565
 GameObject:
   m_ObjectHideFlags: 0
@@ -918,6 +902,7 @@ GameObject:
   - component: {fileID: 4436427137093535442}
   - component: {fileID: 5630658949621447858}
   - component: {fileID: 222640088891493764}
+  - component: {fileID: 2134372190508770214}
   m_Layer: 25
   m_Name: Purple Tank
   m_TagString: Tank
@@ -1017,7 +1002,7 @@ MonoBehaviour:
   ignoreLayerMask:
     serializedVersion: 2
     m_Bits: 268437294
-  enemyParent: {fileID: 0}
+  enemyParents: []
 --- !u!114 &8147042413594737687
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1206,10 +1191,26 @@ MonoBehaviour:
   ownerComponents:
   - {fileID: -2896793128741677329}
   - {fileID: 5009471853096854092}
-  tankOrigin: {fileID: 8530993442464327376}
   rb: {fileID: 5207649292017990146}
+  tankOrigin: {fileID: 8530993442464327376}
   turret: {fileID: 2296614985622072900}
   barrel: {fileID: 4845901430446646921}
+  teamName: 
   teleportDistance: 5
   rotateTowardsSpeed: 360
   setRotationMinAngle: 110
+--- !u!114 &2134372190508770214
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9020707831748607082}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6dd208702654b75488b856b2664059db, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  disabled: 0
+  trackMarks: {fileID: 9069381433934400627}
+  baseTankLogic: {fileID: 8147042413594737687}

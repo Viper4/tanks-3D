@@ -13,7 +13,9 @@ public class TargetSystem : MonoBehaviour
     Transform turret;
     Transform barrel;
     public LayerMask ignoreLayerMask;
-    public Transform enemyParent;
+    public List<Transform> enemyParents;
+
+    PhotonTankView myPTV;
 
     private void Start()
     {
@@ -37,11 +39,13 @@ public class TargetSystem : MonoBehaviour
                 currentTarget = primaryTarget;
             }
         }
-        
-        if (enemyParent == null)
+
+        if (enemyParents == null)
         {
-            enemyParent = transform.parent;
+            enemyParents.Add(transform.parent);
         }
+
+        myPTV = GetComponent<PhotonTankView>();
     }
 
     // Update is called once per frame
@@ -49,60 +53,45 @@ public class TargetSystem : MonoBehaviour
     {
         if (chooseTarget)
         {
-            if (enemyParent.childCount > 1)
+            if (enemyParents.Count > 0)
             {
+                List<Transform> allTargets = new List<Transform>();
                 List<Transform> visibleTargets = new List<Transform>();
-                foreach (Transform tank in enemyParent)
+                for (int i = 0; i < enemyParents.Count; i++)
                 {
-                    if (tank != transform)
+                    Transform enemyParent = enemyParents[i];
+                    foreach (Transform tank in enemyParent)
                     {
-                        Transform target;
-                        if (tank.CompareTag("Player"))
+                        if (tank != transform && (myPTV.teamName == null || tank.GetComponent<PhotonTankView>().teamName != myPTV.teamName))
                         {
-                            target = tank.transform.Find("Tank Origin").Find(preferredTargetArea);
-                        }
-                        else
-                        {
-                            target = tank.transform.Find(preferredTargetArea);
-                        }
-
-                        if (Physics.Raycast(turret.position, target.position - turret.position, out RaycastHit hit, Mathf.Infinity, ~ignoreLayerMask, QueryTriggerInteraction.Ignore))
-                        {
-                            if (hit.transform.CompareTag(target.transform.tag))
+                            Transform target;
+                            if (tank.CompareTag("Player"))
                             {
-                                visibleTargets.Add(target);
+                                target = tank.transform.Find("Tank Origin").Find(preferredTargetArea);
+                            }
+                            else
+                            {
+                                target = tank.transform.Find(preferredTargetArea);
+                            }
+                            allTargets.Add(target);
+                            if (Physics.Raycast(turret.position, target.position - turret.position, out RaycastHit hit, Mathf.Infinity, ~ignoreLayerMask, QueryTriggerInteraction.Ignore))
+                            {
+                                if (hit.transform.CompareTag(target.transform.tag))
+                                {
+                                    visibleTargets.Add(target);
+                                }
                             }
                         }
                     }
                 }
 
-                if (visibleTargets.Count != 0)
+                if (visibleTargets.Count > 0)
                 {
                     currentTarget = transform.ClosestTransform(visibleTargets);
                 }
                 else
                 {
-                    currentTarget = transform.ClosestTransform(enemyParent);
-                    if (currentTarget.CompareTag("Player"))
-                    {
-                        currentTarget = currentTarget.Find("Tank Origin").Find(preferredTargetArea);
-                    }
-                    else
-                    {
-                        currentTarget = currentTarget.Find(preferredTargetArea);
-                    }
-                }
-            }
-            else if (enemyParent.childCount == 1)
-            {
-                Transform enemyChild = enemyParent.GetChild(0);
-                if (enemyChild.CompareTag("Player"))
-                {
-                    currentTarget = enemyChild.Find("Tank Origin").Find(preferredTargetArea);
-                }
-                else
-                {
-                    currentTarget = enemyChild.Find(preferredTargetArea);
+                    currentTarget = transform.ClosestTransform(allTargets);
                 }
             }
         }
@@ -115,7 +104,7 @@ public class TargetSystem : MonoBehaviour
             }
             else
             {
-                currentTarget = enemyParent;
+                currentTarget = enemyParents[0];
             }
         }
     }

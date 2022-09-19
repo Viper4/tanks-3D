@@ -7,17 +7,24 @@ using MyUnityAddons.CustomPhoton;
 
 public class DataManager : MonoBehaviourPun
 {
+    static DataManager Instance;
+
     public static PlayerSettings playerSettings = new PlayerSettings();
     public static RoomSettings roomSettings = new RoomSettings();
     public static PlayerData playerData = new PlayerData();
 
     private void Start()
     {
-        playerData = SaveSystem.LoadPlayerData("PlayerData");
-        playerSettings = SaveSystem.LoadPlayerSettings("PlayerSettings", transform);
-        roomSettings = SaveSystem.LoadRoomSettings(SaveSystem.LatestFileInSaveFolder(false, ".roomsettings"));
+        if (Instance == null)
+        {
+            playerData = SaveSystem.LoadPlayerData("PlayerData");
+            playerSettings = SaveSystem.LoadPlayerSettings("PlayerSettings", transform);
+            roomSettings = SaveSystem.LoadRoomSettings(SaveSystem.LatestFileInSaveFolder(false, ".roomsettings"));
 
-        RegisterCustomTypes();
+            RegisterCustomTypes();
+
+            Instance = this;
+        }
     }
 
     // Update is called once per frame

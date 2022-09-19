@@ -270,7 +270,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4612882154067720755}
-  - component: {fileID: 7968080951278322270}
   m_Layer: 2
   m_Name: TrackMarks
   m_TagString: Tank
@@ -295,21 +294,6 @@ Transform:
   m_Father: {fileID: 8820478986772652707}
   m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &7968080951278322270
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5459586628171892748}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6dd208702654b75488b856b2664059db, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  disabled: 0
-  trackMarks: {fileID: 4612882154067720755}
-  baseTankLogic: {fileID: 9015243663734650980}
 --- !u!1 &5994608288994695818
 GameObject:
   m_ObjectHideFlags: 0
@@ -687,6 +671,7 @@ GameObject:
   - component: {fileID: 7576510698517756716}
   - component: {fileID: 7904251344502137440}
   - component: {fileID: 30512970735458952}
+  - component: {fileID: 1003759196487152242}
   m_Layer: 25
   m_Name: Blue Tank
   m_TagString: Tank
@@ -765,7 +750,7 @@ MonoBehaviour:
   ignoreLayerMask:
     serializedVersion: 2
     m_Bits: 268437294
-  enemyParent: {fileID: 0}
+  enemyParents: []
 --- !u!114 &9015243663734650980
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -952,13 +937,29 @@ MonoBehaviour:
   ownerComponents:
   - {fileID: 4345622123981235058}
   - {fileID: -4089808789469299082}
-  tankOrigin: {fileID: 8820478986772652707}
   rb: {fileID: -563639079389155497}
+  tankOrigin: {fileID: 8820478986772652707}
   turret: {fileID: 1428688472867334711}
   barrel: {fileID: 5714107077558805242}
+  teamName: 
   teleportDistance: 5
   rotateTowardsSpeed: 360
   setRotationMinAngle: 110
+--- !u!114 &1003759196487152242
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8152485418157340697}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6dd208702654b75488b856b2664059db, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  disabled: 0
+  trackMarks: {fileID: 4612882154067720755}
+  baseTankLogic: {fileID: 9015243663734650980}
 --- !u!1 &8330142916516434170
 GameObject:
   m_ObjectHideFlags: 0
