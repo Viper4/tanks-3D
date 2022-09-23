@@ -19,6 +19,7 @@ public class BrownBot : MonoBehaviour
 
     TargetSystem targetSystem;
     FireControl fireControl;
+    BaseTankLogic baseTankLogic;
 
     // Start is called before the first frame Update
     void Start()
@@ -26,11 +27,10 @@ public class BrownBot : MonoBehaviour
         barrel = transform.Find("Barrel");
         turret = transform.Find("Turret");
 
-        if (GetComponent<TargetSystem>() != null)
-        {
-            targetSystem = GetComponent<TargetSystem>();
-        }
+
+        targetSystem = GetComponent<TargetSystem>();
         fireControl = GetComponent<FireControl>();
+        baseTankLogic = GetComponent<BaseTankLogic>();
 
         StartCoroutine(ChangeScan());
     }
@@ -38,7 +38,7 @@ public class BrownBot : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!GameManager.Instance.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null)
+        if (!GameManager.Instance.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null && !baseTankLogic.disabled)
         {
             float angleX = Mathf.PingPong(Time.time * turretRotSpeed, turretScanRange.x * 2) - turretScanRange.x;
             float angleY = Mathf.PingPong(Time.time * turretRotSpeed, turretScanRange.y * 2) - turretScanRange.y;

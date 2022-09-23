@@ -30,12 +30,14 @@ public class PlayerManager : MonoBehaviourPunCallbacks
 
     private void Start()
     {
-        if (GameManager.Instance.offlineMode)
+        if (PhotonNetwork.OfflineMode)
         {
             Destroy(this);
         }
         else
         {
+            BoxCollider playerSpawnCollider = playerPrefab.Find("Tank Origin").Find("Body").GetComponent<BoxCollider>();
+
             Instance = this;
             foreach (Transform child in teamSpawnParent)
             {
@@ -76,7 +78,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks
                 }
                 else
                 {
-                    newPlayer = SpawnPlayer(CustomRandom.GetSpawnPointInCollider(defaultSpawns[spawnIndex], Vector3.down, ignoreLayerMask), defaultSpawns[spawnIndex].transform.rotation);
+                    newPlayer = SpawnPlayer(CustomRandom.GetSpawnPointInCollider(defaultSpawns[spawnIndex], Vector3.down, ignoreLayerMask, playerSpawnCollider, defaultSpawns[spawnIndex].transform.rotation), defaultSpawns[spawnIndex].transform.rotation);
                     playerProperties["Kills"] = DataManager.playerData.kills;
                     playerProperties["Deaths"] = DataManager.playerData.deaths;
                 }
@@ -94,7 +96,8 @@ public class PlayerManager : MonoBehaviourPunCallbacks
                     switch (roomSettings.primaryMode)
                     {
                         case "FFA":
-                            newPlayer = SpawnPlayer(CustomRandom.GetSpawnPointInCollider(freeForAllSpawn, Vector3.down, ignoreLayerMask), Quaternion.AngleAxis(Random.Range(-180, 180), Vector3.up));
+                            Quaternion randomRotation = Quaternion.AngleAxis(Random.Range(-180, 180), Vector3.up);
+                            newPlayer = SpawnPlayer(CustomRandom.GetSpawnPointInCollider(freeForAllSpawn, Vector3.down, ignoreLayerMask, playerSpawnCollider, randomRotation), randomRotation);
                             break;
                         case "Teams":
                             int teamIndex = -1;
@@ -107,13 +110,13 @@ public class PlayerManager : MonoBehaviourPunCallbacks
                                 }
                             }
 
-                            Vector3 spawnPosition = CustomRandom.GetSpawnPointInCollider(teamSpawns[teamIndex], Vector3.down, ignoreLayerMask);
+                            Vector3 spawnPosition = CustomRandom.GetSpawnPointInCollider(teamSpawns[teamIndex], Vector3.down, ignoreLayerMask, playerSpawnCollider, teamSpawns[teamIndex].transform.rotation);
 
                             newPlayer = PhotonNetwork.Instantiate(teamPlayerPrefabs[teamIndex].name, spawnPosition, teamSpawns[teamIndex].transform.rotation);
                             newPlayer.name = teamPlayerPrefabs[teamIndex].name;
                             break;
                         default:
-                            newPlayer = SpawnPlayer(CustomRandom.GetSpawnPointInCollider(defaultSpawns[spawnIndex], Vector3.down, ignoreLayerMask), defaultSpawns[spawnIndex].transform.rotation);
+                            newPlayer = SpawnPlayer(CustomRandom.GetSpawnPointInCollider(defaultSpawns[spawnIndex], Vector3.down, ignoreLayerMask, playerSpawnCollider, defaultSpawns[spawnIndex].transform.rotation), defaultSpawns[spawnIndex].transform.rotation);
                             playerProperties["Kills"] = DataManager.playerData.kills;
                             playerProperties["Deaths"] = DataManager.playerData.deaths;
                             break;
@@ -212,7 +215,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks
             tankOrigin.parent.SetParent(null);
 
             GameManager.Instance.totalLives--;
-            if (transform.childCount < 1)
+            if (playerParent.childCount < 1)
             {
                 GameManager.Instance.frozen = true;
                 PhotonNetwork.LocalPlayer.JoinOrSwitchTeam("Players");
@@ -245,26 +248,10 @@ public class PlayerManager : MonoBehaviourPunCallbacks
         if (GameManager.Instance.totalLives > 0)
         {
             GameManager.Instance.PhotonLoadScene(-1, 3, true, false);
-            PhotonHashtable parameters = new PhotonHashtable
-            {
-                { "sceneIndex", -1 },
-                { "delay", 3 },
-                { "save", true },
-                { "waitWhilePaused", false }
-            };
-            PhotonNetwork.RaiseEvent(GameManager.Instance.LoadSceneEventCode, parameters, RaiseEventOptions.Default, SendOptions.SendUnreliable);
         }
         else
         {
             GameManager.Instance.PhotonLoadScene("End Scene", 3, true, false);
-            PhotonHashtable parameters = new PhotonHashtable
-            {
-                { "sceneName", "End Scene" },
-                { "delay", 3 },
-                { "save", true },
-                { "waitWhilePaused", false }
-            };
-            PhotonNetwork.RaiseEvent(GameManager.Instance.LoadSceneEventCode, parameters, RaiseEventOptions.Default, SendOptions.SendUnreliable);
         }
     }
 

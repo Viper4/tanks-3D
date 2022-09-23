@@ -361,7 +361,7 @@ PrefabInstance:
     - target: {fileID: -4089808789469299082, guid: 013dcda7d98c1ff44a08d58dc3401393, type: 3}
       propertyPath: primaryTarget
       value: 
-      objectReference: {fileID: 1652207148}
+      objectReference: {fileID: 775086557}
     - target: {fileID: -4089808789469299082, guid: 013dcda7d98c1ff44a08d58dc3401393, type: 3}
       propertyPath: preferredTargetArea
       value: Turret
@@ -901,6 +901,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: cdeaed633b5316343bb8e6fba6cbf904, type: 3}
+--- !u!4 &775086557 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4301954169777001681, guid: cdeaed633b5316343bb8e6fba6cbf904, type: 3}
+  m_PrefabInstance: {fileID: 775086556}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1080608054
 GameObject:
   m_ObjectHideFlags: 0
@@ -926,7 +931,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1080608054}
   m_LocalRotation: {x: -0, y: 0.7071068, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: -14, y: 0, z: 2}
+  m_LocalPosition: {x: -14, y: 0, z: 3}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -944,7 +949,7 @@ BoxCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 3, y: 2, z: 3}
+  m_Size: {x: 5, y: 2, z: 5}
   m_Center: {x: 0, y: 1, z: 0}
 --- !u!1 &1217908354
 GameObject:
@@ -971,7 +976,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1217908354}
   m_LocalRotation: {x: -0, y: 0.7071068, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: -16, y: 0, z: -6}
+  m_LocalPosition: {x: -16, y: 0, z: -8}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -989,7 +994,7 @@ BoxCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 3, y: 2, z: 3}
+  m_Size: {x: 5, y: 2, z: 5}
   m_Center: {x: 0, y: 1, z: 0}
 --- !u!1001 &1338290885
 PrefabInstance:
@@ -1073,7 +1078,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1365417563}
   m_LocalRotation: {x: -0, y: 0.7071068, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: -14, y: 0, z: -2}
+  m_LocalPosition: {x: -14, y: 0, z: -3}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1091,7 +1096,7 @@ BoxCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 3, y: 2, z: 3}
+  m_Size: {x: 5, y: 2, z: 5}
   m_Center: {x: 0, y: 1, z: 0}
 --- !u!1 &1643479947
 GameObject:
@@ -1118,7 +1123,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1643479947}
   m_LocalRotation: {x: -0, y: 0.7071068, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: -16, y: 0, z: 6}
+  m_LocalPosition: {x: -16, y: 0, z: 8}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1136,13 +1141,8 @@ BoxCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 3, y: 2, z: 3}
+  m_Size: {x: 5, y: 2, z: 5}
   m_Center: {x: 0, y: 1, z: 0}
---- !u!4 &1652207148 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 4301954169777001681, guid: cdeaed633b5316343bb8e6fba6cbf904, type: 3}
-  m_PrefabInstance: {fileID: 775086556}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1749873268
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1268,7 +1268,7 @@ PrefabInstance:
     - target: {fileID: -4089808789469299082, guid: 013dcda7d98c1ff44a08d58dc3401393, type: 3}
       propertyPath: primaryTarget
       value: 
-      objectReference: {fileID: 1652207148}
+      objectReference: {fileID: 775086557}
     - target: {fileID: -4089808789469299082, guid: 013dcda7d98c1ff44a08d58dc3401393, type: 3}
       propertyPath: preferredTargetArea
       value: Turret

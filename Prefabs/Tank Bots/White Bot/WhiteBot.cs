@@ -24,11 +24,10 @@ public class WhiteBot : MonoBehaviour
         turretRenderer = transform.Find("Turret").GetComponent<MeshRenderer>();
         barrelRenderer = transform.Find("Barrel").GetComponent<MeshRenderer>();
         yield return new WaitUntil(() => !GameManager.Instance.frozen && Time.timeScale != 0);
-        Instantiate(disappearEffect, transform.position, transform.rotation);
-        Instantiate(circleEffect, transform);
+        PoofEffect();
     }
 
-    private void Update()
+    private void LateUpdate()
     {
         if (!GameManager.Instance.frozen && Time.timeScale != 0)
         {
@@ -51,5 +50,11 @@ public class WhiteBot : MonoBehaviour
         {
             bodyRenderer.enabled = turretRenderer.enabled = barrelRenderer.enabled = true;
         }
+    }
+
+    public void PoofEffect()
+    {
+        Instantiate(disappearEffect, transform.position, transform.rotation);
+        Instantiate(circleEffect, transform);
     }
 }

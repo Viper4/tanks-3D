@@ -48,7 +48,7 @@ public class GreenBot : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!GameManager.Instance.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null)
+        if (!GameManager.Instance.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null && !baseTankLogic.disabled)
         {
             if (bulletRicochet.shootPositions.Count > 0)
             {
@@ -77,7 +77,7 @@ public class GreenBot : MonoBehaviour
 
     void Loop()
     {
-        if (!GameManager.Instance.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null)
+        if (!GameManager.Instance.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null && !baseTankLogic.disabled)
         {
             if ((lastPosition - transform.position).sqrMagnitude > 0.099f)
             {

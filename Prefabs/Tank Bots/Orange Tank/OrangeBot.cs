@@ -57,7 +57,7 @@ public class OrangeBot : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!GameManager.Instance.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null)
+        if (!GameManager.Instance.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null && !baseTankLogic.disabled)
         {
             if (fireControl.canFire && !shooting && targetSystem.TargetVisible())
             {
@@ -125,27 +125,33 @@ public class OrangeBot : MonoBehaviour
                 }
             }
 
-            // Rotating turret and barrel towards target
-            baseTankLogic.targetTurretDir = targetSystem.currentTarget.position - turret.position;
+            if (targetSystem.currentTarget != null)
+            {
+                // Rotating turret and barrel towards target
+                baseTankLogic.targetTurretDir = targetSystem.currentTarget.position - turret.position;
+            }
         }
     }
 
     private void OnTriggerStay(Collider other)
     {
-        switch (other.tag)
+        if (!GameManager.Instance.frozen && Time.timeScale != 0 && baseTankLogic != null && !baseTankLogic.disabled)
         {
-            case "Mine":
-                nearbyMine = other.transform;
-                break;
-            case "Bullet":
-                if (other.TryGetComponent<BulletBehaviour>(out var bulletBehaviour))
-                {
-                    if (bulletBehaviour.owner != null && bulletBehaviour.owner != transform)
+            switch (other.tag)
+            {
+                case "Mine":
+                    nearbyMine = other.transform;
+                    break;
+                case "Bullet":
+                    if (other.TryGetComponent<BulletBehaviour>(out var bulletBehaviour))
                     {
-                        nearbyBullet = other.transform;
+                        if (bulletBehaviour.owner != null && bulletBehaviour.owner != transform)
+                        {
+                            nearbyBullet = other.transform;
+                        }
                     }
-                }
-                break;
+                    break;
+            }
         }
     }
 

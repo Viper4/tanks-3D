@@ -187,7 +187,7 @@ public class PlayerControl : MonoBehaviourPunCallbacks
                 playerProperties.Add("Deaths", DataManager.playerData.deaths);
                 PhotonNetwork.LocalPlayer.SetCustomProperties(playerProperties);
             }
-            FindObjectOfType<PlayerManager>().OnPlayerDeath(tankOrigin);
+            PlayerManager.Instance.OnPlayerDeath(tankOrigin);
         }
         else
         {

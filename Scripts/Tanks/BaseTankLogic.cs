@@ -326,21 +326,13 @@ public class BaseTankLogic : MonoBehaviour
         }
         else
         {
-            Transform trackMarks = tankOrigin.Find("TrackMarks");
-
-            if (trackMarks != null)
-            {
-                trackMarks.parent = effectsParent;
-                Destroy(trackMarks.GetComponent<TrailEmitter>());
-            }
-
             if (transform.CompareTag("AI Tank"))
             {
                 GeneticAlgorithmBot bot = GetComponent<GeneticAlgorithmBot>();
                 bot.Dead = true;
                 transform.SetParent(null);
 
-                tankOrigin.GetComponent<Collider>().enabled = false;
+                tankOrigin.GetComponent<CapsuleCollider>().enabled = false;
                 body.gameObject.SetActive(false);
                 turret.gameObject.SetActive(false);
                 barrel.gameObject.SetActive(false);
@@ -349,22 +341,29 @@ public class BaseTankLogic : MonoBehaviour
             {
                 if (!GameManager.Instance.inLobby && GameManager.Instance.autoPlay)
                 {
-                    Debug.Log("Here");
-                    if (transform.root.TryGetComponent<TankManager>(out var tankManager))
+                    TankManager.Instance.RespawnTank(tankOrigin);
+                    disabled = true;
+                    transform.SetParent(null);
+
+                    foreach (Collider collider in tankOrigin.GetComponents<Collider>())
                     {
-                        tankManager.RespawnTank(tankOrigin);
+                        collider.enabled = false;
                     }
-                    else
-                    {
-                        Destroy(gameObject);
-                    }
+                    body.gameObject.SetActive(false);
+                    turret.gameObject.SetActive(false);
+                    barrel.gameObject.SetActive(false);
                 }
                 else
                 {
-                    if (transform.root.TryGetComponent<TankManager>(out var tankManager))
+                    TankManager.Instance.StartCheckTankCount();
+
+                    Transform trackMarks = tankOrigin.Find("TrackMarks");
+
+                    if (trackMarks != null)
                     {
-                        tankManager.StartCheckTankCount();
+                        trackMarks.SetParent(effectsParent);
                     }
+
                     Destroy(gameObject);
                 }
             }
@@ -433,7 +432,7 @@ public class BaseTankLogic : MonoBehaviour
 
     public void RotateTankToVector(Vector3 to, bool master = false)
     {
-        if (!overrideRotation || master)
+        if (to != Vector3.zero && (!overrideRotation || master))
         {
             float angle = Mathf.Abs(Vector3.SignedAngle(tankOrigin.forward, to, tankOrigin.up));
 
@@ -456,8 +455,6 @@ public class BaseTankLogic : MonoBehaviour
         {
             tankOrigin.forward = -tankOrigin.forward;
             body.forward = -body.forward;
-            //turret.forward = -turret.forward;
-            //barrel.forward = -barrel.forward;
             trackMarks.forward = -trackMarks.forward;
         }
     }
@@ -470,11 +467,19 @@ public class BaseTankLogic : MonoBehaviour
     [PunRPC]
     public void ReactivateTank()
     {
+        tankOrigin.SetParent(TankManager.Instance.tankParent);
         disabled = false;
-        tankOrigin.GetComponent<CapsuleCollider>().enabled = true;
+        foreach (Collider collider in tankOrigin.GetComponents<Collider>())
+        {
+            collider.enabled = true;
+        }
 
         tankOrigin.Find("Body").gameObject.SetActive(true);
         tankOrigin.Find("Turret").gameObject.SetActive(true);
         tankOrigin.Find("Barrel").gameObject.SetActive(true);
+        if (tankOrigin.TryGetComponent<WhiteBot>(out var whiteBot))
+        {
+            whiteBot.PoofEffect();
+        }
     }
 }

@@ -72,7 +72,8 @@ public static class SaveSystem
         deaths = 0,
         time = -1,
         bestTime = -1,
-        sceneIndex = -1
+        sceneIndex = -1,
+        previousSceneIndex = -1
     };
 
     public static void Init()
@@ -99,6 +100,7 @@ public static class SaveSystem
         playerData.time = defaultPlayerData.time;
         playerData.bestTime = bestTime;
         playerData.sceneIndex = defaultPlayerData.sceneIndex;
+        playerData.previousSceneIndex = defaultPlayerData.previousSceneIndex;
 
         playerData.SavePlayerData(fileName, false);
 
@@ -217,7 +219,6 @@ public static class SaveSystem
 
     public static RoomSettings LoadRoomSettings(string fileName)
     {
-        Debug.Log("Loaded");
         RoomSettings newSettings = new RoomSettings();
         if (File.Exists(SAVE_FOLDER + fileName + roomSettingsExtension))
         {

@@ -74,7 +74,7 @@ public class GoldBot : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!GameManager.Instance.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null)
+        if (!GameManager.Instance.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null && !baseTankLogic.disabled)
         {
             if (mode != Mode.LayRoutine && mode != Mode.Laying && mode != Mode.Escape)
             {
@@ -171,9 +171,8 @@ public class GoldBot : MonoBehaviour
 
     void Loop()
     {
-        if (!GameManager.Instance.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null)
+        if (!GameManager.Instance.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null && !baseTankLogic.disabled)
         {
-
             bulletRicochet.ScanArea(turret.position);
             if (!mineControl.laidMines.Contains(targetSystem.currentTarget.parent)) // Target isn't a mine
             {
@@ -210,7 +209,7 @@ public class GoldBot : MonoBehaviour
                         }
                     }
                 }
-            LoopEnd:;
+                LoopEnd:;
             }
             else // Target is a mine
             {
@@ -226,20 +225,23 @@ public class GoldBot : MonoBehaviour
 
     private void OnTriggerStay(Collider other)
     {
-        switch (other.tag)
+        if (!GameManager.Instance.frozen && Time.timeScale != 0 && baseTankLogic != null && !baseTankLogic.disabled)
         {
-            case "Mine":
-                nearbyMine = other.transform;
-                break;
-            case "Bullet":
-                if (other.TryGetComponent<BulletBehaviour>(out var bulletBehaviour))
-                {
-                    if (bulletBehaviour.owner != null && bulletBehaviour.owner != transform)
+            switch (other.tag)
+            {
+                case "Mine":
+                    nearbyMine = other.transform;
+                    break;
+                case "Bullet":
+                    if (other.TryGetComponent<BulletBehaviour>(out var bulletBehaviour))
                     {
-                        nearbyBullet = other.transform;
+                        if (bulletBehaviour.owner != null && bulletBehaviour.owner != transform)
+                        {
+                            nearbyBullet = other.transform;
+                        }
                     }
-                }
-                break;
+                    break;
+            }
         }
     }
 

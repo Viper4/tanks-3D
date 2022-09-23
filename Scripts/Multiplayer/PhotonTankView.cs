@@ -2,8 +2,10 @@ using UnityEngine;
 using Photon.Pun;
 using MyUnityAddons.Calculations;
 using Photon.Realtime;
+using MyUnityAddons.CustomPhoton;
+using System.Collections;
 
-public class PhotonTankView : MonoBehaviourPunCallbacks, IPunObservable
+public class PhotonTankView : MonoBehaviourPunCallbacks, IPunObservable, IPunOwnershipCallbacks, IPunInstantiateMagicCallback
 {
     [SerializeField] bool player;
     [SerializeField] Behaviour[] ownerComponents;
@@ -11,7 +13,7 @@ public class PhotonTankView : MonoBehaviourPunCallbacks, IPunObservable
     [SerializeField] Transform tankOrigin;
     [SerializeField] Transform turret;
     [SerializeField] Transform barrel;
-    public string teamName = null;
+    public string teamName = "FFA";
     BaseTankLogic baseTankLogic;
 
     [SerializeField] float teleportDistance = 10;
@@ -26,6 +28,8 @@ public class PhotonTankView : MonoBehaviourPunCallbacks, IPunObservable
 
     private void Start()
     {
+        baseTankLogic = GetComponent<BaseTankLogic>();
+
         targetVelocity = Vector3.zero;
         targetPosition = tankOrigin.position;
         targetTankRotation = tankOrigin.rotation;
@@ -34,23 +38,6 @@ public class PhotonTankView : MonoBehaviourPunCallbacks, IPunObservable
         if (!player)
         {
             transform.SetParent(TankManager.Instance.tankParent);
-            if (!GameManager.Instance.inLobby)
-            {
-                baseTankLogic = GetComponent<BaseTankLogic>();
-
-                if (PhotonNetwork.IsMasterClient)
-                {
-                    photonView.RequestOwnership();
-                }
-                else
-                {
-                    baseTankLogic.disabled = true;
-                    foreach (Behaviour component in ownerComponents)
-                    {
-                        component.enabled = false;
-                    }
-                }
-            }
         }
     }
 
@@ -108,16 +95,68 @@ public class PhotonTankView : MonoBehaviourPunCallbacks, IPunObservable
         }
     }
 
-    public override void OnMasterClientSwitched(Player newMasterClient)
+    public void OnOwnershipRequest(PhotonView targetView, Player requestingPlayer)
     {
-        if (!player && !GameManager.Instance.inLobby && PhotonNetwork.IsMasterClient)
+        if (targetView != photonView)
+            return;
+
+        photonView.TransferOwnership(requestingPlayer);
+    }
+
+    public void OnOwnershipTransfered(PhotonView targetView, Player previousOwner)
+    {
+        if (targetView != photonView)
+            return;
+
+        StartCoroutine(OwnershipChange());
+    }
+
+    IEnumerator OwnershipChange()
+    {
+        yield return new WaitUntil(() => baseTankLogic != null);
+
+        if (photonView.IsMine)
         {
-            photonView.RequestOwnership();
             baseTankLogic.disabled = false;
             foreach (Behaviour component in ownerComponents)
             {
                 component.enabled = true;
             }
+        }
+        else
+        {
+            baseTankLogic.disabled = true;
+            foreach (Behaviour component in ownerComponents)
+            {
+                component.enabled = false;
+            }
+        }
+    }
+
+    public void OnOwnershipTransferFailed(PhotonView targetView, Player senderOfFailedRequest)
+    {
+        Debug.LogWarning("Ownership transfer failed on " + targetView.ViewID + " from " + senderOfFailedRequest.NickName);
+    }
+
+    public void OnPhotonInstantiate(PhotonMessageInfo info)
+    {
+        if (!player)
+        {
+            object[] instantiateData = info.photonView.InstantiationData;
+
+            if (TryGetComponent<TargetSystem>(out var targetSystem))
+            {
+                if ((bool)instantiateData[0])
+                {
+                    targetSystem.enemyParents.Add(TankManager.Instance.tankParent);
+                }
+                if ((bool)instantiateData[1])
+                {
+                    targetSystem.enemyParents.Add(PlayerManager.Instance.playerParent);
+                }
+            }
+
+            transform.SetParent(TankManager.Instance.tankParent);
         }
     }
 }

@@ -2117,7 +2117,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2799083273139696049}
-  - component: {fileID: 2947148916795075784}
   m_Layer: 7
   m_Name: TrackMarks
   m_TagString: Player
@@ -2142,21 +2141,6 @@ Transform:
   m_Father: {fileID: 5113858065110483005}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2947148916795075784
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6079145949625077149}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6dd208702654b75488b856b2664059db, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  disabled: 0
-  trackMarks: {fileID: 2799083273139696049}
-  baseTankLogic: {fileID: -1731460198348781545}
 --- !u!1 &6161557077281983733
 GameObject:
   m_ObjectHideFlags: 0
@@ -2528,6 +2512,7 @@ GameObject:
   - component: {fileID: 8717466537847481428}
   - component: {fileID: -1731460198348781545}
   - component: {fileID: 714796969137908049}
+  - component: {fileID: 8392517078070437661}
   m_Layer: 7
   m_Name: Player
   m_TagString: Player
@@ -2703,6 +2688,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   deleteOnMultiplayer: 1
+--- !u!114 &8392517078070437661
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6432079618835187455}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6dd208702654b75488b856b2664059db, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  tankOrigin: {fileID: 5113858065110483005}
+  trackMarks: {fileID: 2799083273139696049}
+  baseTankLogic: {fileID: -1731460198348781545}
 --- !u!1 &6597881472347150753
 GameObject:
   m_ObjectHideFlags: 0

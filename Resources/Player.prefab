@@ -1679,7 +1679,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6dd208702654b75488b856b2664059db, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  disabled: 0
+  tankOrigin: {fileID: 0}
   trackMarks: {fileID: 6270719373632848196}
   baseTankLogic: {fileID: 1596204444662429922}
 --- !u!1 &2711077548307209146
@@ -2071,7 +2071,7 @@ MonoBehaviour:
   tankOrigin: {fileID: 3973960147865972936}
   turret: {fileID: 5363182311491822628}
   barrel: {fileID: 1653656013202730217}
-  teamName: 
+  teamName: FFA
   teleportDistance: 5
   rotateTowardsSpeed: 360
   setRotationMinAngle: 110
@@ -2087,7 +2087,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6dd208702654b75488b856b2664059db, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  disabled: 0
+  tankOrigin: {fileID: 3973960147865972936}
   trackMarks: {fileID: 6270719373632848196}
   baseTankLogic: {fileID: 1596204444662429922}
 --- !u!1 &2983809502732183837

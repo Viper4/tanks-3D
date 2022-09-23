@@ -61,20 +61,13 @@ public class BaseUIHandler : MonoBehaviour
         }
         else
         {
-            PhotonHashtable parameters = new PhotonHashtable()
-            {
-                { "sceneName", sceneName },
-                { "delay", 0 },
-                { "save", false },
-                { "waitWhilePaused", false }
-            };
-            PhotonNetwork.RaiseEvent(GameManager.Instance.LoadSceneEventCode, parameters, Photon.Realtime.RaiseEventOptions.Default, ExitGames.Client.Photon.SendOptions.SendUnreliable);
             GameManager.Instance.PhotonLoadScene(sceneName, 0, false, false);
         }
     }
 
     public void ResumeGame()
     {
+        DataManager.playerData = SaveSystem.LoadPlayerData("PlayerData");
         if (DataManager.playerData.sceneIndex != -1)
         {
             if (PhotonNetwork.OfflineMode)
@@ -83,14 +76,6 @@ public class BaseUIHandler : MonoBehaviour
             }
             else
             {
-                PhotonHashtable parameters = new PhotonHashtable()
-                {
-                    { "sceneIndex", DataManager.playerData.sceneIndex },
-                    { "delay", 0 },
-                    { "save", false },
-                    { "waitWhilePaused", false }
-                };
-                PhotonNetwork.RaiseEvent(GameManager.Instance.LoadSceneEventCode, parameters, Photon.Realtime.RaiseEventOptions.Default, ExitGames.Client.Photon.SendOptions.SendUnreliable);
                 GameManager.Instance.PhotonLoadScene(DataManager.playerData.sceneIndex, 0, false, false);
             }
         }

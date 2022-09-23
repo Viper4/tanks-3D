@@ -12,4 +12,5 @@ public class PlayerData
     public float time;
     public float bestTime;
     public int sceneIndex;
+    public int previousSceneIndex;
 }

@@ -95,7 +95,7 @@ public class TrapBot : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!GameManager.Instance.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null)
+        if (!GameManager.Instance.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null && !baseTankLogic.disabled)
         {
             targetDir = targetSystem.currentTarget.position - turret.position;
             angleToTarget = Mathf.Abs(Vector3.SignedAngle(transform.forward, targetDir, transform.up));
@@ -229,7 +229,7 @@ public class TrapBot : MonoBehaviour
 
     void OnTriggerStay(Collider other)
     {
-        if (!GameManager.Instance.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null)
+        if (!GameManager.Instance.frozen && Time.timeScale != 0 && baseTankLogic != null && !baseTankLogic.disabled)
         {
             // Avoiding bullets and mines
             switch (other.tag)

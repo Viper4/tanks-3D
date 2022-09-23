@@ -351,7 +351,7 @@ MonoBehaviour:
   Group: 0
   prefixField: -1
   Synchronization: 3
-  OwnershipTransfer: 0
+  OwnershipTransfer: 1
   observableSearch: 2
   ObservedComponents:
   - {fileID: 4005516063062427649}
@@ -378,7 +378,7 @@ MonoBehaviour:
   tankOrigin: {fileID: 1807415214875140994}
   turret: {fileID: 8119463396326681366}
   barrel: {fileID: 3184342306150245339}
-  teamName: 
+  teamName: FFA
   teleportDistance: 5
   rotateTowardsSpeed: 360
   setRotationMinAngle: 110
@@ -394,7 +394,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6dd208702654b75488b856b2664059db, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  disabled: 0
+  tankOrigin: {fileID: 1807415214875140994}
   trackMarks: {fileID: 1346010612084230433}
   baseTankLogic: {fileID: 2189044298125408581}
 --- !u!1 &1417340831735424559

@@ -50,7 +50,7 @@ public class AquamarineBot : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!GameManager.Instance.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null)
+        if (!GameManager.Instance.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null && !baseTankLogic.disabled)
         {
             baseTankLogic.targetTankDir = transform.forward;
 
@@ -174,7 +174,7 @@ public class AquamarineBot : MonoBehaviour
 
     void OnTriggerStay(Collider other)
     {
-        if (!GameManager.Instance.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null)
+        if (!GameManager.Instance.frozen && Time.timeScale != 0 && baseTankLogic != null && !baseTankLogic.disabled)
         {
             // Avoiding bullets and mines
             switch (other.tag)

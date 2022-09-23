@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using Photon.Pun;
 using PhotonHashtable = ExitGames.Client.Photon.Hashtable;
 using ExitGames.Client.Photon;
@@ -15,7 +14,7 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
 {
     readonly byte UpdateUIEventCode = 0;
     readonly byte UpdateTeamsEventCode = 1;
-    readonly byte LoadSceneCode = 2;
+    readonly byte LeaveWaitingRoomEventCode = 2;
 
     [SerializeField] GameObject playerSlotPrefab;
 
@@ -118,13 +117,13 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
 
         PhotonHashtable roomProperties = new PhotonHashtable
         {
-            ["Waiting"] = false,
-            ["RoomSettings"] = DataManager.roomSettings
+            { "Waiting", false },
+            { "RoomSettings", DataManager.roomSettings },
+            { "Total Lives", DataManager.roomSettings.totalLives }
         };
         PhotonNetwork.CurrentRoom.SetCustomProperties(roomProperties);
         DataManager.playerData = SaveSystem.ResetPlayerData("PlayerData");
 
-        PhotonNetwork.RaiseEvent(LoadSceneCode, null, RaiseEventOptions.Default, SendOptions.SendUnreliable);
         PhotonNetwork.LoadLevel(DataManager.roomSettings.map);
     }
 
@@ -226,8 +225,10 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
     {
         PhotonHashtable roomProperties = new PhotonHashtable
         {
-            ["RoomSettings"] = DataManager.roomSettings
+            { "RoomSettings", DataManager.roomSettings },
+            { "Total Lives", DataManager.roomSettings.totalLives }
         };
+        PhotonNetwork.CurrentRoom.IsVisible = DataManager.roomSettings.isPublic;
         PhotonNetwork.CurrentRoom.SetCustomProperties(roomProperties);
         StartCoroutine(MasterUpdateTeamRosters());
     }
@@ -326,10 +327,9 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
             Debug.Log("Raised UpdateTeamsEventCode");
             UpdateTeamRosters();
         }
-        else if (eventData.Code == LoadSceneCode)
+        else if (eventData.Code == LeaveWaitingRoomEventCode)
         {
             DataManager.playerData = SaveSystem.ResetPlayerData("PlayerData");
-            PhotonNetwork.LoadLevel(((RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["RoomSettings"]).map);
         }
     }
 

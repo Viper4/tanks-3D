@@ -141,6 +141,9 @@ public class RoomCustomization : MonoBehaviour
         {
             switch (setting.name)
             {
+                case "Is Public":
+                    setting.GetComponent<Toggle>().isOn = DataManager.roomSettings.isPublic;
+                    break;
                 case "Map Dropdown":
                     SetValueToOption(setting.GetComponent<Dropdown>(), DataManager.roomSettings.map);
                     break;

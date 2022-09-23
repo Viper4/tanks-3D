@@ -52,6 +52,7 @@ namespace MyUnityAddons
             public static int[] Distribute(int numerator, int denominator, float mutateChance = 0, int rangeMin = 0, int rangeMax = 0)
             {
                 int[] array = new int[denominator];
+                int sum = 0;
 
                 int remainder = numerator % denominator;
                 int quotient = numerator / denominator;
@@ -66,10 +67,11 @@ namespace MyUnityAddons
                         {
                             array[i] += Random.Range(rangeMin, rangeMax + 1);
                         }
+                        sum += array[i];
                     }
                     else
                     {
-                        array[i] = numerator - array.Sum();
+                        array[i] = numerator - sum;
                     }
                 }
                 return array;
@@ -201,8 +203,9 @@ namespace MyUnityAddons
                             {
                                 Vector3 testPosition = hit.point - direction * (spawnCollider.size.y + 0.001f);
 
+                                Debug.DrawLine(testPosition, origin, Color.red, 10f);
                                 Quaternion rotation = spawnRotation == null ? spawnCollider.transform.rotation : (Quaternion)spawnRotation;
-                                if (!Physics.CheckBox(testPosition, spawnCollider.size, rotation, ~ignoreLayers))
+                                if (!Physics.CheckBox(testPosition, spawnCollider.size * 0.5f, rotation, ~ignoreLayers))
                                 {
                                     if (onTopOfPoint)
                                     {
@@ -390,7 +393,7 @@ namespace MyUnityAddons
             {
                 if (transforms.Count > 0)
                 {
-                    float bestDistance = Mathf.Infinity;
+                    float bestDistance = CustomMath.SqrDistance(fromTransform.position, transforms[0].position);
                     Transform closestTransform = transforms[0];
                     for (int i = 1; i < transforms.Count; i++)
                     {
@@ -435,7 +438,7 @@ namespace MyUnityAddons
             {
                 if (positions.Count > 0)
                 {
-                    float bestAngle = Mathf.Infinity;
+                    float bestAngle = Vector3.Angle(positions[0] - transform.position, transform.forward);
                     Vector3 bestPosition = positions[0];
                     for (int i = 1; i < positions.Count; i++)
                     {
@@ -456,7 +459,7 @@ namespace MyUnityAddons
             {
                 if (positions.Count > 0)
                 {
-                    float bestAngle = -1;
+                    float bestAngle = Vector3.Angle(positions[0] - transform.position, transform.forward);
                     Vector3 bestPosition = positions[0];
                     for (int i = 1; i < positions.Count; i++)
                     {
@@ -477,8 +480,8 @@ namespace MyUnityAddons
             {
                 if (transforms.Count > 0)
                 {
-                    float bestAngle = Mathf.Infinity;
-                    Transform bestPosition = transforms[0];
+                    float bestAngle = Vector3.Angle(transforms[0].position - transform.position, transform.forward);
+                    Transform bestTransform = transforms[0];
                     for (int i = 1; i < transforms.Count; i++)
                     {
                         Vector3 direction = transforms[i].position - transform.position;
@@ -486,10 +489,10 @@ namespace MyUnityAddons
                         if (angle < bestAngle)
                         {
                             bestAngle = angle;
-                            bestPosition = transforms[i];
+                            bestTransform = transforms[i];
                         }
                     }
-                    return bestPosition;
+                    return bestTransform;
                 }
                 return null;
             }
@@ -498,7 +501,7 @@ namespace MyUnityAddons
             {
                 if (transforms.Count > 0)
                 {
-                    float bestAngle = -1;
+                    float bestAngle = Vector3.Angle(transforms[0].position - transform.position, transform.forward);
                     Transform bestTransform = transforms[0];
                     for (int i = 1; i < transforms.Count; i++)
                     {

@@ -6,13 +6,14 @@ using Photon.Pun;
 using Photon.Realtime;
 using TMPro;
 using PhotonHashtable = ExitGames.Client.Photon.Hashtable;
-using MyUnityAddons.CustomPhoton;
 
 public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
 {
     public InputField createInput;
     public InputField joinInput;
     public InputField usernameInput;
+
+    [SerializeField] RectTransform joiningOrCreating;
 
     [SerializeField] Transform popup;
     Coroutine popupRoutine;
@@ -21,18 +22,35 @@ public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
     {
         if (CreateInputIsValid() && UsernameInputIsValid())
         {
-            RoomOptions roomOptions = new RoomOptions
-            {
-                PublishUserId = true,
-                CleanupCacheOnLeave = true,
-                IsVisible = DataManager.roomSettings.isPublic,
-            };
-            PhotonNetwork.CreateRoom(createInput.text, roomOptions);
+            PhotonNetwork.NickName = GetUniqueUsername(usernameInput.text);
+
             PhotonHashtable playerProperties = new PhotonHashtable()
             {
                 { "New", true }
             };
             PhotonNetwork.LocalPlayer.SetCustomProperties(playerProperties);
+            PhotonHashtable roomProperties = new PhotonHashtable
+            {
+                { "RoomSettings", DataManager.roomSettings },
+                { "Waiting", true },
+                { "Ready Players", 0 },
+                { "Total Lives", DataManager.roomSettings.totalLives }
+            };
+            RoomOptions roomOptions = new RoomOptions
+            {
+                PublishUserId = true,
+                CleanupCacheOnLeave = true,
+                IsVisible = DataManager.roomSettings.isPublic,
+                IsOpen = true,
+                CustomRoomProperties = roomProperties
+            };
+
+            Debug.Log(roomOptions.IsOpen + " " + roomOptions.IsVisible);
+
+            PhotonNetwork.CreateRoom(createInput.text, roomOptions);
+
+            joiningOrCreating.gameObject.SetActive(true);
+            joiningOrCreating.Find("Label").GetComponent<TextMeshProUGUI>().text = "Creating Room...";
         }
     } 
     
@@ -40,12 +58,17 @@ public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
     {
         if (JoinInputIsValid() && UsernameInputIsValid())
         {
-            PhotonNetwork.JoinRoom(joinInput.text);
+            PhotonNetwork.NickName = GetUniqueUsername(usernameInput.text);
+
             PhotonHashtable playerProperties = new PhotonHashtable()
             {
                 { "New", true }
             };
             PhotonNetwork.LocalPlayer.SetCustomProperties(playerProperties);
+            PhotonNetwork.JoinRoom(joinInput.text);
+
+            joiningOrCreating.gameObject.SetActive(true);
+            joiningOrCreating.Find("Label").GetComponent<TextMeshProUGUI>().text = "Joining...";
         }
     }
 
@@ -53,7 +76,19 @@ public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
     {
         if (UsernameInputIsValid())
         {
-            PhotonNetwork.JoinRandomRoom();
+            PhotonNetwork.NickName = GetUniqueUsername(usernameInput.text);
+
+            if (PhotonNetwork.CountOfRooms > 0)
+            {
+                PhotonNetwork.JoinRandomRoom();
+
+                joiningOrCreating.gameObject.SetActive(true);
+                joiningOrCreating.Find("Label").GetComponent<TextMeshProUGUI>().text = "Joining...";
+            }
+            else
+            {
+                StartShowPopup("No rooms to join", 2.5f);
+            }
         }
     }
 
@@ -89,24 +124,11 @@ public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
 
     public override void OnJoinedRoom()
     {
-        PhotonNetwork.NickName = GetUniqueUsername(usernameInput.text);
-
         if (PhotonNetwork.IsMasterClient)
         {
-            PhotonNetwork.AutomaticallySyncScene = true;
-
-            PhotonHashtable roomProperties = new PhotonHashtable
-            {
-                { "RoomSettings", DataManager.roomSettings },
-                { "Waiting", true },
-                { "Ready Players", 0 },
-                { "Total Lives", DataManager.roomSettings.totalLives }
-            };
-            PhotonNetwork.CurrentRoom.SetCustomProperties(roomProperties);
-
-            StartCoroutine(DelayedPhotonLoad("Waiting Room"));
+            PhotonNetwork.LoadLevel("Waiting Room");
         }
-        else
+        /*else
         {
             if ((bool)PhotonNetwork.CurrentRoom.CustomProperties["Waiting"])
             {
@@ -117,7 +139,7 @@ public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
                 Debug.Log(((RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["RoomSettings"]).map);
                 PhotonNetwork.LoadLevel(((RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["RoomSettings"]).map);
             }
-        }
+        }*/
     }
 
     string GetUniqueUsername(string username)
@@ -140,25 +162,6 @@ public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
             }
         }
         return username;
-    }
-
-    IEnumerator DelayedPhotonLoad(string sceneName)
-    {
-        yield return new WaitForSecondsRealtime(0.2f); // Wait until CustomProperties are synched and updated across the network
-        PhotonNetwork.LoadLevel(sceneName);
-    }
-
-    IEnumerator ShowPlaceholderError(InputField input, string message, float delay)
-    {
-        Transform placeholderError = input.transform.Find("PlaceholderError");
-        placeholderError.GetComponent<Text>().text = message;
-        placeholderError.gameObject.SetActive(true);
-        input.placeholder.gameObject.SetActive(false);
-
-        yield return new WaitForSecondsRealtime(delay);
-
-        placeholderError.gameObject.SetActive(false);
-        input.placeholder.gameObject.SetActive(true);
     }
 
     void StartShowPopup(string message, float delay)
@@ -186,16 +189,23 @@ public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
 
     public override void OnCreateRoomFailed(short returnCode, string message)
     {
+        joiningOrCreating.gameObject.SetActive(false);
+
         StartShowPopup("Create failed: " + message, 2.5f);
     }
 
     public override void OnJoinRoomFailed(short returnCode, string message)
     {
+        joiningOrCreating.gameObject.SetActive(false);
+
         StartShowPopup("Join failed: " + message, 2.5f);
     }
 
     public override void OnJoinRandomFailed(short returnCode, string message)
     {
+        joiningOrCreating.gameObject.SetActive(false);
+
         StartShowPopup("Join failed: " + message, 2.5f);
+        Debug.Log(returnCode);
     }
 }
