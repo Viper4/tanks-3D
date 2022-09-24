@@ -214,7 +214,7 @@ public class GameManager : MonoBehaviourPunCallbacks
                         }
                     }
 
-                    if (!TankManager.Instance.lastCampaignScene)
+                    if (TankManager.Instance == null || !TankManager.Instance.lastCampaignScene)
                     {
                         label.Find("Level").GetComponent<Text>().text = currentScene.name;
                     }

@@ -8,7 +8,7 @@ public class ClientManager : MonoBehaviourPunCallbacks
     public bool deleteOnMultiplayer = false;
 
     // Start is called before the first frame update
-    void Awake()
+    void Start()
     {
         if (!PhotonNetwork.OfflineMode && deleteOnMultiplayer)
         {

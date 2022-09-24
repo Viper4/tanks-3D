@@ -280,7 +280,7 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
         RoomSettings currentRoomSettings = (RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["RoomSettings"];
 
         roomName.text = PhotonNetwork.CurrentRoom.Name;
-        mapName.text = currentRoomSettings.map;
+        mapName.text = currentRoomSettings.map + " (" + currentRoomSettings.primaryMode + ")";
 
         tempTeamsCount = new Dictionary<string, int>()
         {

@@ -201,7 +201,7 @@ namespace MyUnityAddons
                         {
                             if (spawnCollider != null)
                             {
-                                Vector3 testPosition = hit.point - direction * (spawnCollider.size.y + 0.001f);
+                                Vector3 testPosition = hit.point - direction * (spawnCollider.size.y + 0.01f);
 
                                 Debug.DrawLine(testPosition, origin, Color.red, 10f);
                                 Quaternion rotation = spawnRotation == null ? spawnCollider.transform.rotation : (Quaternion)spawnRotation;
