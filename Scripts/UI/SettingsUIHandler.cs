@@ -14,11 +14,6 @@ public class SettingsUIHandler : MonoBehaviour
 
     readonly KeyCode[] mouseKeyCodes = { KeyCode.Mouse0, KeyCode.Mouse1, KeyCode.Mouse2, KeyCode.Mouse3, KeyCode.Mouse4, KeyCode.Mouse5, KeyCode.Mouse6 };
 
-    private void Start()
-    {
-        UpdateSettingsUI();
-    }
-
     private void Update()
     {
         Event currentEvent = new Event();
@@ -112,7 +107,8 @@ public class SettingsUIHandler : MonoBehaviour
 
     public void LoadSettings(string fileName)
     {
-        DataManager.playerSettings = SaveSystem.LoadPlayerSettings(fileName, player);
+        DataManager.playerSettings = SaveSystem.LoadPlayerSettings(fileName);
+        GameManager.Instance.UpdatePlayerWithSettings(player);
 
         UpdateSettingsUI();
     }
@@ -139,13 +135,16 @@ public class SettingsUIHandler : MonoBehaviour
         {
             switch (content.name)
             {
-                case "Game":
+                case "General":
                     foreach (Transform setting in content)
                     {
                         switch (setting.name)
                         {
                             case "Sensitivity":
                                 setting.GetComponent<Slider>().value = DataManager.playerSettings.sensitivity;
+                                break;
+                            case "FOV":
+                                setting.GetComponent<Slider>().value = DataManager.playerSettings.fieldOfView;
                                 break;
                         }
                     }
@@ -161,9 +160,6 @@ public class SettingsUIHandler : MonoBehaviour
                     {
                         switch (setting.name)
                         {
-                            case "FOV":
-                                setting.GetComponent<Slider>().value = DataManager.playerSettings.fieldOfView;
-                                break;
                             case "Silhouettes":
                                 setting.GetComponent<Toggle>().isOn = DataManager.playerSettings.silhouettes;
                                 break;

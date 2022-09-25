@@ -31,6 +31,11 @@ public class PlayerControl : MonoBehaviourPunCallbacks
 
     [SerializeField] LayerMask ignoreLayerMasks;
 
+    private void Start()
+    {
+        GameManager.Instance.UpdatePlayerWithSettings(transform);
+    }
+
     // Update is called once per frame
     void LateUpdate()
     {

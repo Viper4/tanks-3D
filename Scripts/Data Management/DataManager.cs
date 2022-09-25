@@ -18,7 +18,7 @@ public class DataManager : MonoBehaviourPun
         if (Instance == null)
         {
             playerData = SaveSystem.LoadPlayerData("PlayerData");
-            playerSettings = SaveSystem.LoadPlayerSettings("PlayerSettings", transform);
+            playerSettings = SaveSystem.LoadPlayerSettings("PlayerSettings");
             roomSettings = SaveSystem.LoadRoomSettings(SaveSystem.LatestFileInSaveFolder(false, ".roomsettings"));
 
             RegisterCustomTypes();

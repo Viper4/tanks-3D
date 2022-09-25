@@ -74,7 +74,8 @@ public class PlayerManager : MonoBehaviourPunCallbacks
                     GameManager.Instance.frozen = false;
                     Time.timeScale = 1;
                     GameManager.Instance.loadingScreen.gameObject.SetActive(false);
-                    DataManager.playerSettings = SaveSystem.LoadPlayerSettings("PlayerSettings", SpawnSpectator(Vector3.zero, Quaternion.identity));
+                    DataManager.playerSettings = SaveSystem.LoadPlayerSettings("PlayerSettings");
+                    GameManager.Instance.UpdatePlayerWithSettings(SpawnSpectator(Vector3.zero, Quaternion.identity));
                 }
                 else
                 {
@@ -89,7 +90,8 @@ public class PlayerManager : MonoBehaviourPunCallbacks
                 {
                     GameManager.Instance.frozen = false;
                     GameManager.Instance.loadingScreen.gameObject.SetActive(false);
-                    DataManager.playerSettings = SaveSystem.LoadPlayerSettings("PlayerSettings", SpawnSpectator(Vector3.zero, Quaternion.identity));
+                    DataManager.playerSettings = SaveSystem.LoadPlayerSettings("PlayerSettings");
+                    GameManager.Instance.UpdatePlayerWithSettings(SpawnSpectator(Vector3.zero, Quaternion.identity));
                 }
                 else
                 {
@@ -129,11 +131,12 @@ public class PlayerManager : MonoBehaviourPunCallbacks
                 newPhotonView = newPlayer.GetComponent<PhotonView>();
                 playerProperties.Add("ViewID", newPhotonView.ViewID);
                 GameManager.Instance.UpdatePlayerVariables(newPhotonView);
-                DataManager.playerSettings = SaveSystem.LoadPlayerSettings("PlayerSettings", newPlayer.transform);
+                DataManager.playerSettings = SaveSystem.LoadPlayerSettings("PlayerSettings");
+                GameManager.Instance.UpdatePlayerWithSettings(newPlayer.transform);
             }
             else
             {
-                DataManager.playerSettings = SaveSystem.LoadPlayerSettings("PlayerSettings", null);
+                DataManager.playerSettings = SaveSystem.LoadPlayerSettings("PlayerSettings");
             }
 
             PhotonNetwork.LocalPlayer.SetCustomProperties(playerProperties);
@@ -150,6 +153,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks
 
     private GameObject SpawnPlayer(Vector3 position, Quaternion rotation)
     {
+        Debug.Log("Spawned player");
         GameObject newPlayer = PhotonNetwork.Instantiate(playerPrefab.name, position, rotation);
         newPlayer.GetComponent<PhotonView>().RPC("InitializePlayer", RpcTarget.All, new object[] { new float[] { Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), 1 }, new float[] { Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), 1 } });
         newPlayer.name = playerPrefab.name;

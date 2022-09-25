@@ -134,16 +134,7 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
             DataManager.roomSettings.primaryMode = mode;
             UpdateRoomSettingsProperty();
 
-            tempTeamsCount["Team 4"] = teamManager.GetTeamMembersCount("Team 4");
-            tempTeamsCount["Team 3"] = teamManager.GetTeamMembersCount("Team 3");
-            tempTeamsCount["Team 2"] = teamManager.GetTeamMembersCount("Team 2");
-            tempTeamsCount["Team 1"] = teamManager.GetTeamMembersCount("Team 1");
-            foreach (Player player in PhotonNetwork.PlayerList)
-            {
-                AllocatePlayerToTeam(player);
-            }
-
-            MasterUpdateBasicUI();
+            MasterUpdateAllUI();
         }
     }
     
@@ -230,6 +221,20 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
         };
         PhotonNetwork.CurrentRoom.IsVisible = DataManager.roomSettings.isPublic;
         PhotonNetwork.CurrentRoom.SetCustomProperties(roomProperties);
+    }
+
+    public void MasterUpdateAllUI()
+    {
+        tempTeamsCount["Team 4"] = teamManager.GetTeamMembersCount("Team 4");
+        tempTeamsCount["Team 3"] = teamManager.GetTeamMembersCount("Team 3");
+        tempTeamsCount["Team 2"] = teamManager.GetTeamMembersCount("Team 2");
+        tempTeamsCount["Team 1"] = teamManager.GetTeamMembersCount("Team 1");
+        foreach (Player player in PhotonNetwork.PlayerList)
+        {
+            AllocatePlayerToTeam(player);
+        }
+        PhotonNetwork.RaiseEvent(UpdateUIEventCode, null, RaiseEventOptions.Default, SendOptions.SendUnreliable);
+        UpdateBasicUI();
         StartCoroutine(MasterUpdateTeamRosters());
     }
 
@@ -242,7 +247,9 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
 
     private void UpdateTeamRosters()
     {
-        RoomSettings currentRoomSettings = (RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["RoomSettings"];
+        DataManager.roomSettings = (RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["RoomSettings"];
+        playerList.gameObject.SetActive(DataManager.roomSettings.primaryMode != "Teams");
+        teamsTab.gameObject.SetActive(DataManager.roomSettings.primaryMode == "Teams");
         foreach (Transform content in rosterContent.Values)
         {
             foreach (Transform child in content)
@@ -261,26 +268,20 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
             }
         }
 
-        playerListCount.text = teamManager.GetTeamMembersCount("Players") + "/" + currentRoomSettings.playerLimit + " players";
+        playerListCount.text = teamManager.GetTeamMembersCount("Players") + "/" + DataManager.roomSettings.playerLimit + " players";
         spectatorListCount.text = teamManager.GetTeamMembersCount("Spectators") + " spectating";
         for (int i = 0; i < teamsListCount.Length; i++)
         {
-            teamsListCount[i].text = teamManager.GetTeamMembersCount("Team " + (i+1)) + "/" + currentRoomSettings.teamSize + " players";
+            teamsListCount[i].text = teamManager.GetTeamMembersCount("Team " + (i+1)) + "/" + DataManager.roomSettings.teamSize + " players";
         }
-    }
-
-    public void MasterUpdateBasicUI()
-    {
-        PhotonNetwork.RaiseEvent(UpdateUIEventCode, null, RaiseEventOptions.Default, SendOptions.SendUnreliable);
-        UpdateBasicUI();
     }
 
     private void UpdateBasicUI()
     {
-        RoomSettings currentRoomSettings = (RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["RoomSettings"];
+        DataManager.roomSettings = (RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["RoomSettings"];
 
         roomName.text = PhotonNetwork.CurrentRoom.Name;
-        mapName.text = currentRoomSettings.map + " (" + currentRoomSettings.primaryMode + ")";
+        mapName.text = DataManager.roomSettings.map + " (" + DataManager.roomSettings.primaryMode + ")";
 
         tempTeamsCount = new Dictionary<string, int>()
         {
@@ -291,7 +292,7 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
         };
         for (int i = 0; i < 4; i++)
         {
-            if (i + 1 > currentRoomSettings.teamLimit)
+            if (i + 1 > DataManager.roomSettings.teamLimit)
             {
                 tempTeamsCount.Remove("Team " + i);
                 teamsList[i].gameObject.SetActive(false);

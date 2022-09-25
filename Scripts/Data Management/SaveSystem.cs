@@ -9,13 +9,11 @@ using MyUnityAddons.Calculations;
 public static class SaveSystem
 {
     private static readonly string SAVE_FOLDER = Application.dataPath + "/SaveData/";
-    private static readonly string CROSSHAIR_FOLDER = Application.dataPath + "/Crosshairs/";
+    public static readonly string CROSSHAIR_FOLDER = Application.dataPath + "/Crosshairs/";
 
     private static readonly string playerSettingsExtension = ".playersettings";
     private static readonly string roomSettingsExtension = ".roomsettings";
     private static readonly string playerDataExtension = ".playerdata";
-
-    public static Sprite crosshair;
 
     public static readonly PlayerSettings defaultPlayerSettings = new PlayerSettings
     {
@@ -155,7 +153,7 @@ public static class SaveSystem
         File.WriteAllText(SAVE_FOLDER + fileName + playerSettingsExtension, json);
     }
 
-    public static PlayerSettings LoadPlayerSettings(string fileName, Transform player)
+    public static PlayerSettings LoadPlayerSettings(string fileName)
     {
         if (File.Exists(SAVE_FOLDER + fileName + playerSettingsExtension))
         {
@@ -163,42 +161,7 @@ public static class SaveSystem
 
             if (json != null)
             {
-                PlayerSettings loadedSettings = JsonConvert.DeserializeObject<PlayerSettings>(json);
-
-                if (player != null)
-                {
-                    if (player.TryGetComponent<SpectatorControl>(out var spectatorControl))
-                    {
-                        spectatorControl.sensitivity = loadedSettings.sensitivity;
-                        spectatorControl.rotationSmoothTime = loadedSettings.cameraSmoothing;
-                    }
-                    else
-                    {
-                        string crosshairFilePath = CROSSHAIR_FOLDER + loadedSettings.crosshairFileName + ".png";
-                        crosshair = CustomMath.ImageToSprite(crosshairFilePath);
-                        Transform playerUI = player.Find("Player UI");
-                        if (playerUI != null)
-                        {
-                            BaseUIHandler baseUIHandler = playerUI.GetComponent<BaseUIHandler>();
-                            if (baseUIHandler != null && baseUIHandler.UIElements.ContainsKey("InGame"))
-                            {
-                                Transform reticle = baseUIHandler.UIElements["InGame"].Find("Reticle");
-                                reticle.GetComponent<CrosshairManager>().UpdateReticleSprite(crosshair, loadedSettings.crosshairColorIndex, loadedSettings.crosshairScale);
-                            }
-                        }
-
-                        Transform camera = player.Find("Camera");
-                        if (camera != null && camera.TryGetComponent<CameraControl>(out var cameraS))
-                        {
-                            cameraS.sensitivity = loadedSettings.sensitivity;
-                            cameraS.rotationSmoothTime = loadedSettings.cameraSmoothing;
-                        }
-                    }
-                }
-
-                AudioListener.volume = loadedSettings.masterVolume / 100;
-
-                return loadedSettings;
+                return JsonConvert.DeserializeObject<PlayerSettings>(json);
             }
         }
         else

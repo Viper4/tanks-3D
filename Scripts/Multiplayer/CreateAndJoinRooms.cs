@@ -22,8 +22,6 @@ public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
     {
         if (CreateInputIsValid() && UsernameInputIsValid())
         {
-            PhotonNetwork.NickName = GetUniqueUsername(usernameInput.text);
-
             PhotonHashtable playerProperties = new PhotonHashtable()
             {
                 { "New", true }
@@ -58,8 +56,6 @@ public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
     {
         if (JoinInputIsValid() && UsernameInputIsValid())
         {
-            PhotonNetwork.NickName = GetUniqueUsername(usernameInput.text);
-
             PhotonHashtable playerProperties = new PhotonHashtable()
             {
                 { "New", true }
@@ -76,7 +72,6 @@ public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
     {
         if (UsernameInputIsValid())
         {
-            PhotonNetwork.NickName = GetUniqueUsername(usernameInput.text);
 
             if (PhotonNetwork.CountOfRooms > 0)
             {
@@ -124,11 +119,13 @@ public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
 
     public override void OnJoinedRoom()
     {
+        PhotonNetwork.NickName = GetUniqueUsername(usernameInput.text);
+
         if (PhotonNetwork.IsMasterClient)
         {
             PhotonNetwork.LoadLevel("Waiting Room");
         }
-        /*else
+        else
         {
             if ((bool)PhotonNetwork.CurrentRoom.CustomProperties["Waiting"])
             {
@@ -139,7 +136,8 @@ public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
                 Debug.Log(((RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["RoomSettings"]).map);
                 PhotonNetwork.LoadLevel(((RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["RoomSettings"]).map);
             }
-        }*/
+        }
+        PhotonNetwork.AutomaticallySyncScene = true;
     }
 
     string GetUniqueUsername(string username)

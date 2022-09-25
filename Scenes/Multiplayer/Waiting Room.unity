@@ -4983,6 +4983,10 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 9143578255358646216, guid: 1976ff2b0fb30ba4797d334202f06dc4, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[3].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9143578255358646216, guid: 1976ff2b0fb30ba4797d334202f06dc4, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 344985677}
@@ -4995,7 +4999,15 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 344985679}
     - target: {fileID: 9143578255358646216, guid: 1976ff2b0fb30ba4797d334202f06dc4, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[3].m_Target
+      value: 
+      objectReference: {fileID: 344985672}
+    - target: {fileID: 9143578255358646216, guid: 1976ff2b0fb30ba4797d334202f06dc4, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[2].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 9143578255358646216, guid: 1976ff2b0fb30ba4797d334202f06dc4, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[3].m_CallState
       value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 9143578255358646216, guid: 1976ff2b0fb30ba4797d334202f06dc4, type: 3}
@@ -5008,7 +5020,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9143578255358646216, guid: 1976ff2b0fb30ba4797d334202f06dc4, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[2].m_MethodName
-      value: MasterUpdateBasicUI
+      value: MasterUpdateAllUI
       objectReference: {fileID: 0}
     - target: {fileID: 9143578255358646216, guid: 1976ff2b0fb30ba4797d334202f06dc4, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_TargetAssemblyTypeName
@@ -5016,6 +5028,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9143578255358646216, guid: 1976ff2b0fb30ba4797d334202f06dc4, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[2].m_TargetAssemblyTypeName
+      value: WaitingRoom, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 9143578255358646216, guid: 1976ff2b0fb30ba4797d334202f06dc4, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[3].m_TargetAssemblyTypeName
       value: WaitingRoom, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 9143578255358646216, guid: 1976ff2b0fb30ba4797d334202f06dc4, type: 3}

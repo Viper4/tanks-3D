@@ -230,6 +230,43 @@ public class GameManager : MonoBehaviourPunCallbacks
         }
     }
 
+    public void UpdatePlayerWithSettings(Transform player)
+    {
+        if (player != null)
+        {
+            if (player.TryGetComponent<SpectatorControl>(out var spectatorControl))
+            {
+                spectatorControl.sensitivity = DataManager.playerSettings.sensitivity;
+                spectatorControl.rotationSmoothTime = DataManager.playerSettings.cameraSmoothing;
+            }
+            else
+            {
+                string crosshairFilePath = SaveSystem.CROSSHAIR_FOLDER + DataManager.playerSettings.crosshairFileName + ".png";
+                Sprite crosshair = CustomMath.ImageToSprite(crosshairFilePath);
+                Transform playerUI = player.Find("Player UI");
+                if (playerUI != null)
+                {
+                    BaseUIHandler baseUIHandler = playerUI.GetComponent<BaseUIHandler>();
+                    if (baseUIHandler != null && baseUIHandler.UIElements.ContainsKey("InGame"))
+                    {
+                        Transform reticle = baseUIHandler.UIElements["InGame"].Find("Reticle");
+                        reticle.GetComponent<CrosshairManager>().UpdateReticleSprite(crosshair, DataManager.playerSettings.crosshairColorIndex, DataManager.playerSettings.crosshairScale);
+                    }
+                }
+
+                Transform camera = player.Find("Camera");
+                if (camera != null && camera.TryGetComponent<CameraControl>(out var cameraS))
+                {
+                    camera.GetComponent<Camera>().fieldOfView = DataManager.playerSettings.fieldOfView;
+                    cameraS.sensitivity = DataManager.playerSettings.sensitivity;
+                    cameraS.rotationSmoothTime = DataManager.playerSettings.cameraSmoothing;
+                }
+            }
+        }
+
+        AudioListener.volume = DataManager.playerSettings.masterVolume / 100;
+    }
+
     public void StopAllLoadRoutines()
     {
         StopAllCoroutines();
