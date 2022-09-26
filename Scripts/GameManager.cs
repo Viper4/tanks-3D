@@ -29,6 +29,7 @@ public class GameManager : MonoBehaviourPunCallbacks
     readonly byte RemoveReadyPlayerCode = 5;
     public readonly byte DestroyCode = 6;
     public readonly byte ResetDataCode = 7;
+    public readonly byte LoadSceneCode = 8;
 
     public Transform loadingScreen;
     [SerializeField] Transform progressBar;
@@ -96,10 +97,12 @@ public class GameManager : MonoBehaviourPunCallbacks
         switch (currentScene.name)
         {
             case "Main Menu":
+                UpdatePlayerWithSettings(null);
                 loadingScreen.gameObject.SetActive(false);
                 StartCoroutine(ResetAutoPlay(2.5f));
                 break;
             case "Waiting Room":
+                UpdatePlayerWithSettings(null);
                 loadingScreen.gameObject.SetActive(false);
                 StartCoroutine(ResetAutoPlay(2.5f));
                 break;
@@ -263,6 +266,10 @@ public class GameManager : MonoBehaviourPunCallbacks
                 }
             }
         }
+        else
+        {
+            Camera.main.fieldOfView = DataManager.playerSettings.fieldOfView;
+        }
 
         AudioListener.volume = DataManager.playerSettings.masterVolume / 100;
     }
@@ -278,10 +285,6 @@ public class GameManager : MonoBehaviourPunCallbacks
     {
         StartCoroutine(LoadSceneRoutine(currentScene.buildIndex + 1, delay, false, save, true));
     }
-    public void PhotonLoadNextScene(float delay = 0, bool save = false)
-    {
-        StartCoroutine(LoadSceneRoutine(currentScene.buildIndex + 1, delay, true, save, false));
-    }
 
     public void LoadScene(int sceneIndex = -1, float delay = 0, bool save = false, bool waitWhilePaused = true)
     {
@@ -293,14 +296,67 @@ public class GameManager : MonoBehaviourPunCallbacks
         StartCoroutine(LoadSceneRoutine(sceneName, delay, false, save, waitWhilePaused));
     }
 
-    public void PhotonLoadScene(int sceneIndex = -1, float delay = 0, bool save = false, bool waitWhilePaused = true)
+    public void PhotonLoadNextScene(float delay = 0, bool save = false)
     {
-        StartCoroutine(LoadSceneRoutine(sceneIndex, delay, true, save, waitWhilePaused));
+        if (PhotonNetwork.IsMasterClient)
+        {
+            PhotonHashtable eventParameters = new PhotonHashtable()
+            {
+                { "sceneIndex", currentScene.buildIndex + 1 },
+                { "delay", delay },
+                { "save", save }
+            };
+            RaiseEventOptions raiseEventOptions = new RaiseEventOptions()
+            {
+                CachingOption = EventCaching.DoNotCache,
+                InterestGroup = 0,
+                TargetActors = null,
+                Receivers = ReceiverGroup.All,
+            };
+            PhotonNetwork.RaiseEvent(LoadSceneCode, eventParameters, raiseEventOptions, SendOptions.SendUnreliable);
+        }
     }
 
-    public void PhotonLoadScene(string sceneName = null, float delay = 0, bool save = false, bool waitWhilePaused = true)
+    public void PhotonLoadScene(int sceneIndex = -1, float delay = 0, bool save = false)
     {
-        StartCoroutine(LoadSceneRoutine(sceneName, delay, true, save, waitWhilePaused));
+        if (PhotonNetwork.IsMasterClient)
+        {
+            PhotonHashtable eventParameters = new PhotonHashtable()
+            {
+                { "sceneIndex", sceneIndex },
+                { "delay", delay },
+                { "save", save }
+            };
+            RaiseEventOptions raiseEventOptions = new RaiseEventOptions()
+            {
+                CachingOption = EventCaching.DoNotCache,
+                InterestGroup = 0,
+                TargetActors = null,
+                Receivers = ReceiverGroup.All,
+            };
+            PhotonNetwork.RaiseEvent(LoadSceneCode, eventParameters, raiseEventOptions, SendOptions.SendUnreliable);
+        }
+    }
+
+    public void PhotonLoadScene(string sceneName = null, float delay = 0, bool save = false)
+    {
+        if (PhotonNetwork.IsMasterClient)
+        {
+            PhotonHashtable eventParameters = new PhotonHashtable()
+            {
+                { "sceneName", sceneName },
+                { "delay", delay },
+                { "save", save }
+            };
+            RaiseEventOptions raiseEventOptions = new RaiseEventOptions()
+            {
+                CachingOption = EventCaching.DoNotCache,
+                InterestGroup = 0,
+                TargetActors = null,
+                Receivers = ReceiverGroup.All,
+            };
+            PhotonNetwork.RaiseEvent(LoadSceneCode, eventParameters, raiseEventOptions, SendOptions.SendUnreliable);
+        }
     }
 
     private IEnumerator LoadSceneRoutine(int sceneIndex, float delay, bool photon, bool save, bool waitWhilePaused)
@@ -563,6 +619,18 @@ public class GameManager : MonoBehaviourPunCallbacks
         {
             DataManager.playerData = SaveSystem.ResetPlayerData("PlayerData");
         }
+        else if (eventData.Code == LoadSceneCode)
+        {
+            PhotonHashtable parameters = (PhotonHashtable)eventData.Parameters[ParameterCode.Data];
+            if (parameters.ContainsKey("sceneIndex"))
+            {
+                StartCoroutine(LoadSceneRoutine((int)parameters["sceneIndex"], (float)parameters["delay"], true, (bool)parameters["save"], false));
+            }
+            else if (parameters.ContainsKey("sceneName"))
+            {
+                StartCoroutine(LoadSceneRoutine((string)parameters["sceneName"], (float)parameters["delay"], true, (bool)parameters["save"], false));
+            }
+        }
     }
 
     public void MainMenu()
@@ -626,6 +694,5 @@ public class GameManager : MonoBehaviourPunCallbacks
         canceledConnect = false;
         PhotonNetwork.OfflineMode = true;
         SceneManager.LoadScene("Main Menu");
-        Debug.Log("Disconnected: " + cause.ToString());
     }
 }

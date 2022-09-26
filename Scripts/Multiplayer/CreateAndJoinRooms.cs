@@ -43,8 +43,6 @@ public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
                 CustomRoomProperties = roomProperties
             };
 
-            Debug.Log(roomOptions.IsOpen + " " + roomOptions.IsVisible);
-
             PhotonNetwork.CreateRoom(createInput.text, roomOptions);
 
             joiningOrCreating.gameObject.SetActive(true);
@@ -137,7 +135,6 @@ public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
                 PhotonNetwork.LoadLevel(((RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["RoomSettings"]).map);
             }
         }
-        PhotonNetwork.AutomaticallySyncScene = true;
     }
 
     string GetUniqueUsername(string username)

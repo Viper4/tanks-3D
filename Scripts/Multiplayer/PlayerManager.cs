@@ -64,21 +64,22 @@ public class PlayerManager : MonoBehaviourPunCallbacks
             {
                 { "Kills", 0 },
                 { "Deaths", 0 },
-                { "New", false }
+                { "New", false },
             };
 
             if (roomSettings.primaryMode == "Co-Op")
             {
-                if (PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey("Started") && (bool)PhotonNetwork.CurrentRoom.CustomProperties["Started"] && PhotonNetwork.LocalPlayer.CustomProperties.ContainsKey("New") && (bool)PhotonNetwork.LocalPlayer.CustomProperties["New"])
+                if ((string)PhotonNetwork.LocalPlayer.CustomProperties["Original Team"] == "Spectators" || (PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey("Started") && (bool)PhotonNetwork.CurrentRoom.CustomProperties["Started"] && PhotonNetwork.LocalPlayer.CustomProperties.ContainsKey("New") && (bool)PhotonNetwork.LocalPlayer.CustomProperties["New"]))
                 {
                     GameManager.Instance.frozen = false;
                     Time.timeScale = 1;
                     GameManager.Instance.loadingScreen.gameObject.SetActive(false);
                     DataManager.playerSettings = SaveSystem.LoadPlayerSettings("PlayerSettings");
-                    GameManager.Instance.UpdatePlayerWithSettings(SpawnSpectator(Vector3.zero, Quaternion.identity));
+                    GameManager.Instance.UpdatePlayerWithSettings(SpawnSpectator(new Vector3(0, 6, 0), Quaternion.identity));
                 }
                 else
                 {
+                    PhotonNetwork.LocalPlayer.JoinOrSwitchTeam("Players");
                     newPlayer = SpawnPlayer(CustomRandom.GetSpawnPointInCollider(defaultSpawns[spawnIndex], Vector3.down, ignoreLayerMask, playerSpawnCollider, defaultSpawns[spawnIndex].transform.rotation), defaultSpawns[spawnIndex].transform.rotation);
                     playerProperties["Kills"] = DataManager.playerData.kills;
                     playerProperties["Deaths"] = DataManager.playerData.deaths;
@@ -91,7 +92,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks
                     GameManager.Instance.frozen = false;
                     GameManager.Instance.loadingScreen.gameObject.SetActive(false);
                     DataManager.playerSettings = SaveSystem.LoadPlayerSettings("PlayerSettings");
-                    GameManager.Instance.UpdatePlayerWithSettings(SpawnSpectator(Vector3.zero, Quaternion.identity));
+                    GameManager.Instance.UpdatePlayerWithSettings(SpawnSpectator(new Vector3(0, 6, 0), Quaternion.identity));
                 }
                 else
                 {
@@ -153,7 +154,6 @@ public class PlayerManager : MonoBehaviourPunCallbacks
 
     private GameObject SpawnPlayer(Vector3 position, Quaternion rotation)
     {
-        Debug.Log("Spawned player");
         GameObject newPlayer = PhotonNetwork.Instantiate(playerPrefab.name, position, rotation);
         newPlayer.GetComponent<PhotonView>().RPC("InitializePlayer", RpcTarget.All, new object[] { new float[] { Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), 1 }, new float[] { Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), 1 } });
         newPlayer.name = playerPrefab.name;
@@ -200,7 +200,6 @@ public class PlayerManager : MonoBehaviourPunCallbacks
         }
         else
         {
-            PhotonNetwork.LocalPlayer.JoinOrSwitchTeam("Spectators");
             Transform camera = tankOrigin.parent.Find("Camera");
             SpawnSpectator(camera.position, camera.rotation);
             PhotonNetwork.Destroy(tankOrigin.parent.gameObject);
@@ -222,7 +221,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks
             if (playerParent.childCount < 1)
             {
                 GameManager.Instance.frozen = true;
-                PhotonNetwork.LocalPlayer.JoinOrSwitchTeam("Players");
+                PhotonNetwork.LocalPlayer.JoinOrSwitchTeam((string)PhotonNetwork.LocalPlayer.CustomProperties["Original Team"]);
                 StopCoroutines();
 
                 if (PhotonNetwork.IsMasterClient)
@@ -243,19 +242,18 @@ public class PlayerManager : MonoBehaviourPunCallbacks
 
     void RestartCoOpGame()
     {
-        Debug.Log("Restart CoOp Game");
         PhotonHashtable roomProperties = new PhotonHashtable()
         {
             { "Total Lives", GameManager.Instance.totalLives }
         };
         PhotonNetwork.CurrentRoom.SetCustomProperties(roomProperties);
-        if (GameManager.Instance.totalLives > 0)
+        if (GameManager.Instance.totalLives > 0 && CustomNetworkHandling.NonSpectatorList.Length > 0)
         {
-            GameManager.Instance.PhotonLoadScene(-1, 3, true, false);
+            GameManager.Instance.PhotonLoadScene(-1, 3, true);
         }
         else
         {
-            GameManager.Instance.PhotonLoadScene("End Scene", 3, true, false);
+            GameManager.Instance.PhotonLoadScene("End Scene", 3, true);
         }
     }
 
@@ -267,11 +265,10 @@ public class PlayerManager : MonoBehaviourPunCallbacks
     IEnumerator DelayedOnPlayerLeftCheck()
     {
         yield return new WaitForEndOfFrame();
-        if (roomSettings.primaryMode == "Co-Op" && transform.childCount < 1)
+        if (roomSettings.primaryMode == "Co-Op" && playerParent.childCount < 1)
         {
-            Debug.Log("Here");
             GameManager.Instance.frozen = true;
-            PhotonNetwork.LocalPlayer.JoinOrSwitchTeam("Players");
+            PhotonNetwork.LocalPlayer.JoinOrSwitchTeam((string)PhotonNetwork.LocalPlayer.CustomProperties["Original Team"]);
 
             if (PhotonNetwork.IsMasterClient)
             {

@@ -83,7 +83,6 @@ public class MineBehaviour : MonoBehaviourPunCallbacks
             PhotonHashtable parameters = (PhotonHashtable)eventData.Parameters[ParameterCode.Data];
             if ((int)parameters["ID"] == mineID)
             {
-                Debug.Log("Destroyed: " + (int)parameters["ID"]);
                 ExplodeMine(new List<Transform>());
             }
         }

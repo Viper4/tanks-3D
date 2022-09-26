@@ -124,7 +124,6 @@ public class TankManager : MonoBehaviourPunCallbacks
             }
             for (int j = 0; j < tankAmount; j++)
             {
-                Debug.Log(j + ": " + tankParent.GetChild(j + sum) + " / " + players[i].NickName);
                 tankParent.GetChild(j + sum).GetComponent<PhotonView>().TransferOwnership(players[i]);
             }
             sum += tankAmount;
@@ -277,9 +276,8 @@ public class TankManager : MonoBehaviourPunCallbacks
                         if (roomSettings.primaryMode == "Co-Op")
                         {
                             GameManager.Instance.frozen = true;
-                            PhotonNetwork.LocalPlayer.JoinOrSwitchTeam("Players");
 
-                            FindObjectOfType<PlayerManager>().StopCoroutines();
+                            PlayerManager.Instance.StopCoroutines();
                         }
 
                         if (PhotonNetwork.IsMasterClient)
@@ -287,16 +285,16 @@ public class TankManager : MonoBehaviourPunCallbacks
                             if (lastCampaignScene || GameManager.Instance.totalLives <= 0)
                             {
                                 roomSettings.map = "End Scene";
-                                GameManager.Instance.PhotonLoadScene("End Scene", 3, true, false);
+                                GameManager.Instance.PhotonLoadScene("End Scene", 3, true);
                             }
                             else
                             {
-                                roomSettings.map = SceneManager.GetSceneByBuildIndex(GameManager.Instance.currentScene.buildIndex + 1).name;
-                                Debug.Log(roomSettings.map + " / " + SceneManager.GetSceneByBuildIndex(GameManager.Instance.currentScene.buildIndex + 1).name);
+                                string path = SceneUtility.GetScenePathByBuildIndex(GameManager.Instance.currentScene.buildIndex + 1);
+                                string sceneName = System.IO.Path.GetFileNameWithoutExtension(path);
+                                roomSettings.map = sceneName;
                                 GameManager.Instance.PhotonLoadNextScene(3, true);
                             }
 
-                            Debug.Log("Set total lives");
                             PhotonHashtable roomProperties = new PhotonHashtable()
                             {
                                 { "RoomSettings", roomSettings },
@@ -308,7 +306,7 @@ public class TankManager : MonoBehaviourPunCallbacks
                         {
                             if (lastCampaignScene || GameManager.Instance.totalLives <= 0)
                             {
-                                GameManager.Instance.PhotonLoadScene("End Scene", 3, true, false);
+                                GameManager.Instance.PhotonLoadScene("End Scene", 3, true);
                             }
                             else
                             {
@@ -328,6 +326,14 @@ public class TankManager : MonoBehaviourPunCallbacks
                 }
             }
             checking = false;
+        }
+    }
+
+    public override void OnPlayerEnteredRoom(Player newPlayer)
+    {
+        if (PhotonNetwork.IsMasterClient && !GameManager.Instance.inLobby)
+        {
+            AllocateOwnershipOfTanks();
         }
     }
 

@@ -11,7 +11,7 @@ public class BaseUIHandler : MonoBehaviour
 
     [SerializeField] List<Transform> activeElements = new List<Transform>();
 
-    private void Start()
+    private void Awake()
     {
         foreach (Transform child in transform)
         {
@@ -61,7 +61,7 @@ public class BaseUIHandler : MonoBehaviour
         }
         else
         {
-            GameManager.Instance.PhotonLoadScene(sceneName, 0, false, false);
+            GameManager.Instance.PhotonLoadScene(sceneName);
         }
     }
 
@@ -72,11 +72,11 @@ public class BaseUIHandler : MonoBehaviour
         {
             if (PhotonNetwork.OfflineMode)
             {
-                GameManager.Instance.LoadScene(DataManager.playerData.sceneIndex, 0, false, false);
+                GameManager.Instance.LoadScene(DataManager.playerData.sceneIndex);
             }
             else
             {
-                GameManager.Instance.PhotonLoadScene(DataManager.playerData.sceneIndex, 0, false, false);
+                GameManager.Instance.PhotonLoadScene(DataManager.playerData.sceneIndex);
             }
         }
     }
@@ -93,6 +93,11 @@ public class BaseUIHandler : MonoBehaviour
             PhotonNetwork.CurrentRoom.SetCustomProperties(roomProperties);
             PhotonNetwork.RaiseEvent(GameManager.Instance.ResetDataCode, null, Photon.Realtime.RaiseEventOptions.Default, ExitGames.Client.Photon.SendOptions.SendUnreliable);
         }
+    }
+
+    public void MainMenu()
+    {
+        GameManager.Instance.MainMenu();
     }
 
     public void Exit()

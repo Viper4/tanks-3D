@@ -135,7 +135,6 @@ public class RoomCustomization : MonoBehaviour
 
     public void UpdateSettingsUI()
     {
-        Debug.Log("Updated");
         GameObject[] allUISettings = GameObject.FindGameObjectsWithTag("UI Setting");
         foreach (GameObject setting in allUISettings)
         {

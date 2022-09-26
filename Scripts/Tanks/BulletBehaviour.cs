@@ -69,7 +69,6 @@ public class BulletBehaviour : MonoBehaviourPunCallbacks
             PhotonHashtable parameters = (PhotonHashtable)eventData.Parameters[ParameterCode.Data];
             if ((int)parameters["ID"] == bulletID)
             {
-                Debug.Log("Destroyed: " + (int)parameters["ID"]);
                 SubtractBulletsFired();
                 if (!(bool)parameters["Safe"])
                 {

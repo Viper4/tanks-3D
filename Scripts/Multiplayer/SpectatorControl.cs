@@ -28,7 +28,6 @@ public class SpectatorControl : MonoBehaviour
 
     private void Start()
     {
-        GameManager.Instance.UpdatePlayerWithSettings(transform);
         currentRotation = transform.eulerAngles;
     }
 

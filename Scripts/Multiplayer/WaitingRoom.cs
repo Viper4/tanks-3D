@@ -113,7 +113,7 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
 
     public void StartGame() // Accessable only by MasterClient
     {
-        PhotonNetwork.AutomaticallySyncScene = true;
+        PhotonNetwork.RaiseEvent(LeaveWaitingRoomEventCode, null, RaiseEventOptions.Default, SendOptions.SendUnreliable);
 
         PhotonHashtable roomProperties = new PhotonHashtable
         {
@@ -123,8 +123,13 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
         };
         PhotonNetwork.CurrentRoom.SetCustomProperties(roomProperties);
         DataManager.playerData = SaveSystem.ResetPlayerData("PlayerData");
+        PhotonHashtable playerProperties = new PhotonHashtable()
+        {
+            { "Original Team", PhotonNetwork.LocalPlayer.GetPhotonTeam().Name }
+        };
+        PhotonNetwork.LocalPlayer.SetCustomProperties(playerProperties);
 
-        PhotonNetwork.LoadLevel(DataManager.roomSettings.map);
+        GameManager.Instance.PhotonLoadScene(DataManager.roomSettings.map, 0, false);
     }
 
     public void ChangePrimaryMode(string mode) // Accessable only by MasterClient
@@ -132,6 +137,20 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
         if (DataManager.roomSettings.primaryMode != mode)
         {
             DataManager.roomSettings.primaryMode = mode;
+            if (mode == "Co-Op")
+            {
+                if (DataManager.roomSettings.map != "Classic 1" && DataManager.roomSettings.map != "Regular 1")
+                {
+                    DataManager.roomSettings.map = "Classic 1";
+                }
+            }
+            else
+            {
+                if (DataManager.roomSettings.map == "Classic 1" || DataManager.roomSettings.map == "Regular 1")
+                {
+                    DataManager.roomSettings.map = "Classic";
+                }
+            }
             UpdateRoomSettingsProperty();
 
             MasterUpdateAllUI();
@@ -320,17 +339,20 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
     {
         if (eventData.Code == UpdateUIEventCode)
         {
-            Debug.Log("Raised UpdateUIEventCode");
             UpdateBasicUI();
         }
         else if (eventData.Code == UpdateTeamsEventCode)
         {
-            Debug.Log("Raised UpdateTeamsEventCode");
             UpdateTeamRosters();
         }
         else if (eventData.Code == LeaveWaitingRoomEventCode)
         {
             DataManager.playerData = SaveSystem.ResetPlayerData("PlayerData");
+            PhotonHashtable playerProperties = new PhotonHashtable()
+            {
+                { "Original Team", PhotonNetwork.LocalPlayer.GetPhotonTeam().Name }
+            };
+            PhotonNetwork.LocalPlayer.SetCustomProperties(playerProperties);
         }
     }
 
@@ -341,7 +363,6 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
 
     public override void OnPlayerLeftRoom(Player otherPlayer)
     {
-        Debug.Log("Here");
         if (PhotonNetwork.IsMasterClient)
         {
             otherPlayer.LeaveCurrentTeam();
@@ -351,7 +372,6 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
 
     public override void OnMasterClientSwitched(Player newMasterClient)
     {
-        Debug.Log("Switched master client to " + newMasterClient.NickName);
         if (PhotonNetwork.IsMasterClient)
         {
             foreach (GameObject UIElement in ownerElements)

@@ -13,7 +13,7 @@ public class DataManager : MonoBehaviourPun
     public static RoomSettings roomSettings = new RoomSettings();
     public static PlayerData playerData = new PlayerData();
 
-    private void Start()
+    private void Awake()
     {
         if (Instance == null)
         {

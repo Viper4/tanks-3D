@@ -434,6 +434,7 @@ public class BaseTankLogic : MonoBehaviour
     {
         if (to != Vector3.zero && (!overrideRotation || master))
         {
+            to.y = tankOrigin.forward.y;
             float angle = Mathf.Abs(Vector3.SignedAngle(tankOrigin.forward, to, tankOrigin.up));
 
             if (angle > 180 - flipAngleThreshold && angle < 180 + flipAngleThreshold)
