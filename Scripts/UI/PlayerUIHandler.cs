@@ -1,8 +1,6 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using Photon.Pun;
-using System.Text.RegularExpressions;
 
 public class PlayerUIHandler : MonoBehaviour
 {
@@ -42,7 +40,7 @@ public class PlayerUIHandler : MonoBehaviour
         {
             if (Input.GetKeyDown(KeyCode.Escape))
             {
-                if (baseUIHandler.UIElements["PauseMenu"].gameObject.activeSelf)
+                if (baseUIHandler.UIElements["PauseMenu"].gameObject.activeSelf || baseUIHandler.UIElements["Settings"].gameObject.activeSelf)
                 {
                     Resume();
                 }

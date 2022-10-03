@@ -34,14 +34,19 @@ public static class SaveSystem
             { "Lock Camera", KeyCode.LeftShift },
             { "Switch Camera", KeyCode.LeftAlt },
             { "Leaderboard", KeyCode.Tab },
+            { "Zoom Control", KeyCode.Z },
             { "Toggle HUD", KeyCode.F1 },
-            { "Screenshot", KeyCode.F11 }
+            { "Screenshot", KeyCode.F2 },
+            { "Debug Menu", KeyCode.F3 },
         },
+        targetFramerate = 60,
         silhouettes = true,
         masterVolume = 100,
         crosshairFileName = "Default",
         crosshairColorIndex = 0,
         crosshairScale = 1,
+        slowZoomSpeed = 0.5f,
+        fastZoomSpeed = 5f,
     };
 
     public static readonly RoomSettings defaultRoomSettings = new RoomSettings
@@ -215,16 +220,22 @@ public static class SaveSystem
 
     public static string LatestFileInSaveFolder(bool returnExtension, string fileExtension = "")
     {
-        DirectoryInfo saveFolder = new DirectoryInfo(SAVE_FOLDER);
-        FileInfo latestFile = saveFolder.GetFiles("*" + fileExtension, SearchOption.AllDirectories).OrderByDescending(f => f.LastWriteTime).FirstOrDefault();
+        FileInfo latestFile = new DirectoryInfo(SAVE_FOLDER).GetFiles("*" + fileExtension, SearchOption.AllDirectories).OrderByDescending(f => f.LastWriteTime).FirstOrDefault();
 
-        if (returnExtension)
+        if (latestFile != null)
         {
-            return latestFile.Name;
+            if (returnExtension)
+            {
+                return latestFile.Name;
+            }
+            else
+            {
+                return Path.GetFileNameWithoutExtension(latestFile.Name);
+            }
         }
         else
         {
-            return Path.GetFileNameWithoutExtension(latestFile.Name);
+            return null;
         }
     }
 

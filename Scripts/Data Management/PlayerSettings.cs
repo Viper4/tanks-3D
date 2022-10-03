@@ -9,9 +9,12 @@ public class PlayerSettings
     public float cameraSmoothing;
     public float fieldOfView;
     public Dictionary<string, KeyCode> keyBinds;
+    public int targetFramerate;
     public bool silhouettes;
     public float masterVolume;
     public string crosshairFileName;
     public int crosshairColorIndex;
     public float crosshairScale;
+    public float slowZoomSpeed;
+    public float fastZoomSpeed;
 }

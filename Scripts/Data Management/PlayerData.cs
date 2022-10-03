@@ -1,7 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
 [System.Serializable]
 public class PlayerData
 {
@@ -13,4 +9,18 @@ public class PlayerData
     public float bestTime;
     public int sceneIndex;
     public int previousSceneIndex;
+
+    public PlayerData Copy(PlayerData into)
+    {
+        into.lives = lives;
+        into.kills = kills;
+        into.shots = shots;
+        into.deaths = deaths;
+        into.time = time;
+        into.bestTime = bestTime;
+        into.sceneIndex = sceneIndex;
+        into.previousSceneIndex = previousSceneIndex;
+
+        return into;
+    }
 }

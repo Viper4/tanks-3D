@@ -16,6 +16,14 @@ public class LeaderboardHandler : MonoBehaviour
 
     [SerializeField] ClientManager clientManager;
 
+    private struct LeaderboardData
+    {
+        public int kills;
+        public int deaths;
+        public float KD;
+        public string teamName;
+    }
+
     // Update is called once per frame
     void LateUpdate()
     {
@@ -78,13 +86,5 @@ public class LeaderboardHandler : MonoBehaviour
             newPlayerSlot.transform.Find("Deaths").GetComponent<TextMeshProUGUI>().text = leaderboardData.deaths.ToString();
             newPlayerSlot.transform.Find("KD").GetComponent<TextMeshProUGUI>().text = leaderboardData.KD.ToString();
         }
-    }
-
-    private struct LeaderboardData
-    {
-        public int kills;
-        public int deaths;
-        public float KD;
-        public string teamName;
     }
 }

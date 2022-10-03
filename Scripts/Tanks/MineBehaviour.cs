@@ -8,6 +8,7 @@ using PhotonHashtable = ExitGames.Client.Photon.Hashtable;
 
 public class MineBehaviour : MonoBehaviourPunCallbacks
 {
+    readonly byte StartTimerCode = 9;
     public int mineID = 0;
 
     public Transform owner { get; set; }
@@ -33,13 +34,13 @@ public class MineBehaviour : MonoBehaviourPunCallbacks
     // Update is called once per frame
     void Update()
     {
-        if (!GameManager.Instance.frozen)
+        if (Time.timeScale > 0 && !GameManager.Instance.frozen)
         {
-            activateDelay -= Time.deltaTime * 1;
+            activateDelay -= Time.deltaTime;
 
             if (activateDelay <= 0)
             {
-                timer -= Time.deltaTime * 1;
+                timer -= Time.deltaTime;
 
                 // Explodes at 0 seconds
                 if (timer <= 0)
@@ -86,16 +87,29 @@ public class MineBehaviour : MonoBehaviourPunCallbacks
                 ExplodeMine(new List<Transform>());
             }
         }
+        else if (eventData.Code == StartTimerCode)
+        {
+            PhotonHashtable parameters = (PhotonHashtable)eventData.Parameters[ParameterCode.Data];
+            if ((int)parameters["ID"] == mineID)
+            {
+                timer = 2;
+            }
+        }
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Tank") || other.CompareTag("Player") || other.CompareTag("AI Tank"))
+        if ((ownerPV == null || ownerPV.IsMine) && (other.CompareTag("Tank") || other.CompareTag("Player") || other.CompareTag("AI Tank")))
         {
             if (activateDelay <= 0 && timer > 1.5f)
             {
                 if (timer > 2)
                 {
+                    PhotonHashtable parameters = new PhotonHashtable()
+                    {
+                        { "ID", mineID }
+                    };
+                    PhotonNetwork.RaiseEvent(StartTimerCode, parameters, RaiseEventOptions.Default, SendOptions.SendUnreliable);
                     timer = 2;
                 }
             }

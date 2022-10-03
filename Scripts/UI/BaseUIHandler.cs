@@ -67,23 +67,27 @@ public class BaseUIHandler : MonoBehaviour
 
     public void ResumeGame()
     {
-        DataManager.playerData = SaveSystem.LoadPlayerData("PlayerData");
-        if (DataManager.playerData.sceneIndex != -1)
+        string latestFile = SaveSystem.LatestFileInSaveFolder(false, ".playerdata");
+        if (latestFile != null)
         {
-            if (PhotonNetwork.OfflineMode)
+            DataManager.playerData = SaveSystem.LoadPlayerData(latestFile);
+            if (DataManager.playerData.sceneIndex != -1)
             {
-                GameManager.Instance.LoadScene(DataManager.playerData.sceneIndex);
-            }
-            else
-            {
-                GameManager.Instance.PhotonLoadScene(DataManager.playerData.sceneIndex);
+                if (PhotonNetwork.OfflineMode)
+                {
+                    GameManager.Instance.LoadScene(DataManager.playerData.sceneIndex);
+                }
+                else
+                {
+                    GameManager.Instance.PhotonLoadScene(DataManager.playerData.sceneIndex);
+                }
             }
         }
     }
 
-    public void ResetPlayerData()
+    public void ResetPlayerData(string fileName)
     {
-        DataManager.playerData = SaveSystem.ResetPlayerData("PlayerData");
+        DataManager.playerData = SaveSystem.ResetPlayerData(fileName);
         if (!PhotonNetwork.OfflineMode && PhotonNetwork.IsMasterClient)
         {
             PhotonHashtable roomProperties = new PhotonHashtable()
@@ -91,7 +95,12 @@ public class BaseUIHandler : MonoBehaviour
                 { "Total Lives", ((RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["RoomSettings"]).totalLives }
             };
             PhotonNetwork.CurrentRoom.SetCustomProperties(roomProperties);
-            PhotonNetwork.RaiseEvent(GameManager.Instance.ResetDataCode, null, Photon.Realtime.RaiseEventOptions.Default, ExitGames.Client.Photon.SendOptions.SendUnreliable);
+
+            PhotonHashtable parameters = new PhotonHashtable()
+            {
+                { "fileName", fileName }
+            };
+            PhotonNetwork.RaiseEvent(GameManager.Instance.ResetDataCode, parameters, Photon.Realtime.RaiseEventOptions.Default, ExitGames.Client.Photon.SendOptions.SendUnreliable);
         }
     }
 

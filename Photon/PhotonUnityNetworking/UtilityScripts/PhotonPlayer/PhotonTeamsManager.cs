@@ -263,9 +263,12 @@ namespace Photon.Pun.UtilityScripts
 
         private void ClearTeams()
         {
-            foreach (var key in playersPerTeam.Keys)
+            if (playersPerTeam != null)
             {
-                playersPerTeam[key].Clear();
+                foreach (var key in playersPerTeam.Keys)
+                {
+                    playersPerTeam[key].Clear();
+                }
             }
         }
 

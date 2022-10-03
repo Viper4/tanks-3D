@@ -552,6 +552,41 @@ namespace MyUnityAddons
         }
     }
 
+    namespace CustomConversions
+    {
+        using System;
+
+        public static class Conversions
+        {
+            static readonly string[] SizeSuffixes = { "bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" };
+            public static string SizeSuffix(Int64 value, int decimalPlaces = 1)
+            {
+                if (decimalPlaces < 0) { throw new ArgumentOutOfRangeException("decimalPlaces"); }
+                if (value < 0) { return "-" + SizeSuffix(-value, decimalPlaces); }
+                if (value == 0) { return string.Format("{0:n" + decimalPlaces + "} bytes", 0); }
+
+                // mag is 0 for bytes, 1 for KB, 2, for MB, etc.
+                int mag = (int)Math.Log(value, 1024);
+
+                // 1L << (mag * 10) == 2 ^ (10 * mag) 
+                // [i.e. the number of bytes in the unit corresponding to mag]
+                decimal adjustedSize = (decimal)value / (1L << (mag * 10));
+
+                // make adjustment when the value is large enough that
+                // it would round up to 1000 or more
+                if (Math.Round(adjustedSize, decimalPlaces) >= 1000)
+                {
+                    mag += 1;
+                    adjustedSize /= 1024;
+                }
+
+                return string.Format("{0:n" + decimalPlaces + "} {1}",
+                    adjustedSize,
+                    SizeSuffixes[mag]);
+            }
+        }
+    }
+
     namespace CustomPhoton
     {
         using Photon.Pun;
@@ -619,7 +654,10 @@ namespace MyUnityAddons
                     return null;
                 }
             }
+        }
 
+        public static class TeamAllocation
+        {
             public static void JoinOrSwitchTeam(this Player player, string teamName)
             {
                 PhotonTeam currentTeam = player.GetPhotonTeam();
@@ -671,6 +709,88 @@ namespace MyUnityAddons
                 {
                     player.JoinTeam(team);
                 }
+            }
+
+            public static string AllocatePlayerToTeam(this Player player)
+            {
+                RoomSettings roomSettings = (RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["RoomSettings"];
+                PhotonTeam currentTeam = player.GetPhotonTeam();
+
+                switch (roomSettings.primaryMode)
+                {
+                    case "Teams":
+                        Dictionary<string, int> teamCounts = new Dictionary<string, int>()
+                        {
+                            { "Team 4", PhotonTeamsManager.Instance.GetTeamMembersCount("Team 4") },
+                            { "Team 3", PhotonTeamsManager.Instance.GetTeamMembersCount("Team 3") },
+                            { "Team 2", PhotonTeamsManager.Instance.GetTeamMembersCount("Team 2") },
+                            { "Team 1", PhotonTeamsManager.Instance.GetTeamMembersCount("Team 1") },
+                        };
+
+                        if (teamCounts.Values.Sum() < roomSettings.playerLimit)
+                        {
+                            PhotonTeam smallestTeam = null;
+                            foreach (string key in teamCounts.Keys)
+                            {
+                                if (smallestTeam == null)
+                                {
+                                    if (teamCounts[key] < roomSettings.teamSize)
+                                    {
+                                        PhotonTeamsManager.Instance.TryGetTeamByName(key, out smallestTeam);
+                                    }
+                                }
+                                else
+                                {
+                                    if (teamCounts[smallestTeam.Name] < roomSettings.teamSize && teamCounts[key] <= teamCounts[smallestTeam.Name])
+                                    {
+                                        PhotonTeamsManager.Instance.TryGetTeamByName(key, out smallestTeam);
+                                    }
+                                }
+                            }
+                            if (smallestTeam != null)
+                            {
+                                if (currentTeam != null)
+                                {
+                                    if (currentTeam.Name == "Players")
+                                    {
+                                        player.SwitchTeam(smallestTeam);
+                                        return smallestTeam.Name;
+                                    }
+                                }
+                                else
+                                {
+                                    player.JoinTeam(smallestTeam);
+                                    return smallestTeam.Name;
+                                }
+                            }
+                        }
+                        break;
+                    default: // FFA, PvE, Co-Op
+                        if (PhotonTeamsManager.Instance.GetTeamMembersCount("Players") < roomSettings.playerLimit)
+                        {
+                            if (currentTeam != null)
+                            {
+                                if (currentTeam.Name == "Players")
+                                {
+                                    return "Players";
+                                }
+                                if (currentTeam.Name.Contains("Team"))
+                                {
+                                    player.SwitchTeam("Players");
+                                    return "Players";
+                                }
+                            }
+                            else
+                            {
+                                player.JoinTeam("Players");
+                                return "Players";
+                            }
+                        }
+                        break;
+                }
+
+                player.JoinOrSwitchTeam("Spectators");
+                return "Spectators";
             }
         }
 

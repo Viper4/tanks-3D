@@ -224,7 +224,7 @@ public class GoldBot : MonoBehaviour
             {
                 case "Mine":
                     nearbyMine = other.transform;
-                    if (targetMine == null)
+                    if (targetMine == null && mode != Mode.Escape)
                     {
                         targetMine = nearbyMine;
                     }
@@ -423,34 +423,31 @@ public class GoldBot : MonoBehaviour
             yield return new WaitForEndOfFrame();
         }
 
-        if (Physics.OverlapSphere(layPosition, trapRadius, highTierTanks).Length <= 5) // One gold tank has 4 colliders for turret, barrel, body, buffer collider, and capsule collider
-        {
-            mode = Mode.Laying;
-            baseTankLogic.stationary = true;
-            yield return new WaitForSeconds(Random.Range(layDelay[0], layDelay[1]));
-            StartCoroutine(mineControl.LayMine());
+        mode = Mode.Laying;
+        baseTankLogic.stationary = true;
+        yield return new WaitForSeconds(Random.Range(layDelay[0], layDelay[1]));
 
-            if (shootAfterLay)
+        float angleOffset = 360 / escapeSearchSteps;
+        baseTankLogic.stationary = false;
+        for (int i = 0; i < escapeSearchSteps; i++)
+        {
+            Vector3 testDirection = Quaternion.AngleAxis(i * angleOffset, turret.up) * transform.forward;
+            Vector3 escapePosition = transform.position + testDirection * (trapRadius * 1.5f);
+            if (!Physics.Raycast(turret.position, testDirection, trapRadius * 1.5f, baseTankLogic.barrierLayers) && !Physics.CheckSphere(turret.position + testDirection * (trapRadius * 1.5f), trapRadius, mineLayerMask))
             {
-                targetMine = mineControl.laidMines[^1].GetChild(0);
-            }
-            float angleOffset = 360 / escapeSearchSteps;
-            baseTankLogic.stationary = false;
-            for (int i = 0; i < escapeSearchSteps; i++)
-            {
-                Vector3 testDirection = Quaternion.AngleAxis(i * angleOffset, turret.up) * transform.forward;
-                Vector3 escapePosition = transform.position + testDirection * (trapRadius * 1.5f);
-                if (!Physics.Raycast(turret.position, testDirection, trapRadius * 1.5f, baseTankLogic.barrierLayers) && !Physics.CheckSphere(turret.position + testDirection * (trapRadius * 1.5f), trapRadius, mineLayerMask))
+                StartCoroutine(mineControl.LayMine());
+                if (shootAfterLay)
                 {
-                    mode = Mode.Escape;
-                    Debug.DrawLine(turret.position, turret.position + testDirection * (trapRadius * 1.5f), Color.green, 10);
-                    while (CustomMath.SqrDistance(transform.position, escapePosition) > 4)
-                    {
-                        baseTankLogic.targetTankDir = escapePosition - transform.position;
-                        yield return new WaitForEndOfFrame();
-                    }
-                    break;
+                    targetMine = mineControl.laidMines[^1].GetChild(0);
                 }
+                mode = Mode.Escape;
+                Debug.DrawLine(turret.position, turret.position + testDirection * (trapRadius * 1.5f), Color.green, 10);
+                while (CustomMath.SqrDistance(transform.position, escapePosition) > 4)
+                {
+                    baseTankLogic.targetTankDir = escapePosition - transform.position;
+                    yield return new WaitForEndOfFrame();
+                }
+                break;
             }
         }
 

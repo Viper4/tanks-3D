@@ -64,7 +64,6 @@ public class PhotonTankView : MonoBehaviourPunCallbacks, IPunObservable, IPunOwn
                 stream.SendNext(tankOrigin.rotation);
                 stream.SendNext(turret.rotation);
                 stream.SendNext(barrel.rotation);
-
                 stream.SendNext(teamName);
             }
             else if (stream.IsReading)

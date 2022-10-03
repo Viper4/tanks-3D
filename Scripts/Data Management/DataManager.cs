@@ -17,9 +17,17 @@ public class DataManager : MonoBehaviourPun
     {
         if (Instance == null)
         {
-            playerData = SaveSystem.LoadPlayerData("PlayerData");
             playerSettings = SaveSystem.LoadPlayerSettings("PlayerSettings");
-            roomSettings = SaveSystem.LoadRoomSettings(SaveSystem.LatestFileInSaveFolder(false, ".roomsettings"));
+            string latestRoomSettingsFile = SaveSystem.LatestFileInSaveFolder(false, ".roomsettings");
+            if (latestRoomSettingsFile != null)
+            {
+                roomSettings = SaveSystem.LoadRoomSettings(latestRoomSettingsFile);
+            }
+            else
+            {
+                roomSettings = SaveSystem.defaultRoomSettings;
+                SaveSystem.SaveRoomSettings(roomSettings, "DefaultRoomSettings");
+            }
 
             RegisterCustomTypes();
 

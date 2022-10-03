@@ -69,7 +69,21 @@ public class SettingsUIHandler : MonoBehaviour
         DataManager.playerSettings.masterVolume = slider.value;
         slider.transform.Find("Value Text").GetComponent<Text>().text = slider.value.ToString();
 
-        AudioListener.volume = DataManager.playerSettings.masterVolume / 100;
+        AudioListener.volume = DataManager.playerSettings.masterVolume / 200;
+    }
+
+    public void ChangeTargetFramerate(Slider slider)
+    {
+        Application.targetFrameRate = DataManager.playerSettings.targetFramerate = (int)slider.value;
+        if (slider.value <= 300)
+        {
+            slider.transform.Find("Value Text").GetComponent<Text>().text = slider.value.ToString();
+        }
+        else
+        {
+            slider.transform.Find("Value Text").GetComponent<Text>().text = "Unlimited";
+            Application.targetFrameRate = 1000;
+        }
     }
 
     public void ToggleSilhouettes(Toggle toggle)
@@ -98,6 +112,16 @@ public class SettingsUIHandler : MonoBehaviour
     public void SetCrosshairColor(Dropdown dropdown)
     {
         DataManager.playerSettings.crosshairColorIndex = dropdown.value;
+    }
+
+    public void ChangeSlowZoomSpeed(InputField inputField)
+    {
+        float.TryParse(inputField.text, out DataManager.playerSettings.slowZoomSpeed);
+    }
+
+    public void ChangeFastZoomSpeed(InputField inputField)
+    {
+        float.TryParse(inputField.text, out DataManager.playerSettings.fastZoomSpeed);
     }
 
     public void SaveSettings(string fileName)
@@ -146,6 +170,10 @@ public class SettingsUIHandler : MonoBehaviour
                             case "FOV":
                                 setting.GetComponent<Slider>().value = DataManager.playerSettings.fieldOfView;
                                 break;
+                            case "Zoom Speed":
+                                setting.Find("InputField Slow").GetComponent<InputField>().text = DataManager.playerSettings.slowZoomSpeed.ToString();
+                                setting.Find("InputField Fast").GetComponent<InputField>().text = DataManager.playerSettings.fastZoomSpeed.ToString();
+                                break;
                         }
                     }
                     break;
@@ -160,6 +188,9 @@ public class SettingsUIHandler : MonoBehaviour
                     {
                         switch (setting.name)
                         {
+                            case "Target Framerate":
+                                setting.GetComponent<Slider>().value = DataManager.playerSettings.targetFramerate;
+                                break;
                             case "Silhouettes":
                                 setting.GetComponent<Toggle>().isOn = DataManager.playerSettings.silhouettes;
                                 break;

@@ -22,6 +22,7 @@ public class CameraControl : MonoBehaviour
 
     [SerializeField] float dstFromTarget = 4;
     [SerializeField] Vector2 targetDstMinMax = new Vector2(0, 30);
+    [SerializeField] Vector2 altTargetDstMinMax = new Vector2(30, 60);
 
     [SerializeField] Vector2 pitchMinMaxN = new Vector2(-40, 80);
     [SerializeField] Vector2 pitchMinMaxL = new Vector2(-20, 20);
@@ -82,15 +83,30 @@ public class CameraControl : MonoBehaviour
                 username.UpdateTextMeshTo(transform, alternateCamera);
             }
 
-            float zoomRate = Input.GetKey(KeyCode.LeftShift) ? 0.5f : 5f;
-            // Zoom with scroll
-            if (Input.GetAxisRaw("Mouse ScrollWheel") > 0)
+            float zoomRate = Input.GetKey(DataManager.playerSettings.keyBinds["Zoom Control"]) ? DataManager.playerSettings.slowZoomSpeed : DataManager.playerSettings.fastZoomSpeed;
+            if (alternateCamera)
             {
-                dstFromTarget = Mathf.Clamp(dstFromTarget - zoomRate, targetDstMinMax.x, targetDstMinMax.y);
+                // Zoom with scroll
+                if (Input.GetAxisRaw("Mouse ScrollWheel") > 0)
+                {
+                    dstFromTarget = Mathf.Clamp(dstFromTarget - zoomRate, altTargetDstMinMax.x, altTargetDstMinMax.y);
+                }
+                else if (Input.GetAxisRaw("Mouse ScrollWheel") < 0)
+                {
+                    dstFromTarget = Mathf.Clamp(dstFromTarget + zoomRate, altTargetDstMinMax.x, altTargetDstMinMax.y);
+                }
             }
-            else if (Input.GetAxisRaw("Mouse ScrollWheel") < 0)
+            else
             {
-                dstFromTarget = Mathf.Clamp(dstFromTarget + zoomRate, targetDstMinMax.x, targetDstMinMax.y);
+                // Zoom with scroll
+                if (Input.GetAxisRaw("Mouse ScrollWheel") > 0)
+                {
+                    dstFromTarget = Mathf.Clamp(dstFromTarget - zoomRate, targetDstMinMax.x, targetDstMinMax.y);
+                }
+                else if (Input.GetAxisRaw("Mouse ScrollWheel") < 0)
+                {
+                    dstFromTarget = Mathf.Clamp(dstFromTarget + zoomRate, targetDstMinMax.x, targetDstMinMax.y);
+                }
             }
 
             // Lock turret toggle
@@ -111,6 +127,7 @@ public class CameraControl : MonoBehaviour
 
                 if (alternateCamera)
                 {
+                    dstFromTarget = Mathf.Clamp(dstFromTarget, altTargetDstMinMax.x, altTargetDstMinMax.y);
                     transform.eulerAngles = new Vector3(90, 0, 0);
                 }
             }
@@ -125,7 +142,7 @@ public class CameraControl : MonoBehaviour
                 Cursor.visible = false;
                 if (alternateCamera)
                 {
-                    transform.position = new Vector3(0, 30 + dstFromTarget, 0);
+                    transform.position = new Vector3(0, dstFromTarget, 0);
                 }
 
                 if (dstFromTarget == 0 && !alternateCamera)

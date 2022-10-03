@@ -6,6 +6,8 @@ using Photon.Pun;
 using Photon.Realtime;
 using TMPro;
 using PhotonHashtable = ExitGames.Client.Photon.Hashtable;
+using MyUnityAddons.CustomPhoton;
+using Photon.Pun.UtilityScripts;
 
 public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
 {
@@ -70,7 +72,6 @@ public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
     {
         if (UsernameInputIsValid())
         {
-
             if (PhotonNetwork.CountOfRooms > 0)
             {
                 PhotonNetwork.JoinRandomRoom();
@@ -118,6 +119,7 @@ public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
     public override void OnJoinedRoom()
     {
         PhotonNetwork.NickName = GetUniqueUsername(usernameInput.text);
+        string teamName = PhotonNetwork.LocalPlayer.AllocatePlayerToTeam();
 
         if (PhotonNetwork.IsMasterClient)
         {
@@ -131,7 +133,11 @@ public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
             }
             else
             {
-                Debug.Log(((RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["RoomSettings"]).map);
+                PhotonHashtable playerProperties = new PhotonHashtable()
+                {
+                    { "Original Team", teamName }
+                };
+                PhotonNetwork.LocalPlayer.SetCustomProperties(playerProperties);
                 PhotonNetwork.LoadLevel(((RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["RoomSettings"]).map);
             }
         }
