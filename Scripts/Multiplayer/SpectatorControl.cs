@@ -29,6 +29,8 @@ public class SpectatorControl : MonoBehaviour
     private void Start()
     {
         currentRotation = transform.eulerAngles;
+        pitch = transform.eulerAngles.x;
+        yaw = transform.eulerAngles.y;
     }
 
     // Update is called once per frame

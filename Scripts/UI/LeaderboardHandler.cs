@@ -53,7 +53,7 @@ public class LeaderboardHandler : MonoBehaviour
 
         Dictionary<string, LeaderboardData> leaderboard = new Dictionary<string, LeaderboardData>();
 
-        Player[] leaderboardPlayers = ((RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["RoomSettings"]).primaryMode == "Co-Op" ? PhotonNetwork.PlayerList : CustomNetworkHandling.NonSpectatorList;
+        Player[] leaderboardPlayers = ((RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["RoomSettings"]).mode == "Co-Op" ? PhotonNetwork.PlayerList : CustomNetworkHandling.NonSpectatorList;
 
         foreach (Player player in leaderboardPlayers)
         {

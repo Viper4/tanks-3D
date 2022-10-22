@@ -716,7 +716,7 @@ namespace MyUnityAddons
                 RoomSettings roomSettings = (RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["RoomSettings"];
                 PhotonTeam currentTeam = player.GetPhotonTeam();
 
-                switch (roomSettings.primaryMode)
+                switch (roomSettings.mode)
                 {
                     case "Teams":
                         Dictionary<string, int> teamCounts = new Dictionary<string, int>()

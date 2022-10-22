@@ -19,8 +19,8 @@ public class FireControl : MonoBehaviourPun
 
     public float speed = 32;
     [SerializeField] int pierceLevel = 0;
-    [SerializeField] int pierceLimit = 0;
-    [SerializeField] int ricochetLevel = 1;
+    public int pierceLimit = 0;
+    public int ricochetLevel = 1;
 
     public int bulletLimit = 5;
     public List<Transform> firedBullets { get; set; } = new List<Transform>();
@@ -39,7 +39,7 @@ public class FireControl : MonoBehaviourPun
 
     public bool BulletSpawnClear()
     {
-        return !Physics.CheckBox(spawnPoint.position, bullet.GetComponent<Collider>().bounds.size, spawnPoint.rotation, solidLayerMask);
+        return !Physics.Raycast(barrel.position, spawnPoint.position - barrel.position, Vector3.Distance(spawnPoint.position, barrel.position), solidLayerMask);
     }
 
     public IEnumerator Shoot()
@@ -67,12 +67,12 @@ public class FireControl : MonoBehaviourPun
     }
 
     [PunRPC]
-    public void MultiplayerInstantiateBullet(Vector3 position, Quaternion rotation, int bulletID)
+    public void MultiplayerInstantiateBullet(Vector3 position, Quaternion rotation, float speed, int pierceLimit, int ricochetLevel, int bulletID)
     {
         Transform bulletClone = Instantiate(bullet, position, rotation, bulletParent);
         firedBullets.Add(bulletClone);
         Instantiate(shootEffect, position, rotation, bulletParent);
-        StartCoroutine(InitializeBullet(bulletClone, bulletID));
+        StartCoroutine(InitializeBullet(bulletClone, speed, pierceLimit, ricochetLevel, bulletID));
     }
 
     void InstantiateBullet(Vector3 position, Quaternion rotation)
@@ -80,10 +80,10 @@ public class FireControl : MonoBehaviourPun
         Transform bulletClone = Instantiate(bullet, position, rotation, bulletParent);
         firedBullets.Add(bulletClone);
         Instantiate(shootEffect, position, rotation, bulletParent);
-        StartCoroutine(InitializeBullet(bulletClone, bulletClone.GetInstanceID()));
+        StartCoroutine(InitializeBullet(bulletClone, speed, pierceLimit, ricochetLevel, bulletClone.GetInstanceID()));
     }
 
-    IEnumerator InitializeBullet(Transform bullet, int ID)
+    IEnumerator InitializeBullet(Transform bullet, float _speed, int _pierceLimit, int _ricochetLevel, int ID)
     {
         bullet.gameObject.SetActive(false);
         yield return new WaitUntil(() => bullet.GetComponent<BulletBehaviour>() != null);
@@ -94,10 +94,10 @@ public class FireControl : MonoBehaviourPun
             BulletBehaviour bulletBehaviour = bullet.GetComponent<BulletBehaviour>();
             bulletBehaviour.owner = transform;
             bulletBehaviour.ownerPV = photonView;
-            bulletBehaviour.speed = speed;
+            bulletBehaviour.speed = _speed;
             bulletBehaviour.pierceLevel = pierceLevel;
-            bulletBehaviour.pierceLimit = pierceLimit;
-            bulletBehaviour.ricochetLevel = ricochetLevel;
+            bulletBehaviour.pierceLimit = _pierceLimit;
+            bulletBehaviour.ricochetLevel = _ricochetLevel;
             bulletBehaviour.ResetVelocity();
             if (!PhotonNetwork.OfflineMode && !GameManager.Instance.inLobby)
             {
@@ -105,7 +105,7 @@ public class FireControl : MonoBehaviourPun
 
                 if (photonView.IsMine)
                 {
-                    photonView.RPC("MultiplayerInstantiateBullet", RpcTarget.Others, new object[] { spawnPoint.position, spawnPoint.rotation, ID });
+                    photonView.RPC("MultiplayerInstantiateBullet", RpcTarget.Others, new object[] { spawnPoint.position, spawnPoint.rotation, _speed, _pierceLimit, _ricochetLevel, ID });
                 }
             }
         }

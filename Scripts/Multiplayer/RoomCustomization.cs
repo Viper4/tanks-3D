@@ -10,10 +10,8 @@ public class RoomCustomization : MonoBehaviour
 
     [SerializeField] RectTransform FFASettings;
     [SerializeField] RectTransform teamSettings;
-    [SerializeField] RectTransform PvESettings;
+    [SerializeField] RectTransform PVESettings;
     [SerializeField] RectTransform CoOpSettings;
-
-    [SerializeField] RectTransform roundSettings;
 
     public void TogglePublic(Toggle toggle)
     {
@@ -30,13 +28,13 @@ public class RoomCustomization : MonoBehaviour
         DataManager.roomSettings.map = dropdown.options[dropdown.value].text + " 1";
     }
 
-    public void ChangePrimaryMode(Dropdown dropdown)
+    public void ChangeMode(Dropdown dropdown)
     {
         string option = dropdown.options[dropdown.value].text;
-        DataManager.roomSettings.primaryMode = option;
+        DataManager.roomSettings.mode = option;
 
-        FFASettings.gameObject.SetActive(option == "FFA");
-        PvESettings.gameObject.SetActive(option == "PvE");
+        FFASettings.gameObject.SetActive(option == "FFA" || option == "Teams");
+        PVESettings.gameObject.SetActive(option == "PvE");
         teamSettings.gameObject.SetActive(option == "Teams");
 
         if (option == "Co-Op")
@@ -61,22 +59,6 @@ public class RoomCustomization : MonoBehaviour
         }
     }
 
-    public void ChangeSecondaryMode(Dropdown dropdown)
-    {
-        string option = dropdown.options[dropdown.value].text;
-        DataManager.roomSettings.secondaryMode = option;
-
-        switch (option)
-        {
-            case "Endless":
-                roundSettings.gameObject.SetActive(false);
-                break;
-            case "Rounds":
-                roundSettings.gameObject.SetActive(true);
-                break;
-        }
-    }
-
     public void ChangeTeamAmount(Dropdown dropdown)
     {
         int.TryParse(dropdown.options[dropdown.value].text, out DataManager.roomSettings.teamLimit);
@@ -85,11 +67,6 @@ public class RoomCustomization : MonoBehaviour
     public void ChangeTeamSize(InputField input)
     {
         int.TryParse(input.text, out DataManager.roomSettings.teamSize);
-    }
-
-    public void ChangeWaveSize(Dropdown dropdown)
-    {
-        DataManager.roomSettings.waveSize = dropdown.value;
     }
 
     public void ChangeDifficulty(Dropdown dropdown)
@@ -113,11 +90,6 @@ public class RoomCustomization : MonoBehaviour
         }
     }
 
-    public void ChangeRoundAmount(InputField input)
-    {
-        int.TryParse(input.text, out DataManager.roomSettings.roundAmount);
-    }
-
     public void ChangeBotLimit(InputField input)
     {
         int.TryParse(input.text, out DataManager.roomSettings.botLimit);
@@ -126,6 +98,22 @@ public class RoomCustomization : MonoBehaviour
     public void ChangeFillLobby(Toggle toggle)
     {
         DataManager.roomSettings.fillLobby = toggle.isOn;
+    }
+
+    public void ChangeBoostSelection(MultiDropdown multiDropdown)
+    {
+        foreach (int value in multiDropdown.values)
+        {
+            if (!DataManager.roomSettings.boosts.Contains(multiDropdown.options[value].text))
+            {
+                DataManager.roomSettings.boosts.Add(multiDropdown.options[value].text);
+            }
+        }
+    }
+
+    public void ChangeBoostLimit(InputField input)
+    {
+        int.TryParse(input.text, out DataManager.roomSettings.boostLimit);
     }
 
     public void ChangeTotalLives(TMP_InputField input)
@@ -149,13 +137,9 @@ public class RoomCustomization : MonoBehaviour
                 case "Map Preview":
 
                     break;
-                case "Mode 1 Dropdown":
-                    SetValueToOption(setting.GetComponent<Dropdown>(), DataManager.roomSettings.primaryMode);
-                    ChangePrimaryMode(setting.GetComponent<Dropdown>()); // Enable/disable gameobjects
-                    break;
-                case "Mode 2 Dropdown":
-                    SetValueToOption(setting.GetComponent<Dropdown>(), DataManager.roomSettings.secondaryMode);
-                    ChangeSecondaryMode(setting.GetComponent<Dropdown>()); // Enable/disable gameobjects
+                case "Mode Dropdown":
+                    SetValueToOption(setting.GetComponent<Dropdown>(), DataManager.roomSettings.mode);
+                    ChangeMode(setting.GetComponent<Dropdown>()); // Enable/disable gameobjects
                     break;
                 case "Team Limit":
                     SetValueToOption(setting.GetComponent<Dropdown>(), DataManager.roomSettings.teamLimit.ToString());
@@ -163,14 +147,8 @@ public class RoomCustomization : MonoBehaviour
                 case "Team Size":
                     setting.GetComponent<InputField>().text = DataManager.roomSettings.teamSize.ToString();
                     break;
-                case "Wave Size":
-                    SetValueToOption(setting.GetComponent<Dropdown>(), DataManager.roomSettings.waveSize.ToString());
-                    break;
                 case "Difficulty":
                     setting.GetComponent<Dropdown>().value = DataManager.roomSettings.difficulty;
-                    break;
-                case "Round Amount":
-                    setting.GetComponent<InputField>().text = DataManager.roomSettings.roundAmount.ToString();
                     break;
                 case "Player Limit":
                     setting.GetComponent<InputField>().text = DataManager.roomSettings.playerLimit.ToString();
@@ -183,6 +161,12 @@ public class RoomCustomization : MonoBehaviour
                     break;
                 case "Fill Lobby":
                     setting.GetComponent<Toggle>().isOn = DataManager.roomSettings.fillLobby;
+                    break;
+                case "Boost Selection":
+                    SetValuesToOptions(setting.GetComponent<MultiDropdown>(), DataManager.roomSettings.boosts);
+                    break;
+                case "Boost Limit":
+                    setting.GetComponent<InputField>().text = DataManager.roomSettings.boostLimit.ToString();
                     break;
             }
         }

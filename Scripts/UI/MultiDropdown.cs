@@ -2,10 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class MultiDropdown : MonoBehaviour
 {
-    [SerializeField] Text captionText;
+    [SerializeField] TextMeshProUGUI captionText;
     [SerializeField] RectTransform dropdownList;
     public List<Dropdown.OptionData> options;
     [SerializeField] RectTransform optionTemplate;
@@ -59,7 +60,11 @@ public class MultiDropdown : MonoBehaviour
         }
         else
         {
-            captionText.text = options[values[0]].text;
+            int index = values[0];
+            if (options.Count > 0 && index >= 0 && index < options.Count)
+            {
+                captionText.text = options[index].text;
+            }
         }
     }
 

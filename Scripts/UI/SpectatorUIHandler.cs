@@ -17,7 +17,7 @@ public class SpectatorUIHandler : MonoBehaviour
         }
         else
         {
-            if (((RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["RoomSettings"]).primaryMode != "Co-Op")
+            if (((RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["RoomSettings"]).mode != "Co-Op")
             {
                 baseUIHandler.UIElements["PauseMenu"].Find("LabelBackground").GetChild(0).GetComponent<Text>().text = "Paused\n" + PhotonNetwork.CurrentRoom.Name;
             }

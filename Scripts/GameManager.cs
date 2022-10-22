@@ -39,6 +39,8 @@ public class GameManager : MonoBehaviourPunCallbacks
     [SerializeField] Transform readyButton;
     [SerializeField] TextMeshProUGUI readyPlayersCounter;
 
+    [SerializeField] GameObject[] customPhotonPrefabPool;
+
     PhotonView playerPV;
     BaseUIHandler baseUIHandler;
 
@@ -85,6 +87,17 @@ public class GameManager : MonoBehaviourPunCallbacks
     public void OnSceneLoad()
     {
         StopAllCoroutines();
+        if (PhotonNetwork.PrefabPool is DefaultPool pool && customPhotonPrefabPool != null)
+        {
+            foreach (GameObject prefab in customPhotonPrefabPool)
+            {
+                if (!pool.ResourceCache.ContainsKey(prefab.name))
+                {
+                    pool.ResourceCache.Add(prefab.name, prefab);
+                }
+            }
+        }
+
         loadingScene = false;
         currentScene = SceneManager.GetActiveScene();
         Time.timeScale = 1;
@@ -271,6 +284,7 @@ public class GameManager : MonoBehaviourPunCallbacks
         }
 
         AudioListener.volume = DataManager.playerSettings.masterVolume / 200;
+        Application.targetFrameRate = DataManager.playerSettings.targetFramerate;
     }
 
     public void StopAllLoadRoutines()

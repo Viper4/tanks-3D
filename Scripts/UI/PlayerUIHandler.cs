@@ -5,17 +5,26 @@ using Photon.Pun;
 public class PlayerUIHandler : MonoBehaviour
 {
     [SerializeField] PlayerControl playerControl;
+    [SerializeField] GameObject bulletIcon;
+    [SerializeField] GameObject mineIcon;
     BaseUIHandler baseUIHandler;
+    FireControl fireControl;
+    MineControl mineControl;
+
+    Transform bulletsLeftParent;
+    Transform minesLeftParent;
 
     private void Start()
     {   
         baseUIHandler = GetComponent<BaseUIHandler>();
+        fireControl = playerControl.GetComponent<FireControl>();
+        mineControl = playerControl.GetComponent<MineControl>();
 
         if (!PhotonNetwork.OfflineMode)
         {
             if (playerControl.photonView.IsMine)
             {
-                if (((RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["RoomSettings"]).primaryMode != "Co-Op")
+                if (((RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["RoomSettings"]).mode != "Co-Op")
                 {
                     baseUIHandler.UIElements["PauseMenu"].Find("LabelBackground").GetChild(0).GetComponent<Text>().text = "Paused\n" + PhotonNetwork.CurrentRoom.Name;
                     baseUIHandler.UIElements["HUD"].Find("Level Background").GetChild(0).GetComponent<Text>().text = PhotonNetwork.CurrentRoom.Name;
@@ -32,6 +41,9 @@ public class PlayerUIHandler : MonoBehaviour
             baseUIHandler.UIElements["HUD"].Find("Level Background").GetChild(0).GetComponent<Text>().text = GameManager.Instance.currentScene.name;
             baseUIHandler.UIElements["PauseMenu"].Find("LabelBackground").GetChild(0).GetComponent<Text>().text = "Game Paused\n " + GameManager.Instance.currentScene.name;
         }
+
+        bulletsLeftParent = baseUIHandler.UIElements["HUD"].Find("Bullets Left");
+        minesLeftParent = baseUIHandler.UIElements["HUD"].Find("Mines Left");
     }
 
     private void LateUpdate()
@@ -66,38 +78,38 @@ public class PlayerUIHandler : MonoBehaviour
                 baseUIHandler.UIElements["HUD"].gameObject.SetActive(true);
 
                 // Blacking out used bullets and mines
-                int bulletLimit = playerControl.GetComponent<FireControl>().bulletLimit;
-                int bulletsLeft = bulletLimit - playerControl.GetComponent<FireControl>().firedBullets.Count;
+                int bulletLimit = fireControl.bulletLimit;
+                int bulletsLeft = bulletLimit - fireControl.firedBullets.Count;
                 for (int i = 0; i < bulletLimit; i++)
                 {
                     if (i < bulletsLeft)
                     {
-                        baseUIHandler.UIElements["HUD"].Find("Bullets Left").GetChild(i).GetComponent<Image>().color = Color.white;
+                        bulletsLeftParent.GetChild(i).GetComponent<Image>().color = Color.white;
                     }
                     else
                     {
-                        baseUIHandler.UIElements["HUD"].Find("Bullets Left").GetChild(i).GetComponent<Image>().color = Color.black;
+                        bulletsLeftParent.GetChild(i).GetComponent<Image>().color = Color.black;
                     }
                 }
 
-                int mineLimit = playerControl.GetComponent<MineControl>().mineLimit;
-                int minesLeft = mineLimit - playerControl.GetComponent<MineControl>().laidMines.Count;
+                int mineLimit = mineControl.mineLimit;
+                int minesLeft = mineLimit - mineControl.laidMines.Count;
                 for (int i = 0; i < mineLimit; i++)
                 {
                     if (i < minesLeft)
                     {
-                        baseUIHandler.UIElements["HUD"].Find("Mines Left").GetChild(i).GetComponent<Image>().color = Color.white;
+                        minesLeftParent.GetChild(i).GetComponent<Image>().color = Color.white;
                     }
                     else
                     {
-                        baseUIHandler.UIElements["HUD"].Find("Mines Left").GetChild(i).GetComponent<Image>().color = Color.black;
+                        minesLeftParent.GetChild(i).GetComponent<Image>().color = Color.black;
                     }
                 }
 
                 baseUIHandler.UIElements["HUD"].Find("Kills").GetComponent<Text>().text = "Kills: " + DataManager.playerData.kills;
                 if (!PhotonNetwork.OfflineMode)
                 {
-                    baseUIHandler.UIElements["HUD"].Find("Deaths").GetComponent<Text>().text = "Deaths: " + DataManager.playerData.deaths;
+                    baseUIHandler.UIElements["HUD"].Find("Lives").GetComponent<Text>().text = "Deaths: " + DataManager.playerData.deaths;
                 }
                 else
                 {
@@ -111,6 +123,42 @@ public class PlayerUIHandler : MonoBehaviour
         }
     }
     
+    public void UpdateBulletIcons()
+    {
+        if (bulletsLeftParent.childCount > fireControl.bulletLimit)
+        {
+            for (int i = fireControl.bulletLimit; i < bulletsLeftParent.childCount; i++)
+            {
+                Destroy(bulletsLeftParent.GetChild(i).gameObject);
+            }
+        }
+        else if (bulletsLeftParent.childCount < fireControl.bulletLimit)
+        {
+            for (int i = 0; i < fireControl.bulletLimit - bulletsLeftParent.childCount; i++)
+            {
+                Instantiate(bulletIcon, bulletsLeftParent);
+            }
+        }
+    }
+
+    public void UpdateMineIcons()
+    {
+        if (minesLeftParent.childCount > mineControl.mineLimit)
+        {
+            for (int i = mineControl.mineLimit; i < minesLeftParent.childCount; i++)
+            {
+                Destroy(minesLeftParent.GetChild(i).gameObject);
+            }
+        }
+        else if (minesLeftParent.childCount < mineControl.mineLimit)
+        {
+            for (int i = 0; i < mineControl.mineLimit - minesLeftParent.childCount; i++)
+            {
+                Instantiate(mineIcon, minesLeftParent);
+            }
+        }
+    }
+
     public void Resume()
     {
         playerControl.Paused = false;

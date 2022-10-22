@@ -13,36 +13,20 @@ using System.Text.RegularExpressions;
 public class WaitingRoom : MonoBehaviourPunCallbacks
 {
     readonly byte UpdateUICode = 0;
-    readonly byte UpdateTeamsCode = 1;
     readonly byte LeaveWaitingRoomCode = 2;
 
     [SerializeField] GameObject playerSlotPrefab;
-
-    [SerializeField] List<StringTransformPair> rosterContentList = new List<StringTransformPair>();
-    private Dictionary<string, Transform> rosterContent = new Dictionary<string, Transform>();
 
     [SerializeField] GameObject[] ownerElements;
 
     [SerializeField] Text roomName;
     [SerializeField] Text mapName;
 
-    [SerializeField] Text playerListCount;
-    [SerializeField] Text spectatorListCount;
-    [SerializeField] Text[] teamsListCount;
-
-    [SerializeField] Transform[] teamsList;
-
-    [SerializeField] Transform playerList;
-    [SerializeField] Transform teamsTab;
+    [SerializeField] TeamSwitching teamSwitcher;
 
     // Start is called before the first frame update
     IEnumerator Start()
     {
-        foreach (StringTransformPair keyValuePair in rosterContentList)
-        {
-            rosterContent.Add(keyValuePair.key, keyValuePair.value);
-        }
-
         if (!PhotonNetwork.IsMasterClient)
         {
             foreach (GameObject UIElement in ownerElements)
@@ -57,50 +41,17 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
                 }
             }
         }
-        else
-        {
-            DataManager.roomSettings = (RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["RoomSettings"];
-        }
-        UpdateBasicUI();
 
-        playerList.gameObject.SetActive(DataManager.roomSettings.primaryMode != "Teams");
-        teamsTab.gameObject.SetActive(DataManager.roomSettings.primaryMode == "Teams");
-        StartCoroutine(MasterUpdateTeamRosters());
         yield return new WaitForSecondsRealtime(0.2f);
+        UpdateBasicUI();
+        teamSwitcher.MasterStartUpdateRosters();
         transform.Find("Loading").gameObject.SetActive(false);
-    }
-
-    public void ChangeTeam(string teamName)
-    {
-        int teamSize = PhotonTeamsManager.Instance.GetTeamMembersCount(teamName);
-        
-        if (teamSize < ((RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["RoomSettings"]).teamSize)
-        {
-            PhotonTeam currentTeam = PhotonNetwork.LocalPlayer.GetPhotonTeam();
-            if (currentTeam != null)
-            {
-                if (currentTeam.Name != teamName)
-                {
-                    PhotonNetwork.LocalPlayer.SwitchTeam(teamName);
-                }
-                else
-                {
-                    return;
-                }
-            }
-            else
-            {
-                PhotonNetwork.LocalPlayer.JoinTeam(teamName);
-            }
-
-            StartCoroutine(MasterUpdateTeamRosters());
-        }
     }
 
     public void StartGame() // Accessable only by MasterClient
     {
         PhotonNetwork.RaiseEvent(LeaveWaitingRoomCode, null, RaiseEventOptions.Default, SendOptions.SendUnreliable);
-        if (DataManager.roomSettings.primaryMode == "Co-Op")
+        if (DataManager.roomSettings.mode == "Co-Op")
         {
             string campaign = Regex.Match(DataManager.roomSettings.map, @"(.*?)[ ][0-9]+$").Groups[1].ToString();
             DataManager.playerData = SaveSystem.ResetPlayerData(campaign + "PlayerData");
@@ -126,11 +77,11 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
         GameManager.Instance.PhotonLoadScene(DataManager.roomSettings.map, 0, false);
     }
 
-    public void ChangePrimaryMode(string mode) // Accessable only by MasterClient
+    public void ChangeMode(string mode) // Accessable only by MasterClient
     {
-        if (DataManager.roomSettings.primaryMode != mode)
+        if (DataManager.roomSettings.mode != mode)
         {
-            DataManager.roomSettings.primaryMode = mode;
+            DataManager.roomSettings.mode = mode;
             if (mode == "Co-Op")
             {
                 if (DataManager.roomSettings.map != "Classic 1" && DataManager.roomSettings.map != "Regular 1")
@@ -170,45 +121,7 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
         }
         PhotonNetwork.RaiseEvent(UpdateUICode, null, RaiseEventOptions.Default, SendOptions.SendUnreliable);
         UpdateBasicUI();
-        StartCoroutine(MasterUpdateTeamRosters());
-    }
-
-    private IEnumerator MasterUpdateTeamRosters()
-    {
-        yield return new WaitForSecondsRealtime(0.15f); // Wait for teams to sync
-        PhotonNetwork.RaiseEvent(UpdateTeamsCode, null, RaiseEventOptions.Default, SendOptions.SendUnreliable);
-        UpdateTeamRosters();
-    }
-
-    private void UpdateTeamRosters()
-    {
-        DataManager.roomSettings = (RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["RoomSettings"];
-        playerList.gameObject.SetActive(DataManager.roomSettings.primaryMode != "Teams");
-        teamsTab.gameObject.SetActive(DataManager.roomSettings.primaryMode == "Teams");
-        foreach (Transform content in rosterContent.Values)
-        {
-            foreach (Transform child in content)
-            {
-                Destroy(child.gameObject);
-            }
-        }
-
-        foreach (Player player in PhotonNetwork.PlayerList)
-        {
-            PhotonTeam team = player.GetPhotonTeam();
-            if (team != null && rosterContent.ContainsKey(team.Name))
-            {
-                GameObject newPlayerSlot = Instantiate(playerSlotPrefab, rosterContent[team.Name]);
-                newPlayerSlot.GetComponent<Text>().text = player.NickName;
-            }
-        }
-
-        playerListCount.text = PhotonTeamsManager.Instance.GetTeamMembersCount("Players") + "/" + DataManager.roomSettings.playerLimit + " players";
-        spectatorListCount.text = PhotonTeamsManager.Instance.GetTeamMembersCount("Spectators") + " spectating";
-        for (int i = 0; i < teamsListCount.Length; i++)
-        {
-            teamsListCount[i].text = PhotonTeamsManager.Instance.GetTeamMembersCount("Team " + (i+1)) + "/" + DataManager.roomSettings.teamSize + " players";
-        }
+        teamSwitcher.MasterStartUpdateRosters();
     }
 
     private void UpdateBasicUI()
@@ -216,19 +129,9 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
         DataManager.roomSettings = (RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["RoomSettings"];
 
         roomName.text = PhotonNetwork.CurrentRoom.Name;
-        mapName.text = DataManager.roomSettings.map + " (" + DataManager.roomSettings.primaryMode + ")";
+        mapName.text = DataManager.roomSettings.map + " (" + DataManager.roomSettings.mode + ")";
 
-        for (int i = 0; i < 4; i++)
-        {
-            if (i + 1 > DataManager.roomSettings.teamLimit)
-            {
-                teamsList[i].gameObject.SetActive(false);
-            }
-            else
-            {
-                teamsList[i].gameObject.SetActive(true);
-            }
-        }
+        teamSwitcher.UpdateRosters();
     }
 
     public override void OnEnable()
@@ -249,15 +152,11 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
         {
             UpdateBasicUI();
         }
-        else if (eventData.Code == UpdateTeamsCode)
-        {
-            UpdateTeamRosters();
-        }
         else if (eventData.Code == LeaveWaitingRoomCode)
         {
             DataManager.roomSettings = (RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["RoomSettings"];
 
-            if (DataManager.roomSettings.primaryMode == "Co-Op")
+            if (DataManager.roomSettings.mode == "Co-Op")
             {
                 string campaign = Regex.Match(DataManager.roomSettings.map, @"(.*?)[ ][0-9]+$").Groups[1].ToString();
                 DataManager.playerData = SaveSystem.ResetPlayerData(campaign + "PlayerData");
@@ -284,7 +183,7 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
         if (PhotonNetwork.IsMasterClient)
         {
             otherPlayer.LeaveCurrentTeam();
-            StartCoroutine(MasterUpdateTeamRosters());
+            teamSwitcher.MasterStartUpdateRosters();
         }
     }
 
@@ -304,12 +203,5 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
                 }
             }
         }
-    }
-
-    [System.Serializable]
-    private struct StringTransformPair
-    {
-        public string key;
-        public Transform value;
     }
 }

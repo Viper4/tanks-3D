@@ -81,7 +81,7 @@ public class BulletBehaviour : MonoBehaviourPunCallbacks
 
     private void OnTriggerEnter(Collider other)
     {
-        if (!GameManager.Instance.frozen)
+        if (!GameManager.Instance.frozen && !removedSelf)
         {
             switch (other.tag)
             {
@@ -96,8 +96,34 @@ public class BulletBehaviour : MonoBehaviourPunCallbacks
                     Transform otherPlayer = other.transform.parent.parent;
                     if (!collidedTransforms.Contains(otherPlayer))
                     {
-                        KillTarget(otherPlayer);
                         collidedTransforms.Add(otherPlayer);
+
+                        if (!otherPlayer.TryGetComponent<Shields>(out var shields))
+                        {
+                            KillTarget(otherPlayer);
+                            break;
+                        }
+
+                        int damageAmount = pierceLimit - pierces + 1;
+                        if (damageAmount > shields.shieldAmount)
+                        {
+                            KillTarget(otherPlayer);
+                        }
+                        else
+                        {
+                            if (otherPlayer.TryGetComponent<PhotonView>(out var otherPV))
+                            {
+                                if (otherPV.IsMine)
+                                {
+                                    otherPV.RPC("DamageShields", RpcTarget.All, new object[] { damageAmount });
+                                }
+                            }
+                            else
+                            {
+                                shields.DamageShields(damageAmount);
+                            }
+                            NormalDestroy();
+                        }
                     }
                     break;
                 case "AI Tank":
@@ -113,7 +139,7 @@ public class BulletBehaviour : MonoBehaviourPunCallbacks
 
     private void OnCollisionEnter(Collision other)
     {
-        if (!GameManager.Instance.frozen)
+        if (!GameManager.Instance.frozen && !removedSelf)
         {
             switch (other.transform.tag)
             {
@@ -128,8 +154,34 @@ public class BulletBehaviour : MonoBehaviourPunCallbacks
                     Transform otherPlayer = other.transform.parent;
                     if (!collidedTransforms.Contains(otherPlayer))
                     {
-                        KillTarget(otherPlayer);
                         collidedTransforms.Add(otherPlayer);
+
+                        if (!otherPlayer.TryGetComponent<Shields>(out var shields))
+                        {
+                            KillTarget(otherPlayer);
+                            break;
+                        }
+
+                        int damageAmount = pierceLimit - pierces + 1;
+                        if (damageAmount > shields.shieldAmount)
+                        {
+                            KillTarget(otherPlayer);
+                        }
+                        else
+                        {
+                            if (otherPlayer.TryGetComponent<PhotonView>(out var otherPV))
+                            {
+                                if (otherPV.IsMine)
+                                {
+                                    otherPV.RPC("DamageShields", RpcTarget.All, new object[] { damageAmount });
+                                }
+                            }
+                            else
+                            {
+                                shields.DamageShields(damageAmount);
+                            }
+                            NormalDestroy();
+                        }
                     }
                     break;
                 case "AI Tank":

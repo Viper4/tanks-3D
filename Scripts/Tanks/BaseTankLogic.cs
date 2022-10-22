@@ -308,6 +308,7 @@ public class BaseTankLogic : MonoBehaviour
 
         if (player)
         {
+            GetComponent<Shields>().DeleteShields();
             if (!playerControl.godMode)
             {
                 tankOrigin.GetComponent<Collider>().enabled = false;

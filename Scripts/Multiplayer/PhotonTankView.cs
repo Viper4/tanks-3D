@@ -141,15 +141,15 @@ public class PhotonTankView : MonoBehaviourPunCallbacks, IPunObservable, IPunOwn
     {
         if (!player)
         {
-            object[] instantiateData = info.photonView.InstantiationData;
+            object[] instantiationData = info.photonView.InstantiationData;
 
             if (TryGetComponent<TargetSystem>(out var targetSystem))
             {
-                if ((bool)instantiateData[0])
+                if ((bool)instantiationData[0])
                 {
                     targetSystem.enemyParents.Add(TankManager.Instance.tankParent);
                 }
-                if ((bool)instantiateData[1])
+                if ((bool)instantiationData[1])
                 {
                     targetSystem.enemyParents.Add(PlayerManager.Instance.playerParent);
                 }

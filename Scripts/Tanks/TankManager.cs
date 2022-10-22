@@ -30,8 +30,6 @@ public class TankManager : MonoBehaviourPunCallbacks
 
     int teamIndex = 0;
 
-    RoomSettings roomSettings;
-
     public enum GenerationMode
     {
         FFA,
@@ -43,16 +41,6 @@ public class TankManager : MonoBehaviourPunCallbacks
     private void Start()
     {
         Instance = this;
-        if (PhotonNetwork.PrefabPool is DefaultPool pool && tanks != null)
-        {
-            foreach (GameObject prefab in tanks)
-            {
-                if (!pool.ResourceCache.ContainsKey(prefab.name))
-                {
-                    pool.ResourceCache.Add(prefab.name, prefab);
-                }
-            }
-        }
 
         foreach (Transform child in teamSpawnParent)
         {
@@ -65,16 +53,15 @@ public class TankManager : MonoBehaviourPunCallbacks
 
         if (!PhotonNetwork.OfflineMode && !GameManager.Instance.inLobby)
         {
-            roomSettings = (RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["RoomSettings"];
-            tankLimit = roomSettings.botLimit;
+            tankLimit = DataManager.roomSettings.botLimit;
 
-            if (roomSettings.primaryMode != "Co-Op")
+            if (DataManager.roomSettings.mode != "Co-Op")
             {
-                if (PhotonNetwork.IsMasterClient && roomSettings.botLimit > 0)
+                if (PhotonNetwork.IsMasterClient && DataManager.roomSettings.botLimit > 0)
                 {
                     foreach (GameObject tank in tanks.ToList())
                     {
-                        if (!roomSettings.bots.Contains(tank.name))
+                        if (!DataManager.roomSettings.bots.Contains(tank.name))
                         {
                             tanks.Remove(tank);
                         }
@@ -273,7 +260,7 @@ public class TankManager : MonoBehaviourPunCallbacks
                     }
                     else
                     {
-                        if (roomSettings.primaryMode == "Co-Op")
+                        if (DataManager.roomSettings.mode == "Co-Op")
                         {
                             GameManager.Instance.frozen = true;
 
@@ -284,20 +271,20 @@ public class TankManager : MonoBehaviourPunCallbacks
                         {
                             if (lastCampaignScene || GameManager.Instance.totalLives <= 0)
                             {
-                                roomSettings.map = "End Scene";
+                                DataManager.roomSettings.map = "End Scene";
                                 GameManager.Instance.PhotonLoadScene("End Scene", 3, true);
                             }
                             else
                             {
                                 string path = SceneUtility.GetScenePathByBuildIndex(GameManager.Instance.currentScene.buildIndex + 1);
                                 string sceneName = System.IO.Path.GetFileNameWithoutExtension(path);
-                                roomSettings.map = sceneName;
+                                DataManager.roomSettings.map = sceneName;
                                 GameManager.Instance.PhotonLoadNextScene(3, true);
                             }
 
                             PhotonHashtable roomProperties = new PhotonHashtable()
                             {
-                                { "RoomSettings", roomSettings },
+                                { "RoomSettings", DataManager.roomSettings },
                                 { "Total Lives", GameManager.Instance.totalLives }
                             };
                             PhotonNetwork.CurrentRoom.SetCustomProperties(roomProperties);

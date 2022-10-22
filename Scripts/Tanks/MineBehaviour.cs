@@ -189,13 +189,29 @@ public class MineBehaviour : MonoBehaviourPunCallbacks
         canFlash = true;
     }
 
+    void KillPlayer(Transform player)
+    {
+        if (!PhotonNetwork.OfflineMode)
+        {
+            if (ownerPV.IsMine)
+            {
+                player.GetComponent<PhotonView>().RPC("ExplodeTank", RpcTarget.All);
+            }
+        }
+        else
+        {
+            player.GetComponent<BaseTankLogic>().ExplodeTank();
+        }
+        IncreaseKills(player);
+    }
+
     public void ExplodeMine(List<Transform> chain)
     {
         if (!PhotonNetwork.OfflineMode && !GameManager.Instance.inLobby && ownerPV.IsMine)
         {
             PhotonHashtable parameters = new PhotonHashtable
             {
-                { "ID", mineID },
+                { "ID", mineID }
             };
             PhotonNetwork.RaiseEvent(GameManager.Instance.DestroyCode, parameters, RaiseEventOptions.Default, SendOptions.SendUnreliable);
         }
@@ -216,33 +232,49 @@ public class MineBehaviour : MonoBehaviourPunCallbacks
                         {
                             if (ownerPV.IsMine)
                             {
-                                collider.transform.GetComponent<PhotonView>().RPC("ExplodeTank", RpcTarget.All);
+                                collider.GetComponent<PhotonView>().RPC("ExplodeTank", RpcTarget.All);
                             }
                         }
                         else
                         {
-                            collider.transform.GetComponent<BaseTankLogic>().ExplodeTank();
+                            collider.GetComponent<BaseTankLogic>().ExplodeTank();
                         }
                         IncreaseKills(collider.transform);
-                        
                         break;
                     case "Player":
-                        Transform otherPlayer = collider.transform.parent;
-                        if (!chain.Contains(otherPlayer))
+                        if (PhotonNetwork.OfflineMode || ownerPV.IsMine)
                         {
-                            chain.Add(otherPlayer);
-                            if (!PhotonNetwork.OfflineMode)
+                            Transform otherPlayer = collider.transform.parent;
+
+                            if (!chain.Contains(otherPlayer))
                             {
-                                if (ownerPV.IsMine)
+                                if (!otherPlayer.TryGetComponent<Shields>(out var shields))
                                 {
-                                    otherPlayer.GetComponent<PhotonView>().RPC("ExplodeTank", RpcTarget.All);
+                                    KillPlayer(otherPlayer);
+                                    chain.Add(otherPlayer);
+                                    break;
+                                }
+
+                                if (shields.shieldAmount < 3)
+                                {
+                                    KillPlayer(otherPlayer);
+                                    chain.Add(otherPlayer);
+                                }
+                                else
+                                {
+                                    if (otherPlayer.TryGetComponent<PhotonView>(out var otherPV))
+                                    {
+                                        if (otherPV.IsMine)
+                                        {
+                                            otherPV.RPC("DamageShields", RpcTarget.All, new object[] { 3 });
+                                        }
+                                    }
+                                    else
+                                    {
+                                        shields.DamageShields(3);
+                                    }
                                 }
                             }
-                            else
-                            {
-                                otherPlayer.GetComponent<BaseTankLogic>().ExplodeTank();
-                            }
-                            IncreaseKills(otherPlayer);
                         }
                         break;
                     case "AI Tank":

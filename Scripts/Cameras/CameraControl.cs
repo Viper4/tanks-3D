@@ -42,6 +42,8 @@ public class CameraControl : MonoBehaviour
     bool lockCamera = false;
     bool alternateCamera = false;
 
+    public bool invisible = false;
+
     // Start is called before the first frame Update
     void Start()
     {
@@ -135,8 +137,9 @@ public class CameraControl : MonoBehaviour
             if (!playerControl.Dead && Time.timeScale != 0)
             {
                 // Unlinking y eulers of turret, barrel, and target from parent
-                turret.localRotation = Quaternion.Inverse(tankOrigin.localRotation) * lastParentRotation * turret.localRotation;
-                barrel.localRotation = Quaternion.Inverse(tankOrigin.localRotation) * lastParentRotation * barrel.localRotation;
+                Quaternion inverseParentRot = Quaternion.Euler(0, lastParentRotation.eulerAngles.y - tankOrigin.localEulerAngles.y, 0);
+                turret.localRotation = inverseParentRot * turret.localRotation;
+                barrel.localRotation = inverseParentRot * barrel.localRotation;
 
                 reticle.gameObject.SetActive(true);
                 Cursor.visible = false;
@@ -154,11 +157,14 @@ public class CameraControl : MonoBehaviour
                     turret.rotation = barrel.rotation = transform.rotation;
                     reticle.position = new Vector3(Screen.width * 0.5f, Screen.height * 0.5f, 0);
 
-                    body.gameObject.GetComponent<MeshRenderer>().enabled = turret.gameObject.GetComponent<MeshRenderer>().enabled = barrel.gameObject.GetComponent<MeshRenderer>().enabled = false;
+                    body.GetComponent<MeshRenderer>().enabled = turret.GetComponent<MeshRenderer>().enabled = barrel.GetComponent<MeshRenderer>().enabled = false;
                 }
                 else
                 {
-                    body.gameObject.GetComponent<MeshRenderer>().enabled = turret.gameObject.GetComponent<MeshRenderer>().enabled = barrel.gameObject.GetComponent<MeshRenderer>().enabled = true;
+                    if (!invisible)
+                    {
+                        body.GetComponent<MeshRenderer>().enabled = turret.GetComponent<MeshRenderer>().enabled = barrel.GetComponent<MeshRenderer>().enabled = true;
+                    }
 
                     Cursor.lockState = CursorLockMode.Confined;
                     pitchMinMax = pitchMinMaxN;
@@ -173,9 +179,6 @@ public class CameraControl : MonoBehaviour
                         {
                             reticle.position = thisCamera.WorldToScreenPoint(barrelHit.point);
                         }
-
-                        // When locking the turret, the barrel and turret start drifting when turning the tank on slopes
-                        //turret.localEulerAngles = new Vector3(0, barrel.localEulerAngles.y, 0);
                     }
                 }
 
@@ -224,8 +227,7 @@ public class CameraControl : MonoBehaviour
             // Rotating turret and barrel towards the mouseHit point
             Quaternion lookRotation = Quaternion.LookRotation(mouseHit.point - target.position, tankOrigin.up);
 
-            turret.rotation = Quaternion.AngleAxis(lookRotation.eulerAngles.y, Vector3.up);
-            barrel.rotation = target.rotation = lookRotation;
+            barrel.rotation = turret.rotation = lookRotation;
         }
         reticle.position = Input.mousePosition;
     }

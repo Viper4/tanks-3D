@@ -53,17 +53,16 @@ public static class SaveSystem
     {
         isPublic = true,
         map = "Classic",
-        primaryMode = "FFA",
-        secondaryMode = "Endless",
+        mode = "FFA",
         teamLimit = 2,
         teamSize = 3,
-        waveSize = 1,
-        roundAmount = 10,
         difficulty = 1,
         playerLimit = 8,
         bots = new List<string>(),
         botLimit = 4,
         fillLobby = true,
+        boosts = new List<string>(),
+        boostLimit = 10,
         totalLives = 6,
     };
 

@@ -34,7 +34,7 @@ public class DebugDisplay : MonoBehaviour
     private void Update()
     {
         frameCount++;
-        dt += Time.deltaTime;
+        dt += Time.unscaledDeltaTime;
         if (dt > 1.0 / refreshRate)
         {
             fps = (int)(frameCount / dt);

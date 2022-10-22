@@ -1,12 +1,13 @@
 using UnityEngine;
 using Photon.Pun;
+using TMPro;
 
 public class UsernameSystem : MonoBehaviour
 {
     [SerializeField] int fontScaler = 4;
 
     [SerializeField] PhotonView PV;
-    [SerializeField] TextMesh textMesh;
+    [SerializeField] TextMeshPro textMesh;
 
     // Start is called before the first frame update
     void Start()

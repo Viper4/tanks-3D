@@ -33,6 +33,10 @@ public class DataManager : MonoBehaviourPun
 
             Instance = this;
         }
+        else if (!PhotonNetwork.IsMasterClient && PhotonNetwork.InRoom)
+        {
+            roomSettings = (RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["RoomSettings"];
+        }
     }
 
     // Update is called once per frame

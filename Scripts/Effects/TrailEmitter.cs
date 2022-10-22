@@ -40,7 +40,7 @@ public class TrailEmitter : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!Disabled)
+        if (!disabled)
         {
             foreach (Transform trail in trails)
             {
