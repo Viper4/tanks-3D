@@ -14,7 +14,6 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
     public static PhotonChatController Instance;
 
     ChatClient chatClient;
-    bool isConnected = false;
     string replyRecipient = null;
 
     [SerializeField] GameObject chatBox;
@@ -42,26 +41,23 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
     // Update is called once per frame
     void Update()
     {
-        if (isConnected)
+        chatClient.Service();
+        if (!chatBox.activeSelf)
         {
-            chatClient.Service();
-            if (!chatBox.activeSelf)
+            if (Input.GetKeyDown(DataManager.playerSettings.keyBinds["Chat"]))
             {
-                if (Input.GetKeyDown(DataManager.playerSettings.keyBinds["Chat"]))
-                {
-                    chatBox.SetActive(true);
-                }
+                chatBox.SetActive(true);
             }
-            else
+        }
+        else
+        {
+            if (Input.GetKeyDown(KeyCode.Return))
             {
-                if (Input.GetKeyDown(KeyCode.Return))
-                {
-                    SendMessage(chatInput);
-                }
-                else if (Input.GetKeyDown(KeyCode.Escape))
-                {
-                    chatBox.SetActive(false);
-                }
+                SendMessage(chatInput);
+            }
+            else if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                chatBox.SetActive(false);
             }
         }
     }
@@ -184,12 +180,12 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
 
     public void OnConnected()
     {
-        isConnected = true;
+        
     }
 
     public void OnDisconnected()
     {
-        isConnected = false;
+        
     }
 
     public void OnGetMessages(string channelName, string[] senders, object[] messages)

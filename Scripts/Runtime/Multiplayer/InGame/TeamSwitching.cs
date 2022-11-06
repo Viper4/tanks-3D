@@ -101,13 +101,33 @@ public class TeamSwitching : MonoBehaviourPunCallbacks
                         PhotonNetwork.LocalPlayer.JoinOrSwitchTeam(teamName);
                         PlayerManager.Instance.RespawnAsSpectator(transform.parent);
                     }
-                    else if ((currentTeam == null || currentTeam.Name == "Spectators") && PhotonTeamsManager.Instance.TryGetTeamByName(teamName, out var team))
+                    else if (PhotonTeamsManager.Instance.TryGetTeamByName(teamName, out var team))
                     {
                         PhotonNetwork.LocalPlayer.JoinOrSwitchTeam(teamName);
-                        if (DataManager.roomSettings.mode != "Co-Op")
+
+                        switch (DataManager.roomSettings.mode)
                         {
-                            PlayerManager.Instance.SpawnInLocalPlayer(team);
-                            Destroy(transform.parent.gameObject);
+                            case "Co-Op":
+                                break;
+                            case "Teams":
+                                if (currentTeam != null && currentTeam.Name != "Spectators")
+                                {
+                                    PhotonNetwork.Destroy(transform.parent.gameObject);
+                                    PlayerManager.Instance.SpawnInLocalPlayer(team);
+                                }
+                                else
+                                {
+                                    PlayerManager.Instance.SpawnInLocalPlayer(team);
+                                    Destroy(transform.parent.gameObject);
+                                }
+                                break;
+                            default:
+                                if (currentTeam == null || currentTeam.Name == "Spectators")
+                                {
+                                    PlayerManager.Instance.SpawnInLocalPlayer(team);
+                                    Destroy(transform.parent.gameObject);
+                                }
+                                break;
                         }
                     }
                 }

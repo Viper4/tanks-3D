@@ -75,7 +75,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks
                 else
                 {
                     PhotonNetwork.LocalPlayer.JoinOrSwitchTeam("Players");
-                    newPlayer = SpawnPlayer(CustomRandom.GetSpawnPointInCollider(defaultSpawns[spawnIndex], Vector3.down, ignoreLayerMask, playerSpawnCollider, defaultSpawns[spawnIndex].transform.rotation), defaultSpawns[spawnIndex].transform.rotation);
+                    newPlayer = SpawnPlayer(playerPrefab, CustomRandom.GetSpawnPointInCollider(defaultSpawns[spawnIndex], Vector3.down, ignoreLayerMask, playerSpawnCollider, defaultSpawns[spawnIndex].transform.rotation), defaultSpawns[spawnIndex].transform.rotation);
                     playerProperties["Kills"] = DataManager.playerData.kills;
                     playerProperties["Deaths"] = DataManager.playerData.deaths;
                 }
@@ -94,7 +94,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks
                     {
                         case "FFA":
                             Quaternion randomRotation = Quaternion.AngleAxis(Random.Range(-180, 180), Vector3.up);
-                            newPlayer = SpawnPlayer(CustomRandom.GetSpawnPointInCollider(freeForAllSpawn, Vector3.down, ignoreLayerMask, playerSpawnCollider, randomRotation), randomRotation);
+                            newPlayer = SpawnPlayer(playerPrefab, CustomRandom.GetSpawnPointInCollider(freeForAllSpawn, Vector3.down, ignoreLayerMask, playerSpawnCollider, randomRotation), randomRotation);
                             break;
                         case "Teams":
                             int teamIndex = -1;
@@ -107,13 +107,10 @@ public class PlayerManager : MonoBehaviourPunCallbacks
                                 }
                             }
 
-                            Vector3 spawnPosition = CustomRandom.GetSpawnPointInCollider(teamSpawns[teamIndex], Vector3.down, ignoreLayerMask, playerSpawnCollider, teamSpawns[teamIndex].transform.rotation);
-
-                            newPlayer = PhotonNetwork.Instantiate(teamPlayerPrefabs[teamIndex].name, spawnPosition, teamSpawns[teamIndex].transform.rotation);
-                            newPlayer.name = teamPlayerPrefabs[teamIndex].name;
+                            newPlayer = SpawnPlayer(teamPlayerPrefabs[teamIndex], CustomRandom.GetSpawnPointInCollider(teamSpawns[teamIndex], Vector3.down, ignoreLayerMask, playerSpawnCollider, teamSpawns[teamIndex].transform.rotation), teamSpawns[teamIndex].transform.rotation, false);
                             break;
                         default:
-                            newPlayer = SpawnPlayer(CustomRandom.GetSpawnPointInCollider(defaultSpawns[spawnIndex], Vector3.down, ignoreLayerMask, playerSpawnCollider, defaultSpawns[spawnIndex].transform.rotation), defaultSpawns[spawnIndex].transform.rotation);
+                            newPlayer = SpawnPlayer(playerPrefab, CustomRandom.GetSpawnPointInCollider(defaultSpawns[spawnIndex], Vector3.down, ignoreLayerMask, playerSpawnCollider, defaultSpawns[spawnIndex].transform.rotation), defaultSpawns[spawnIndex].transform.rotation);
                             playerProperties["Kills"] = DataManager.playerData.kills;
                             playerProperties["Deaths"] = DataManager.playerData.deaths;
                             break;
@@ -154,7 +151,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks
         {
             case "FFA":
                 Quaternion randomRotation = Quaternion.AngleAxis(Random.Range(-180, 180), Vector3.up);
-                newPlayer = SpawnPlayer(CustomRandom.GetSpawnPointInCollider(freeForAllSpawn, Vector3.down, ignoreLayerMask, playerSpawnCollider, randomRotation), randomRotation);
+                newPlayer = SpawnPlayer(playerPrefab, CustomRandom.GetSpawnPointInCollider(freeForAllSpawn, Vector3.down, ignoreLayerMask, playerSpawnCollider, randomRotation), randomRotation);
                 break;
             case "Teams":
                 int teamIndex = -1;
@@ -167,13 +164,10 @@ public class PlayerManager : MonoBehaviourPunCallbacks
                     }
                 }
 
-                Vector3 spawnPosition = CustomRandom.GetSpawnPointInCollider(teamSpawns[teamIndex], Vector3.down, ignoreLayerMask, playerSpawnCollider, teamSpawns[teamIndex].transform.rotation);
-
-                newPlayer = PhotonNetwork.Instantiate(teamPlayerPrefabs[teamIndex].name, spawnPosition, teamSpawns[teamIndex].transform.rotation);
-                newPlayer.name = teamPlayerPrefabs[teamIndex].name;
+                newPlayer = SpawnPlayer(teamPlayerPrefabs[teamIndex], CustomRandom.GetSpawnPointInCollider(teamSpawns[teamIndex], Vector3.down, ignoreLayerMask, playerSpawnCollider, teamSpawns[teamIndex].transform.rotation), teamSpawns[teamIndex].transform.rotation, false);
                 break;
             default:
-                newPlayer = SpawnPlayer(CustomRandom.GetSpawnPointInCollider(defaultSpawns[spawnIndex], Vector3.down, ignoreLayerMask, playerSpawnCollider, defaultSpawns[spawnIndex].transform.rotation), defaultSpawns[spawnIndex].transform.rotation);
+                newPlayer = SpawnPlayer(playerPrefab, CustomRandom.GetSpawnPointInCollider(defaultSpawns[spawnIndex], Vector3.down, ignoreLayerMask, playerSpawnCollider, defaultSpawns[spawnIndex].transform.rotation), defaultSpawns[spawnIndex].transform.rotation);
                 playerProperties["Kills"] = DataManager.playerData.kills;
                 playerProperties["Deaths"] = DataManager.playerData.deaths;
                 break;
@@ -204,16 +198,16 @@ public class PlayerManager : MonoBehaviourPunCallbacks
         return newSpectator;
     }
 
-    private GameObject SpawnPlayer(Vector3 position, Quaternion rotation)
+    private GameObject SpawnPlayer(Transform prefab, Vector3 position, Quaternion rotation, bool randomColors = true)
     {
         PhotonHashtable playerProperties = new PhotonHashtable()
         {
             { "Spectator", false }
         };
         PhotonNetwork.LocalPlayer.SetCustomProperties(playerProperties);
-        GameObject newPlayer = PhotonNetwork.Instantiate(playerPrefab.name, position, rotation);
-        newPlayer.GetComponent<PhotonView>().RPC("InitializePlayer", RpcTarget.All, new object[] { new float[] { Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), 1 }, new float[] { Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), 1 } });
-        newPlayer.name = playerPrefab.name;
+        GameObject newPlayer = PhotonNetwork.Instantiate(prefab.name, position, rotation);
+        newPlayer.GetComponent<PhotonView>().RPC("InitializePlayer", RpcTarget.All, new object[] { randomColors, new float[] { Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), 1 }, new float[] { Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), 1 } });
+        newPlayer.name = prefab.name;
         newPlayer.transform.Find("Camera").gameObject.SetActive(true);
         newPlayer.transform.Find("Player UI").gameObject.SetActive(true);
 
