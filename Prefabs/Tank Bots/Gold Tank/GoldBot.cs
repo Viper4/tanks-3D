@@ -82,7 +82,7 @@ public class GoldBot : MonoBehaviour
             }
 
             Vector3 targetDir = targetSystem.currentTarget.position - turret.position;
-            predictedTargetPosition = targetSystem.PredictedTargetPosition(CustomMath.TravelTime(turret.position, targetSystem.currentTarget.position, fireControl.speed));
+            predictedTargetPosition = targetSystem.PredictedTargetPosition(CustomMath.TravelTime(turret.position, targetSystem.currentTarget.position, fireControl.bulletSettings.speed));
             bool predictedPositionVisible = false;
             if (mode != Mode.StraightFirePattern && mode != Mode.RicochetFirePattern)
             {

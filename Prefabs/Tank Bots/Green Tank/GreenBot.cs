@@ -85,13 +85,13 @@ public class GreenBot : MonoBehaviour
                 bulletRicochet.ScanArea(turret.position);
             }
 
-            Vector3 predictedPos = targetSystem.PredictedTargetPosition(CustomMath.TravelTime(turret.position, targetSystem.currentTarget.position, fireControl.speed * predictionScale));
+            Vector3 predictedPos = targetSystem.PredictedTargetPosition(CustomMath.TravelTime(turret.position, targetSystem.currentTarget.position, fireControl.bulletSettings.speed * predictionScale));
             bulletRicochet.CalculateBulletRicochets(barrel, predictedPos);
 
             if (bulletRicochet.shootPositions.Count > 0)
             {
                 shootPosition = bulletRicochet.SelectShootPosition(barrel, RicochetCalculation.SelectionMode.Closest);
-                predictedPos = targetSystem.PredictedTargetPosition(bulletRicochet.shootPositions[shootPosition] / fireControl.speed);
+                predictedPos = targetSystem.PredictedTargetPosition(bulletRicochet.shootPositions[shootPosition] / fireControl.bulletSettings.speed);
                 bulletRicochet.CalculateBulletRicochets(barrel, predictedPos);
                 if (bulletRicochet.shootPositions.Count > 0)
                 {

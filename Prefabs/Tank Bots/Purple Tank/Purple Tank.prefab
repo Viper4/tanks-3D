@@ -946,7 +946,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerControl: {fileID: 0}
   barrel: {fileID: 4845901430446646921}
-  bullet: {fileID: 4307626717143694363, guid: de9dbd5b8f77ecb4a866f8d8cf75c17d, type: 3}
+  bulletTypes:
+  - {fileID: 4307626717143694363, guid: de9dbd5b8f77ecb4a866f8d8cf75c17d, type: 3}
+  - {fileID: 439779918157275786, guid: e82b6db23e6ee9f45931e68f161c1c36, type: 3}
+  - {fileID: 5124250838519604896, guid: 9da335a328db8da49938f47ad88f2c2d, type: 3}
+  bulletIndex: 0
   spawnPoint: {fileID: 6762536917903161150}
   shootEffect: {fileID: 7275907135579404139, guid: 71b07424ffcb49a41830ab0761db5c07, type: 3}
   bulletParent: {fileID: 0}

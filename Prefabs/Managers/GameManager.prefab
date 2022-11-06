@@ -959,6 +959,11 @@ MonoBehaviour:
   readyButton: {fileID: 3998579669134604594}
   readyPlayersCounter: {fileID: 3184159590657871444}
   customPhotonPrefabPool:
+  - {fileID: 2926516457120658954, guid: d6e16f75477571b40b324c322517d95b, type: 3}
+  - {fileID: 2738467188748950692, guid: ac2279b4992ccb44b9449e4c7c036da0, type: 3}
+  - {fileID: 2411737411322316678, guid: 3d94dcbe9db2bc046bf603a32c8e282b, type: 3}
+  - {fileID: 8503986742886749548, guid: 39589efd7f0f62044a0cb7b71b251f85, type: 3}
+  - {fileID: 8292948316347695928, guid: 07df96ea784099f489c8dbf54f9382f6, type: 3}
   - {fileID: 6353959912858125971, guid: c9f541d7851ab9a47a33057f6c146edd, type: 3}
   - {fileID: 4033695715270616719, guid: 8c192097c6438ea419f6b4c11af8dd65, type: 3}
   - {fileID: 8152485418157340697, guid: a2089b8661e86fd4c99f5c815f926e03, type: 3}
@@ -980,6 +985,9 @@ MonoBehaviour:
   - {fileID: 3713401230634244106, guid: 68c7268ca258813409c3381de58672a4, type: 3}
   - {fileID: 5769820011260211252, guid: d77dc343b4e88eb44be79677c34bb35a, type: 3}
   - {fileID: 3713401230634244106, guid: 5c1521f1de12a4f48b4f1ed457491e7c, type: 3}
+  - {fileID: 6709687364018734019, guid: 2220efec37758f344a23034c03fdafd2, type: 3}
+  - {fileID: 6709687364018734019, guid: 7717faa009f3d054380c51af691c19e1, type: 3}
+  - {fileID: 6709687364018734019, guid: 853d0a8e73a7d164287374125f43d003, type: 3}
   currentScene:
     m_Handle: 0
   totalLives: -1
@@ -2175,6 +2183,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 3149388286793973794}
     m_Modifications:
+    - target: {fileID: 3701921020277001424, guid: 86598a599b5090141a6c94adc736dbe8, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3715960217702208803, guid: 86598a599b5090141a6c94adc736dbe8, type: 3}
       propertyPath: m_Pivot.x
       value: 0
@@ -2274,6 +2286,14 @@ PrefabInstance:
     - target: {fileID: 3715960217702208806, guid: 86598a599b5090141a6c94adc736dbe8, type: 3}
       propertyPath: m_Name
       value: Master Overlay
+      objectReference: {fileID: 0}
+    - target: {fileID: 6514746110478999403, guid: 86598a599b5090141a6c94adc736dbe8, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6514746110478999403, guid: 86598a599b5090141a6c94adc736dbe8, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 86598a599b5090141a6c94adc736dbe8, type: 3}

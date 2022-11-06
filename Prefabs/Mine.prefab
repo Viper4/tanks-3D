@@ -57,6 +57,7 @@ GameObject:
   - component: {fileID: 4223942867902412961}
   - component: {fileID: 4223942867902412962}
   - component: {fileID: 2067888184578489794}
+  - component: {fileID: 4225668469638466836}
   - component: {fileID: 935318324568531641}
   - component: {fileID: -1720852371781949432}
   - component: {fileID: 6123959700245512937}
@@ -147,6 +148,24 @@ SphereCollider:
   serializedVersion: 2
   m_Radius: 3
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &4225668469638466836
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4223942867902412964}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7fbd7321c18d60743b574e3c6f3bf1e6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  explosionEffect: {fileID: 3982350210874365301, guid: 38256d267e02f9045b36a61ca4903a4d, type: 3}
+  overlapInteract:
+    serializedVersion: 2
+    m_Bits: 838861064
+  explosionForce: 12
+  explosionRadius: 7
 --- !u!114 &935318324568531641
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -160,16 +179,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mineID: 0
-  overlapInteract:
-    serializedVersion: 2
-    m_Bits: 905969928
-  explosionEffect: {fileID: 3982350210874365301, guid: 38256d267e02f9045b36a61ca4903a4d, type: 3}
   normalMaterial: {fileID: 2100000, guid: d01208a34e76d3c47b0ec4ddb64069e8, type: 2}
   flashMaterial: {fileID: 2100000, guid: 6148edda2b911d545828f011f6c34bc7, type: 2}
   activateDelay: 1.5
   timer: 15
-  explosionForce: 500
-  explosionRadius: 7
+  explosive: {fileID: 4225668469638466836}
   audioSource: {fileID: 6123959700245512937}
   tickOne: {fileID: 8300000, guid: f5a1f649f986e5d4f92888c7396e9b8f, type: 3}
   tickTwo: {fileID: 8300000, guid: bb7f13f94621c9d4aac09ded7bec449c, type: 3}

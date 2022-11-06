@@ -550,15 +550,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerControl: {fileID: 0}
   barrel: {fileID: 690586443962760300}
-  bullet: {fileID: 4307626717143694363, guid: de9dbd5b8f77ecb4a866f8d8cf75c17d, type: 3}
+  bulletTypes:
+  - {fileID: 4307626717143694363, guid: de9dbd5b8f77ecb4a866f8d8cf75c17d, type: 3}
+  - {fileID: 439779918157275786, guid: e82b6db23e6ee9f45931e68f161c1c36, type: 3}
+  - {fileID: 5124250838519604896, guid: 9da335a328db8da49938f47ad88f2c2d, type: 3}
   spawnPoint: {fileID: 8960685113855324647}
   shootEffect: {fileID: 7891438045153574773, guid: 4d61908da1eaf274aa82edf86c9a5c95, type: 3}
   bulletParent: {fileID: 0}
-  speed: 16
-  pierceLevel: 0
-  pierceLimit: 0
-  ricochetLevel: 1
   bulletLimit: 1
+  firedBullets: []
   fireCooldown:
   - 4
   - 6
@@ -566,6 +566,20 @@ MonoBehaviour:
   solidLayerMask:
     serializedVersion: 2
     m_Bits: 605028353
+  originalBulletSettings:
+    bulletIndex: 0
+    speed: 0
+    pierceLevel: 0
+    pierceLimit: 0
+    ricochetLevel: 0
+    explosionRadius: 0
+  bulletSettings:
+    bulletIndex: 0
+    speed: 16
+    pierceLevel: 0
+    pierceLimit: 0
+    ricochetLevel: 1
+    explosionRadius: 5
 --- !u!114 &348678474553284728
 MonoBehaviour:
   m_ObjectHideFlags: 0

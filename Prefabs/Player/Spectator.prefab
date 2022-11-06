@@ -627,13 +627,13 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-      - m_Target: {fileID: 3514198225660971919}
-        m_TargetAssemblyTypeName: BaseUIHandler, Assembly-CSharp
-        m_MethodName: DeactivateElement
-        m_Mode: 2
+      - m_Target: {fileID: 1881867519185044659}
+        m_TargetAssemblyTypeName: SettingsUIHandler, Assembly-CSharp
+        m_MethodName: UpdateSettingsUI
+        m_Mode: 1
         m_Arguments:
-          m_ObjectArgument: {fileID: 2874279683180331397}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Transform, UnityEngine
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
@@ -1013,7 +1013,7 @@ Canvas:
   m_SortingBucketNormalizedSize: 0
   m_AdditionalShaderChannelsFlag: 0
   m_SortingLayerID: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_TargetDisplay: 0
 --- !u!114 &6653101906008390360
 MonoBehaviour:
@@ -2150,18 +2150,6 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-      - m_Target: {fileID: 3514198225660971919}
-        m_TargetAssemblyTypeName: BaseUIHandler, Assembly-CSharp
-        m_MethodName: DeactivateElement
-        m_Mode: 2
-        m_Arguments:
-          m_ObjectArgument: {fileID: 2874279683180331397}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Transform, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
       - m_Target: {fileID: 8262593056251828806}
         m_TargetAssemblyTypeName: TeamSwitching, Assembly-CSharp
         m_MethodName: UpdateRosters
@@ -2951,6 +2939,10 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
       value: ChangeTempTeam
       objectReference: {fileID: 0}
+    - target: {fileID: 2807954496914171849, guid: 6df63ed5b41413e4c92ef67fb9653081, type: 3}
+      propertyPath: m_SortingOrder
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 4430745270891428799, guid: 6df63ed5b41413e4c92ef67fb9653081, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
@@ -2978,6 +2970,10 @@ PrefabInstance:
     - target: {fileID: 4905087193093662959, guid: 6df63ed5b41413e4c92ef67fb9653081, type: 3}
       propertyPath: m_Name
       value: Change Teams
+      objectReference: {fileID: 0}
+    - target: {fileID: 4905087193093662959, guid: 6df63ed5b41413e4c92ef67fb9653081, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5085076924801121235, guid: 6df63ed5b41413e4c92ef67fb9653081, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
@@ -3249,6 +3245,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Settings
       objectReference: {fileID: 0}
+    - target: {fileID: 760133604649861456, guid: 8c4f1a850c4e3ca4fb46cd97bbac48de, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2150081750335087127, guid: 8c4f1a850c4e3ca4fb46cd97bbac48de, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -3475,6 +3475,17 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8c4f1a850c4e3ca4fb46cd97bbac48de, type: 3}
+--- !u!114 &1881867519185044659 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8266226543487680839, guid: 8c4f1a850c4e3ca4fb46cd97bbac48de, type: 3}
+  m_PrefabInstance: {fileID: 7541899588062660084}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc1c81960d521c14281a6280a42a8fa4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!224 &8465828602693691363 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 2150081750335087127, guid: 8c4f1a850c4e3ca4fb46cd97bbac48de, type: 3}

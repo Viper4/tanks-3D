@@ -134,18 +134,6 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-      - m_Target: {fileID: 5649241332685557866}
-        m_TargetAssemblyTypeName: BaseUIHandler, Assembly-CSharp
-        m_MethodName: DeactivateElement
-        m_Mode: 2
-        m_Arguments:
-          m_ObjectArgument: {fileID: 1205254892522122500}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Transform, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
       - m_Target: {fileID: 3824772449842818737}
         m_TargetAssemblyTypeName: SettingsUIHandler, Assembly-CSharp
         m_MethodName: UpdateSettingsUI
@@ -2050,15 +2038,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerControl: {fileID: 6432079618835187448}
   barrel: {fileID: 7434512807079599132}
-  bullet: {fileID: 4307626717143694363, guid: de9dbd5b8f77ecb4a866f8d8cf75c17d, type: 3}
+  bulletTypes:
+  - {fileID: 4307626717143694363, guid: de9dbd5b8f77ecb4a866f8d8cf75c17d, type: 3}
+  - {fileID: 439779918157275786, guid: e82b6db23e6ee9f45931e68f161c1c36, type: 3}
+  - {fileID: 5124250838519604896, guid: 9da335a328db8da49938f47ad88f2c2d, type: 3}
+  - {fileID: 439779918157275786, guid: 1de81f3cfc2274e428ab0177e5918a65, type: 3}
   spawnPoint: {fileID: 5070647258124889183}
   shootEffect: {fileID: 3951999571271251617, guid: f7daba63eab9f5b4cae466ebd10c14b6, type: 3}
   bulletParent: {fileID: 0}
-  speed: 16
-  pierceLevel: 0
-  pierceLimit: 0
-  ricochetLevel: 1
   bulletLimit: 5
+  firedBullets: []
   fireCooldown:
   - 0.1
   - 0.1
@@ -2066,6 +2055,20 @@ MonoBehaviour:
   solidLayerMask:
     serializedVersion: 2
     m_Bits: 605028353
+  originalBulletSettings:
+    bulletIndex: 0
+    speed: 0
+    pierceLevel: 0
+    pierceLimit: 0
+    ricochetLevel: 0
+    explosionRadius: 0
+  bulletSettings:
+    bulletIndex: 0
+    speed: 16
+    pierceLevel: 0
+    pierceLimit: 0
+    ricochetLevel: 1
+    explosionRadius: 5
 --- !u!114 &8717466537847481428
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2078,7 +2081,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e86729278561f7641a9aed8cc39ff1e7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  PV: {fileID: 0}
   tankOrigin: {fileID: 5113858065110483005}
   mine: {fileID: 4223942867902412960, guid: 8a98f2906960e414d93db694525801d9, type: 3}
   mineParent: {fileID: 0}
@@ -2380,7 +2382,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerControl: {fileID: 6432079618835187448}
-  bulletIcon: {fileID: 2282050499597423073, guid: d74af27c00027b045a0845be0abf480f, type: 3}
+  bulletIcons: []
+  iconIndex: 0
   mineIcon: {fileID: 8808879291873048019, guid: ec7a3c0c017ab1b41bc6ff5ac31334ae, type: 3}
 --- !u!1 &6724952585108053958
 GameObject:
@@ -3208,7 +3211,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7523557919255940726, guid: 8c4f1a850c4e3ca4fb46cd97bbac48de, type: 3}
       propertyPath: m_SortingOrder
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7523557919255940726, guid: 8c4f1a850c4e3ca4fb46cd97bbac48de, type: 3}
       propertyPath: m_OverrideSorting

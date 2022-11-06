@@ -65,7 +65,7 @@ public class BlackBot : MonoBehaviour
             targetDir = targetSystem.currentTarget.position - turret.position;
             angleToTarget = Mathf.Abs(Vector3.SignedAngle(transform.forward, targetDir, transform.up));
 
-            predictedTargetPosition = targetSystem.PredictedTargetPosition(CustomMath.TravelTime(turret.position, targetSystem.currentTarget.position, fireControl.speed));
+            predictedTargetPosition = targetSystem.PredictedTargetPosition(CustomMath.TravelTime(turret.position, targetSystem.currentTarget.position, fireControl.bulletSettings.speed));
             bool targetVisible = targetSystem.TargetVisible();
             bool predictedPosVisible = !Physics.Linecast(turret.position, predictedTargetPosition, ~targetSystem.ignoreLayerMask);
             if (predictedPosVisible)
