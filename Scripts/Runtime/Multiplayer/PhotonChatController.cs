@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 using TMPro;
 using System;
 using MyUnityAddons.CustomPhoton;
+using Photon.Realtime;
 
 public class PhotonChatController : MonoBehaviour, IChatClientListener
 {
@@ -64,8 +65,8 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
 
     public void ConnectToPhotonChat()
     {
-        chatClient.AuthValues = new AuthenticationValues(PhotonNetwork.LocalPlayer.UserId);
-        chatClient.Connect(PhotonNetwork.PhotonServerSettings.AppSettings.AppIdChat, PhotonNetwork.AppVersion, new AuthenticationValues(PhotonNetwork.LocalPlayer.UserId));
+        chatClient.AuthValues = new Photon.Chat.AuthenticationValues(PhotonNetwork.LocalPlayer.UserId);
+        chatClient.Connect(PhotonNetwork.PhotonServerSettings.AppSettings.AppIdChat, PhotonNetwork.AppVersion, new Photon.Chat.AuthenticationValues(PhotonNetwork.LocalPlayer.UserId));
     }
 
     private void CreateMessage(string message, Color color)
@@ -92,9 +93,17 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
         Match match = Regex.Match(inputText, "[/][^ ]* ([^ ]*) (.*)");
         string recipientUsername = match.Groups[1].ToString();
         string message = match.Groups[2].ToString();
-        CreateMessage($"me -> {recipientUsername}: {message}", Color.grey);
 
-        chatClient.SendPrivateMessage(CustomNetworkHandling.FindPlayerWithUsername(recipientUsername).UserId, message);
+        Player player = CustomNetworkHandling.FindPlayerWithUsername(recipientUsername);
+        if (player != null)
+        {
+            CreateMessage($"me -> {recipientUsername}: {message}", Color.grey);
+            chatClient.SendPrivateMessage(player.UserId, message);
+        }
+        else
+        {
+            CreateMessage($"Could not find \"{recipientUsername}\"", Color.red);
+        }
     }
 
     private void SendReplyMessage(string inputText)
@@ -106,8 +115,16 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
         else
         {
             string message = Regex.Replace(inputText, "[/][^ ]* ", "");
-            CreateMessage($"me -> {CustomNetworkHandling.FindPlayerWithUserID(replyRecipient).NickName}: {message}", Color.grey);
-            chatClient.SendPrivateMessage(replyRecipient, message);
+            Player player = CustomNetworkHandling.FindPlayerWithUserID(replyRecipient);
+            if (player != null)
+            {
+                CreateMessage($"me -> {player.NickName}: {message}", Color.grey);
+                chatClient.SendPrivateMessage(replyRecipient, message);
+            }
+            else
+            {
+                CreateMessage($"Could not find \"{player.NickName}\"", Color.red);
+            }
         }
     }
 
@@ -236,11 +253,14 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
 
     public void OnUserSubscribed(string channel, string user)
     {
+        Debug.Log($"User subscribed {channel} {user}");
         CreateMessage($"{CustomNetworkHandling.FindPlayerWithUserID(user).NickName} joined", Color.yellow);
     }
 
     public void OnUserUnsubscribed(string channel, string user)
     {
+        Debug.Log($"User unsubscribed {channel} {user}");
+
         CreateMessage($"{CustomNetworkHandling.FindPlayerWithUserID(user).NickName} left", Color.yellow);
     }
 }
