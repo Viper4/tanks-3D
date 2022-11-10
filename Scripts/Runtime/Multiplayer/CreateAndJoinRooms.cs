@@ -22,9 +22,9 @@ public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
 
     private void Start()
     {
-        if (DataManager.playerSettings.username != null)
+        if (DataManager.chatSettings.username != null)
         {
-            usernameInput.SetTextWithoutNotify(DataManager.playerSettings.username);
+            usernameInput.SetTextWithoutNotify(DataManager.chatSettings.username);
         }
     }
 
@@ -50,7 +50,7 @@ public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
                 CleanupCacheOnLeave = true,
                 IsVisible = DataManager.roomSettings.isPublic,
                 IsOpen = true,
-                CustomRoomProperties = roomProperties
+                CustomRoomProperties = roomProperties,
             };
 
             PhotonNetwork.CreateRoom(createInput.text, roomOptions);
@@ -127,8 +127,8 @@ public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
     public override void OnJoinedRoom()
     {
         PhotonNetwork.NickName = GetUniqueUsername(usernameInput.text);
-        DataManager.playerSettings.username = usernameInput.text;
-        SaveSystem.SavePlayerSettings(DataManager.playerSettings, "PlayerSettings");
+        DataManager.chatSettings.username = usernameInput.text;
+        SaveSystem.SaveChatSettings(DataManager.chatSettings, "ChatSettings");
         PhotonNetwork.LocalPlayer.AllocatePlayerToTeam();
 
         PhotonChatController.Instance.ConnectToPhotonChat();

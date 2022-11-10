@@ -139,9 +139,7 @@ public class SettingsUIHandler : MonoBehaviour
 
     public void ResetSettings()
     {
-        string username = DataManager.playerSettings.username;
         DataManager.playerSettings = SaveSystem.defaultPlayerSettings;
-        DataManager.playerSettings.username = username;
 
         UpdateSettingsUI();
     }

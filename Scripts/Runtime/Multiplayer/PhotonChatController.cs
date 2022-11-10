@@ -9,6 +9,7 @@ using TMPro;
 using System;
 using MyUnityAddons.CustomPhoton;
 using Photon.Realtime;
+using MyUnityAddons.Calculations;
 
 public class PhotonChatController : MonoBehaviour, IChatClientListener
 {
@@ -24,6 +25,10 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
     [SerializeField] GameObject chatMessageTemplate;
 
     string roomChannel = null;
+
+    Dictionary<string, string> IDUsernamePair = new Dictionary<string, string>();
+
+    bool isConnected = false;
 
     // Start is called before the first frame update
     void Start()
@@ -63,8 +68,53 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
         }
     }
 
+    string GetUsername(string userID)
+    {
+        if (IDUsernamePair.ContainsKey(userID))
+        {
+            return IDUsernamePair[userID];
+        }
+        else
+        {
+            Player player = CustomNetworkHandling.FindPlayerWithUserID(userID);
+            if (player != null)
+            {
+                string username = player.NickName;
+                IDUsernamePair.Add(userID, username);
+                return username;
+            }
+            else
+            {
+                Debug.LogWarning("Could not find username for user " + userID);
+                return userID;
+            }
+        }
+    }
+
+    string GetUserID(string username)
+    {
+        Player player = CustomNetworkHandling.FindPlayerWithUsername(username);
+        if (player != null)
+        {
+            return player.UserId;
+        }
+        else
+        {
+            foreach ((string userID, string name) in IDUsernamePair)
+            {
+                if (name == username)
+                {
+                    return userID;
+                }
+            }
+            Debug.LogWarning("Could not find userID for user " + username);
+            return username;
+        }
+    }
+
     public void ConnectToPhotonChat()
     {
+        IDUsernamePair.AddOrReplace(PhotonNetwork.LocalPlayer.UserId, DataManager.chatSettings.username);
         chatClient.AuthValues = new Photon.Chat.AuthenticationValues(PhotonNetwork.LocalPlayer.UserId);
         chatClient.Connect(PhotonNetwork.PhotonServerSettings.AppSettings.AppIdChat, PhotonNetwork.AppVersion, new Photon.Chat.AuthenticationValues(PhotonNetwork.LocalPlayer.UserId));
     }
@@ -78,7 +128,7 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
 
     private void SendPublicMessage(string inputText)
     {
-        CreateMessage($"{DataManager.playerSettings.username}: {inputText}", Color.white);
+        CreateMessage($"{DataManager.chatSettings.username}: {inputText}", Color.white);
         if (chatClient.PublicChannels.Count > 0)
         {
             foreach (string channel in chatClient.PublicChannels.Keys)
@@ -93,16 +143,16 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
         Match match = Regex.Match(inputText, "[/][^ ]* ([^ ]*) (.*)");
         string recipientUsername = match.Groups[1].ToString();
         string message = match.Groups[2].ToString();
+        string userID = GetUserID(recipientUsername);
 
-        Player player = CustomNetworkHandling.FindPlayerWithUsername(recipientUsername);
-        if (player != null)
+        if (userID != recipientUsername)
         {
             CreateMessage($"me -> {recipientUsername}: {message}", Color.grey);
-            chatClient.SendPrivateMessage(player.UserId, message);
+            chatClient.SendPrivateMessage(userID, message);
         }
         else
         {
-            CreateMessage($"Could not find \"{recipientUsername}\"", Color.red);
+            CreateMessage("Could not find" + recipientUsername, Color.red);
         }
     }
 
@@ -115,16 +165,9 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
         else
         {
             string message = Regex.Replace(inputText, "[/][^ ]* ", "");
-            Player player = CustomNetworkHandling.FindPlayerWithUserID(replyRecipient);
-            if (player != null)
-            {
-                CreateMessage($"me -> {player.NickName}: {message}", Color.grey);
-                chatClient.SendPrivateMessage(replyRecipient, message);
-            }
-            else
-            {
-                CreateMessage($"Could not find \"{player.NickName}\"", Color.red);
-            }
+
+            CreateMessage($"me -> {GetUsername(replyRecipient)}: {message}", Color.grey);
+            chatClient.SendPrivateMessage(replyRecipient, message);
         }
     }
 
@@ -153,6 +196,200 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
                     case "/reply":
                         SendReplyMessage(inputText);
                         break;
+                    case "/mute":
+                        string username = Regex.Replace(inputText, "[/][^ ]* ", "");
+                        string userID = GetUserID(username);
+                        if (userID != username)
+                        {
+                            DataManager.chatSettings.muteList.TryAdd(userID);
+                            CreateMessage("Muted " + username, Color.white);
+                        }
+                        else
+                        {
+                            CreateMessage("Could not find " + username, Color.red);
+                        }
+                        break;
+                    case "/unmute":
+                        username = Regex.Replace(inputText, "[/][^ ]* ", "");
+                        userID = GetUserID(username);
+                        if (userID != username)
+                        {
+                            DataManager.chatSettings.muteList.Remove(userID);
+                            CreateMessage("Unmuted " + username, Color.white);
+                        }
+                        else
+                        {
+                            CreateMessage("Could not find " + username, Color.red);
+                        }
+                        break;
+                    case "/promote":
+                        if (PhotonNetwork.IsMasterClient)
+                        {
+                            username = Regex.Replace(inputText, "[/][^ ]* ", "");
+                            Player player = CustomNetworkHandling.FindPlayerWithUsername(username);
+                            if (player != null)
+                            {
+                                PhotonNetwork.SetMasterClient(player);
+                                CreateMessage("Promoted " + username, Color.white);
+                            }
+                            else
+                            {
+                                CreateMessage("Could not find " + username, Color.red);
+                            }
+                        }
+                        else
+                        {
+                            CreateMessage("You are not the owner", Color.red);
+                        }
+                        break;
+                    case "/kick":
+                        if (PhotonNetwork.IsMasterClient)
+                        {
+                            username = Regex.Replace(inputText, "[/][^ ]* ", "");
+                            Player player = CustomNetworkHandling.FindPlayerWithUsername(username);
+                            if (player != null)
+                            {
+                                PhotonNetwork.CloseConnection(player);
+                                CreateMessage("Kicked " + username, Color.white);
+                            }
+                            else
+                            {
+                                CreateMessage("Could not find " + username, Color.red);
+                            }
+                        }
+                        else
+                        {
+                            CreateMessage("You are not the owner", Color.red);
+                        }
+                        break;
+                    case "/ban":
+                        if (PhotonNetwork.IsMasterClient)
+                        {
+                            username = Regex.Replace(inputText, "[/][^ ]* ", "");
+                            userID = GetUserID(username);
+                            if (userID != username)
+                            {
+                                if (DataManager.chatSettings.blacklist.TryAdd(userID))
+                                {
+                                    SaveSystem.SaveChatSettings(DataManager.chatSettings, "ChatSettings");
+                                    Player player = CustomNetworkHandling.FindPlayerWithUsername(username);
+                                    if (player != null)
+                                    {
+                                        PhotonNetwork.CloseConnection(player);
+                                    }
+                                    CreateMessage("Banned " + username, Color.white);
+                                }
+                                else
+                                {
+                                    CreateMessage(username + " is already banned", Color.white);
+                                }
+                            }
+                            else
+                            {
+                                CreateMessage("Could not find " + username, Color.red);
+                            }
+                        }
+                        else
+                        {
+                            CreateMessage("You are not the owner", Color.red);
+                        }
+                        break;
+                    case "/unban":
+                        if (PhotonNetwork.IsMasterClient)
+                        {
+                            username = Regex.Replace(inputText, "[/][^ ]* ", "");
+                            userID = GetUserID(username);
+                            if (userID != username)
+                            {
+                                if (DataManager.chatSettings.blacklist.Remove(userID))
+                                {
+                                    SaveSystem.SaveChatSettings(DataManager.chatSettings, "ChatSettings");
+                                    CreateMessage("Unbanned " + username, Color.white);
+                                }
+                                else
+                                {
+                                    CreateMessage(username + " is already unbanned", Color.white);
+                                }
+                            }
+                            else
+                            {
+                                CreateMessage("Could not find " + username, Color.red);
+                            }
+                        }
+                        else
+                        {
+                            CreateMessage("You are not the owner", Color.red);
+                        }
+                        break;
+                    case "/whitelist":
+                        if (PhotonNetwork.IsMasterClient)
+                        {
+                            Match match = Regex.Match(inputText, "[/][^ ]* ([^ ]*) (.*)");
+                            string mode = match.Groups[1].ToString();
+                            if (mode == "clear")
+                            {
+                                DataManager.chatSettings.whitelist.Clear();
+                                SaveSystem.SaveChatSettings(DataManager.chatSettings, "ChatSettings");
+                                CreateMessage("Cleared the whitelist", Color.white);
+                            }
+                            else if (mode == "on")
+                            {
+                                DataManager.chatSettings.whitelistActive = true;
+                                SaveSystem.SaveChatSettings(DataManager.chatSettings, "ChatSettings");
+                                CreateMessage("Whitelist on", Color.white);
+                            }
+                            else if (mode == "off")
+                            {
+                                DataManager.chatSettings.whitelistActive = false;
+                                SaveSystem.SaveChatSettings(DataManager.chatSettings, "ChatSettings");
+                                CreateMessage("Whitelist off", Color.white);
+                            }
+                            else
+                            {
+                                string target = match.Groups[2].ToString();
+                                userID = GetUserID(target);
+                                if (userID != target)
+                                {
+                                    if (mode == "add")
+                                    {
+                                        if (DataManager.chatSettings.whitelist.TryAdd(userID))
+                                        {
+                                            SaveSystem.SaveChatSettings(DataManager.chatSettings, "ChatSettings");
+                                            CreateMessage("Added " + target + " to the whitelist", Color.white);
+                                        }
+                                        else
+                                        {
+                                            CreateMessage(target + " is already on the whitelist", Color.white);
+                                        }
+                                    }
+                                    else if (mode == "remove")
+                                    {
+                                        if (DataManager.chatSettings.whitelist.Remove(userID))
+                                        {
+                                            SaveSystem.SaveChatSettings(DataManager.chatSettings, "ChatSettings");
+                                            CreateMessage("Removed " + target + " from the whitelist", Color.white);
+                                        }
+                                        else
+                                        {
+                                            CreateMessage(target + " is already removed from the whitelist", Color.white);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        CreateMessage("Unknown mode \"" + mode + "\", use on/off/add/remove/clear", Color.red);
+                                    }
+                                }
+                                else
+                                {
+                                    CreateMessage("Could not find " + target, Color.red);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            CreateMessage("You are not the owner", Color.red);
+                        }
+                        break;
                     default:
                         CreateMessage($"Unknown command \"{command}\"", Color.red);
                         break;
@@ -168,16 +405,19 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
 
     public void SubscribeToRoomChannel(string channel)
     {
-        StartCoroutine(WaitToSubscribe(channel));
+        StartCoroutine(WaitToSubscribe(channel, 99, true));
         roomChannel = channel;
     }
 
-    IEnumerator WaitToSubscribe(string channel)
+    IEnumerator WaitToSubscribe(string channel, int maxSubcribers, bool publishSubscribers)
     {
-        while (!chatClient.Subscribe(new string[] { channel }))
+        ChannelCreationOptions channelOptions = new ChannelCreationOptions()
         {
-            yield return new WaitForSecondsRealtime(0.05f);
-        }
+            MaxSubscribers = maxSubcribers,
+            PublishSubscribers = publishSubscribers,
+        };
+        yield return new WaitUntil(() => isConnected);
+        chatClient.Subscribe(channel, 0, 0, channelOptions);
     }
 
     public void UnsubscribeFromRoomChannel()
@@ -197,21 +437,21 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
 
     public void OnConnected()
     {
-        
+        isConnected = true;
     }
 
     public void OnDisconnected()
     {
-        
+        isConnected = false;
     }
 
     public void OnGetMessages(string channelName, string[] senders, object[] messages)
     {
         for (int i = 0; i < senders.Length; i++)
         {
-            if (!senders[i].Equals(chatClient.UserId))
+            if (!senders[i].Equals(chatClient.UserId) && !DataManager.chatSettings.muteList.Contains(senders[i]))
             {
-                CreateMessage($"{CustomNetworkHandling.FindPlayerWithUserID(senders[i]).NickName}: {messages[i]}", Color.white);
+                CreateMessage($"{GetUsername(senders[i])}: {messages[i]}", Color.white);
             }
         }
     }
@@ -222,9 +462,9 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
         {
             string[] splitNames = channelName.Split(new char[] { ':' });
             string senderName = splitNames[0];
-            if (!sender.Equals(senderName, StringComparison.OrdinalIgnoreCase))
+            if (!sender.Equals(senderName, StringComparison.OrdinalIgnoreCase) && !DataManager.chatSettings.muteList.Contains(sender))
             {
-                CreateMessage($"{CustomNetworkHandling.FindPlayerWithUserID(sender).NickName} -> me: {message}", Color.grey);
+                CreateMessage($"{GetUsername(sender)} -> me: {message}", Color.grey);
                 replyRecipient = sender;
             }
         }
@@ -253,14 +493,27 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
 
     public void OnUserSubscribed(string channel, string user)
     {
-        Debug.Log($"User subscribed {channel} {user}");
-        CreateMessage($"{CustomNetworkHandling.FindPlayerWithUserID(user).NickName} joined", Color.yellow);
+        if (DataManager.chatSettings.whitelistActive && !DataManager.chatSettings.whitelist.Contains(user))
+        {
+            return;
+        }
+        if (DataManager.chatSettings.blacklist.Contains(user))
+        {
+            return;
+        }
+        CreateMessage($"{GetUsername(user)} joined", Color.yellow);
     }
 
     public void OnUserUnsubscribed(string channel, string user)
     {
-        Debug.Log($"User unsubscribed {channel} {user}");
-
-        CreateMessage($"{CustomNetworkHandling.FindPlayerWithUserID(user).NickName} left", Color.yellow);
+        if (DataManager.chatSettings.whitelistActive && !DataManager.chatSettings.whitelist.Contains(user))
+        {
+            return;
+        }
+        if (DataManager.chatSettings.blacklist.Contains(user))
+        {
+            return;
+        }
+        CreateMessage($"{GetUsername(user)} left", Color.yellow);
     }
 }

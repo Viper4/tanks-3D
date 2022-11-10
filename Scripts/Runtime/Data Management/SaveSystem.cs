@@ -10,13 +10,22 @@ public static class SaveSystem
     private static readonly string SAVE_FOLDER = Application.dataPath + "/SaveData/";
     public static readonly string CROSSHAIR_FOLDER = Application.dataPath + "/Crosshairs/";
 
+    private static readonly string chatSettingsExtension = ".chatsettings";
     private static readonly string playerSettingsExtension = ".playersettings";
     private static readonly string roomSettingsExtension = ".roomsettings";
     private static readonly string playerDataExtension = ".playerdata";
 
-    public static readonly PlayerSettings defaultPlayerSettings = new PlayerSettings
+    public static readonly ChatSettings defaultChatSettings = new ChatSettings()
     {
         username = null,
+        whitelistActive = false,
+        whitelist = new List<string>(),
+        blacklist = new List<string>(),
+        muteList = new List<string>(),
+    };
+
+    public static readonly PlayerSettings defaultPlayerSettings = new PlayerSettings
+    {
         sensitivity = 15,
         cameraSmoothing = 0.1f,
         fieldOfView = 60,
@@ -149,6 +158,33 @@ public static class SaveSystem
         }
 
         return newPlayerData;
+    }
+
+    public static void SaveChatSettings(this ChatSettings fromSettings, string fileName)
+    {
+        string json = JsonConvert.SerializeObject(fromSettings, Formatting.Indented);
+
+        File.WriteAllText(SAVE_FOLDER + fileName + chatSettingsExtension, json);
+    }
+
+    public static ChatSettings LoadChatSettings(string fileName)
+    {
+        if (File.Exists(SAVE_FOLDER + fileName + chatSettingsExtension))
+        {
+            string json = File.ReadAllText(SAVE_FOLDER + fileName + chatSettingsExtension);
+
+            if (json != null)
+            {
+                return JsonConvert.DeserializeObject<ChatSettings>(json);
+            }
+        }
+        else
+        {
+            Debug.LogWarning("Could not find file '" + SAVE_FOLDER + fileName + chatSettingsExtension + "', saving and loading defaults.");
+
+            defaultChatSettings.SaveChatSettings(fileName);
+        }
+        return defaultChatSettings;
     }
 
     public static void SavePlayerSettings(this PlayerSettings fromSettings, string fileName)

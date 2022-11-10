@@ -9,6 +9,7 @@ public class DataManager : MonoBehaviourPun
 {
     static DataManager Instance;
 
+    public static ChatSettings chatSettings = new ChatSettings();
     public static PlayerSettings playerSettings = new PlayerSettings();
     public static RoomSettings roomSettings = new RoomSettings();
     public static PlayerData playerData = new PlayerData();
@@ -17,6 +18,7 @@ public class DataManager : MonoBehaviourPun
     {
         if (Instance == null)
         {
+            chatSettings = SaveSystem.LoadChatSettings("ChatSettings");
             playerSettings = SaveSystem.LoadPlayerSettings("PlayerSettings");
             string latestRoomSettingsFile = SaveSystem.LatestFileInSaveFolder(false, ".roomsettings");
             if (latestRoomSettingsFile != null)

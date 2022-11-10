@@ -549,6 +549,16 @@ namespace MyUnityAddons
                     dictionary.Add(key, value);
                 }
             }
+
+            public static bool TryAdd<T>(this List<T> list, T item)
+            {
+                if (!list.Contains(item))
+                {
+                    list.Add(item);
+                    return true;
+                }
+                return false;
+            }
         }
     }
 
@@ -660,18 +670,6 @@ namespace MyUnityAddons
                 try
                 {
                     return PhotonView.Find((int)player.CustomProperties["ViewID"]);
-                }
-                catch
-                {
-                    return null;
-                }
-            }
-
-            public static Player GetPlayer(this PhotonView PV)
-            {
-                try
-                {
-                    return PhotonNetwork.PlayerList.Where((x) => PV.ViewID == (int)x.CustomProperties["ViewID"]).FirstOrDefault();
                 }
                 catch
                 {

@@ -5,7 +5,6 @@ using UnityEngine;
 [System.Serializable]
 public class PlayerSettings
 {
-    public string username;
     public float sensitivity;
     public float cameraSmoothing;
     public float fieldOfView;

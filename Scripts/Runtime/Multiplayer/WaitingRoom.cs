@@ -193,5 +193,19 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
                 }
             }
         }
+        else
+        {
+            foreach (GameObject UIElement in ownerElements)
+            {
+                if (UIElement.CompareTag("Mode Button"))
+                {
+                    UIElement.GetComponent<Button>().interactable = false;
+                }
+                else
+                {
+                    UIElement.SetActive(false);
+                }
+            }
+        }
     }
 }

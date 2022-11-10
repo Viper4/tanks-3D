@@ -62,6 +62,7 @@ public class GameManager : MonoBehaviourPunCallbacks
         PhotonNetwork.SerializationRate = 10;
         if (Instance == null)
         {
+            PhotonNetwork.EnableCloseConnection = true;
             PhotonNetwork.OfflineMode = true;
             Instance = this;
             DontDestroyOnLoad(transform);
@@ -671,8 +672,32 @@ public class GameManager : MonoBehaviourPunCallbacks
         }
     }
 
+    public override void OnMasterClientSwitched(Player newMasterClient)
+    {
+        if (currentScene.name == "End Scene" && PhotonNetwork.IsMasterClient)
+        {
+            baseUIHandler.UIElements["EndMenu"].Find("Restart").gameObject.SetActive(true);
+        }
+    }
+
     public override void OnPlayerEnteredRoom(Player newPlayer)
     {
+        if (PhotonNetwork.IsMasterClient)
+        {
+            if (DataManager.chatSettings.whitelistActive)
+            {
+                if (!DataManager.chatSettings.whitelist.Contains(newPlayer.UserId))
+                {
+                    PhotonNetwork.CloseConnection(newPlayer);
+                    return;
+                }
+            }
+            if (DataManager.chatSettings.blacklist.Contains(newPlayer.UserId))
+            {
+                PhotonNetwork.CloseConnection(newPlayer);
+                return;
+            }
+        }
         if (currentScene.name != "Waiting Room")
         {
             if (PhotonNetwork.IsMasterClient)
@@ -680,14 +705,6 @@ public class GameManager : MonoBehaviourPunCallbacks
                 newPlayer.AllocatePlayerToTeam();
             }
             readyPlayersCounter.text = readyPlayers + " / " + CustomNetworkHandling.NonSpectatorList.Length;
-        }
-    }
-
-    public override void OnMasterClientSwitched(Player newMasterClient)
-    {
-        if (currentScene.name == "End Scene" && PhotonNetwork.IsMasterClient)
-        {
-            baseUIHandler.UIElements["EndMenu"].Find("Restart").gameObject.SetActive(true);
         }
     }
 
@@ -707,12 +724,13 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     public override void OnLeftRoom()
     {
-        SceneManager.LoadScene("Lobby");
         PhotonChatController.Instance.UnsubscribeFromRoomChannel();
+        SceneManager.LoadScene("Lobby");
     }
 
     public override void OnDisconnected(DisconnectCause cause)
     {
+        PhotonChatController.Instance.UnsubscribeFromRoomChannel();
         canceledConnect = false;
         PhotonNetwork.OfflineMode = true;
         SceneManager.LoadScene("Main Menu");

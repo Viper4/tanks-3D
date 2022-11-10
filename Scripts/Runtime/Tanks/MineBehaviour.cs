@@ -136,6 +136,7 @@ public class MineBehaviour : MonoBehaviourPunCallbacks
         audioSource.Play();
 
         yield return new WaitForSeconds(timer * 0.1f);
+        yield return new WaitWhile(() => GameManager.Instance.frozen);
         StartCoroutine(FlashLoop());
     }
 
@@ -143,7 +144,7 @@ public class MineBehaviour : MonoBehaviourPunCallbacks
     {
         if (owner != null)
         {
-            if (ownerPV.IsMine)
+            if (ownerPV != null && ownerPV.IsMine)
             {
                 PhotonHashtable parameters = new PhotonHashtable()
                 {
