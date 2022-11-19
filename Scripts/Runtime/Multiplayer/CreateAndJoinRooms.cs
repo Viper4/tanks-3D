@@ -22,7 +22,7 @@ public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
 
     private void Start()
     {
-        if (DataManager.chatSettings.username != null)
+        if(DataManager.chatSettings.username != null)
         {
             usernameInput.SetTextWithoutNotify(DataManager.chatSettings.username);
         }
@@ -30,7 +30,7 @@ public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
 
     public void CreateRoom()
     {
-        if (CreateInputIsValid() && UsernameInputIsValid())
+        if(CreateInputIsValid() && UsernameInputIsValid())
         {
             PhotonHashtable playerProperties = new PhotonHashtable()
             {
@@ -62,7 +62,7 @@ public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
     
     public void JoinRoom()
     {
-        if (JoinInputIsValid() && UsernameInputIsValid())
+        if(JoinInputIsValid() && UsernameInputIsValid())
         {
             PhotonHashtable playerProperties = new PhotonHashtable()
             {
@@ -78,9 +78,9 @@ public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
 
     public void JoinRandomRoom()
     {
-        if (UsernameInputIsValid())
+        if(UsernameInputIsValid())
         {
-            if (PhotonNetwork.CountOfRooms > 0)
+            if(PhotonNetwork.CountOfRooms > 0)
             {
                 PhotonNetwork.JoinRandomRoom();
 
@@ -96,7 +96,7 @@ public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
 
     bool CreateInputIsValid()
     {
-        if (createInput.text.Length == 0)
+        if(createInput.text.Length == 0)
         {
             StartShowPopup("Room name is empty", 2.5f);
             return false;
@@ -106,7 +106,7 @@ public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
 
     bool JoinInputIsValid()
     {
-        if (joinInput.text.Length == 0)
+        if(joinInput.text.Length == 0)
         {
             StartShowPopup("Room name is empty", 2.5f);
             return false;
@@ -116,7 +116,7 @@ public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
 
     bool UsernameInputIsValid()
     {
-        if (usernameInput.text.Length == 0)
+        if(usernameInput.text.Length == 0)
         {
             StartShowPopup("Username is empty", 2.5f);
             return false;
@@ -134,13 +134,13 @@ public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
         PhotonChatController.Instance.ConnectToPhotonChat();
         PhotonChatController.Instance.SubscribeToRoomChannel(PhotonNetwork.CurrentRoom.Name);
 
-        if (PhotonNetwork.IsMasterClient)
+        if(PhotonNetwork.IsMasterClient)
         {
             PhotonNetwork.LoadLevel("Waiting Room");
         }
         else
         {
-            if ((bool)PhotonNetwork.CurrentRoom.CustomProperties["Waiting"])
+            if((bool)PhotonNetwork.CurrentRoom.CustomProperties["Waiting"])
             {
                 PhotonNetwork.LoadLevel("Waiting Room");
             }
@@ -154,17 +154,17 @@ public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
     string GetUniqueUsername(string username)
     {
         List<string> usernames = new List<string>();
-        foreach (Player player in PhotonNetwork.PlayerListOthers)
+        foreach(Player player in PhotonNetwork.PlayerListOthers)
         {
             usernames.Add(player.NickName);
         }
 
-        if (usernames.Contains(username))
+        if(usernames.Contains(username))
         {
-            for (int i = 0; i < 20; i++)
+            for(int i = 0; i < 20; i++)
             {
-                string newUsername = username + " (" + (i + 1) + ")";
-                if (!usernames.Contains(newUsername))
+                string newUsername = username + "(" +(i + 1) + ")";
+                if(!usernames.Contains(newUsername))
                 {
                     return newUsername;
                 }
@@ -175,7 +175,7 @@ public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
 
     void StartShowPopup(string message, float delay)
     {
-        if (popupRoutine != null)
+        if(popupRoutine != null)
         {
             StopCoroutine(popupRoutine);
         }

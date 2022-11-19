@@ -17,7 +17,7 @@ public class MultiDropdown : MonoBehaviour
 
     void OnValidate()
     {
-        if (captionText != null)
+        if(captionText != null)
         {
             UpdateCaptionText();
         }
@@ -25,7 +25,7 @@ public class MultiDropdown : MonoBehaviour
 
     private void Awake()
     {
-        for (int i = 0; i < options.Count; i++)
+        for(int i = 0; i < options.Count; i++)
         {
             RectTransform newOption = Instantiate(optionTemplate, optionTemplate.parent);
 
@@ -46,7 +46,7 @@ public class MultiDropdown : MonoBehaviour
     {
         Toggle toggleComponent = optionToggles[value].GetComponent<Toggle>();
         toggleComponent.SetIsOnWithoutNotify(true);
-        if (!values.Contains(value))
+        if(!values.Contains(value))
         {
             values.Add(value);
             UpdateCaptionText();
@@ -55,18 +55,18 @@ public class MultiDropdown : MonoBehaviour
 
     void UpdateCaptionText()
     {
-        if (values.Count == 0)
+        if(values.Count == 0)
         {
             captionText.text = "None";
         }
-        else if (values.Count > 1)
+        else if(values.Count > 1)
         {
             captionText.text = "Mixed";
         }
         else
         {
             int index = values[0];
-            if (options.Count > 0 && index >= 0 && index < options.Count)
+            if(options.Count > 0 && index >= 0 && index < options.Count)
             {
                 captionText.text = options[index].text;
             }
@@ -77,9 +77,9 @@ public class MultiDropdown : MonoBehaviour
     {
         int value = optionToggles.IndexOf(toggle);
 
-        if (toggle.GetComponent<Toggle>().isOn)
+        if(toggle.GetComponent<Toggle>().isOn)
         {
-            if (!values.Contains(value))
+            if(!values.Contains(value))
             {
                 values.Add(value);
             }

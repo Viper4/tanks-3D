@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 2416849736704526757}
   - component: {fileID: 7529693762855719024}
   - component: {fileID: 8972715663299021257}
+  - component: {fileID: -2428875701500357146}
   m_Layer: 2
   m_Name: Destructable Arch
   m_TagString: Untagged
@@ -4931,6 +4932,19 @@ ParticleSystemRenderer:
   m_MeshWeighting2: 1
   m_MeshWeighting3: 1
   m_MaskInteraction: 0
+--- !u!114 &-2428875701500357146
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 445845715882296466}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 115c28a99863dae43902bdb19990c000, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  prefabName: Destructable Arch
 --- !u!1 &7844054617174742182
 GameObject:
   m_ObjectHideFlags: 0

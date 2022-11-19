@@ -6,7 +6,6 @@ public class CameraControl : MonoBehaviour
 {
     Camera thisCamera;
 
-    public float sensitivity = 15;
     [SerializeField] Transform target;
     public Transform reticle;
 
@@ -29,7 +28,6 @@ public class CameraControl : MonoBehaviour
 
     Vector2 pitchMinMax = new Vector2(-40, 80);
 
-    public float rotationSmoothTime = 0.1f;
     Vector3 rotationSmoothVelocity;
     Vector3 currentRotation;
 
@@ -47,12 +45,12 @@ public class CameraControl : MonoBehaviour
     // Start is called before the first frame Update
     void Start()
     {
-        if (PhotonNetwork.OfflineMode || playerControl.photonView.IsMine)
+        if(PhotonNetwork.OfflineMode || playerControl.photonView.IsMine)
         {
             thisCamera = GetComponent<Camera>();
 
             // If target is not set, automatically set it to the parent
-            if (target == null)
+            if(target == null)
             {
                 target = transform.parent;
             }
@@ -76,24 +74,24 @@ public class CameraControl : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!playerControl.Paused && (PhotonNetwork.OfflineMode || playerControl.photonView.IsMine))
+        if(!playerControl.Paused &&(PhotonNetwork.OfflineMode || playerControl.photonView.IsMine))
         {
             // Updating every username to rotate to this camera for this client
             UsernameSystem[] allUsernames = FindObjectsOfType<UsernameSystem>();
-            foreach (UsernameSystem username in allUsernames)
+            foreach(UsernameSystem username in allUsernames)
             {
                 username.UpdateTextMeshTo(transform, alternateCamera);
             }
 
             float zoomRate = Input.GetKey(DataManager.playerSettings.keyBinds["Zoom Control"]) ? DataManager.playerSettings.slowZoomSpeed : DataManager.playerSettings.fastZoomSpeed;
-            if (alternateCamera)
+            if(alternateCamera)
             {
                 // Zoom with scroll
-                if (Input.GetAxisRaw("Mouse ScrollWheel") > 0)
+                if(Input.GetAxisRaw("Mouse ScrollWheel") > 0)
                 {
                     dstFromTarget = Mathf.Clamp(dstFromTarget - zoomRate, altTargetDstMinMax.x, altTargetDstMinMax.y);
                 }
-                else if (Input.GetAxisRaw("Mouse ScrollWheel") < 0)
+                else if(Input.GetAxisRaw("Mouse ScrollWheel") < 0)
                 {
                     dstFromTarget = Mathf.Clamp(dstFromTarget + zoomRate, altTargetDstMinMax.x, altTargetDstMinMax.y);
                 }
@@ -101,40 +99,40 @@ public class CameraControl : MonoBehaviour
             else
             {
                 // Zoom with scroll
-                if (Input.GetAxisRaw("Mouse ScrollWheel") > 0)
+                if(Input.GetAxisRaw("Mouse ScrollWheel") > 0)
                 {
                     dstFromTarget = Mathf.Clamp(dstFromTarget - zoomRate, targetDstMinMax.x, targetDstMinMax.y);
                 }
-                else if (Input.GetAxisRaw("Mouse ScrollWheel") < 0)
+                else if(Input.GetAxisRaw("Mouse ScrollWheel") < 0)
                 {
                     dstFromTarget = Mathf.Clamp(dstFromTarget + zoomRate, targetDstMinMax.x, targetDstMinMax.y);
                 }
             }
 
             // Lock turret toggle
-            if (Input.GetKeyDown(DataManager.playerSettings.keyBinds["Lock Turret"]))
+            if(Input.GetKeyDown(DataManager.playerSettings.keyBinds["Lock Turret"]))
             {
                 lockTurret = !lockTurret;
                 baseUIHandler.UIElements["Lock Turret"].gameObject.SetActive(lockTurret);
             }
-            else if (!alternateCamera && Input.GetKeyDown(DataManager.playerSettings.keyBinds["Lock Camera"]))
+            else if(!alternateCamera && Input.GetKeyDown(DataManager.playerSettings.keyBinds["Lock Camera"]))
             {
                 lockCamera = !lockCamera;
                 baseUIHandler.UIElements["Lock Camera"].gameObject.SetActive(lockCamera);
             }
-            else if (Input.GetKeyDown(DataManager.playerSettings.keyBinds["Switch Camera"]))
+            else if(Input.GetKeyDown(DataManager.playerSettings.keyBinds["Switch Camera"]))
             {
                 alternateCamera = !alternateCamera;
                 lockCamera = false;
 
-                if (alternateCamera)
+                if(alternateCamera)
                 {
                     dstFromTarget = Mathf.Clamp(dstFromTarget, altTargetDstMinMax.x, altTargetDstMinMax.y);
                     transform.eulerAngles = new Vector3(90, 0, 0);
                 }
             }
 
-            if (!playerControl.Dead && Time.timeScale != 0)
+            if(!playerControl.Dead && Time.timeScale != 0)
             {
                 // Unlinking y eulers of turret, barrel, and target from parent
                 Quaternion inverseParentRot = Quaternion.Euler(0, lastParentRotation.eulerAngles.y - tankOrigin.localEulerAngles.y, 0);
@@ -143,12 +141,12 @@ public class CameraControl : MonoBehaviour
 
                 reticle.gameObject.SetActive(true);
                 Cursor.visible = false;
-                if (alternateCamera)
+                if(alternateCamera)
                 {
                     transform.position = new Vector3(0, dstFromTarget, 0);
                 }
 
-                if (dstFromTarget == 0 && !alternateCamera)
+                if(dstFromTarget == 0 && !alternateCamera)
                 {
                     Cursor.lockState = CursorLockMode.Locked;
                     float eulerXOffset = CustomMath.FormattedAngle(turret.eulerAngles.x);
@@ -161,7 +159,7 @@ public class CameraControl : MonoBehaviour
                 }
                 else
                 {
-                    if (!invisible)
+                    if(!invisible)
                     {
                         body.GetComponent<MeshRenderer>().enabled = turret.GetComponent<MeshRenderer>().enabled = barrel.GetComponent<MeshRenderer>().enabled = true;
                     }
@@ -169,13 +167,13 @@ public class CameraControl : MonoBehaviour
                     Cursor.lockState = CursorLockMode.Confined;
                     pitchMinMax = pitchMinMaxN;
 
-                    if (!lockTurret)
+                    if(!lockTurret)
                     {
                         RotateToMousePoint();
                     }
                     else
                     {
-                        if (Physics.Raycast(barrel.position + barrel.forward, barrel.forward, out RaycastHit barrelHit, Mathf.Infinity, ~mouseIgnoreLayers))
+                        if(Physics.Raycast(barrel.position + barrel.forward, barrel.forward, out RaycastHit barrelHit, Mathf.Infinity, ~mouseIgnoreLayers))
                         {
                             reticle.position = thisCamera.WorldToScreenPoint(barrelHit.point);
                         }
@@ -193,25 +191,25 @@ public class CameraControl : MonoBehaviour
                 reticle.position = Input.mousePosition;
             }
 
-            if (!alternateCamera)
+            if(!alternateCamera)
             {
-                if (!lockCamera)
+                if(!lockCamera)
                 {
                     // Translating inputs from mouse into smoothed rotation of camera
-                    yaw += Input.GetAxis("Mouse X") * sensitivity / 4;
-                    pitch -= Input.GetAxis("Mouse Y") * sensitivity / 4;
+                    yaw += Input.GetAxis("Mouse X") * DataManager.playerSettings.sensitivity / 4;
+                    pitch -= Input.GetAxis("Mouse Y") * DataManager.playerSettings.sensitivity / 4;
                     pitch = Mathf.Clamp(pitch, pitchMinMax.x, pitchMinMax.y);
 
-                    currentRotation = Vector3.SmoothDamp(currentRotation, new Vector3(pitch, yaw), ref rotationSmoothVelocity, rotationSmoothTime);
+                    currentRotation = Vector3.SmoothDamp(currentRotation, new Vector3(pitch, yaw), ref rotationSmoothVelocity, DataManager.playerSettings.cameraSmoothing);
                     // Setting rotation and position of camera on previous params and target and dstFromTarget
                     transform.eulerAngles = currentRotation;
                 }
                 transform.position = target.position - transform.forward * dstFromTarget;
 
                 // Prevent clipping of camera
-                if (Physics.Raycast(target.position, (transform.position - target.position).normalized, out RaycastHit clippingHit, dstFromTarget, ~cameraIgnoreLayers))
+                if(Physics.Raycast(target.position,(transform.position - target.position).normalized, out RaycastHit clippingHit, dstFromTarget, ~cameraIgnoreLayers))
                 {
-                    transform.position = clippingHit.point - (transform.position - target.position).normalized;
+                    transform.position = clippingHit.point -(transform.position - target.position).normalized;
                 }
             }
         }
@@ -221,7 +219,7 @@ public class CameraControl : MonoBehaviour
     {
         Ray mouseRay = thisCamera.ScreenPointToRay(Input.mousePosition);
 
-        if (Physics.Raycast(mouseRay, out RaycastHit mouseHit, Mathf.Infinity, ~mouseIgnoreLayers))
+        if(Physics.Raycast(mouseRay, out RaycastHit mouseHit, Mathf.Infinity, ~mouseIgnoreLayers))
         {
             Debug.DrawLine(transform.position, mouseHit.point, Color.red, 0.1f);
             // Rotating turret and barrel towards the mouseHit point

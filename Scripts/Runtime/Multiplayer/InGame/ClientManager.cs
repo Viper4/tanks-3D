@@ -10,7 +10,7 @@ public class ClientManager : MonoBehaviourPunCallbacks
     // Start is called before the first frame update
     void Start()
     {
-        if (!PhotonNetwork.OfflineMode && deleteOnMultiplayer)
+        if(!PhotonNetwork.OfflineMode && deleteOnMultiplayer)
         {
             Destroy(gameObject);
         }
@@ -21,7 +21,7 @@ public class ClientManager : MonoBehaviourPunCallbacks
     {
         transform.SetParent(PlayerManager.Instance.playerParent);
 
-        if (changeColors)
+        if(changeColors)
         {
             Color primaryColor = new Color(primaryColorArray[0], primaryColorArray[1], primaryColorArray[2], primaryColorArray[3]);
             Color secondaryColor = new Color(secondaryColorArray[0], secondaryColorArray[1], secondaryColorArray[2], secondaryColorArray[3]);

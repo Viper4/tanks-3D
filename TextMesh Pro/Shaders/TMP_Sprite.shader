@@ -2,20 +2,20 @@ Shader "TextMeshPro/Sprite"
 {
 	Properties
 	{
-        [PerRendererData] _MainTex ("Sprite Texture", 2D) = "white" {}
-		_Color ("Tint", Color) = (1,1,1,1)
+        [PerRendererData] _MainTex("Sprite Texture", 2D) = "white" {}
+		_Color("Tint", Color) =(1,1,1,1)
 		
-		_StencilComp ("Stencil Comparison", Float) = 8
-		_Stencil ("Stencil ID", Float) = 0
-		_StencilOp ("Stencil Operation", Float) = 0
-		_StencilWriteMask ("Stencil Write Mask", Float) = 255
-		_StencilReadMask ("Stencil Read Mask", Float) = 255
+		_StencilComp("Stencil Comparison", Float) = 8
+		_Stencil("Stencil ID", Float) = 0
+		_StencilOp("Stencil Operation", Float) = 0
+		_StencilWriteMask("Stencil Write Mask", Float) = 255
+		_StencilReadMask("Stencil Read Mask", Float) = 255
 		
-		_CullMode ("Cull Mode", Float) = 0
-		_ColorMask ("Color Mask", Float) = 15
-		_ClipRect ("Clip Rect", vector) = (-32767, -32767, 32767, 32767)
+		_CullMode("Cull Mode", Float) = 0
+		_ColorMask("Color Mask", Float) = 15
+		_ClipRect("Clip Rect", vector) =(-32767, -32767, 32767, 32767)
 
-		[Toggle(UNITY_UI_ALPHACLIP)] _UseUIAlphaClip ("Use Alpha Clip", Float) = 0
+		[Toggle(UNITY_UI_ALPHACLIP)] _UseUIAlphaClip("Use Alpha Clip", Float) = 0
 	}
 
 	SubShader
@@ -98,14 +98,14 @@ Shader "TextMeshPro/Sprite"
 
 			fixed4 frag(v2f IN) : SV_Target
 			{
-				half4 color = (tex2D(_MainTex, IN.texcoord) + _TextureSampleAdd) * IN.color;
+				half4 color =(tex2D(_MainTex, IN.texcoord) + _TextureSampleAdd) * IN.color;
 				
                 #ifdef UNITY_UI_CLIP_RECT
 					color.a *= UnityGet2DClipping(IN.worldPosition.xy, _ClipRect);
 				#endif
 
 				#ifdef UNITY_UI_ALPHACLIP
-					clip (color.a - 0.001);
+					clip(color.a - 0.001);
 				#endif
 
 				return color;

@@ -29,11 +29,11 @@ public class WhiteBot : MonoBehaviour
 
     private void LateUpdate()
     {
-        if (!GameManager.Instance.frozen && Time.timeScale != 0)
+        if(!GameManager.Instance.frozen && Time.timeScale != 0)
         {
             bodyRenderer.enabled = turretRenderer.enabled = barrelRenderer.enabled = false;
 
-            switch (trapBot.mode)
+            switch(trapBot.mode)
             {
                 case TrapBot.Mode.Offense:
                     engineSoundManager.audioSource.pitch = offensePitch;

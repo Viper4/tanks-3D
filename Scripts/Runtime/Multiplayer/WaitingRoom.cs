@@ -27,11 +27,11 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
     // Start is called before the first frame update
     IEnumerator Start()
     {
-        if (!PhotonNetwork.IsMasterClient)
+        if(!PhotonNetwork.IsMasterClient)
         {
-            foreach (GameObject UIElement in ownerElements)
+            foreach(GameObject UIElement in ownerElements)
             {
-                if (UIElement.CompareTag("Mode Button"))
+                if(UIElement.CompareTag("Mode Button"))
                 {
                     UIElement.GetComponent<Button>().interactable = false;
                 }
@@ -51,7 +51,7 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
     public void StartGame() // Accessable only by MasterClient
     {
         PhotonNetwork.RaiseEvent(LeaveWaitingRoomCode, null, RaiseEventOptions.Default, SendOptions.SendUnreliable);
-        if (DataManager.roomSettings.mode == "Co-Op")
+        if(DataManager.roomSettings.mode == "Co-Op")
         {
             string campaign = Regex.Match(DataManager.roomSettings.map, @"(.*?)[ ][0-9]+$").Groups[1].ToString();
             DataManager.playerData = SaveSystem.ResetPlayerData(campaign + "PlayerData");
@@ -74,19 +74,19 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
 
     public void ChangeMode(string mode) // Accessable only by MasterClient
     {
-        if (DataManager.roomSettings.mode != mode)
+        if(DataManager.roomSettings.mode != mode)
         {
             DataManager.roomSettings.mode = mode;
-            if (mode == "Co-Op")
+            if(mode == "Co-Op")
             {
-                if (DataManager.roomSettings.map != "Classic 1" && DataManager.roomSettings.map != "Regular 1")
+                if(DataManager.roomSettings.map != "Classic 1" && DataManager.roomSettings.map != "Regular 1")
                 {
                     DataManager.roomSettings.map = "Classic 1";
                 }
             }
             else
             {
-                if (DataManager.roomSettings.map == "Classic 1" || DataManager.roomSettings.map == "Regular 1")
+                if(DataManager.roomSettings.map == "Classic 1" || DataManager.roomSettings.map == "Regular 1")
                 {
                     DataManager.roomSettings.map = "Classic";
                 }
@@ -110,7 +110,7 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
 
     public void MasterUpdateAllUI()
     {
-        foreach (Player player in PhotonNetwork.PlayerList)
+        foreach(Player player in PhotonNetwork.PlayerList)
         {
             player.AllocatePlayerToTeam();
         }
@@ -121,10 +121,10 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
 
     private void UpdateBasicUI()
     {
-        DataManager.roomSettings = (RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["RoomSettings"];
+        DataManager.roomSettings =(RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["RoomSettings"];
 
         roomName.text = PhotonNetwork.CurrentRoom.Name;
-        mapName.text = DataManager.roomSettings.map + " (" + DataManager.roomSettings.mode + ")";
+        mapName.text = DataManager.roomSettings.map + "(" + DataManager.roomSettings.mode + ")";
 
         teamSwitcher.UpdateRosters();
     }
@@ -143,15 +143,15 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
 
     void OnEvent(EventData eventData)
     {
-        if (eventData.Code == UpdateUICode)
+        if(eventData.Code == UpdateUICode)
         {
             UpdateBasicUI();
         }
-        else if (eventData.Code == LeaveWaitingRoomCode)
+        else if(eventData.Code == LeaveWaitingRoomCode)
         {
-            DataManager.roomSettings = (RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["RoomSettings"];
+            DataManager.roomSettings =(RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["RoomSettings"];
 
-            if (DataManager.roomSettings.mode == "Co-Op")
+            if(DataManager.roomSettings.mode == "Co-Op")
             {
                 string campaign = Regex.Match(DataManager.roomSettings.map, @"(.*?)[ ][0-9]+$").Groups[1].ToString();
                 DataManager.playerData = SaveSystem.ResetPlayerData(campaign + "PlayerData");
@@ -170,7 +170,7 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
 
     public override void OnPlayerLeftRoom(Player otherPlayer)
     {
-        if (PhotonNetwork.IsMasterClient)
+        if(PhotonNetwork.IsMasterClient)
         {
             otherPlayer.LeaveCurrentTeam();
             teamSwitcher.MasterUpdateRosters();
@@ -179,11 +179,11 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
 
     public override void OnMasterClientSwitched(Player newMasterClient)
     {
-        if (PhotonNetwork.IsMasterClient)
+        if(PhotonNetwork.IsMasterClient)
         {
-            foreach (GameObject UIElement in ownerElements)
+            foreach(GameObject UIElement in ownerElements)
             {
-                if (UIElement.CompareTag("Mode Button"))
+                if(UIElement.CompareTag("Mode Button"))
                 {
                     UIElement.GetComponent<Button>().interactable = true;
                 }
@@ -195,9 +195,9 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
         }
         else
         {
-            foreach (GameObject UIElement in ownerElements)
+            foreach(GameObject UIElement in ownerElements)
             {
-                if (UIElement.CompareTag("Mode Button"))
+                if(UIElement.CompareTag("Mode Button"))
                 {
                     UIElement.GetComponent<Button>().interactable = false;
                 }

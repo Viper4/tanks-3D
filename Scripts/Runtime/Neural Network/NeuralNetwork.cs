@@ -27,7 +27,7 @@ public class NeuralNetwork : IComparable<NeuralNetwork>
     public NeuralNetwork(int[] layers, Activations layerActivation)
     {
         this.layers = new int[layers.Length];
-        for (int i = 0; i < layers.Length; i++)
+        for(int i = 0; i < layers.Length; i++)
         {
             this.layers[i] = layers[i];
         }
@@ -42,7 +42,7 @@ public class NeuralNetwork : IComparable<NeuralNetwork>
     void InitNeurons()
     {
         List<float[]> neuronsList = new List<float[]>();
-        for (int i = 0; i < layers.Length; i++)
+        for(int i = 0; i < layers.Length; i++)
         {
             neuronsList.Add(new float[layers[i]]);
         }
@@ -52,10 +52,10 @@ public class NeuralNetwork : IComparable<NeuralNetwork>
     void InitBiases()
     {
         List<float[]> biasList = new List<float[]>();
-        for (int i = 0; i < layers.Length; i++)
+        for(int i = 0; i < layers.Length; i++)
         {
             float[] bias = new float[layers[i]];
-            for (int j = 0; j < layers[i]; j++)
+            for(int j = 0; j < layers[i]; j++)
             {
                 bias[j] = Random.Range(-0.5f, 0.5f);
             }
@@ -67,14 +67,14 @@ public class NeuralNetwork : IComparable<NeuralNetwork>
     void InitWeights()
     {
         List<float[][]> weightsList = new List<float[][]>();
-        for (int i = 1; i < layers.Length; i++)
+        for(int i = 1; i < layers.Length; i++)
         {
             List<float[]> layerWeightsList = new List<float[]>();
             int neuronsInPreviousLayer = layers[i - 1];
-            for (int j = 0; j < neurons[i].Length; j++)
+            for(int j = 0; j < neurons[i].Length; j++)
             {
                 float[] neuronWeights = new float[neuronsInPreviousLayer];
-                for (int k = 0; k < neuronsInPreviousLayer; k++)
+                for(int k = 0; k < neuronsInPreviousLayer; k++)
                 {
                     neuronWeights[k] = Random.Range(-0.5f, 0.5f);
                 }
@@ -87,36 +87,36 @@ public class NeuralNetwork : IComparable<NeuralNetwork>
 
     public float Sigmoid(float x)//activation functions and their corrosponding derivatives
     {
-        float k = (float)Math.Exp(x);
-        return k / (1.0f + k);
+        float k =(float)Math.Exp(x);
+        return k /(1.0f + k);
     }
     public float Tanh(float x)
     {
-        return (float)Math.Tanh(x);
+        return(float)Math.Tanh(x);
     }
     public float Relu(float x)
     {
-        return (0 >= x) ? 0 : x;
+        return(0 >= x) ? 0 : x;
     }
     public float Leakyrelu(float x)
     {
-        return (0 >= x) ? 0.01f * x : x;
+        return(0 >= x) ? 0.01f * x : x;
     }
     public float SigmoidDer(float x)
     {
-        return x * (1 - x);
+        return x *(1 - x);
     }
     public float TanhDer(float x)
     {
-        return 1 - (x * x);
+        return 1 -(x * x);
     }
     public float ReluDer(float x)
     {
-        return (0 >= x) ? 0 : 1;
+        return(0 >= x) ? 0 : 1;
     }
     public float LeakyreluDer(float x)
     {
-        return (0 >= x) ? 0.01f : 1;
+        return(0 >= x) ? 0.01f : 1;
     }
 
     public float Activate(float value, Activations layer)
@@ -131,7 +131,7 @@ public class NeuralNetwork : IComparable<NeuralNetwork>
          * 7. Softmax
         */
 
-        // tanh(x) = 2 / ((1+e^-2x) - 1)
+        // tanh(x) = 2 /((1+e^-2x) - 1)
 
         return layer switch
         {
@@ -158,17 +158,17 @@ public class NeuralNetwork : IComparable<NeuralNetwork>
     // inputs to outputs
     public float[] Forward(float[] inputs)
     {
-        for (int i = 0; i < inputs.Length; i++)
+        for(int i = 0; i < inputs.Length; i++)
         {
             neurons[0][i] = inputs[i];
         }
-        for (int i = 1; i < layers.Length; i++)
+        for(int i = 1; i < layers.Length; i++)
         {
             int layer = i - 1;
-            for (int j = 0; j < neurons[i].Length; j++)
+            for(int j = 0; j < neurons[i].Length; j++)
             {
                 float value = 0;
-                for (int k = 0; k < neurons[layer].Length; k++)
+                for(int k = 0; k < neurons[layer].Length; k++)
                 {
                     value += weights[layer][j][k] * neurons[layer][k];
                 }
@@ -185,19 +185,19 @@ public class NeuralNetwork : IComparable<NeuralNetwork>
 
     public void Mutate(float chance, float val)
     {
-        for (int i = 0; i < biases.Length; i++)
+        for(int i = 0; i < biases.Length; i++)
         {
-            for (int j = 0; j < biases[i].Length; j++)
+            for(int j = 0; j < biases[i].Length; j++)
             {
                 biases[i][j] = Random.value < chance ? biases[i][j] += Random.Range(-val, val) : biases[i][j];
             }
         }
 
-        for (int i = 0; i < weights.Length; i++)
+        for(int i = 0; i < weights.Length; i++)
         {
-            for (int j = 0; j < weights[i].Length; j++)
+            for(int j = 0; j < weights[i].Length; j++)
             {
-                for (int k = 0; k < weights[i][j].Length; k++)
+                for(int k = 0; k < weights[i][j].Length; k++)
                 {
                     weights[i][j][k] = Random.value < chance ? weights[i][j][k] += Random.Range(-val, val) : weights[i][j][k];
                 }
@@ -207,15 +207,15 @@ public class NeuralNetwork : IComparable<NeuralNetwork>
 
     public int CompareTo(NeuralNetwork other)
     {
-        if (other == null)
+        if(other == null)
         {
             return 1;
         }
-        if (fitness > other.fitness)
+        if(fitness > other.fitness)
         {
             return 1;
         }
-        else if (fitness < other.fitness)
+        else if(fitness < other.fitness)
         {
             return -1;
         }
@@ -227,18 +227,18 @@ public class NeuralNetwork : IComparable<NeuralNetwork>
 
     public NeuralNetwork Copy(NeuralNetwork into)
     {
-        for (int i = 0; i < biases.Length; i++)
+        for(int i = 0; i < biases.Length; i++)
         {
-            for (int j = 0; j < biases[i].Length; j++)
+            for(int j = 0; j < biases[i].Length; j++)
             {
                 into.biases[i][j] = biases[i][j];
             }
         }
-        for (int i = 0; i < weights.Length; i++)
+        for(int i = 0; i < weights.Length; i++)
         {
-            for (int j = 0; j < weights[i].Length; j++)
+            for(int j = 0; j < weights[i].Length; j++)
             {
-                for (int k = 0; k < weights[i][j].Length; k++)
+                for(int k = 0; k < weights[i][j].Length; k++)
                 {
                     into.weights[i][j][k] = weights[i][j][k];
                 }
@@ -251,18 +251,18 @@ public class NeuralNetwork : IComparable<NeuralNetwork>
     {
         File.WriteAllText(path, string.Empty);
         StreamWriter writer = new StreamWriter(path, true);
-        for (int i = 0; i < biases.Length; i++)
+        for(int i = 0; i < biases.Length; i++)
         {
-            for (int j = 0; j < biases[i].Length; j++)
+            for(int j = 0; j < biases[i].Length; j++)
             {
                 writer.WriteLine(biases[i][j]);
             }
         }
-        for (int i = 0; i < weights.Length; i++)
+        for(int i = 0; i < weights.Length; i++)
         {
-            for (int j = 0; j < weights[i].Length; j++)
+            for(int j = 0; j < weights[i].Length; j++)
             {
-                for (int k = 0; k < weights[i][j].Length; k++)
+                for(int k = 0; k < weights[i][j].Length; k++)
                 {
                     writer.WriteLine(weights[i][j][k]);
                 }
@@ -274,30 +274,30 @@ public class NeuralNetwork : IComparable<NeuralNetwork>
     public void Load(string path)
     {
         TextReader tr = new StreamReader(path);
-        int NumberOfLines = (int)new FileInfo(path).Length;
+        int NumberOfLines =(int)new FileInfo(path).Length;
         string[] ListLines = new string[NumberOfLines];
         int index = 1;
-        for (int i = 1; i < NumberOfLines; i++)
+        for(int i = 1; i < NumberOfLines; i++)
         {
             ListLines[i] = tr.ReadLine();
         }
         tr.Close();
-        if (new FileInfo(path).Length > 0)
+        if(new FileInfo(path).Length > 0)
         {
-            for (int i = 0; i < biases.Length; i++)
+            for(int i = 0; i < biases.Length; i++)
             {
-                for (int j = 0; j < biases[i].Length; j++)
+                for(int j = 0; j < biases[i].Length; j++)
                 {
                     biases[i][j] = float.Parse(ListLines[index]);
                     index++;
                 }
             }
 
-            for (int i = 0; i < weights.Length; i++)
+            for(int i = 0; i < weights.Length; i++)
             {
-                for (int j = 0; j < weights[i].Length; j++)
+                for(int j = 0; j < weights[i].Length; j++)
                 {
-                    for (int k = 0; k < weights[i][j].Length; k++)
+                    for(int k = 0; k < weights[i][j].Length; k++)
                     {
                         weights[i][j][k] = float.Parse(ListLines[index]);
                         index++;

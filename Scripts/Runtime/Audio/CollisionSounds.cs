@@ -18,15 +18,15 @@ public class CollisionSounds : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (!collision.transform.CompareTag("Bullet"))
+        if(!collision.transform.CompareTag("Bullet"))
         {
             ContactPoint contact = collision.GetContact(0);
             float collisionStrength = Vector3.Dot(contact.normal, collision.relativeVelocity);
-            if (collision.rigidbody != null)
+            if(collision.rigidbody != null)
             {
                 collisionStrength *= collision.rigidbody.mass;
             }
-            if (collisionStrength >= strengthThreshold)
+            if(collisionStrength >= strengthThreshold)
             {
                 audioSourceTransform.position = contact.point;
                 audioSource.pitch = Random.Range(pitchRange[0], pitchRange[1]);

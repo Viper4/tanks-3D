@@ -626,6 +626,7 @@ GameObject:
   - component: {fileID: 7904251344502137440}
   - component: {fileID: 9153861468875608766}
   - component: {fileID: 6687898062539644408}
+  - component: {fileID: 7207716832130606461}
   m_Layer: 25
   m_Name: Teal Tank
   m_TagString: Tank
@@ -672,15 +673,9 @@ MonoBehaviour:
   - {fileID: 4307626717143694363, guid: de9dbd5b8f77ecb4a866f8d8cf75c17d, type: 3}
   - {fileID: 439779918157275786, guid: e82b6db23e6ee9f45931e68f161c1c36, type: 3}
   - {fileID: 5124250838519604896, guid: 9da335a328db8da49938f47ad88f2c2d, type: 3}
-  bulletIndex: 1
   spawnPoint: {fileID: 6901609897244754546}
   shootEffect: {fileID: 7891438045153574773, guid: 4d61908da1eaf274aa82edf86c9a5c95, type: 3}
   bulletParent: {fileID: 0}
-  speed: 26
-  pierceLevel: 0
-  pierceLimit: 1
-  ricochetLevel: 0
-  explosionRadius: 5
   bulletLimit: 1
   firedBullets: []
   fireCooldown:
@@ -690,6 +685,13 @@ MonoBehaviour:
   solidLayerMask:
     serializedVersion: 2
     m_Bits: 605028353
+  originalBulletSettings:
+    bulletIndex: 0
+    speed: 0
+    pierceLevel: 0
+    pierceLimit: 0
+    ricochetLevel: 0
+    explosionRadius: 0
   bulletSettings:
     bulletIndex: 1
     speed: 26
@@ -885,6 +887,19 @@ MonoBehaviour:
   tankOrigin: {fileID: 8820478986772652707}
   trackMarks: {fileID: 4612882154067720755}
   baseTankLogic: {fileID: 9015243663734650980}
+--- !u!114 &7207716832130606461
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8152485418157340697}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 115c28a99863dae43902bdb19990c000, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  prefabName: Teal Tank
 --- !u!1 &8330142916516434170
 GameObject:
   m_ObjectHideFlags: 0

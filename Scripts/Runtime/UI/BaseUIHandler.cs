@@ -13,11 +13,11 @@ public class BaseUIHandler : MonoBehaviour
 
     private void Awake()
     {
-        foreach (Transform child in transform)
+        foreach(Transform child in transform)
         {
             UIElements[child.name] = child;
 
-            if (!activeElements.Contains(child))
+            if(!activeElements.Contains(child))
             {
                 child.gameObject.SetActive(false);
             }
@@ -26,7 +26,7 @@ public class BaseUIHandler : MonoBehaviour
                 child.gameObject.SetActive(true);
             }
         }
-        if (UIElements.ContainsKey("InGame"))
+        if(UIElements.ContainsKey("InGame"))
         {
             UIElements["HUD"] = UIElements["InGame"].Find("HUD");
             UIElements["Lock Turret"] = UIElements["HUD"].Find("Lock Turret");
@@ -38,12 +38,12 @@ public class BaseUIHandler : MonoBehaviour
 
     public bool PauseUIActive()
     {
-        if (UIElements.ContainsKey("PauseMenu") && UIElements["PauseMenu"].gameObject.activeSelf)
+        if(UIElements.ContainsKey("PauseMenu") && UIElements["PauseMenu"].gameObject.activeSelf)
         {
             return true;
         }
 
-        if (UIElements.ContainsKey("Settings") && UIElements["Settings"].gameObject.activeSelf)
+        if(UIElements.ContainsKey("Settings") && UIElements["Settings"].gameObject.activeSelf)
         {
             return true;
         }
@@ -55,7 +55,7 @@ public class BaseUIHandler : MonoBehaviour
     public void LoadScene(string sceneName)
     {
         GameManager.Instance.StopAllLoadRoutines();
-        if (PhotonNetwork.OfflineMode)
+        if(PhotonNetwork.OfflineMode)
         {
             GameManager.Instance.LoadScene(sceneName, 0, false, false);
         }
@@ -68,12 +68,12 @@ public class BaseUIHandler : MonoBehaviour
     public void ResumeGame()
     {
         string latestFile = SaveSystem.LatestFileInSaveFolder(false, ".playerdata");
-        if (latestFile != null)
+        if(latestFile != null)
         {
             DataManager.playerData = SaveSystem.LoadPlayerData(latestFile);
-            if (DataManager.playerData.sceneIndex != -1)
+            if(DataManager.playerData.sceneIndex != -1)
             {
-                if (PhotonNetwork.OfflineMode)
+                if(PhotonNetwork.OfflineMode)
                 {
                     GameManager.Instance.LoadScene(DataManager.playerData.sceneIndex);
                 }
@@ -88,11 +88,11 @@ public class BaseUIHandler : MonoBehaviour
     public void ResetPlayerData(string fileName)
     {
         DataManager.playerData = SaveSystem.ResetPlayerData(fileName);
-        if (!PhotonNetwork.OfflineMode && PhotonNetwork.IsMasterClient)
+        if(!PhotonNetwork.OfflineMode && PhotonNetwork.IsMasterClient)
         {
             PhotonHashtable roomProperties = new PhotonHashtable()
             {
-                { "Total Lives", ((RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["RoomSettings"]).totalLives }
+                { "Total Lives",((RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["RoomSettings"]).totalLives }
             };
             PhotonNetwork.CurrentRoom.SetCustomProperties(roomProperties);
 

@@ -60,7 +60,7 @@ public class GameManager : MonoBehaviourPunCallbacks
         SaveSystem.Init();
         PhotonNetwork.SendRate = 30;
         PhotonNetwork.SerializationRate = 10;
-        if (Instance == null)
+        if(Instance == null)
         {
             PhotonNetwork.EnableCloseConnection = true;
             PhotonNetwork.OfflineMode = true;
@@ -69,7 +69,7 @@ public class GameManager : MonoBehaviourPunCallbacks
 
             OnSceneLoad();
         }
-        else if (Instance != this)
+        else if(Instance != this)
         {
             Instance.autoPlay = autoPlay;
             Instance.inLobby = inLobby;
@@ -88,11 +88,11 @@ public class GameManager : MonoBehaviourPunCallbacks
     public void OnSceneLoad()
     {
         StopAllCoroutines();
-        if (PhotonNetwork.PrefabPool is DefaultPool pool && customPhotonPrefabPool != null)
+        if(PhotonNetwork.PrefabPool is DefaultPool pool && customPhotonPrefabPool != null)
         {
-            foreach (GameObject prefab in customPhotonPrefabPool)
+            foreach(GameObject prefab in customPhotonPrefabPool)
             {
-                if (!pool.ResourceCache.ContainsKey(prefab.name))
+                if(!pool.ResourceCache.ContainsKey(prefab.name))
                 {
                     pool.ResourceCache.Add(prefab.name, prefab);
                 }
@@ -103,12 +103,12 @@ public class GameManager : MonoBehaviourPunCallbacks
         currentScene = SceneManager.GetActiveScene();
         Time.timeScale = 1;
 
-        if (PhotonNetwork.OfflineMode)
+        if(PhotonNetwork.OfflineMode)
         {
             baseUIHandler = FindObjectOfType<BaseUIHandler>();
         }
 
-        if (inLobby)
+        if(inLobby)
         {
             UpdatePlayerWithSettings(null);
             loadingScreen.gameObject.SetActive(false);
@@ -116,7 +116,7 @@ public class GameManager : MonoBehaviourPunCallbacks
         }
         else
         {
-            switch (currentScene.name)
+            switch(currentScene.name)
             {
                 case "End Scene":
                     baseUIHandler = GameObject.Find("End UI").GetComponent<BaseUIHandler>();
@@ -124,22 +124,22 @@ public class GameManager : MonoBehaviourPunCallbacks
                     Transform stats = baseUIHandler.UIElements["StatsMenu"].Find("Stats");
                     loadingScreen.gameObject.SetActive(false);
 
-                    if (!PhotonNetwork.OfflineMode && !PhotonNetwork.IsMasterClient)
+                    if(!PhotonNetwork.OfflineMode && !PhotonNetwork.IsMasterClient)
                     {
                         baseUIHandler.UIElements["EndMenu"].Find("Restart").gameObject.SetActive(false);
                     }
 
                     labelText.text = "Game over";
-                    if (reachedLastLevel)
+                    if(reachedLastLevel)
                     {
-                        if (PhotonNetwork.OfflineMode)
+                        if(PhotonNetwork.OfflineMode)
                         {
-                            if (DataManager.playerData.lives > 0)
+                            if(DataManager.playerData.lives > 0)
                             {
                                 labelText.text = "Campaign complete!";
                             }
                         }
-                        else if ((int)PhotonNetwork.CurrentRoom.CustomProperties["Total Lives"] > 0)
+                        else if((int)PhotonNetwork.CurrentRoom.CustomProperties["Total Lives"] > 0)
                         {
                             labelText.text = "Campaign complete!";
                         }
@@ -148,29 +148,29 @@ public class GameManager : MonoBehaviourPunCallbacks
                     stats.Find("Time").GetComponent<Text>().text = "Time: " + DataManager.playerData.time.FormattedTime();
                     stats.Find("Best Time").GetComponent<Text>().text = "Best Time: " + DataManager.playerData.bestTime.FormattedTime();
 
-                    if (DataManager.playerData.kills > 0)
+                    if(DataManager.playerData.kills > 0)
                     {
                         float accuracy = 1;
-                        if (DataManager.playerData.shots != 0)
+                        if(DataManager.playerData.shots != 0)
                         {
                             accuracy = Mathf.Clamp((float)DataManager.playerData.kills / DataManager.playerData.shots, 0, 1);
                         }
-                        stats.Find("Accuracy").GetComponent<Text>().text = "Accuracy: " + (Mathf.Round(accuracy * 10000) / 100).ToString() + "%";
+                        stats.Find("Accuracy").GetComponent<Text>().text = "Accuracy: " +(Mathf.Round(accuracy * 10000) / 100).ToString() + "%";
                         stats.Find("Kills").GetComponent<Text>().text = "Kills: " + DataManager.playerData.kills;
-                        if (DataManager.playerData.deaths == 0)
+                        if(DataManager.playerData.deaths == 0)
                         {
                             stats.Find("KD Ratio").GetComponent<Text>().text = "KD Ratio: " + DataManager.playerData.kills.ToString();
                         }
                         else
                         {
-                            stats.Find("KD Ratio").GetComponent<Text>().text = "KD Ratio: " + ((float)DataManager.playerData.kills / DataManager.playerData.deaths).ToString();
+                            stats.Find("KD Ratio").GetComponent<Text>().text = "KD Ratio: " +((float)DataManager.playerData.kills / DataManager.playerData.deaths).ToString();
                         }
                     }
 
                     stats.Find("Deaths").GetComponent<Text>().text = "Deaths: " + DataManager.playerData.deaths;
                     break;
                 default:
-                    if (currentScene.buildIndex <= multiplayerSceneIndexEnd)
+                    if(currentScene.buildIndex <= multiplayerSceneIndexEnd)
                     {
                         loadingScreen.gameObject.SetActive(false);
                         frozen = false;
@@ -184,12 +184,12 @@ public class GameManager : MonoBehaviourPunCallbacks
 
                         loadingScreen.gameObject.SetActive(true);
                         progressBar.gameObject.SetActive(false);
-                        if (PhotonNetwork.OfflineMode)
+                        if(PhotonNetwork.OfflineMode)
                         {
                             startButton.gameObject.SetActive(true);
                             readyButton.gameObject.SetActive(false);
                             readyPlayersCounter.gameObject.SetActive(false);
-                            if (DataManager.playerData.previousSceneIndex != currentScene.buildIndex && levelIndex != 0 && levelIndex % 5 == 0)
+                            if(DataManager.playerData.previousSceneIndex != currentScene.buildIndex && levelIndex != 0 && levelIndex % 5 == 0)
                             {
                                 DataManager.playerData.lives++;
                                 StartCoroutine(PopupExtraLife(2.25f));
@@ -210,8 +210,8 @@ public class GameManager : MonoBehaviourPunCallbacks
                             readyPlayers = 0;
                             readyPlayersCounter.text = "0 / " + CustomNetworkHandling.NonSpectatorList.Length;
 
-                            totalLives = (int)PhotonNetwork.CurrentRoom.CustomProperties["Total Lives"];
-                            if (DataManager.playerData.previousSceneIndex != currentScene.buildIndex && levelIndex != 0 && levelIndex % 5 == 0)
+                            totalLives =(int)PhotonNetwork.CurrentRoom.CustomProperties["Total Lives"];
+                            if(DataManager.playerData.previousSceneIndex != currentScene.buildIndex && levelIndex != 0 && levelIndex % 5 == 0)
                             {
                                 totalLives++;
                                 StartCoroutine(PopupExtraLife(2.25f));
@@ -223,13 +223,13 @@ public class GameManager : MonoBehaviourPunCallbacks
                             {
                                 label.Find("Lives").GetComponent<Text>().text = "Lives: " + totalLives;
                             }
-                            if (PhotonNetwork.IsMasterClient)
+                            if(PhotonNetwork.IsMasterClient)
                             {
                                 PhotonNetwork.CurrentRoom.SetCustomProperties(roomProperties);
                             }
                         }
 
-                        if (TankManager.Instance == null || !TankManager.Instance.lastCampaignScene)
+                        if(TankManager.Instance == null || !TankManager.Instance.lastCampaignScene)
                         {
                             label.Find("Level").GetComponent<Text>().text = currentScene.name;
                         }
@@ -248,34 +248,26 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     public void UpdatePlayerWithSettings(Transform player)
     {
-        if (player != null)
+        if(player != null)
         {
-            if (player.TryGetComponent<SpectatorControl>(out var spectatorControl))
+            if(player.TryGetComponent<Camera>(out var camera))
             {
-                spectatorControl.sensitivity = DataManager.playerSettings.sensitivity;
-                spectatorControl.rotationSmoothTime = DataManager.playerSettings.cameraSmoothing;
+                camera.fieldOfView = DataManager.playerSettings.fieldOfView;
             }
-            else
+
+            if(player.CompareTag("Player"))
             {
                 string crosshairFilePath = SaveSystem.CROSSHAIR_FOLDER + DataManager.playerSettings.crosshairFileName + ".png";
                 Sprite crosshair = CustomMath.ImageToSprite(crosshairFilePath);
                 Transform playerUI = player.Find("Player UI");
-                if (playerUI != null)
+                if(playerUI != null)
                 {
                     BaseUIHandler baseUIHandler = playerUI.GetComponent<BaseUIHandler>();
-                    if (baseUIHandler != null && baseUIHandler.UIElements.ContainsKey("InGame"))
+                    if(baseUIHandler != null && baseUIHandler.UIElements.ContainsKey("InGame"))
                     {
                         Transform reticle = baseUIHandler.UIElements["InGame"].Find("Reticle");
                         reticle.GetComponent<CrosshairManager>().UpdateReticleSprite(crosshair, DataManager.playerSettings.crosshairColorIndex, DataManager.playerSettings.crosshairScale);
                     }
-                }
-
-                Transform camera = player.Find("Camera");
-                if (camera != null && camera.TryGetComponent<CameraControl>(out var cameraS))
-                {
-                    camera.GetComponent<Camera>().fieldOfView = DataManager.playerSettings.fieldOfView;
-                    cameraS.sensitivity = DataManager.playerSettings.sensitivity;
-                    cameraS.rotationSmoothTime = DataManager.playerSettings.cameraSmoothing;
                 }
             }
         }
@@ -312,7 +304,7 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     public void PhotonLoadNextScene(float delay = 0, bool save = false)
     {
-        if (PhotonNetwork.IsMasterClient)
+        if(PhotonNetwork.IsMasterClient)
         {
             PhotonHashtable eventParameters = new PhotonHashtable()
             {
@@ -333,7 +325,7 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     public void PhotonLoadScene(int sceneIndex = -1, float delay = 0, bool save = false)
     {
-        if (PhotonNetwork.IsMasterClient)
+        if(PhotonNetwork.IsMasterClient)
         {
             PhotonHashtable eventParameters = new PhotonHashtable()
             {
@@ -354,7 +346,7 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     public void PhotonLoadScene(string sceneName = null, float delay = 0, bool save = false)
     {
-        if (PhotonNetwork.IsMasterClient)
+        if(PhotonNetwork.IsMasterClient)
         {
             PhotonHashtable eventParameters = new PhotonHashtable()
             {
@@ -375,16 +367,16 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     private IEnumerator LoadSceneRoutine(int sceneIndex, float delay, bool photon, bool save, bool waitWhilePaused)
     {
-        if (!loadingScene)
+        if(!loadingScene)
         {
             loadingScene = true;
             
-            if (sceneIndex < 0)
+            if(sceneIndex < 0)
             {
                 sceneIndex = currentScene.buildIndex;
             }
 
-            if (save)
+            if(save)
             {
                 string campaign = Regex.Match(currentScene.name, @"(.*?)[ ][0-9]+$").Groups[1].ToString();
                 DataManager.playerData.sceneIndex = sceneIndex;
@@ -392,16 +384,16 @@ public class GameManager : MonoBehaviourPunCallbacks
             }
 
             yield return new WaitForSecondsRealtime(delay);
-            if (baseUIHandler != null && waitWhilePaused)
+            if(baseUIHandler != null && waitWhilePaused)
             {
                 yield return new WaitWhile(() => baseUIHandler.PauseUIActive());
             }
 
-            if (photon)
+            if(photon)
             {
                 PhotonNetwork.LoadLevel(sceneIndex);
 
-                if (!inLobby)
+                if(!inLobby)
                 {
                     loadingScreen.gameObject.SetActive(true);
                     startButton.gameObject.SetActive(false);
@@ -409,7 +401,7 @@ public class GameManager : MonoBehaviourPunCallbacks
                     progressBar.gameObject.SetActive(true);
 
                     float progress = Mathf.Clamp01(PhotonNetwork.LevelLoadingProgress / .9f);
-                    while (progress < 1)
+                    while(progress < 1)
                     {
                         progress = Mathf.Clamp01(PhotonNetwork.LevelLoadingProgress / .9f);
 
@@ -423,14 +415,14 @@ public class GameManager : MonoBehaviourPunCallbacks
             {
                 AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneIndex);
 
-                if (!inLobby)
+                if(!inLobby)
                 {
                     loadingScreen.gameObject.SetActive(true);
                     startButton.gameObject.SetActive(false);
                     readyButton.gameObject.SetActive(false);
                     progressBar.gameObject.SetActive(true);
 
-                    while (!asyncLoad.isDone)
+                    while(!asyncLoad.isDone)
                     {
                         float progress = Mathf.Clamp01(asyncLoad.progress / .9f);
 
@@ -445,16 +437,16 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     private IEnumerator LoadSceneRoutine(string sceneName, float delay, bool photon, bool save, bool waitWhilePaused)
     {
-        if (!loadingScene)
+        if(!loadingScene)
         {
             loadingScene = true;
 
-            if (sceneName == null)
+            if(sceneName == null)
             {
                 sceneName = currentScene.name;
             }
 
-            if (save)
+            if(save)
             {
                 string campaign = Regex.Match(currentScene.name, @"(.*?)[ ][0-9]+$").Groups[1].ToString();
                 DataManager.playerData.sceneIndex = SceneManager.GetSceneByName(sceneName).buildIndex;
@@ -462,16 +454,16 @@ public class GameManager : MonoBehaviourPunCallbacks
             }
 
             yield return new WaitForSecondsRealtime(delay);
-            if (baseUIHandler != null && waitWhilePaused)
+            if(baseUIHandler != null && waitWhilePaused)
             {
                 yield return new WaitWhile(() => baseUIHandler.PauseUIActive());
             }
 
-            if (photon)
+            if(photon)
             {
                 PhotonNetwork.LoadLevel(sceneName);
 
-                if (!inLobby)
+                if(!inLobby)
                 {
                     loadingScreen.gameObject.SetActive(true);
                     startButton.gameObject.SetActive(false);
@@ -479,7 +471,7 @@ public class GameManager : MonoBehaviourPunCallbacks
                     progressBar.gameObject.SetActive(true);
 
                     float progress = Mathf.Clamp01(PhotonNetwork.LevelLoadingProgress / .9f);
-                    while (progress < 1)
+                    while(progress < 1)
                     {
                         progress = Mathf.Clamp01(PhotonNetwork.LevelLoadingProgress / .9f);
 
@@ -493,14 +485,14 @@ public class GameManager : MonoBehaviourPunCallbacks
             {
                 AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneName);
 
-                if (!inLobby)
+                if(!inLobby)
                 {
                     loadingScreen.gameObject.SetActive(true);
                     startButton.gameObject.SetActive(false);
                     readyButton.gameObject.SetActive(false);
                     progressBar.gameObject.SetActive(true);
 
-                    while (!asyncLoad.isDone)
+                    while(!asyncLoad.isDone)
                     {
                         float progress = Mathf.Clamp01(asyncLoad.progress / .9f);
 
@@ -527,7 +519,7 @@ public class GameManager : MonoBehaviourPunCallbacks
         Time.timeScale = 1;
         frozen = true;
         LevelGenerator levelGenerator = FindObjectOfType<LevelGenerator>();
-        if (levelGenerator != null)
+        if(levelGenerator != null)
         {
             levelGenerator.GenerateLevel();
         }
@@ -547,17 +539,17 @@ public class GameManager : MonoBehaviourPunCallbacks
         yield return new WaitForEndOfFrame();
         PhotonTeam team = PhotonNetwork.LocalPlayer.GetPhotonTeam();
 
-        if (PhotonNetwork.OfflineMode)
+        if(PhotonNetwork.OfflineMode)
         {
             baseUIHandler.GetComponent<PlayerUIHandler>().Resume();
         }
-        else if ((team == null || team.Name != "Spectators") && playerPV.IsMine)
+        else if((team == null || team.Name != "Spectators") && playerPV.IsMine)
         {
             baseUIHandler.GetComponent<PlayerUIHandler>().Resume();
         }
 
         yield return new WaitForSecondsRealtime(3);
-        if (PhotonNetwork.OfflineMode)
+        if(PhotonNetwork.OfflineMode)
         {
             yield return new WaitWhile(() => baseUIHandler.PauseUIActive());
         }
@@ -566,11 +558,11 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     public void ToggleReady()
     {
-        if (playerPV.IsMine)
+        if(playerPV.IsMine)
         {
             Image readyImage = readyButton.GetComponent<Image>();
 
-            if (ready)
+            if(ready)
             {
                 readyPlayers--;
                 PhotonNetwork.RaiseEvent(RemoveReadyPlayerCode, null, RaiseEventOptions.Default, SendOptions.SendUnreliable);
@@ -586,7 +578,7 @@ public class GameManager : MonoBehaviourPunCallbacks
             }
 
             int nonSpectatorsLength = CustomNetworkHandling.NonSpectatorList.Length;
-            if (readyPlayers >= nonSpectatorsLength)
+            if(readyPlayers >= nonSpectatorsLength)
             {
                 PhotonNetwork.RaiseEvent(StartGameCode, null, RaiseEventOptions.Default, SendOptions.SendUnreliable);
                 StartGame();
@@ -604,7 +596,7 @@ public class GameManager : MonoBehaviourPunCallbacks
     public void MainMenu()
     {
         StopAllLoadRoutines();
-        if (PhotonNetwork.OfflineMode)
+        if(PhotonNetwork.OfflineMode)
         {
             LoadScene("Main Menu", 0, false, false);
         }
@@ -629,44 +621,44 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     void OnEvent(EventData eventData)
     {
-        if (eventData.Code == StartGameCode)
+        if(eventData.Code == StartGameCode)
         {
             readyButton.GetComponent<Image>().color = Color.red;
             readyPlayers = 0;
             StartGame();
         }
-        else if (eventData.Code == AddReadyPlayerCode)
+        else if(eventData.Code == AddReadyPlayerCode)
         {
             readyPlayers++;
             readyPlayersCounter.text = readyPlayers + " / " + CustomNetworkHandling.NonSpectatorList.Length;
         }
-        else if (eventData.Code == RemoveReadyPlayerCode)
+        else if(eventData.Code == RemoveReadyPlayerCode)
         {
             readyPlayers--;
             readyPlayersCounter.text = readyPlayers + " / " + CustomNetworkHandling.NonSpectatorList.Length;
         }
-        else if (eventData.Code == ResetDataCode)
+        else if(eventData.Code == ResetDataCode)
         {
-            PhotonHashtable parameters = (PhotonHashtable)eventData.Parameters[ParameterCode.Data];
+            PhotonHashtable parameters =(PhotonHashtable)eventData.Parameters[ParameterCode.Data];
             DataManager.playerData = SaveSystem.ResetPlayerData((string)parameters["fileName"]);
         }
-        else if (eventData.Code == LoadSceneCode)
+        else if(eventData.Code == LoadSceneCode)
         {
-            PhotonHashtable parameters = (PhotonHashtable)eventData.Parameters[ParameterCode.Data];
-            if (parameters.ContainsKey("sceneIndex"))
+            PhotonHashtable parameters =(PhotonHashtable)eventData.Parameters[ParameterCode.Data];
+            if(parameters.ContainsKey("sceneIndex"))
             {
-                StartCoroutine(LoadSceneRoutine((int)parameters["sceneIndex"], (float)parameters["delay"], true, (bool)parameters["save"], false));
+                StartCoroutine(LoadSceneRoutine((int)parameters["sceneIndex"],(float)parameters["delay"], true,(bool)parameters["save"], false));
             }
-            else if (parameters.ContainsKey("sceneName"))
+            else if(parameters.ContainsKey("sceneName"))
             {
-                StartCoroutine(LoadSceneRoutine((string)parameters["sceneName"], (float)parameters["delay"], true, (bool)parameters["save"], false));
+                StartCoroutine(LoadSceneRoutine((string)parameters["sceneName"],(float)parameters["delay"], true,(bool)parameters["save"], false));
             }
         }
     }
 
     public override void OnConnectedToMaster()
     {
-        if (canceledConnect)
+        if(canceledConnect)
         {
             PhotonNetwork.Disconnect();
         }
@@ -674,7 +666,7 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     public override void OnMasterClientSwitched(Player newMasterClient)
     {
-        if (currentScene.name == "End Scene" && PhotonNetwork.IsMasterClient)
+        if(currentScene.name == "End Scene" && PhotonNetwork.IsMasterClient)
         {
             baseUIHandler.UIElements["EndMenu"].Find("Restart").gameObject.SetActive(true);
         }
@@ -682,25 +674,25 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     public override void OnPlayerEnteredRoom(Player newPlayer)
     {
-        if (PhotonNetwork.IsMasterClient)
+        if(PhotonNetwork.IsMasterClient)
         {
-            if (DataManager.chatSettings.whitelistActive)
+            if(DataManager.chatSettings.whitelistActive)
             {
-                if (!DataManager.chatSettings.whitelist.Contains(newPlayer.UserId))
+                if(!DataManager.chatSettings.whitelist.Contains(newPlayer.UserId))
                 {
                     PhotonNetwork.CloseConnection(newPlayer);
                     return;
                 }
             }
-            if (DataManager.chatSettings.blacklist.Contains(newPlayer.UserId))
+            if(DataManager.chatSettings.blacklist.Contains(newPlayer.UserId))
             {
                 PhotonNetwork.CloseConnection(newPlayer);
                 return;
             }
         }
-        if (currentScene.name != "Waiting Room")
+        if(currentScene.name != "Waiting Room")
         {
-            if (PhotonNetwork.IsMasterClient)
+            if(PhotonNetwork.IsMasterClient)
             {
                 newPlayer.AllocatePlayerToTeam();
             }
@@ -710,10 +702,10 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     public override void OnPlayerLeftRoom(Player otherPlayer)
     {
-        if (currentScene.buildIndex > multiplayerSceneIndexEnd)
+        if(currentScene.buildIndex > multiplayerSceneIndexEnd)
         {
             readyPlayers = 0;
-            if (ready)
+            if(ready)
             {
                 readyPlayers++;
                 PhotonNetwork.RaiseEvent(AddReadyPlayerCode, null, RaiseEventOptions.Default, SendOptions.SendUnreliable);
@@ -730,7 +722,6 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     public override void OnDisconnected(DisconnectCause cause)
     {
-        PhotonChatController.Instance.UnsubscribeFromRoomChannel();
         canceledConnect = false;
         PhotonNetwork.OfflineMode = true;
         SceneManager.LoadScene("Main Menu");

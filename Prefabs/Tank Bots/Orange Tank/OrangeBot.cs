@@ -57,17 +57,17 @@ public class OrangeBot : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!GameManager.Instance.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null && !baseTankLogic.disabled)
+        if(!GameManager.Instance.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null && !baseTankLogic.disabled)
         {
-            if (fireControl.canFire && !shooting && targetSystem.TargetVisible())
+            if(fireControl.canFire && !shooting && targetSystem.TargetVisible())
             {
                 StartCoroutine(Shoot());
             }
 
-            if (nearbyMine != null)
+            if(nearbyMine != null)
             {
                 baseTankLogic.AvoidMine(nearbyMine, 100);
-                if (mineRoutine != null)
+                if(mineRoutine != null)
                 {
                     StartCoroutine(ResetLay());
                     StopCoroutine(mineRoutine);
@@ -75,16 +75,16 @@ public class OrangeBot : MonoBehaviour
                     mineRoutine = null;
                 }
             }
-            else if (mode != Mode.LayRoutine)
+            else if(mode != Mode.LayRoutine)
             {
                 baseTankLogic.targetTankDir = transform.forward;
-                if (mode == Mode.None && mineControl.canLay && mineControl.laidMines.Count < mineControl.mineLimit)
+                if(mode == Mode.None && mineControl.canLay && mineControl.laidMines.Count < mineControl.mineLimit)
                 {
-                    foreach (string tag in mineObjectTags)
+                    foreach(string tag in mineObjectTags)
                     {
                         List<Transform> visibleObjects = areaScanner.GetVisibleObjects(turret, mineObjectLayerMask, tag);
                         areaScanner.SelectObject(targetSystem.currentTarget, visibleObjects);
-                        if (areaScanner.selectedObject != null)
+                        if(areaScanner.selectedObject != null)
                         {
                             mineRoutine = StartCoroutine(LayMine());
                             break;
@@ -93,20 +93,20 @@ public class OrangeBot : MonoBehaviour
                 }
             }
 
-            if (nearbyBullet != null)
+            if(nearbyBullet != null)
             {
                 baseTankLogic.AvoidBullet(nearbyBullet);
             }
 
-            if (!mineControl.laidMines.Contains(targetSystem.currentTarget.parent))
+            if(!mineControl.laidMines.Contains(targetSystem.currentTarget.parent))
             {
-                if (!shooting && !targetSystem.TargetVisible() && mineControl.laidMines.Count > 0)
+                if(!shooting && !targetSystem.TargetVisible() && mineControl.laidMines.Count > 0)
                 {
-                    foreach (Transform mine in mineControl.laidMines)
+                    foreach(Transform mine in mineControl.laidMines)
                     {
-                        if (Physics.Raycast(turret.position, mine.position - turret.position, out RaycastHit hit, Mathf.Infinity, ~targetSystem.ignoreLayerMask))
+                        if(Physics.Raycast(turret.position, mine.position - turret.position, out RaycastHit hit, Mathf.Infinity, ~targetSystem.ignoreLayerMask))
                         {
-                            if (hit.transform.CompareTag("Mine") && Physics.CheckSphere(mine.position, trapRadius, 1 << targetSystem.currentTarget.gameObject.layer))
+                            if(hit.transform.CompareTag("Mine") && Physics.CheckSphere(mine.position, trapRadius, 1 << targetSystem.currentTarget.gameObject.layer))
                             {
                                 targetSystem.currentTarget = mine.GetChild(0);
                                 targetSystem.chooseTarget = false;
@@ -118,14 +118,14 @@ public class OrangeBot : MonoBehaviour
             }
             else
             {
-                if (!targetSystem.TargetVisible())
+                if(!targetSystem.TargetVisible())
                 {
                     targetSystem.currentTarget = targetSystem.primaryTarget;
-                    targetSystem.chooseTarget = GameManager.Instance != null && (!PhotonNetwork.OfflineMode || GameManager.Instance.autoPlay);
+                    targetSystem.chooseTarget = GameManager.Instance != null &&(!PhotonNetwork.OfflineMode || GameManager.Instance.autoPlay);
                 }
             }
 
-            if (targetSystem.currentTarget != null)
+            if(targetSystem.currentTarget != null)
             {
                 // Rotating turret and barrel towards target
                 baseTankLogic.targetTurretDir = targetSystem.currentTarget.position - turret.position;
@@ -135,17 +135,17 @@ public class OrangeBot : MonoBehaviour
 
     private void OnTriggerStay(Collider other)
     {
-        if (!GameManager.Instance.frozen && Time.timeScale != 0 && baseTankLogic != null && !baseTankLogic.disabled)
+        if(!GameManager.Instance.frozen && Time.timeScale != 0 && baseTankLogic != null && !baseTankLogic.disabled)
         {
-            switch (other.tag)
+            switch(other.tag)
             {
                 case "Mine":
                     nearbyMine = other.transform;
                     break;
                 case "Bullet":
-                    if (other.TryGetComponent<BulletBehaviour>(out var bulletBehaviour))
+                    if(other.TryGetComponent<BulletBehaviour>(out var bulletBehaviour))
                     {
-                        if (bulletBehaviour.owner != null && bulletBehaviour.owner != transform)
+                        if(bulletBehaviour.owner != null && bulletBehaviour.owner != transform)
                         {
                             nearbyBullet = other.transform;
                         }
@@ -157,16 +157,16 @@ public class OrangeBot : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-        switch (other.tag)
+        switch(other.tag)
         {
             case "Mine":
-                if (nearbyMine == other.transform)
+                if(nearbyMine == other.transform)
                 {
                     nearbyMine = null;
                 }
                 break;
             case "Bullet":
-                if (nearbyBullet == other.transform)
+                if(nearbyBullet == other.transform)
                 {
                     nearbyBullet = null;
                 }
@@ -185,10 +185,10 @@ public class OrangeBot : MonoBehaviour
         yield return new WaitForSeconds(Random.Range(fireDelay[0], fireDelay[1]));
         StartCoroutine(GetComponent<FireControl>().Shoot());
 
-        if (targetSystem.currentTarget != targetSystem.primaryTarget)
+        if(targetSystem.currentTarget != targetSystem.primaryTarget)
         {
             targetSystem.currentTarget = targetSystem.primaryTarget;
-            targetSystem.chooseTarget = GameManager.Instance != null && (!PhotonNetwork.OfflineMode || GameManager.Instance.autoPlay);
+            targetSystem.chooseTarget = GameManager.Instance != null &&(!PhotonNetwork.OfflineMode || GameManager.Instance.autoPlay);
         }
         shooting = false;
         baseTankLogic.stationary = false;
@@ -206,7 +206,7 @@ public class OrangeBot : MonoBehaviour
         mode = Mode.LayRoutine;
 
         Vector3 layPositionCenter;
-        if (areaScanner.selectedObject.TryGetComponent(out Collider collider))
+        if(areaScanner.selectedObject.TryGetComponent(out Collider collider))
         {
             layPositionCenter = collider.ClosestPoint(transform.position);
         }
@@ -216,9 +216,9 @@ public class OrangeBot : MonoBehaviour
         }
         layPositionCenter = new Vector3(layPositionCenter.x, body.position.y, layPositionCenter.z);
 
-        while (CustomMath.SqrDistance(layPositionCenter, body.position) > layDistance * layDistance)
+        while(CustomMath.SqrDistance(layPositionCenter, body.position) > layDistance * layDistance)
         {
-            if (areaScanner.selectedObject != null)
+            if(areaScanner.selectedObject != null)
             {
                 baseTankLogic.targetTankDir = layPositionCenter - body.position;
             }

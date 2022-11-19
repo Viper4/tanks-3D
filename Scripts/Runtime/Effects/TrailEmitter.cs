@@ -15,7 +15,7 @@ public class TrailEmitter : MonoBehaviour
         set
         {
             disabled = value;
-            foreach (Transform trail in trails)
+            foreach(Transform trail in trails)
             {
                 trail.GetComponent<TrailRenderer>().emitting = !disabled;
             }
@@ -31,7 +31,7 @@ public class TrailEmitter : MonoBehaviour
 
     private void Start()
     {
-        foreach (Transform trail in trackMarks)
+        foreach(Transform trail in trackMarks)
         {
             trails.Add(trail);
         }
@@ -40,9 +40,9 @@ public class TrailEmitter : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!disabled)
+        if(!disabled)
         {
-            foreach (Transform trail in trails)
+            foreach(Transform trail in trails)
             {
                 trail.GetComponent<TrailRenderer>().emitting = baseTankLogic.IsGrounded();
             }
@@ -52,7 +52,7 @@ public class TrailEmitter : MonoBehaviour
     [PunRPC]
     public void ResetTrails()
     {
-        foreach (Transform trail in trails)
+        foreach(Transform trail in trails)
         {
             trail.GetComponent<TrailRenderer>().Clear();
         }

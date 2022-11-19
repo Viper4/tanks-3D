@@ -19,7 +19,7 @@ public class DestructableObject : MonoBehaviour
     {
         objectCollider = transform.GetChild(0).GetComponent<Collider>();
         audioSource = GetComponent<AudioSource>();
-        if (TryGetComponent<Collider>(out var rootCollider))
+        if(TryGetComponent<Collider>(out var rootCollider))
         {
             Destroy(rootCollider);
         }
@@ -29,13 +29,13 @@ public class DestructableObject : MonoBehaviour
     {
         solidObject.SetActive(false);
         particles.Play();
-        if (audioSource != null)
+        if(audioSource != null)
         {
             audioSource.pitch = Random.Range(pitchRange[0], pitchRange[1]);
             audioSource.Play();
         }
 
-        if (!respawning && respawnDelay > 0)
+        if(!respawning && respawnDelay > 0)
         {
             StartCoroutine(Respawn());
         }
@@ -45,7 +45,7 @@ public class DestructableObject : MonoBehaviour
     {
         respawning = true;
         yield return new WaitForSeconds(respawnDelay);
-        while (Physics.CheckBox(objectCollider.bounds.center, objectCollider.bounds.extents * 0.49f, transform.rotation, overlapLayerMask))
+        while(Physics.CheckBox(objectCollider.bounds.center, objectCollider.bounds.extents * 0.49f, transform.rotation, overlapLayerMask))
         {
             yield return new WaitForSeconds(1f);
         }

@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 2591342120730757894}
   - component: {fileID: 1081636184467642239}
   - component: {fileID: -5774909379612630911}
+  - component: {fileID: -5531347356612450436}
   m_Layer: 26
   m_Name: Push Triangle 1
   m_TagString: Untagged
@@ -148,6 +149,19 @@ MonoBehaviour:
   - 1
   - 1.2
   volumeMultiplier: 0.1
+--- !u!114 &-5531347356612450436
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3739875933827908193}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 115c28a99863dae43902bdb19990c000, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  prefabName: Pushable Triangle
 --- !u!1 &6814802538401512376
 GameObject:
   m_ObjectHideFlags: 0

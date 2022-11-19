@@ -21,13 +21,13 @@ public class MainMenuCamera : MonoBehaviour
     void SwitchTarget()
     {
         target.gameObject.SetActive(true);
-        if (targetIndex > tankParent.childCount - 1)
+        if(targetIndex > tankParent.childCount - 1)
         {
             targetDstLimit = targetDstMinMaxFar;
             targetIndex = -1;
             target = tankParent;
         }
-        else if (targetIndex < 0)
+        else if(targetIndex < 0)
         {
             targetDstLimit = targetDstMinMaxFar;
             targetIndex = tankParent.childCount;
@@ -43,43 +43,43 @@ public class MainMenuCamera : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (target == null)
+        if(target == null)
         {
             targetDstLimit = targetDstMinMaxFar;
             targetIndex = -1;
             target = tankParent;
         }
-        if (Input.GetMouseButtonDown(0))
+        if(Input.GetMouseButtonDown(0))
         {
             targetIndex++;
             SwitchTarget();
         }
-        else if (Input.GetMouseButtonDown(1))
+        else if(Input.GetMouseButtonDown(1))
         {
             targetIndex--;
             SwitchTarget();
         }
-        else if (Input.GetKeyDown(DataManager.playerSettings.keyBinds["Toggle HUD"]))
+        else if(Input.GetKeyDown(DataManager.playerSettings.keyBinds["Toggle HUD"]))
         {
             mainMenuObject.SetActive(!mainMenuObject.activeSelf);
         }
 
         float zoomRate = Input.GetKey(KeyCode.LeftShift) ? 0.5f : 5f;
         // Zoom with scroll
-        if (Input.GetAxisRaw("Mouse ScrollWheel") > 0)
+        if(Input.GetAxisRaw("Mouse ScrollWheel") > 0)
         {
             dstFromTarget = Mathf.Clamp(dstFromTarget - zoomRate, targetDstLimit.x, targetDstLimit.y);
         }
-        else if (Input.GetAxisRaw("Mouse ScrollWheel") < 0)
+        else if(Input.GetAxisRaw("Mouse ScrollWheel") < 0)
         {
             dstFromTarget = Mathf.Clamp(dstFromTarget + zoomRate, targetDstLimit.x, targetDstLimit.y);
             transform.eulerAngles = new Vector3(60, transform.eulerAngles.y, 0);
         }
 
         Quaternion rotation;
-        if (dstFromTarget == 0)
+        if(dstFromTarget == 0)
         {
-            if (target == tankParent)
+            if(target == tankParent)
             {
                 dstFromTarget = targetDstMinMaxFar[0];
                 rotation = Quaternion.Euler(new Vector3(60, transform.eulerAngles.y, 0));

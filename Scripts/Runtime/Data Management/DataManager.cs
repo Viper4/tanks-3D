@@ -16,12 +16,12 @@ public class DataManager : MonoBehaviourPun
 
     private void Awake()
     {
-        if (Instance == null)
+        if(Instance == null)
         {
             chatSettings = SaveSystem.LoadChatSettings("ChatSettings");
             playerSettings = SaveSystem.LoadPlayerSettings("PlayerSettings");
             string latestRoomSettingsFile = SaveSystem.LatestFileInSaveFolder(false, ".roomsettings");
-            if (latestRoomSettingsFile != null)
+            if(latestRoomSettingsFile != null)
             {
                 roomSettings = SaveSystem.LoadRoomSettings(latestRoomSettingsFile);
             }
@@ -35,16 +35,16 @@ public class DataManager : MonoBehaviourPun
 
             Instance = this;
         }
-        else if (!PhotonNetwork.IsMasterClient && PhotonNetwork.InRoom)
+        else if(!PhotonNetwork.IsMasterClient && PhotonNetwork.InRoom)
         {
-            roomSettings = (RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["RoomSettings"];
+            roomSettings =(RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["RoomSettings"];
         }
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (!GameManager.Instance.inLobby && !GameManager.Instance.frozen && Time.timeScale > 0)
+        if(!GameManager.Instance.inLobby && !GameManager.Instance.frozen && Time.timeScale > 0)
         {
             playerData.time += Time.deltaTime;
         }
@@ -52,7 +52,7 @@ public class DataManager : MonoBehaviourPun
 
     void RegisterCustomTypes()
     {
-        PhotonPeer.RegisterType(typeof(Transform), (byte)'T', PhotonDataSerialization.ObjectToByteArray, PhotonDataSerialization.ByteArrayToObject);
-        PhotonPeer.RegisterType(typeof(RoomSettings), (byte)'R', PhotonDataSerialization.ObjectToByteArray, PhotonDataSerialization.ByteArrayToObject);
+        PhotonPeer.RegisterType(typeof(Transform),(byte)'T', PhotonDataSerialization.ObjectToByteArray, PhotonDataSerialization.ByteArrayToObject);
+        PhotonPeer.RegisterType(typeof(RoomSettings),(byte)'R', PhotonDataSerialization.ObjectToByteArray, PhotonDataSerialization.ByteArrayToObject);
     }
 }

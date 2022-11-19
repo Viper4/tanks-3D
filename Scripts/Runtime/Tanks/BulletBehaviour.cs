@@ -60,7 +60,7 @@ public class BulletBehaviour : MonoBehaviourPunCallbacks
         ResetVelocity();
         savedMaterials = thisRenderer.materials;
 
-        if (settings.bulletIndex == 3)
+        if(settings.bulletIndex == 3)
         {
             yield return new WaitForSeconds(0.5f);
             StartCoroutine(FlashLoop());
@@ -69,15 +69,15 @@ public class BulletBehaviour : MonoBehaviourPunCallbacks
 
     void Update()
     {
-        if (GameManager.Instance.frozen)
+        if(GameManager.Instance.frozen)
         {
             rb.constraints = RigidbodyConstraints.FreezeAll;
         }
-        else if (settings.bulletIndex == 3 && Time.timeScale > 0)
+        else if(settings.bulletIndex == 3 && Time.timeScale > 0)
         {
             timer -= Time.deltaTime;
             // Explodes at 0 seconds
-            if (timer <= 0)
+            if(timer <= 0)
             {
                 explosive.Explode(new List<Transform>());
                 SilentDestroy();
@@ -88,7 +88,7 @@ public class BulletBehaviour : MonoBehaviourPunCallbacks
     public override void OnEnable()
     {
         base.OnEnable();
-        if (!GameManager.Instance.inLobby)
+        if(!GameManager.Instance.inLobby)
         {
             PhotonNetwork.NetworkingClient.EventReceived += OnEvent;
         }
@@ -97,7 +97,7 @@ public class BulletBehaviour : MonoBehaviourPunCallbacks
     public override void OnDisable()
     {
         base.OnDisable();
-        if (!GameManager.Instance.inLobby)
+        if(!GameManager.Instance.inLobby)
         {
             PhotonNetwork.NetworkingClient.EventReceived -= OnEvent;
         }
@@ -105,13 +105,13 @@ public class BulletBehaviour : MonoBehaviourPunCallbacks
 
     void OnEvent(EventData eventData)
     {
-        if (eventData.Code == GameManager.Instance.DestroyCode)
+        if(eventData.Code == GameManager.Instance.DestroyCode)
         {
-            PhotonHashtable parameters = (PhotonHashtable)eventData.Parameters[ParameterCode.Data];
-            if ((int)parameters["ID"] == bulletID)
+            PhotonHashtable parameters =(PhotonHashtable)eventData.Parameters[ParameterCode.Data];
+            if((int)parameters["ID"] == bulletID)
             {
                 SubtractBulletsFired();
-                if (!(bool)parameters["Safe"])
+                if(!(bool)parameters["Safe"])
                 {
                     Instantiate(explosionEffect, transform.position, Quaternion.identity);
                 }
@@ -123,14 +123,14 @@ public class BulletBehaviour : MonoBehaviourPunCallbacks
     IEnumerator FlashLoop()
     {
         Material[] newMaterials = new Material[thisRenderer.materials.Length];
-        for (int i = 0; i < newMaterials.Length; i++)
+        for(int i = 0; i < newMaterials.Length; i++)
         {
             newMaterials[i] = flashMaterials[i];
         }
         thisRenderer.materials = newMaterials;
 
         yield return new WaitForSeconds(flashTime);
-        for (int i = 0; i < newMaterials.Length; i++)
+        for(int i = 0; i < newMaterials.Length; i++)
         {
             newMaterials[i] = savedMaterials[i];
         }
@@ -143,11 +143,11 @@ public class BulletBehaviour : MonoBehaviourPunCallbacks
 
     private void OnTriggerEnter(Collider other)
     {
-        if (!GameManager.Instance.frozen && !removedSelf)
+        if(!GameManager.Instance.frozen && !removedSelf)
         {
-            if (explosive != null)
+            if(explosive != null)
             {
-                if (explodeTags.Contains(other.transform.tag))
+                if(explodeTags.Contains(other.transform.tag))
                 {
                     explosive.Explode(new List<Transform>());
                     SilentDestroy();
@@ -155,10 +155,10 @@ public class BulletBehaviour : MonoBehaviourPunCallbacks
             }
             else
             {
-                switch (other.tag)
+                switch(other.tag)
                 {
                     case "Tank":
-                        if (!collidedTransforms.Contains(other.transform.parent))
+                        if(!collidedTransforms.Contains(other.transform.parent))
                         {
                             KillTarget(other.transform.parent);
                             collidedTransforms.Add(other.transform.parent);
@@ -166,26 +166,26 @@ public class BulletBehaviour : MonoBehaviourPunCallbacks
                         break;
                     case "Player":
                         Transform otherPlayer = other.transform.parent.parent;
-                        if (!collidedTransforms.Contains(otherPlayer))
+                        if(!collidedTransforms.Contains(otherPlayer))
                         {
                             collidedTransforms.Add(otherPlayer);
 
-                            if (!otherPlayer.TryGetComponent<Shields>(out var shields))
+                            if(!otherPlayer.TryGetComponent<Shields>(out var shields))
                             {
                                 KillTarget(otherPlayer);
                                 break;
                             }
 
                             int damageAmount = settings.pierceLimit - pierces + 1;
-                            if (damageAmount > shields.shieldAmount)
+                            if(damageAmount > shields.shieldAmount)
                             {
                                 KillTarget(otherPlayer);
                             }
                             else
                             {
-                                if (otherPlayer.TryGetComponent<PhotonView>(out var otherPV))
+                                if(otherPlayer.TryGetComponent<PhotonView>(out var otherPV))
                                 {
-                                    if (otherPV.IsMine)
+                                    if(otherPV.IsMine)
                                     {
                                         otherPV.RPC("DamageShields", RpcTarget.All, new object[] { damageAmount });
                                     }
@@ -199,7 +199,7 @@ public class BulletBehaviour : MonoBehaviourPunCallbacks
                         }
                         break;
                     case "AI Tank":
-                        if (owner != null && !owner.CompareTag("AI Tank") && !collidedTransforms.Contains(other.transform.parent))
+                        if(owner != null && !owner.CompareTag("AI Tank") && !collidedTransforms.Contains(other.transform.parent))
                         {
                             KillTarget(other.transform.parent);
                             collidedTransforms.Add(other.transform.parent);
@@ -212,18 +212,18 @@ public class BulletBehaviour : MonoBehaviourPunCallbacks
 
     private void OnCollisionEnter(Collision other)
     {
-        if (!GameManager.Instance.frozen && !removedSelf)
+        if(!GameManager.Instance.frozen && !removedSelf)
         {
-            if (explosive != null)
+            if(explosive != null)
             {
-                if (explodeTags.Contains(other.transform.tag))
+                if(explodeTags.Contains(other.transform.tag))
                 {
                     explosive.Explode(new List<Transform>());
                     SilentDestroy();
                 }
                 else
                 {
-                    if (settings.bulletIndex == 3)
+                    if(settings.bulletIndex == 3)
                     {
                         ContactPoint contact = other.GetContact(0);
                         float collisionStrength = Vector3.Dot(contact.normal, other.relativeVelocity);
@@ -238,10 +238,10 @@ public class BulletBehaviour : MonoBehaviourPunCallbacks
             }
             else
             {
-                switch (other.transform.tag)
+                switch(other.transform.tag)
                 {
                     case "Tank":
-                        if (!collidedTransforms.Contains(other.transform))
+                        if(!collidedTransforms.Contains(other.transform))
                         {
                             KillTarget(other.transform);
                             collidedTransforms.Add(other.transform);
@@ -249,26 +249,26 @@ public class BulletBehaviour : MonoBehaviourPunCallbacks
                         break;
                     case "Player":
                         Transform otherPlayer = other.transform.parent;
-                        if (!collidedTransforms.Contains(otherPlayer))
+                        if(!collidedTransforms.Contains(otherPlayer))
                         {
                             collidedTransforms.Add(otherPlayer);
 
-                            if (!otherPlayer.TryGetComponent<Shields>(out var shields))
+                            if(!otherPlayer.TryGetComponent<Shields>(out var shields))
                             {
                                 KillTarget(otherPlayer);
                                 break;
                             }
 
                             int damageAmount = settings.pierceLimit - pierces + 1;
-                            if (damageAmount > shields.shieldAmount)
+                            if(damageAmount > shields.shieldAmount)
                             {
                                 KillTarget(otherPlayer);
                             }
                             else
                             {
-                                if (otherPlayer.TryGetComponent<PhotonView>(out var otherPV))
+                                if(otherPlayer.TryGetComponent<PhotonView>(out var otherPV))
                                 {
-                                    if (otherPV.IsMine)
+                                    if(otherPV.IsMine)
                                     {
                                         otherPV.RPC("DamageShields", RpcTarget.All, new object[] { damageAmount });
                                     }
@@ -282,7 +282,7 @@ public class BulletBehaviour : MonoBehaviourPunCallbacks
                         }
                         break;
                     case "AI Tank":
-                        if (!owner.CompareTag("AI Tank") && !collidedTransforms.Contains(other.transform))
+                        if(!owner.CompareTag("AI Tank") && !collidedTransforms.Contains(other.transform))
                         {
                             KillTarget(other.transform);
                             collidedTransforms.Add(other.transform);
@@ -290,12 +290,12 @@ public class BulletBehaviour : MonoBehaviourPunCallbacks
                         break;
                     case "Destructable":
                         // If can pierce, destroy the hit object, otherwise bounce off
-                        if (other.transform.parent.TryGetComponent<DestructableObject>(out var destructableObject))
+                        if(other.transform.parent.TryGetComponent<DestructableObject>(out var destructableObject))
                         {
-                            if (settings.pierceLevel >= destructableObject.destroyResistance)
+                            if(settings.pierceLevel >= destructableObject.destroyResistance)
                             {
                                 destructableObject.DestroyObject();
-                                if (pierces < settings.pierceLimit)
+                                if(pierces < settings.pierceLimit)
                                 {
                                     // Resetting velocity
                                     rb.velocity = transform.forward * settings.speed;
@@ -337,7 +337,7 @@ public class BulletBehaviour : MonoBehaviourPunCallbacks
     
     void BounceOff(Collision collision)
     {
-        if (bounces < settings.ricochetLevel)
+        if(bounces < settings.ricochetLevel)
         {
             bounces++;
             Vector3 reflection = Vector3.Reflect(transform.forward, collision.GetContact(0).normal);
@@ -347,7 +347,7 @@ public class BulletBehaviour : MonoBehaviourPunCallbacks
         }
         else
         {
-            if (explosive != null)
+            if(explosive != null)
             {
                 explosive.Explode(new List<Transform>());
                 SilentDestroy();
@@ -368,7 +368,7 @@ public class BulletBehaviour : MonoBehaviourPunCallbacks
 
     public void ResetVelocity()
     {
-        if (rb != null)
+        if(rb != null)
         {
             rb.velocity = transform.forward * settings.speed;
         }
@@ -376,9 +376,9 @@ public class BulletBehaviour : MonoBehaviourPunCallbacks
 
     void KillTarget(Transform target)
     {
-        if (!PhotonNetwork.OfflineMode && !GameManager.Instance.inLobby)
+        if(!PhotonNetwork.OfflineMode && !GameManager.Instance.inLobby)
         {
-            if (ownerPV != null && ownerPV.IsMine)
+            if(ownerPV != null && ownerPV.IsMine)
             {
                 target.GetComponent<PhotonView>().RPC("ExplodeTank", RpcTarget.All);
                 NormalDestroy();
@@ -386,32 +386,32 @@ public class BulletBehaviour : MonoBehaviourPunCallbacks
         }
         else
         {
-            if (target.TryGetComponent<BaseTankLogic>(out var baseTankLogic))
+            if(target.TryGetComponent<BaseTankLogic>(out var baseTankLogic))
             {
                 baseTankLogic.ExplodeTank();
             }
             NormalDestroy();
         }
 
-        if (owner != null && owner != target)
+        if(owner != null && owner != target)
         {
-            if (owner.CompareTag("Player"))
+            if(owner.CompareTag("Player"))
             {
-                if (PhotonNetwork.OfflineMode)
+                if(PhotonNetwork.OfflineMode)
                 {
                     DataManager.playerData.kills++;
                 }
                 else
                 {
-                    if (target.CompareTag("Tank"))
+                    if(target.CompareTag("Tank"))
                     {
                         DataManager.playerData.kills++;
                     }
-                    else if (target.CompareTag("Player"))
+                    else if(target.CompareTag("Player"))
                     {
-                        if (target.name.Contains("Team"))
+                        if(target.name.Contains("Team"))
                         {
-                            if (target.name != owner.name)
+                            if(target.name != owner.name)
                             {
                                 DataManager.playerData.kills++;
                             }
@@ -428,7 +428,7 @@ public class BulletBehaviour : MonoBehaviourPunCallbacks
                     PhotonNetwork.LocalPlayer.SetCustomProperties(playerProperties);
                 }
             }
-            else if (owner.CompareTag("AI Tank"))
+            else if(owner.CompareTag("AI Tank"))
             {
                 GeneticAlgorithmBot bot = owner.GetComponent<GeneticAlgorithmBot>();
                 bot.Kills++;
@@ -439,7 +439,7 @@ public class BulletBehaviour : MonoBehaviourPunCallbacks
     void SubtractBulletsFired()
     {
         // Keeping track of how many bullets a tank has fired
-        if (!removedSelf && owner != null)
+        if(!removedSelf && owner != null)
         {
             owner.GetComponent<FireControl>().firedBullets.Remove(transform);
             removedSelf = true;
@@ -450,7 +450,7 @@ public class BulletBehaviour : MonoBehaviourPunCallbacks
     {
         SubtractBulletsFired();
 
-        if (!PhotonNetwork.OfflineMode && !GameManager.Instance.inLobby && ownerPV.IsMine)
+        if(!PhotonNetwork.OfflineMode && !GameManager.Instance.inLobby && ownerPV.IsMine)
         {
             PhotonHashtable parameters = new PhotonHashtable
             {
@@ -467,7 +467,7 @@ public class BulletBehaviour : MonoBehaviourPunCallbacks
     {
         SubtractBulletsFired();
 
-        if (!PhotonNetwork.OfflineMode && !GameManager.Instance.inLobby && ownerPV.IsMine)
+        if(!PhotonNetwork.OfflineMode && !GameManager.Instance.inLobby && ownerPV.IsMine)
         {
             PhotonHashtable parameters = new PhotonHashtable
             {

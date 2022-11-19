@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 7424270739883214540}
   - component: {fileID: 7424270739883214531}
   - component: {fileID: 7424270739883214530}
+  - component: {fileID: -5731709758087363687}
   m_Layer: 2
   m_Name: Glass Cylinder
   m_TagString: Untagged
@@ -5055,6 +5056,19 @@ MonoBehaviour:
   pitchRange:
   - 0.9
   - 1.1
+--- !u!114 &-5731709758087363687
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2841735797702003158}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 115c28a99863dae43902bdb19990c000, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  prefabName: Glass Cylinder
 --- !u!1 &4176289168828236808
 GameObject:
   m_ObjectHideFlags: 0

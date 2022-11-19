@@ -72,16 +72,16 @@ public class BlueBot : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!GameManager.Instance.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null && !baseTankLogic.disabled)
+        if(!GameManager.Instance.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null && !baseTankLogic.disabled)
         {
             targetDir = targetSystem.currentTarget.position - turret.position;
             angleToTarget = Mathf.Abs(Vector3.SignedAngle(transform.forward, targetDir, transform.up));
 
-            switch (mode)
+            switch(mode)
             {
                 case Mode.Offense:
                     // Rotating towards target when target is getting behind this tank
-                    if (angleToTarget > maxTargetAngle)
+                    if(angleToTarget > maxTargetAngle)
                     {
                         baseTankLogic.targetTankDir = targetDir;
                     }
@@ -94,7 +94,7 @@ public class BlueBot : MonoBehaviour
                     break;
                 case Mode.Defense:
                     // Rotating away from target when target is in front of tank
-                    if (angleToTarget < minTargetAngle)
+                    if(angleToTarget < minTargetAngle)
                     {
                         baseTankLogic.targetTankDir = -targetDir;
                     }
@@ -105,20 +105,20 @@ public class BlueBot : MonoBehaviour
                     break;
             }
 
-            if (bulletRicochet.shootPositions.Count > 0 || targetSystem.TargetVisible())
+            if(bulletRicochet.shootPositions.Count > 0 || targetSystem.TargetVisible())
             {
-                if (fireControl.canFire && fireControl.firedBullets.Count < fireControl.bulletLimit && firePattern == FirePattern.None)
+                if(fireControl.canFire && fireControl.firedBullets.Count < fireControl.bulletLimit && firePattern == FirePattern.None)
                 {
                     firePatternRoutine = StartCoroutine(ThreeShotPattern());
                 }
             }
             else
             {
-                if (firePattern == FirePattern.ThreeShot)
+                if(firePattern == FirePattern.ThreeShot)
                 {
                     StopCoroutine(firePatternRoutine);
                     firePatternRoutine = null;
-                    if (shootRoutine != null)
+                    if(shootRoutine != null)
                     {
                         StopCoroutine(shootRoutine);
                         shootRoutine = null;
@@ -129,17 +129,17 @@ public class BlueBot : MonoBehaviour
                 }
             }
 
-            if (firePattern != FirePattern.ThreeShot)
+            if(firePattern != FirePattern.ThreeShot)
             {
                 baseTankLogic.targetTurretDir = targetDir;
             }
 
-            if (nearbyMine != null)
+            if(nearbyMine != null)
             {
                 baseTankLogic.AvoidMine(nearbyMine, 100);
             }
 
-            if (nearbyBullet != null)
+            if(nearbyBullet != null)
             {
                 baseTankLogic.AvoidBullet(nearbyBullet);
             }
@@ -150,7 +150,7 @@ public class BlueBot : MonoBehaviour
     {
         yield return new WaitUntil(() => !GameManager.Instance.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null);
 
-        if (firePattern != FirePattern.ThreeShot)
+        if(firePattern != FirePattern.ThreeShot)
         {
             bulletRicochet.ScanArea(turret.position);
             bulletRicochet.CalculateBulletRicochets(barrel, targetSystem.currentTarget.position);
@@ -163,15 +163,15 @@ public class BlueBot : MonoBehaviour
 
     void OnTriggerStay(Collider other)
     {
-        if (!GameManager.Instance.frozen && Time.timeScale != 0 && baseTankLogic != null && !baseTankLogic.disabled)
+        if(!GameManager.Instance.frozen && Time.timeScale != 0 && baseTankLogic != null && !baseTankLogic.disabled)
         {
             // Avoiding bullets and mines
-            switch (other.tag)
+            switch(other.tag)
             {
                 case "Bullet":
-                    if (other.TryGetComponent<BulletBehaviour>(out var bulletBehaviour))
+                    if(other.TryGetComponent<BulletBehaviour>(out var bulletBehaviour))
                     {
-                        if (bulletBehaviour.owner != null && bulletBehaviour.owner != transform)
+                        if(bulletBehaviour.owner != null && bulletBehaviour.owner != transform)
                         {
                             nearbyBullet = other.transform;
                         }
@@ -186,16 +186,16 @@ public class BlueBot : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-        switch (other.tag)
+        switch(other.tag)
         {
             case "Bullet":
-                if (nearbyBullet == other.transform)
+                if(nearbyBullet == other.transform)
                 {
                     nearbyBullet = null;
                 }
                 break;
             case "Mine":
-                if (nearbyMine == other.transform)
+                if(nearbyMine == other.transform)
                 {
                     nearbyMine = null;
                 }
@@ -221,7 +221,7 @@ public class BlueBot : MonoBehaviour
         bulletRicochet.ScanArea(turret.position);
         bulletRicochet.CalculateBulletRicochets(barrel, targetSystem.currentTarget.position);
         Vector3 shootPosition = bulletRicochet.SelectShootPosition(barrel, bulletRicochet.selectionMode);
-        if (bulletRicochet.shootPositions.Count > 0 && Mathf.Abs(Vector3.SignedAngle(turret.forward, shootPosition - turret.position, turret.up)) < maxRicochetAngle && fireControl.BulletSpawnClear())
+        if(bulletRicochet.shootPositions.Count > 0 && Mathf.Abs(Vector3.SignedAngle(turret.forward, shootPosition - turret.position, turret.up)) < maxRicochetAngle && fireControl.BulletSpawnClear())
         {
             // Firing ricochet bullet to target
             baseTankLogic.targetTurretDir = shootPosition - turret.position;
@@ -231,7 +231,7 @@ public class BlueBot : MonoBehaviour
             StartCoroutine(fireControl.Shoot());
             baseTankLogic.stationary = false;
         }
-        else if (barrel.CanRotateTo(targetDir, baseTankLogic.turretRangeX, baseTankLogic.turretRangeY))
+        else if(barrel.CanRotateTo(targetDir, baseTankLogic.turretRangeX, baseTankLogic.turretRangeY))
         {
             // Firing bullet straight to target
             baseTankLogic.targetTurretDir = targetDir;
@@ -248,25 +248,25 @@ public class BlueBot : MonoBehaviour
     {
         firePattern = FirePattern.ThreeShot;
 
-        if (fireControl.firedBullets.Count < fireControl.bulletLimit)
+        if(fireControl.firedBullets.Count < fireControl.bulletLimit)
         {
             shootRoutine = StartCoroutine(FireRicochetOrStraight());
             yield return new WaitUntil(() => shootRoutine == null);
         }
 
-        if (fireControl.firedBullets.Count < fireControl.bulletLimit)
+        if(fireControl.firedBullets.Count < fireControl.bulletLimit)
         {
             shootRoutine = StartCoroutine(FireRicochetOrStraight());
             yield return new WaitUntil(() => shootRoutine == null);
         }
 
-        if (fireControl.firedBullets.Count < fireControl.bulletLimit)
+        if(fireControl.firedBullets.Count < fireControl.bulletLimit)
         {
             shootRoutine = StartCoroutine(FireRicochetOrStraight());
             yield return new WaitUntil(() => shootRoutine == null);
         }
 
-        if (mode != Mode.Defense)
+        if(mode != Mode.Defense)
         {
             StartCoroutine(ResetMode());
             mode = Mode.Defense;

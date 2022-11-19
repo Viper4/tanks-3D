@@ -74,9 +74,9 @@ public class GoldBot : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!GameManager.Instance.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null && !baseTankLogic.disabled)
+        if(!GameManager.Instance.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null && !baseTankLogic.disabled)
         {
-            if (mode != Mode.LayRoutine && mode != Mode.Laying && mode != Mode.Escape)
+            if(mode != Mode.LayRoutine && mode != Mode.Laying && mode != Mode.Escape)
             {
                 baseTankLogic.targetTankDir = transform.forward;
             }
@@ -84,9 +84,9 @@ public class GoldBot : MonoBehaviour
             Vector3 targetDir = targetSystem.currentTarget.position - turret.position;
             predictedTargetPosition = targetSystem.PredictedTargetPosition(CustomMath.TravelTime(turret.position, targetSystem.currentTarget.position, fireControl.bulletSettings.speed));
             bool predictedPositionVisible = false;
-            if (mode != Mode.StraightFirePattern && mode != Mode.RicochetFirePattern)
+            if(mode != Mode.StraightFirePattern && mode != Mode.RicochetFirePattern)
             {
-                if (!Physics.Linecast(turret.position, predictedTargetPosition, ~targetSystem.ignoreLayerMask))
+                if(!Physics.Linecast(turret.position, predictedTargetPosition, ~targetSystem.ignoreLayerMask))
                 {
                     baseTankLogic.targetTurretDir = predictedTargetPosition - turret.position;
                     predictedPositionVisible = true;
@@ -97,18 +97,18 @@ public class GoldBot : MonoBehaviour
                 }
             }
 
-            if (targetSystem.TargetVisible() || predictedPositionVisible)
+            if(targetSystem.TargetVisible() || predictedPositionVisible)
             {
-                if (mode == Mode.LayRoutine)
+                if(mode == Mode.LayRoutine)
                 {
                     StopMineRoutine();
                 }
-                else if (mode == Mode.RicochetFirePattern)
+                else if(mode == Mode.RicochetFirePattern)
                 {
                     StopFireRoutine();
                 }
 
-                if (mode != Mode.StraightFirePattern && fireControl.canFire && Vector3.Angle(barrel.forward, baseTankLogic.targetTurretDir) < maxShootAngle)
+                if(mode != Mode.StraightFirePattern && fireControl.canFire && Vector3.Angle(barrel.forward, baseTankLogic.targetTurretDir) < maxShootAngle)
                 {
                     firePatternRoutine = StartCoroutine(FireStraight(false));
                     StopMineRoutine();
@@ -116,29 +116,29 @@ public class GoldBot : MonoBehaviour
             }
             else
             {
-                if (bulletRicochet.shootPositions.Count > 0)
+                if(bulletRicochet.shootPositions.Count > 0)
                 {
-                    if (mode == Mode.StraightFirePattern)
+                    if(mode == Mode.StraightFirePattern)
                     {
                         StopFireRoutine();
                     }
 
-                    if (nearbyMine == null && mode != Mode.RicochetFirePattern && fireControl.canFire && fireControl.BulletSpawnClear())
+                    if(nearbyMine == null && mode != Mode.RicochetFirePattern && fireControl.canFire && fireControl.BulletSpawnClear())
                     {
                         StartCoroutine(FireRicochet(false));
                     }
                 }
-                else if (targetMine != null)
+                else if(targetMine != null)
                 {
-                    if (mode != Mode.RicochetFirePattern)
+                    if(mode != Mode.RicochetFirePattern)
                     {
                         // Rotating turret and barrel towards mine
                         baseTankLogic.targetTurretDir = targetMine.position - turret.position;
                     }
 
-                    if (Physics.Raycast(turret.position, targetMine.position - turret.position, out RaycastHit hit, Mathf.Infinity, ~targetSystem.ignoreLayerMask) && hit.transform.CompareTag(targetMine.tag))
+                    if(Physics.Raycast(turret.position, targetMine.position - turret.position, out RaycastHit hit, Mathf.Infinity, ~targetSystem.ignoreLayerMask) && hit.transform.CompareTag(targetMine.tag))
                     {
-                        if (fireControl.canFire && mode != Mode.RicochetFirePattern && mode != Mode.StraightFirePattern && !Physics.CheckSphere(targetMine.position, trapRadius, highTierTanks))
+                        if(fireControl.canFire && mode != Mode.RicochetFirePattern && mode != Mode.StraightFirePattern && !Physics.CheckSphere(targetMine.position, trapRadius, highTierTanks))
                         {
                             fireRoutine = StartCoroutine(FireStraight(true));
                         }
@@ -146,7 +146,7 @@ public class GoldBot : MonoBehaviour
                     else
                     {
                         bulletRicochet.CalculateBulletRicochets(barrel, targetMine.position);
-                        if (fireControl.canFire && mode != Mode.RicochetFirePattern && mode != Mode.StraightFirePattern && bulletRicochet.shootPositions.Count > 0 && !Physics.CheckSphere(targetMine.position, trapRadius, highTierTanks))
+                        if(fireControl.canFire && mode != Mode.RicochetFirePattern && mode != Mode.StraightFirePattern && bulletRicochet.shootPositions.Count > 0 && !Physics.CheckSphere(targetMine.position, trapRadius, highTierTanks))
                         {
                             fireRoutine = StartCoroutine(FireRicochet(true));
                         }
@@ -154,13 +154,13 @@ public class GoldBot : MonoBehaviour
                 }
             }
 
-            if (nearbyMine != null && mode != Mode.Escape)
+            if(nearbyMine != null && mode != Mode.Escape)
             {
                 baseTankLogic.AvoidMine(nearbyMine, 100);
                 StopMineRoutine();
             }
 
-            if (nearbyBullet != null)
+            if(nearbyBullet != null)
             {
                 baseTankLogic.AvoidBullet(nearbyBullet);
             }
@@ -169,22 +169,22 @@ public class GoldBot : MonoBehaviour
 
     void Loop()
     {
-        if (!GameManager.Instance.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null && !baseTankLogic.disabled)
+        if(!GameManager.Instance.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null && !baseTankLogic.disabled)
         {
-            targetSystem.chooseTarget = GameManager.Instance != null && (!PhotonNetwork.OfflineMode || GameManager.Instance.autoPlay);
+            targetSystem.chooseTarget = GameManager.Instance != null &&(!PhotonNetwork.OfflineMode || GameManager.Instance.autoPlay);
 
             bulletRicochet.ScanArea(turret.position);
             bulletRicochet.CalculateBulletRicochets(barrel, predictedTargetPosition);
 
-            if (targetMine == null)
+            if(targetMine == null)
             {
                 Collider[] allMines = Physics.OverlapSphere(turret.position, 50, mineLayerMask);
                 List<Collider> checkedMines = new List<Collider>();
-                foreach (Collider collider in allMines)
+                foreach(Collider collider in allMines)
                 {
-                    if (!checkedMines.Contains(collider))
+                    if(!checkedMines.Contains(collider))
                     {
-                        if (!Physics.CheckSphere(collider.bounds.center, trapRadius, highTierTanks) && Physics.CheckSphere(collider.bounds.center, trapRadius, 1 << targetSystem.currentTarget.gameObject.layer))
+                        if(!Physics.CheckSphere(collider.bounds.center, trapRadius, highTierTanks) && Physics.CheckSphere(collider.bounds.center, trapRadius, 1 << targetSystem.currentTarget.gameObject.layer))
                         {
                             targetMine = collider.transform;
                             baseTankLogic.targetTurretDir = collider.transform.position - turret.position;
@@ -193,9 +193,9 @@ public class GoldBot : MonoBehaviour
                         else
                         {
                             Collider[] overlappingMines = Physics.OverlapSphere(collider.bounds.center, mineControl.explosionRadius, mineLayerMask);
-                            foreach (Collider overlappingMine in overlappingMines)
+                            foreach(Collider overlappingMine in overlappingMines)
                             {
-                                if (!Physics.CheckSphere(overlappingMine.bounds.center, trapRadius, highTierTanks) && Physics.CheckSphere(overlappingMine.bounds.center, trapRadius, 1 << targetSystem.currentTarget.gameObject.layer))
+                                if(!Physics.CheckSphere(overlappingMine.bounds.center, trapRadius, highTierTanks) && Physics.CheckSphere(overlappingMine.bounds.center, trapRadius, 1 << targetSystem.currentTarget.gameObject.layer))
                                 {
                                     targetMine = collider.transform;
                                     baseTankLogic.targetTurretDir = collider.transform.position - turret.position;
@@ -208,7 +208,7 @@ public class GoldBot : MonoBehaviour
                 }
                 LoopEnd:;
 
-                if (!targetSystem.TargetVisible() && bulletRicochet.shootPositions.Count <= 0 && mode != Mode.LayRoutine && mode != Mode.Laying && mode != Mode.Escape && mode != Mode.Resetting && nearbyMine == null && mineControl.canLay && mineControl.laidMines.Count < mineControl.mineLimit)
+                if(!targetSystem.TargetVisible() && bulletRicochet.shootPositions.Count <= 0 && mode != Mode.LayRoutine && mode != Mode.Laying && mode != Mode.Escape && mode != Mode.Resetting && nearbyMine == null && mineControl.canLay && mineControl.laidMines.Count < mineControl.mineLimit)
                 {
                     SearchForMinePositions();
                 }
@@ -218,21 +218,21 @@ public class GoldBot : MonoBehaviour
 
     private void OnTriggerStay(Collider other)
     {
-        if (!GameManager.Instance.frozen && Time.timeScale != 0 && baseTankLogic != null && !baseTankLogic.disabled)
+        if(!GameManager.Instance.frozen && Time.timeScale != 0 && baseTankLogic != null && !baseTankLogic.disabled)
         {
-            switch (other.tag)
+            switch(other.tag)
             {
                 case "Mine":
                     nearbyMine = other.transform;
-                    if (targetMine == null && mode != Mode.Escape)
+                    if(targetMine == null && mode != Mode.Escape)
                     {
                         targetMine = nearbyMine;
                     }
                     break;
                 case "Bullet":
-                    if (other.TryGetComponent<BulletBehaviour>(out var bulletBehaviour))
+                    if(other.TryGetComponent<BulletBehaviour>(out var bulletBehaviour))
                     {
-                        if (bulletBehaviour.owner != null && bulletBehaviour.owner != transform)
+                        if(bulletBehaviour.owner != null && bulletBehaviour.owner != transform)
                         {
                             nearbyBullet = other.transform;
                         }
@@ -244,16 +244,16 @@ public class GoldBot : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-        switch (other.tag)
+        switch(other.tag)
         {
             case "Mine":
-                if (nearbyMine == other.transform)
+                if(nearbyMine == other.transform)
                 {
                     nearbyMine = null;
                 }
                 break;
             case "Bullet":
-                if (nearbyBullet == other.transform)
+                if(nearbyBullet == other.transform)
                 {
                     nearbyBullet = null;
                 }
@@ -266,16 +266,16 @@ public class GoldBot : MonoBehaviour
         Dictionary<string, List<Transform>> visibleObjects = new Dictionary<string, List<Transform>>();
         List<Transform> bothVisibleObjects = new List<Transform>();
 
-        foreach (string tag in mineObjectTags)
+        foreach(string tag in mineObjectTags)
         {
             List<Transform> myVisibleObjects = areaScanner.GetVisibleObjectsNotNear(turret, mineObjectLayerMask, tag, highTierTanks | mineLayerMask, trapRadius);
             visibleObjects.Add(tag, myVisibleObjects);
 
-            foreach (Transform visibleObject in myVisibleObjects)
+            foreach(Transform visibleObject in myVisibleObjects)
             {
-                if (Physics.Raycast(targetSystem.currentTarget.position, visibleObject.position - targetSystem.currentTarget.position, out RaycastHit hit, Mathf.Infinity, ~targetSystem.ignoreLayerMask))
+                if(Physics.Raycast(targetSystem.currentTarget.position, visibleObject.position - targetSystem.currentTarget.position, out RaycastHit hit, Mathf.Infinity, ~targetSystem.ignoreLayerMask))
                 {
-                    if (hit.transform == visibleObject)
+                    if(hit.transform == visibleObject)
                     {
                         bothVisibleObjects.Add(visibleObject);
                     }
@@ -283,7 +283,7 @@ public class GoldBot : MonoBehaviour
             }
         }
 
-        if (bothVisibleObjects.Count > 0)
+        if(bothVisibleObjects.Count > 0)
         {
             areaScanner.SelectObject(targetSystem.currentTarget, bothVisibleObjects);
             StopMineRoutine();
@@ -292,7 +292,7 @@ public class GoldBot : MonoBehaviour
         }
         else
         {
-            if (visibleObjects["Destructable"].Count > 0)
+            if(visibleObjects["Destructable"].Count > 0)
             {
                 areaScanner.SelectObject(targetSystem.currentTarget, visibleObjects["Destructable"]);
                 StopMineRoutine();
@@ -304,10 +304,10 @@ public class GoldBot : MonoBehaviour
 
     void StopFireRoutine()
     {
-        if (firePatternRoutine != null)
+        if(firePatternRoutine != null)
         {
             StopCoroutine(firePatternRoutine);
-            if (fireRoutine != null)
+            if(fireRoutine != null)
             {
                 StopCoroutine(fireRoutine);
             }
@@ -319,7 +319,7 @@ public class GoldBot : MonoBehaviour
 
     void StopMineRoutine()
     {
-        if (mineRoutine != null)
+        if(mineRoutine != null)
         {
             StartCoroutine(ResetLay());
             StopCoroutine(mineRoutine);
@@ -339,7 +339,7 @@ public class GoldBot : MonoBehaviour
         yield return new WaitUntil(() => Vector3.Angle(barrel.forward, baseTankLogic.targetTurretDir) < maxShootAngle);
         StartCoroutine(fireControl.Shoot());
         baseTankLogic.stationary = false;
-        if (mine && fireControl.firedBullets[^1] != null)
+        if(mine && fireControl.firedBullets[^1] != null)
         {
             Transform bullet = fireControl.firedBullets[^1];
             yield return new WaitUntil(() => targetMine == null || bullet == null);
@@ -354,7 +354,7 @@ public class GoldBot : MonoBehaviour
         mode = Mode.RicochetFirePattern;
 
         bulletRicochet.ScanArea(turret.position);
-        if (!mine)
+        if(!mine)
         {
             bulletRicochet.CalculateBulletRicochets(barrel, predictedTargetPosition);
         }
@@ -363,7 +363,7 @@ public class GoldBot : MonoBehaviour
             bulletRicochet.CalculateBulletRicochets(barrel, targetMine.position);
         }
 
-        if (bulletRicochet.shootPositions.Count > 0)
+        if(bulletRicochet.shootPositions.Count > 0)
         {
             Vector3 shootPosition = bulletRicochet.SelectShootPosition(barrel, bulletRicochet.selectionMode);
 
@@ -375,7 +375,7 @@ public class GoldBot : MonoBehaviour
             yield return new WaitUntil(() => fireControl.canFire && Vector3.Angle(barrel.forward, shootDirection) < maxShootAngle);
             StartCoroutine(fireControl.Shoot());
             baseTankLogic.stationary = false;
-            if (mine && fireControl.firedBullets.Count > 0)
+            if(mine && fireControl.firedBullets.Count > 0)
             {
                 Transform bullet = fireControl.firedBullets[^1];
                 yield return new WaitUntil(() => targetMine == null || bullet == null);
@@ -399,7 +399,7 @@ public class GoldBot : MonoBehaviour
 
         baseTankLogic.stationary = false;
         Vector3 layPosition;
-        if (areaScanner.selectedObject.TryGetComponent(out Collider collider))
+        if(areaScanner.selectedObject.TryGetComponent(out Collider collider))
         {
             layPosition = collider.ClosestPoint(transform.position);
         }
@@ -409,9 +409,9 @@ public class GoldBot : MonoBehaviour
         }
         layPosition = new Vector3(layPosition.x, body.position.y, layPosition.z);
 
-        while (CustomMath.SqrDistance(layPosition, body.position) > layDistance * layDistance)
+        while(CustomMath.SqrDistance(layPosition, body.position) > layDistance * layDistance)
         {
-            if (areaScanner.selectedObject != null)
+            if(areaScanner.selectedObject != null)
             {
                 baseTankLogic.targetTankDir = layPosition - body.position;
             }
@@ -429,20 +429,20 @@ public class GoldBot : MonoBehaviour
 
         float angleOffset = 360 / escapeSearchSteps;
         baseTankLogic.stationary = false;
-        for (int i = 0; i < escapeSearchSteps; i++)
+        for(int i = 0; i < escapeSearchSteps; i++)
         {
             Vector3 testDirection = Quaternion.AngleAxis(i * angleOffset, turret.up) * transform.forward;
-            Vector3 escapePosition = transform.position + testDirection * (trapRadius * 1.5f);
-            if (!Physics.Raycast(turret.position, testDirection, trapRadius * 1.5f, baseTankLogic.barrierLayers) && !Physics.CheckSphere(turret.position + testDirection * (trapRadius * 1.5f), trapRadius, mineLayerMask))
+            Vector3 escapePosition = transform.position + testDirection *(trapRadius * 1.5f);
+            if(!Physics.Raycast(turret.position, testDirection, trapRadius * 1.5f, baseTankLogic.barrierLayers) && !Physics.CheckSphere(turret.position + testDirection *(trapRadius * 1.5f), trapRadius, mineLayerMask))
             {
                 StartCoroutine(mineControl.LayMine());
-                if (shootAfterLay)
+                if(shootAfterLay)
                 {
                     targetMine = mineControl.laidMines[^1].GetChild(0);
                 }
                 mode = Mode.Escape;
-                Debug.DrawLine(turret.position, turret.position + testDirection * (trapRadius * 1.5f), Color.green, 10);
-                while (CustomMath.SqrDistance(transform.position, escapePosition) > 4)
+                Debug.DrawLine(turret.position, turret.position + testDirection *(trapRadius * 1.5f), Color.green, 10);
+                while(CustomMath.SqrDistance(transform.position, escapePosition) > 4)
                 {
                     baseTankLogic.targetTankDir = escapePosition - transform.position;
                     yield return new WaitForEndOfFrame();

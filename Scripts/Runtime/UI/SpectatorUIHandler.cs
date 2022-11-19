@@ -11,13 +11,13 @@ public class SpectatorUIHandler : MonoBehaviour
     {
         baseUIHandler = GetComponent<BaseUIHandler>();
 
-        if (PhotonNetwork.OfflineMode)
+        if(PhotonNetwork.OfflineMode)
         {
             baseUIHandler.UIElements["PauseMenu"].Find("LabelBackground").GetChild(0).GetComponent<Text>().text = "Paused\n" + GameManager.Instance.currentScene.name;
         }
         else
         {
-            if (((RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["RoomSettings"]).mode != "Co-Op")
+            if(((RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["RoomSettings"]).mode != "Co-Op")
             {
                 baseUIHandler.UIElements["PauseMenu"].Find("LabelBackground").GetChild(0).GetComponent<Text>().text = "Paused\n" + PhotonNetwork.CurrentRoom.Name;
             }
@@ -30,9 +30,9 @@ public class SpectatorUIHandler : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if(Input.GetKeyDown(KeyCode.Escape))
         {
-            if (baseUIHandler.UIElements["PauseMenu"].gameObject.activeSelf)
+            if(baseUIHandler.UIElements["PauseMenu"].gameObject.activeSelf)
             {
                 Resume();
             }

@@ -73,7 +73,7 @@ public class GeneticAlgorithmBot : MonoBehaviour
         fireControl = GetComponent<FireControl>();
         mineControl = GetComponent<MineControl>();
 
-        if (trainer == null)
+        if(trainer == null)
         {
             neuralNetwork = new NeuralNetwork(layers, NeuralNetwork.Activations.Tanh);
             neuralNetwork.Load(modelPath);
@@ -95,20 +95,20 @@ public class GeneticAlgorithmBot : MonoBehaviour
 
     void Loop()
     {
-        if (!dead && !GameManager.Instance.frozen && Time.timeScale != 0 && !baseTankLogic.disabled)
+        if(!dead && !GameManager.Instance.frozen && Time.timeScale != 0 && !baseTankLogic.disabled)
         {
-            // Feed mini map of obstacles (-1), tanks (0.5), and dangers (1) in an area of length * width * cellSize of full map
+            // Feed mini map of obstacles(-1), tanks(0.5), and dangers(1) in an area of length * width * cellSize of full map
             MiniMap();
             int index = 0;
             Vector3Int miniMapOrigin = WorldToCell(transform.position);
             int rowStart = miniMapOrigin.z - halfMiniLength;
             int columnStart = miniMapOrigin.x - halfMiniWidth;
-            if (trainer == null)
+            if(trainer == null)
             {
                 string mapVisual = "";
-                for (int i = rowStart; i < rowStart + miniGridLength; i++)
+                for(int i = rowStart; i < rowStart + miniGridLength; i++)
                 {
-                    for (int j = columnStart; j < columnStart + miniGridWidth; j++)
+                    for(int j = columnStart; j < columnStart + miniGridWidth; j++)
                     {
                         input[index] = dynamicMap[i, j];
                         mapVisual += string.Format("{0} ", dynamicMap[i, j]);
@@ -120,11 +120,11 @@ public class GeneticAlgorithmBot : MonoBehaviour
             }
             else
             {
-                for (int i = rowStart; i < rowStart + miniGridLength; i++)
+                for(int i = rowStart; i < rowStart + miniGridLength; i++)
                 {
-                    for (int j = columnStart; j < columnStart + miniGridWidth; j++)
+                    for(int j = columnStart; j < columnStart + miniGridWidth; j++)
                     {
-                        if (i >= 0 && j >= 0 && i < gridLength && j < gridWidth)
+                        if(i >= 0 && j >= 0 && i < gridLength && j < gridWidth)
                         {
                             input[index] = dynamicMap[i, j];
                             index++;
@@ -143,13 +143,13 @@ public class GeneticAlgorithmBot : MonoBehaviour
             //baseTankLogic.targetTurretDir = Quaternion.AngleAxis(output[2] * 2, turret.up) * barrel.forward;
             
             /*// Firing
-            if (output[3] > 0.75f && fireControl.canFire)
+            if(output[3] > 0.75f && fireControl.canFire)
             {
                 StartCoroutine(fireControl.Shoot());
             }
 
             // Laying
-            if (output[4] > 0.5f && mineControl.canLay)
+            if(output[4] > 0.5f && mineControl.canLay)
             {
                 StartCoroutine(mineControl.LayMine());
             }*/
@@ -162,7 +162,7 @@ public class GeneticAlgorithmBot : MonoBehaviour
 
     Vector3 CellToWorld(Vector3Int cell)
     {
-        return new Vector3((cell.x - halfGridWidth) * cellSize, (cell.y - halfGridHeight) * cellSize, (Mathf.Abs(cell.z - (gridLength - 1)) - halfGridLength) * cellSize);
+        return new Vector3((cell.x - halfGridWidth) * cellSize,(cell.y - halfGridHeight) * cellSize,(Mathf.Abs(cell.z -(gridLength - 1)) - halfGridLength) * cellSize);
     }
 
     Vector3Int WorldToCell(Vector3 position)
@@ -172,9 +172,9 @@ public class GeneticAlgorithmBot : MonoBehaviour
 
     void SetCell(Vector3Int cell, float value)
     {
-        if (cell.z >= 0 && cell.x >= 0 && cell.z < gridLength && cell.x < gridWidth)
+        if(cell.z >= 0 && cell.x >= 0 && cell.z < gridLength && cell.x < gridWidth)
         {
-            if (value != -0.5f || dynamicMap[cell.z, cell.x] != -1)
+            if(value != -0.5f || dynamicMap[cell.z, cell.x] != -1)
             {
                 dynamicMap[cell.z, cell.x] = value;
             }
@@ -193,14 +193,14 @@ public class GeneticAlgorithmBot : MonoBehaviour
         int columnLength = map.GetLength(1);
         float halfCellSize = cellSize * 0.5f;
         Vector3 halfCell = new Vector3(halfCellSize, halfCellSize, halfCellSize);
-        if (trainer == null)
+        if(trainer == null)
         {
             string mapVisual = "";
-            for (int i = 0; i < rowLength; i++)
+            for(int i = 0; i < rowLength; i++)
             {
-                for (int j = 0; j < columnLength; j++)
+                for(int j = 0; j < columnLength; j++)
                 {
-                    if (Physics.CheckBox(CellToWorld(new Vector3Int(j, 0, i)) + halfCell, halfCell * 0.99f, Quaternion.identity, staticObstacleLayerMask))
+                    if(Physics.CheckBox(CellToWorld(new Vector3Int(j, 0, i)) + halfCell, halfCell * 0.99f, Quaternion.identity, staticObstacleLayerMask))
                     {
                         map[i, j] = -1;
                     }
@@ -212,11 +212,11 @@ public class GeneticAlgorithmBot : MonoBehaviour
         }
         else
         {
-            for (int i = 0; i < rowLength; i++)
+            for(int i = 0; i < rowLength; i++)
             {
-                for (int j = 0; j < columnLength; j++)
+                for(int j = 0; j < columnLength; j++)
                 {
-                    if (Physics.CheckBox(CellToWorld(new Vector3Int(j, 0, i)) + halfCell, halfCell * 0.99f, Quaternion.identity, staticObstacleLayerMask))
+                    if(Physics.CheckBox(CellToWorld(new Vector3Int(j, 0, i)) + halfCell, halfCell * 0.99f, Quaternion.identity, staticObstacleLayerMask))
                     {
                         map[i, j] = -1;
                     }
@@ -227,7 +227,7 @@ public class GeneticAlgorithmBot : MonoBehaviour
 
     void MiniMap()
     {
-        dynamicMap = (float[,])map.Clone();
+        dynamicMap =(float[,])map.Clone();
 
         Collider[] allObstacles = Physics.OverlapBox(transform.position, new Vector3(miniGridWidth * cellSize, miniGridHeight * cellSize, miniGridLength * cellSize) * 0.5f, Quaternion.identity, dynamicObstacleLayerMask);
         Collider[] allTanks = Physics.OverlapBox(transform.position, new Vector3(miniGridWidth * cellSize, miniGridHeight * cellSize, miniGridLength * cellSize) * 0.5f, Quaternion.identity, tankLayerMask);
@@ -238,19 +238,19 @@ public class GeneticAlgorithmBot : MonoBehaviour
          * 2. Create box collider from intersecting colliders and test points in that collider
          * 3. Iterate through every cell and test cell for each layermask
          */
-        foreach (Collider obstacle in allObstacles)
+        foreach(Collider obstacle in allObstacles)
         {
             SetCell(WorldToCell(obstacle.bounds.center), -0.5f);
-            foreach (Vector3 vertex in obstacle.Vertices())
+            foreach(Vector3 vertex in obstacle.Vertices())
             {
                 SetCell(WorldToCell(vertex), -0.5f);
             }
         }
-        foreach (Collider tank in allTanks)
+        foreach(Collider tank in allTanks)
         {
             SetCell(WorldToCell(tank.bounds.center), 0.5f);
         }
-        foreach (Collider danger in allDangers)
+        foreach(Collider danger in allDangers)
         {
             SetCell(WorldToCell(danger.bounds.center), 1.0f);
         }
@@ -258,7 +258,7 @@ public class GeneticAlgorithmBot : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.transform.name != "Floor")
+        if(collision.transform.name != "Floor")
         {
             Dead = true;
         }
@@ -266,9 +266,9 @@ public class GeneticAlgorithmBot : MonoBehaviour
 
     private void OnTriggerEnter(Collider collider)
     {
-        if (collider.transform.CompareTag("Checkpoint"))
+        if(collider.transform.CompareTag("Checkpoint"))
         {
-            if (passedCheckpoints.Contains(collider.transform))
+            if(passedCheckpoints.Contains(collider.transform))
             {
                 score--;
                 passedCheckpoints.Remove(collider.transform);
@@ -285,7 +285,7 @@ public class GeneticAlgorithmBot : MonoBehaviour
     {
         dead = value;
 
-        if (dead && trainer != null)
+        if(dead && trainer != null)
         {
             trainer.OnBotDeath();
         }

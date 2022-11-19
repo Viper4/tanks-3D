@@ -419,6 +419,7 @@ GameObject:
   - component: {fileID: 5959688368386575800}
   - component: {fileID: 1959382526490631555}
   - component: {fileID: 6739789436538770453}
+  - component: {fileID: 756539996161481802}
   m_Layer: 27
   m_Name: AI Tank
   m_TagString: AI Tank
@@ -464,15 +465,11 @@ MonoBehaviour:
   - {fileID: 4307626717143694363, guid: de9dbd5b8f77ecb4a866f8d8cf75c17d, type: 3}
   - {fileID: 439779918157275786, guid: e82b6db23e6ee9f45931e68f161c1c36, type: 3}
   - {fileID: 5124250838519604896, guid: 9da335a328db8da49938f47ad88f2c2d, type: 3}
-  bulletIndex: 0
   spawnPoint: {fileID: 6972676014503210410}
   shootEffect: {fileID: 7891438045153574773, guid: 4d61908da1eaf274aa82edf86c9a5c95, type: 3}
   bulletParent: {fileID: 0}
-  speed: 16
-  pierceLevel: 0
-  pierceLimit: 0
-  ricochetLevel: 1
   bulletLimit: 5
+  firedBullets: []
   fireCooldown:
   - 0.1
   - 0.1
@@ -480,6 +477,20 @@ MonoBehaviour:
   solidLayerMask:
     serializedVersion: 2
     m_Bits: 605028353
+  originalBulletSettings:
+    bulletIndex: 0
+    speed: 0
+    pierceLevel: 0
+    pierceLimit: 0
+    ricochetLevel: 0
+    explosionRadius: 0
+  bulletSettings:
+    bulletIndex: 0
+    speed: 16
+    pierceLevel: 0
+    pierceLimit: 0
+    ricochetLevel: 1
+    explosionRadius: 5
 --- !u!114 &-3340109000015338750
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -492,7 +503,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e86729278561f7641a9aed8cc39ff1e7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  PV: {fileID: 5959688368386575800}
   tankOrigin: {fileID: 5002435551293345147}
   mine: {fileID: 4223942867902412960, guid: 8a98f2906960e414d93db694525801d9, type: 3}
   mineParent: {fileID: 0}
@@ -688,6 +698,19 @@ MonoBehaviour:
   tankOrigin: {fileID: 5002435551293345147}
   trackMarks: {fileID: 9151496583424005611}
   baseTankLogic: {fileID: 4762572127985407932}
+--- !u!114 &756539996161481802
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5631725004334847937}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 115c28a99863dae43902bdb19990c000, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  prefabName: AI Tank
 --- !u!1 &5751771638733195478
 GameObject:
   m_ObjectHideFlags: 0

@@ -37,15 +37,15 @@ public class DebugDisplay : MonoBehaviour
     {
         frameCount++;
         dt += Time.unscaledDeltaTime;
-        if (dt > 1.0 / refreshRate)
+        if(dt > 1.0 / refreshRate)
         {
-            fps = (int)(frameCount / dt);
+            fps =(int)(frameCount / dt);
             frameCount = 0;
             dt -= 1.0f / refreshRate;
             RefreshDisplay();
         }
 
-        if (Input.GetKeyDown(DataManager.playerSettings.keyBinds["Debug Menu"])) 
+        if(Input.GetKeyDown(DataManager.playerSettings.keyBinds["Debug Menu"])) 
         {
             debugMenu.SetActive(!debugMenu.activeSelf);
             RefreshDisplay();
@@ -54,7 +54,7 @@ public class DebugDisplay : MonoBehaviour
 
     void RefreshDisplay()
     {
-        if (debugMenu.activeInHierarchy)
+        if(debugMenu.activeInHierarchy)
         {
             versionText.text = $"<mark={textHighlightHexCode}>Tanks 3D {Application.version}</mark>";
             unityVersionText.text = $"<mark={textHighlightHexCode}>Unity {Application.unityVersion}</mark>";
@@ -66,15 +66,15 @@ public class DebugDisplay : MonoBehaviour
             string totalMemory = Conversions.SizeSuffix(Profiler.GetMonoHeapSizeLong());
             memoryText.text = $"<mark={textHighlightHexCode}>Heap size: {usedMemory} / {totalMemory}</mark>";
 
-            if (PhotonNetwork.OfflineMode)
+            if(PhotonNetwork.OfflineMode)
             {
                 pingText.text = $"<mark={textHighlightHexCode}>Offline </mark>";
             }
             else
             {
-                if (PhotonNetwork.CurrentRoom != null)
+                if(PhotonNetwork.CurrentRoom != null)
                 {
-                    pingText.text = $"<mark={textHighlightHexCode}>{PhotonNetwork.CurrentRoom.Name} ({PhotonNetwork.MasterClient.NickName}): {PhotonNetwork.GetPing()} ms</mark>";
+                    pingText.text = $"<mark={textHighlightHexCode}>{PhotonNetwork.CurrentRoom.Name}({PhotonNetwork.MasterClient.NickName}): {PhotonNetwork.GetPing()} ms</mark>";
                 }
                 else
                 {

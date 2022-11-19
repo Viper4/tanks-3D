@@ -55,13 +55,13 @@ public class Boost : MonoBehaviourPun, IPunInstantiateMagicCallback
     public void OnPhotonInstantiate(PhotonMessageInfo info)
     {
         object[] instantiationData = info.photonView.InstantiationData;
-        currentDuration = (float)instantiationData[0];
+        currentDuration =(float)instantiationData[0];
         transform.SetParent(BoostGenerator.Instance.transform);
     }
 
     private void Start()
     {
-        if (currentDuration < 0)
+        if(currentDuration < 0)
         {
             currentDuration = Random.Range(duration[0], duration[1]);
         }
@@ -74,23 +74,23 @@ public class Boost : MonoBehaviourPun, IPunInstantiateMagicCallback
     private void Update()
     {
         spinningObject.transform.rotation = Quaternion.AngleAxis(Time.deltaTime * spinRate, Vector3.up) * spinningObject.transform.rotation;
-        if (!activated && mode != Mode.Static && Time.timeScale > 0 && !GameManager.Instance.frozen)
+        if(!activated && mode != Mode.Static && Time.timeScale > 0 && !GameManager.Instance.frozen)
         {
             currentDuration -= Time.deltaTime;
 
-            if (currentDuration <= flashDuration)
+            if(currentDuration <= flashDuration)
             {
-                if (currentDuration > 0)
+                if(currentDuration > 0)
                 {
-                    if (!flashing)
+                    if(!flashing)
                     {
                         StartCoroutine(Flash());
                     }
                 }
-                else if (PhotonNetwork.IsMasterClient)
+                else if(PhotonNetwork.IsMasterClient)
                 {
                     BoostGenerator.Instance.SpawnNewBoost();
-                    if (PhotonNetwork.OfflineMode)
+                    if(PhotonNetwork.OfflineMode)
                     {
                         Destroy(gameObject);
                     }
@@ -105,7 +105,7 @@ public class Boost : MonoBehaviourPun, IPunInstantiateMagicCallback
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Player") && (PhotonNetwork.OfflineMode || other.transform.parent.parent.GetComponent<PhotonView>().IsMine))
+        if(other.CompareTag("Player") &&(PhotonNetwork.OfflineMode || other.transform.parent.parent.GetComponent<PhotonView>().IsMine))
         {
             StartCoroutine(Activate(other.transform.parent.parent));
         }
@@ -115,14 +115,14 @@ public class Boost : MonoBehaviourPun, IPunInstantiateMagicCallback
     {
         flashing = true;
         Material[] newMaterials = new Material[spinningObjectRenderer.materials.Length];
-        for (int i = 0; i < newMaterials.Length; i++)
+        for(int i = 0; i < newMaterials.Length; i++)
         {
             newMaterials[i] = flashMaterials[i];
         }
         spinningObjectRenderer.materials = newMaterials;
         yield return new WaitForSeconds(flashTime * 0.5f);
 
-        for (int i = 0; i < newMaterials.Length; i++)
+        for(int i = 0; i < newMaterials.Length; i++)
         {
             newMaterials[i] = savedMaterials[i];
         }
@@ -151,7 +151,7 @@ public class Boost : MonoBehaviourPun, IPunInstantiateMagicCallback
     IEnumerator Activate(Transform player)
     {
         activated = true;
-        if (!PhotonNetwork.OfflineMode)
+        if(!PhotonNetwork.OfflineMode)
         {
             photonView.RPC("PlayEffects", RpcTarget.All, null);
         }
@@ -163,35 +163,35 @@ public class Boost : MonoBehaviourPun, IPunInstantiateMagicCallback
         MineControl mineControl = player.GetComponent<MineControl>();
         BaseTankLogic baseTankLogic = player.GetComponent<BaseTankLogic>();
 
-        switch (type)
+        switch(type)
         {
             case BoostType.Bullet:
-                fireControl.bulletLimit += (int)value;
+                fireControl.bulletLimit +=(int)value;
                 player.Find("Player UI").GetComponent<PlayerUIHandler>().UpdateBulletIcons();
 
                 yield return new WaitForSeconds(effectDuration);
-                fireControl.bulletLimit -= (int)value;
+                fireControl.bulletLimit -=(int)value;
                 fireControl.transform.Find("Player UI").GetComponent<PlayerUIHandler>().UpdateBulletIcons();
                 break;
             case BoostType.Mine:
-                mineControl.mineLimit += (int)value;
+                mineControl.mineLimit +=(int)value;
                 player.Find("Player UI").GetComponent<PlayerUIHandler>().UpdateMineIcons();
 
                 yield return new WaitForSeconds(effectDuration);
-                mineControl.mineLimit -= (int)value;
+                mineControl.mineLimit -=(int)value;
                 mineControl.transform.Find("Player UI").GetComponent<PlayerUIHandler>().UpdateMineIcons();
                 break;
             case BoostType.Bounce:
-                fireControl.bulletSettings.ricochetLevel += (int)value;
+                fireControl.bulletSettings.ricochetLevel +=(int)value;
 
                 yield return new WaitForSeconds(effectDuration);
-                fireControl.bulletSettings.ricochetLevel -= (int)value;
+                fireControl.bulletSettings.ricochetLevel -=(int)value;
                 break;
             case BoostType.Pierce:
-                fireControl.bulletSettings.pierceLimit += (int)value;
+                fireControl.bulletSettings.pierceLimit +=(int)value;
 
                 yield return new WaitForSeconds(effectDuration);
-                fireControl.bulletSettings.pierceLimit -= (int)value;
+                fireControl.bulletSettings.pierceLimit -=(int)value;
                 break;
             case BoostType.Speed:
                 baseTankLogic.normalSpeed += value;
@@ -200,7 +200,7 @@ public class Boost : MonoBehaviourPun, IPunInstantiateMagicCallback
                 baseTankLogic.normalSpeed -= value;
                 break;
             case BoostType.Rockets:
-                if (!PhotonNetwork.OfflineMode && player.TryGetComponent<PhotonView>(out var playerPV))
+                if(!PhotonNetwork.OfflineMode && player.TryGetComponent<PhotonView>(out var playerPV))
                 {
                     playerPV.RPC("ApplyBulletBoost", RpcTarget.All, new object[] { effectDuration, 1, 26.0f, fireControl.bulletSettings.pierceLimit, fireControl.bulletSettings.ricochetLevel, 5.0f });
                 }
@@ -212,7 +212,7 @@ public class Boost : MonoBehaviourPun, IPunInstantiateMagicCallback
                 yield return new WaitForSeconds(4); // Wait for particles to finish playing
                 break;
             case BoostType.Missiles:
-                if (!PhotonNetwork.OfflineMode && player.TryGetComponent(out playerPV))
+                if(!PhotonNetwork.OfflineMode && player.TryGetComponent(out playerPV))
                 {
                     playerPV.RPC("ApplyBulletBoost", RpcTarget.All, new object[] { effectDuration, 2, 26.0f, fireControl.bulletSettings.pierceLimit, 0, 5.0f });
                 }
@@ -224,7 +224,7 @@ public class Boost : MonoBehaviourPun, IPunInstantiateMagicCallback
                 yield return new WaitForSeconds(4); // Wait for particles to finish playing
                 break;
             case BoostType.Grenades:
-                if (!PhotonNetwork.OfflineMode && player.TryGetComponent(out playerPV))
+                if(!PhotonNetwork.OfflineMode && player.TryGetComponent(out playerPV))
                 {
                     playerPV.RPC("ApplyBulletBoost", RpcTarget.All, new object[] { effectDuration, 3, 14.0f, 0, 0, 5.0f });
                 }
@@ -236,7 +236,7 @@ public class Boost : MonoBehaviourPun, IPunInstantiateMagicCallback
                 yield return new WaitForSeconds(4); // Wait for particles to finish playing
                 break;
             case BoostType.Invisibility:
-                if (!PhotonNetwork.OfflineMode && player.TryGetComponent(out playerPV))
+                if(!PhotonNetwork.OfflineMode && player.TryGetComponent(out playerPV))
                 {
                     playerPV.RPC("SetInvisible", RpcTarget.All, new object[] { effectDuration });
                 }
@@ -246,9 +246,9 @@ public class Boost : MonoBehaviourPun, IPunInstantiateMagicCallback
                 }
                 break;
             case BoostType.Shields:
-                if (!PhotonNetwork.OfflineMode && player.TryGetComponent(out playerPV))
+                if(!PhotonNetwork.OfflineMode && player.TryGetComponent(out playerPV))
                 {
-                    playerPV.RPC("AddShields", RpcTarget.All, new object[] { (int)value });
+                    playerPV.RPC("AddShields", RpcTarget.All, new object[] {(int)value });
                 }
                 else
                 {
@@ -259,22 +259,22 @@ public class Boost : MonoBehaviourPun, IPunInstantiateMagicCallback
                 break;
         }
 
-        switch (mode)
+        switch(mode)
         {
             case Mode.Static:
-                if (useLimit < 0 || uses < useLimit)
+                if(useLimit < 0 || uses < useLimit)
                 {
                     uses++;
                     yield return new WaitForSeconds(respawnDelay);
                     Respawn();
-                    if (!PhotonNetwork.OfflineMode)
+                    if(!PhotonNetwork.OfflineMode)
                     {
                         photonView.RPC("Respawn", RpcTarget.Others, null);
                     }
                 }
                 else
                 {
-                    if (PhotonNetwork.OfflineMode)
+                    if(PhotonNetwork.OfflineMode)
                     {
                         Destroy(gameObject);
                     }
@@ -286,7 +286,7 @@ public class Boost : MonoBehaviourPun, IPunInstantiateMagicCallback
                 break;
             case Mode.Dynamic:
                 BoostGenerator.Instance.SpawnNewBoost();
-                if (PhotonNetwork.OfflineMode)
+                if(PhotonNetwork.OfflineMode)
                 {
                     Destroy(gameObject);
                 }

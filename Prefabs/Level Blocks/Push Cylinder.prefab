@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 4641109252242467081}
   - component: {fileID: 2475343862008340346}
   - component: {fileID: 2475343862008340347}
+  - component: {fileID: 8415724909497097798}
   m_Layer: 26
   m_Name: Push Cylinder
   m_TagString: Untagged
@@ -162,6 +163,19 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &8415724909497097798
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5064449579881370833}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 115c28a99863dae43902bdb19990c000, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  prefabName: Pushable Cylinder
 --- !u!1 &6400315969129813059
 GameObject:
   m_ObjectHideFlags: 0

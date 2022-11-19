@@ -48,20 +48,20 @@ public class GreenBot : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!GameManager.Instance.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null && !baseTankLogic.disabled)
+        if(!GameManager.Instance.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null && !baseTankLogic.disabled)
         {
-            if (bulletRicochet.shootPositions.Count > 0)
+            if(bulletRicochet.shootPositions.Count > 0)
             {
                 baseTankLogic.targetTurretDir = shootPosition - turret.position;
 
-                if (!shooting && fireControl.canFire && Vector3.Angle(barrel.forward, baseTankLogic.targetTurretDir) < maxShootAngle)
+                if(!shooting && fireControl.canFire && Vector3.Angle(barrel.forward, baseTankLogic.targetTurretDir) < maxShootAngle)
                 {
                     StartCoroutine(Shoot());
                 }
             }
-            else if (bulletRicochet.lookPositions.Count > 0)
+            else if(bulletRicochet.lookPositions.Count > 0)
             {
-                if (lookIndex >= bulletRicochet.lookPositions.Count)
+                if(lookIndex >= bulletRicochet.lookPositions.Count)
                 {
                     lookIndex = 0;
                 }
@@ -77,9 +77,9 @@ public class GreenBot : MonoBehaviour
 
     void Loop()
     {
-        if (!GameManager.Instance.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null && !baseTankLogic.disabled)
+        if(!GameManager.Instance.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null && !baseTankLogic.disabled)
         {
-            if ((lastPosition - transform.position).sqrMagnitude > 0.099f)
+            if((lastPosition - transform.position).sqrMagnitude > 0.099f)
             {
                 lastPosition = transform.position;
                 bulletRicochet.ScanArea(turret.position);
@@ -88,12 +88,12 @@ public class GreenBot : MonoBehaviour
             Vector3 predictedPos = targetSystem.PredictedTargetPosition(CustomMath.TravelTime(turret.position, targetSystem.currentTarget.position, fireControl.bulletSettings.speed * predictionScale));
             bulletRicochet.CalculateBulletRicochets(barrel, predictedPos);
 
-            if (bulletRicochet.shootPositions.Count > 0)
+            if(bulletRicochet.shootPositions.Count > 0)
             {
                 shootPosition = bulletRicochet.SelectShootPosition(barrel, RicochetCalculation.SelectionMode.Closest);
                 predictedPos = targetSystem.PredictedTargetPosition(bulletRicochet.shootPositions[shootPosition] / fireControl.bulletSettings.speed);
                 bulletRicochet.CalculateBulletRicochets(barrel, predictedPos);
-                if (bulletRicochet.shootPositions.Count > 0)
+                if(bulletRicochet.shootPositions.Count > 0)
                 {
                     shootPosition = bulletRicochet.SelectShootPosition(barrel, RicochetCalculation.SelectionMode.Closest);
                 }

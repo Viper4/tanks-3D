@@ -31,7 +31,7 @@ public class LevelGenerator : MonoBehaviour
 
     public void GenerateLevel()
     {
-        foreach (Transform obstacleChild in obstacleParent)
+        foreach(Transform obstacleChild in obstacleParent)
         {
             Destroy(obstacleChild.gameObject);
         }
@@ -49,7 +49,7 @@ public class LevelGenerator : MonoBehaviour
     {
         Dictionary<string, int> cloneAmounts = new Dictionary<string, int>();
         int[] distribution = CustomRandom.Distribute(obstacleLimit, obstacles.Count, switchChance, amountDeviationMin, amountDeviationMax);
-        for (int i = 0; i < obstacles.Count; i++)
+        for(int i = 0; i < obstacles.Count; i++)
         {
             cloneAmounts[obstacles[i].name] = distribution[i];
         }

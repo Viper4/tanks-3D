@@ -1,13 +1,13 @@
-Shader "TextMeshPro/Distance Field (Surface)" {
+Shader "TextMeshPro/Distance Field(Surface)" {
 
 Properties {
 	_FaceTex			("Fill Texture", 2D) = "white" {}
 	_FaceUVSpeedX		("Face UV Speed X", Range(-5, 5)) = 0.0
 	_FaceUVSpeedY		("Face UV Speed Y", Range(-5, 5)) = 0.0
-	[HDR]_FaceColor		("Fill Color", Color) = (1,1,1,1)
+	[HDR]_FaceColor		("Fill Color", Color) =(1,1,1,1)
 	_FaceDilate			("Face Dilate", Range(-1,1)) = 0
 
-	[HDR]_OutlineColor	("Outline Color", Color) = (0,0,0,1)
+	[HDR]_OutlineColor	("Outline Color", Color) =(0,0,0,1)
 	_OutlineTex			("Outline Texture", 2D) = "white" {}
 	_OutlineUVSpeedX	("Outline UV Speed X", Range(-5, 5)) = 0.0
 	_OutlineUVSpeedY	("Outline UV Speed Y", Range(-5, 5)) = 0.0
@@ -24,16 +24,16 @@ Properties {
 	_BumpOutline		("Bump Outline", Range(0,1)) = 0.5
 	_BumpFace			("Bump Face", Range(0,1)) = 0.5
 
-	_ReflectFaceColor	    ("Face Color", Color) = (0,0,0,1)
-	_ReflectOutlineColor	("Outline Color", Color) = (0,0,0,1)
+	_ReflectFaceColor	   ("Face Color", Color) =(0,0,0,1)
+	_ReflectOutlineColor	("Outline Color", Color) =(0,0,0,1)
 	_Cube 					("Reflection Cubemap", Cube) = "black" { /* TexGen CubeReflect */ }
-	_EnvMatrixRotation  	("Texture Rotation", vector) = (0, 0, 0, 0)
-	[HDR]_SpecColor		    ("Specular Color", Color) = (0,0,0,1)
+	_EnvMatrixRotation  	("Texture Rotation", vector) =(0, 0, 0, 0)
+	[HDR]_SpecColor		   ("Specular Color", Color) =(0,0,0,1)
 
 	_FaceShininess		("Face Shininess", Range(0,1)) = 0
 	_OutlineShininess	("Outline Shininess", Range(0,1)) = 0
 
-	[HDR]_GlowColor		("Color", Color) = (0, 1, 0, 0.5)
+	[HDR]_GlowColor		("Color", Color) =(0, 1, 0, 0.5)
 	_GlowOffset			("Offset", Range(-1,1)) = 0
 	_GlowInner			("Inner", Range(0,1)) = 0.05
 	_GlowOuter			("Outer", Range(0,1)) = 0.05
@@ -61,7 +61,7 @@ Properties {
 	_VertexOffsetY		("Vertex OffsetY", float) = 0
 
 	_CullMode			("Cull Mode", Float) = 0
-	//_MaskCoord		("Mask Coords", vector) = (0,0,0,0)
+	//_MaskCoord		("Mask Coords", vector) =(0,0,0,0)
 	//_MaskSoftness		("Mask Softness", float) = 0
 }
 
@@ -137,7 +137,7 @@ SubShader {
 			TRANSFER_SHADOW_CASTER(o)
 			o.uv = TRANSFORM_TEX(v.texcoord, _MainTex);
 			o.uv2 = TRANSFORM_TEX(v.texcoord, _OutlineTex);
-			o.alphaClip = (1.0 - _OutlineWidth * _ScaleRatioA - _FaceDilate * _ScaleRatioA) / 2;
+			o.alphaClip =(1.0 - _OutlineWidth * _ScaleRatioA - _FaceDilate * _ScaleRatioA) / 2;
 			return o;
 		}
 

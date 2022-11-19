@@ -35,7 +35,7 @@ public class PhotonTankView : MonoBehaviourPunCallbacks, IPunObservable, IPunOwn
         targetTankRotation = tankOrigin.rotation;
         targetTurretRotation = turret.rotation;
         targetBarrelRotation = barrel.rotation;
-        if (!player)
+        if(!player)
         {
             transform.SetParent(TankManager.Instance.tankParent);
         }
@@ -43,10 +43,10 @@ public class PhotonTankView : MonoBehaviourPunCallbacks, IPunObservable, IPunOwn
 
     private void Update()
     {
-        if (!PhotonNetwork.OfflineMode && !GameManager.Instance.inLobby && !photonView.IsMine)
+        if(!PhotonNetwork.OfflineMode && !GameManager.Instance.inLobby && !photonView.IsMine)
         {
             rb.velocity = targetVelocity;
-            tankOrigin.position = Vector3.MoveTowards(tankOrigin.position, targetPosition, (targetPosition - tankOrigin.position).magnitude * PhotonNetwork.SerializationRate * Time.deltaTime);
+            tankOrigin.position = Vector3.MoveTowards(tankOrigin.position, targetPosition,(targetPosition - tankOrigin.position).magnitude * PhotonNetwork.SerializationRate * Time.deltaTime);
             tankOrigin.rotation = Quaternion.RotateTowards(tankOrigin.rotation, targetTankRotation, rotateTowardsSpeed * Time.deltaTime);
             turret.rotation = Quaternion.RotateTowards(turret.rotation, targetTurretRotation, rotateTowardsSpeed * Time.deltaTime);
             barrel.rotation = Quaternion.RotateTowards(barrel.rotation, targetBarrelRotation, rotateTowardsSpeed * Time.deltaTime);
@@ -55,9 +55,9 @@ public class PhotonTankView : MonoBehaviourPunCallbacks, IPunObservable, IPunOwn
 
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
     {
-        if (Time.timeScale > 0)
+        if(Time.timeScale > 0)
         {
-            if (stream.IsWriting)
+            if(stream.IsWriting)
             {
                 stream.SendNext(rb.velocity);
                 stream.SendNext(tankOrigin.position);
@@ -66,37 +66,37 @@ public class PhotonTankView : MonoBehaviourPunCallbacks, IPunObservable, IPunOwn
                 stream.SendNext(barrel.rotation);
                 stream.SendNext(teamName);
             }
-            else if (stream.IsReading)
+            else if(stream.IsReading)
             {
-                targetVelocity = (Vector3)stream.ReceiveNext();
-                targetPosition = (Vector3)stream.ReceiveNext();
-                if (CustomMath.SqrDistance(targetPosition, tankOrigin.position) > teleportDistance * teleportDistance)
+                targetVelocity =(Vector3)stream.ReceiveNext();
+                targetPosition =(Vector3)stream.ReceiveNext();
+                if(CustomMath.SqrDistance(targetPosition, tankOrigin.position) > teleportDistance * teleportDistance)
                 {
                     tankOrigin.position = targetPosition;
                 }
-                targetTankRotation = (Quaternion)stream.ReceiveNext();
-                if (Quaternion.Angle(targetTankRotation, tankOrigin.rotation) > setRotationMinAngle)
+                targetTankRotation =(Quaternion)stream.ReceiveNext();
+                if(Quaternion.Angle(targetTankRotation, tankOrigin.rotation) > setRotationMinAngle)
                 {
                     tankOrigin.rotation = targetTankRotation;
                 }
-                targetTurretRotation = (Quaternion)stream.ReceiveNext();
-                if (Quaternion.Angle(targetTurretRotation, turret.rotation) > setRotationMinAngle)
+                targetTurretRotation =(Quaternion)stream.ReceiveNext();
+                if(Quaternion.Angle(targetTurretRotation, turret.rotation) > setRotationMinAngle)
                 {
                     turret.rotation = targetTurretRotation;
                 }
-                targetBarrelRotation = (Quaternion)stream.ReceiveNext();
-                if (Quaternion.Angle(targetBarrelRotation, barrel.rotation) > setRotationMinAngle)
+                targetBarrelRotation =(Quaternion)stream.ReceiveNext();
+                if(Quaternion.Angle(targetBarrelRotation, barrel.rotation) > setRotationMinAngle)
                 {
                     barrel.rotation = targetBarrelRotation;
                 }
-                teamName = (string)stream.ReceiveNext();
+                teamName =(string)stream.ReceiveNext();
             }
         }
     }
 
     public void OnOwnershipRequest(PhotonView targetView, Player requestingPlayer)
     {
-        if (targetView != photonView)
+        if(targetView != photonView)
             return;
 
         photonView.TransferOwnership(requestingPlayer);
@@ -104,7 +104,7 @@ public class PhotonTankView : MonoBehaviourPunCallbacks, IPunObservable, IPunOwn
 
     public void OnOwnershipTransfered(PhotonView targetView, Player previousOwner)
     {
-        if (targetView != photonView)
+        if(targetView != photonView)
             return;
 
         StartCoroutine(OwnershipChange());
@@ -114,10 +114,10 @@ public class PhotonTankView : MonoBehaviourPunCallbacks, IPunObservable, IPunOwn
     {
         yield return new WaitUntil(() => baseTankLogic != null);
 
-        if (photonView.IsMine)
+        if(photonView.IsMine)
         {
             baseTankLogic.disabled = false;
-            foreach (Behaviour component in ownerComponents)
+            foreach(Behaviour component in ownerComponents)
             {
                 component.enabled = true;
             }
@@ -125,7 +125,7 @@ public class PhotonTankView : MonoBehaviourPunCallbacks, IPunObservable, IPunOwn
         else
         {
             baseTankLogic.disabled = true;
-            foreach (Behaviour component in ownerComponents)
+            foreach(Behaviour component in ownerComponents)
             {
                 component.enabled = false;
             }
@@ -139,17 +139,17 @@ public class PhotonTankView : MonoBehaviourPunCallbacks, IPunObservable, IPunOwn
 
     public void OnPhotonInstantiate(PhotonMessageInfo info)
     {
-        if (!player)
+        if(!player)
         {
             object[] instantiationData = info.photonView.InstantiationData;
 
-            if (TryGetComponent<TargetSystem>(out var targetSystem))
+            if(TryGetComponent<TargetSystem>(out var targetSystem))
             {
-                if ((bool)instantiationData[0])
+                if((bool)instantiationData[0])
                 {
                     targetSystem.enemyParents.Add(TankManager.Instance.tankParent);
                 }
-                if ((bool)instantiationData[1])
+                if((bool)instantiationData[1])
                 {
                     targetSystem.enemyParents.Add(PlayerManager.Instance.playerParent);
                 }

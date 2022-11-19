@@ -3,10 +3,10 @@ Shader "Custom/Particles/UnlitAlways"
     Properties
     {
         [MainTexture] _BaseMap("Base Map", 2D) = "white" {}
-        [MainColor] _BaseColor("Base Color", Color) = (1,1,1,1)
+        [MainColor] _BaseColor("Base Color", Color) =(1,1,1,1)
         _Cutoff("Alpha Cutoff", Range(0.0, 1.0)) = 0.5
         _BumpMap("Normal Map", 2D) = "bump" {}
-        [HDR] _EmissionColor("Color", Color) = (0,0,0)
+        [HDR] _EmissionColor("Color", Color) =(0,0,0)
         _EmissionMap("Emission", 2D) = "white" {}
 
         // -------------------------------------
@@ -31,13 +31,13 @@ Shader "Custom/Particles/UnlitAlways"
 
         // Particle specific
         _ColorMode("_ColorMode", Float) = 0.0
-        [HideInInspector] _BaseColorAddSubDiff("_ColorMode", Vector) = (0,0,0,0)
+        [HideInInspector] _BaseColorAddSubDiff("_ColorMode", Vector) =(0,0,0,0)
         [ToggleOff] _FlipbookBlending("__flipbookblending", Float) = 0.0
         [ToggleUI] _SoftParticlesEnabled("__softparticlesenabled", Float) = 0.0
         [ToggleUI] _CameraFadingEnabled("__camerafadingenabled", Float) = 0.0
         [ToggleUI] _DistortionEnabled("__distortionenabled", Float) = 0.0
-        [HideInInspector] _SoftParticleFadeParams("__softparticlefadeparams", Vector) = (0,0,0,0)
-        [HideInInspector] _CameraFadeParams("__camerafadeparams", Vector) = (0,0,0,0)
+        [HideInInspector] _SoftParticleFadeParams("__softparticlefadeparams", Vector) =(0,0,0,0)
+        [HideInInspector] _CameraFadeParams("__camerafadeparams", Vector) =(0,0,0,0)
         [HideInInspector] _DistortionStrengthScaled("Distortion Strength Scaled", Float) = 0.1
 
         // Editmode props
@@ -46,7 +46,7 @@ Shader "Custom/Particles/UnlitAlways"
         // ObsoleteProperties
         [HideInInspector] _FlipbookMode("flipbook", Float) = 0
         [HideInInspector] _Mode("mode", Float) = 0
-        [HideInInspector] _Color("color", Color) = (1,1,1,1)
+        [HideInInspector] _Color("color", Color) =(1,1,1,1)
     }
 
     HLSLINCLUDE

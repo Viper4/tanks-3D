@@ -20,7 +20,7 @@ public class BulletBoost : MonoBehaviour
     [PunRPC]
     public void ApplyBulletBoost(float duration, int bulletIndex, float speed, int pierceLimit, int ricochetLevel, float explosionRadius)
     {
-        if (boostRoutine != null)
+        if(boostRoutine != null)
         {
             StopCoroutine(boostRoutine);
         }

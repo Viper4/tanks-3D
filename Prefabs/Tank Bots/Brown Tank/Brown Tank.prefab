@@ -413,6 +413,7 @@ GameObject:
   - component: {fileID: 3000137161115761802}
   - component: {fileID: 1552227079064137746}
   - component: {fileID: 85250868268231725}
+  - component: {fileID: 715508480346785630}
   m_Layer: 25
   m_Name: Brown Tank
   m_TagString: Tank
@@ -676,6 +677,19 @@ MonoBehaviour:
   tankOrigin: {fileID: 6009521869144415273}
   trackMarks: {fileID: 4391486955260679417}
   baseTankLogic: {fileID: -1282805828423814551}
+--- !u!114 &715508480346785630
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6353959912858125971}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 115c28a99863dae43902bdb19990c000, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  prefabName: Brown Tank
 --- !u!1 &6473996178172189060
 GameObject:
   m_ObjectHideFlags: 0

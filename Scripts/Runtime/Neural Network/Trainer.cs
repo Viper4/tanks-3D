@@ -36,7 +36,7 @@ public class Trainer : MonoBehaviour
     {
         PhotonNetwork.OfflineMode = true;
         // We want even population sizes
-        if (populationSize % 2 != 0)
+        if(populationSize % 2 != 0)
         {
             populationSize = 50;
         }
@@ -49,7 +49,7 @@ public class Trainer : MonoBehaviour
     {
         foreach(GeneticAlgorithmBot bot in bots)
         {
-            if (!bot.Dead)
+            if(!bot.Dead)
             {
                 return;
             }
@@ -62,7 +62,7 @@ public class Trainer : MonoBehaviour
     void InitNetworks()
     {
         neuralNetworks = new List<NeuralNetwork>();
-        for (int i = 0; i < populationSize; i++)
+        for(int i = 0; i < populationSize; i++)
         {
             NeuralNetwork neuralNet = new NeuralNetwork(layers, NeuralNetwork.Activations.Tanh);
             neuralNet.Load(modelFolder + fileName);
@@ -74,25 +74,25 @@ public class Trainer : MonoBehaviour
     {
         Time.timeScale = gameSpeed;
 
-        foreach (Transform child in toClearParent)
+        foreach(Transform child in toClearParent)
         {
             Destroy(child.gameObject);
         }
-        foreach (Transform destructable in destructables)
+        foreach(Transform destructable in destructables)
         {
             destructable.GetChild(0).gameObject.SetActive(true);
         }
 
-        if (enemyPrefabs.Length > 0)
+        if(enemyPrefabs.Length > 0)
         {
-            for (int i = 0; i < enemyCount; i++)
+            for(int i = 0; i < enemyCount; i++)
             {
                 GameObject prefab = enemyPrefabs[Random.Range(0, enemyPrefabs.Length)];
                 GameObject newEnemy = Instantiate(prefab, CustomRandom.GetSpawnPointInCollider(spawnCollider, Vector3.down, ignoreLayers, prefab.transform.Find("Body").GetComponent<BoxCollider>(), Quaternion.identity), Quaternion.identity, toClearParent);
                 newEnemy.GetComponent<TargetSystem>().chooseTarget = true;
                 newEnemy.GetComponent<TargetSystem>().enemyParents.Add(botParent);
                 newEnemy.GetComponent<FireControl>().bulletParent = toClearParent;
-                if (newEnemy.TryGetComponent<MineControl>(out var mineControl))
+                if(newEnemy.TryGetComponent<MineControl>(out var mineControl))
                 {
                     mineControl.mineParent = toClearParent;
                 }
@@ -100,18 +100,18 @@ public class Trainer : MonoBehaviour
             }
         }
 
-        if (bots != null)
+        if(bots != null)
         {
             SortNetworks();
 
-            for (int i = 0; i < bots.Count; i++)
+            for(int i = 0; i < bots.Count; i++)
             {
                 Destroy(bots[i].gameObject);
             }
         }
 
         bots = new List<GeneticAlgorithmBot>();
-        for (int i = 0; i < populationSize; i++)
+        for(int i = 0; i < populationSize; i++)
         {
             GeneticAlgorithmBot bot = Instantiate(botPrefab, spawnPosition, Quaternion.Euler(spawnEulers), botParent).GetComponent<GeneticAlgorithmBot>();
             bot.neuralNetwork = neuralNetworks[i];
@@ -126,7 +126,7 @@ public class Trainer : MonoBehaviour
     void SortNetworks()
     {
         float totalFitness = 0;
-        foreach (GeneticAlgorithmBot bot in bots)
+        foreach(GeneticAlgorithmBot bot in bots)
         {
             bot.UpdateFitness();
             totalFitness += bot.score;
@@ -134,10 +134,10 @@ public class Trainer : MonoBehaviour
 
         neuralNetworks.Sort();
         neuralNetworks[^1].Save(modelFolder + fileName);
-        Debug.Log("Gen " + generation + "\nAverage: " + (totalFitness / bots.Count) + ", Best: " + neuralNetworks[^1].fitness + ", Worst: " + neuralNetworks[0].fitness);
+        Debug.Log("Gen " + generation + "\nAverage: " +(totalFitness / bots.Count) + ", Best: " + neuralNetworks[^1].fitness + ", Worst: " + neuralNetworks[0].fitness);
 
         generation++;
-        for (int i = 0; i < populationSize / 2; i++)
+        for(int i = 0; i < populationSize / 2; i++)
         {
             neuralNetworks[i] = neuralNetworks[i + populationSize / 2].Copy(new NeuralNetwork(layers, NeuralNetwork.Activations.Tanh));
             neuralNetworks[i].Mutate(mutationChance, mutationStrength);

@@ -149,6 +149,7 @@ GameObject:
   - component: {fileID: 5315314118918684429}
   - component: {fileID: 4005516063062427649}
   - component: {fileID: 5298853533775372899}
+  - component: {fileID: -2726647510856865167}
   m_Layer: 25
   m_Name: Red Tank
   m_TagString: Tank
@@ -195,15 +196,11 @@ MonoBehaviour:
   - {fileID: 4307626717143694363, guid: de9dbd5b8f77ecb4a866f8d8cf75c17d, type: 3}
   - {fileID: 439779918157275786, guid: e82b6db23e6ee9f45931e68f161c1c36, type: 3}
   - {fileID: 5124250838519604896, guid: 9da335a328db8da49938f47ad88f2c2d, type: 3}
-  bulletIndex: 0
   spawnPoint: {fileID: 6245761879246086811}
   shootEffect: {fileID: 7891438045153574773, guid: 4d61908da1eaf274aa82edf86c9a5c95, type: 3}
   bulletParent: {fileID: 0}
-  speed: 16
-  pierceLevel: 0
-  pierceLimit: 0
-  ricochetLevel: 1
   bulletLimit: 3
+  firedBullets: []
   fireCooldown:
   - 0.6
   - 0.85
@@ -211,6 +208,20 @@ MonoBehaviour:
   solidLayerMask:
     serializedVersion: 2
     m_Bits: 605028353
+  originalBulletSettings:
+    bulletIndex: 0
+    speed: 0
+    pierceLevel: 0
+    pierceLimit: 0
+    ricochetLevel: 0
+    explosionRadius: 0
+  bulletSettings:
+    bulletIndex: 0
+    speed: 16
+    pierceLevel: 0
+    pierceLimit: 0
+    ricochetLevel: 1
+    explosionRadius: 5
 --- !u!114 &7128904291512063631
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -401,6 +412,19 @@ MonoBehaviour:
   tankOrigin: {fileID: 1807415214875140994}
   trackMarks: {fileID: 1346010612084230433}
   baseTankLogic: {fileID: 2189044298125408581}
+--- !u!114 &-2726647510856865167
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1323752777862920504}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 115c28a99863dae43902bdb19990c000, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  prefabName: Red Tank
 --- !u!1 &1417340831735424559
 GameObject:
   m_ObjectHideFlags: 0

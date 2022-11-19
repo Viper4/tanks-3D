@@ -39,25 +39,25 @@ public class PlayerControl : MonoBehaviourPunCallbacks
     // Update is called once per frame
     void LateUpdate()
     {
-        if (PhotonNetwork.OfflineMode || clientManager.photonView.IsMine)
+        if(PhotonNetwork.OfflineMode || clientManager.photonView.IsMine)
         {
-            if (!Dead && !GameManager.Instance.frozen)
+            if(!Dead && !GameManager.Instance.frozen)
             {
-                if (Time.timeScale != 0)
+                if(Time.timeScale != 0)
                 {
                     Vector2 inputDir = Vector2.zero;
 
-                    if (!Paused)
+                    if(!Paused)
                     {
-                        if (Input.GetKeyDown(DataManager.playerSettings.keyBinds["Shoot"]))
+                        if(Input.GetKeyDown(DataManager.playerSettings.keyBinds["Shoot"]))
                         {
                             StartCoroutine(GetComponent<FireControl>().Shoot());
                         }
-                        else if (Input.GetKeyDown(DataManager.playerSettings.keyBinds["Lay Mine"]) && baseTankLogic.IsGrounded())
+                        else if(Input.GetKeyDown(DataManager.playerSettings.keyBinds["Lay Mine"]) && baseTankLogic.IsGrounded())
                         {
                             StartCoroutine(GetComponent<MineControl>().LayMine());
                         }
-                        else if (Input.GetKeyDown(DataManager.playerSettings.keyBinds["Toggle HUD"]))
+                        else if(Input.GetKeyDown(DataManager.playerSettings.keyBinds["Toggle HUD"]))
                         {
                             showHUD = !showHUD;
                         }
@@ -72,7 +72,7 @@ public class PlayerControl : MonoBehaviourPunCallbacks
 
                     Vector3 velocityDir = tankOrigin.forward;
 
-                    if (Physics.Raycast(tankOrigin.position, -tankOrigin.up, out RaycastHit middleHit, 1, ~ignoreLayerMasks) && Physics.Raycast(tankOrigin.position + tankOrigin.forward, -tankOrigin.up, out RaycastHit frontHit, 1, ~ignoreLayerMasks))
+                    if(Physics.Raycast(tankOrigin.position, -tankOrigin.up, out RaycastHit middleHit, 1, ~ignoreLayerMasks) && Physics.Raycast(tankOrigin.position + tankOrigin.forward, -tankOrigin.up, out RaycastHit frontHit, 1, ~ignoreLayerMasks))
                     {
                         velocityDir = frontHit.point - middleHit.point;
                     }
@@ -85,12 +85,12 @@ public class PlayerControl : MonoBehaviourPunCallbacks
                     RB.velocity = velocity + Vector3.up * velocityY;
 
                     // Rotating tank with movement
-                    if (inputDir != Vector2.zero)
+                    if(inputDir != Vector2.zero)
                     {
                         float targetRotation = Mathf.Atan2(inputDir.x, inputDir.y) * Mathf.Rad2Deg + mainCamera.eulerAngles.y;
                         float angle = tankOrigin.eulerAngles.y - targetRotation;
                         angle = angle < 0 ? angle + 360 : angle;
-                        if (angle > 180 - baseTankLogic.flipAngleThreshold && angle < 180 + baseTankLogic.flipAngleThreshold)
+                        if(angle > 180 - baseTankLogic.flipAngleThreshold && angle < 180 + baseTankLogic.flipAngleThreshold)
                         {
                             baseTankLogic.FlipTank();
                         }
@@ -106,21 +106,21 @@ public class PlayerControl : MonoBehaviourPunCallbacks
                 RB.velocity = Vector3.zero;
             }
 
-            if (cheats)
+            if(cheats)
             {
-                if (Input.GetKey(KeyCode.LeftAlt))
+                if(Input.GetKey(KeyCode.LeftAlt))
                 {
-                    if (Input.GetKeyDown(KeyCode.N))
+                    if(Input.GetKeyDown(KeyCode.N))
                     {
                         Debug.Log("Cheat Next Level");
                         GameManager.Instance.LoadNextScene();
                     }
-                    else if (Input.GetKeyDown(KeyCode.R))
+                    else if(Input.GetKeyDown(KeyCode.R))
                     {
                         Debug.Log("Cheat Reload");
                         GameManager.Instance.LoadScene(-1);
                     }
-                    else if (Input.GetKeyDown(KeyCode.B))
+                    else if(Input.GetKeyDown(KeyCode.B))
                     {
                         Debug.Log("Cheat Reset");
                         Dead = false;
@@ -129,7 +129,7 @@ public class PlayerControl : MonoBehaviourPunCallbacks
                         tankOrigin.Find("Turret").GetComponent<MeshRenderer>().enabled = true;
                         tankOrigin.Find("Barrel").GetComponent<MeshRenderer>().enabled = true;
                     }
-                    else if (Input.GetKeyDown(KeyCode.G))
+                    else if(Input.GetKeyDown(KeyCode.G))
                     {
                         Debug.Log("God Mode Toggled");
 
@@ -142,7 +142,7 @@ public class PlayerControl : MonoBehaviourPunCallbacks
 
     float GetModifiedSmoothTime(float smoothTime)
     {
-        if (baseTankLogic.IsGrounded())
+        if(baseTankLogic.IsGrounded())
         {
             return smoothTime;
         }
@@ -152,26 +152,26 @@ public class PlayerControl : MonoBehaviourPunCallbacks
 
     private float GetInputAxis(string axis)
     {
-        switch (axis)
+        switch(axis)
         {
             case "Horizontal":
                 float horizontal = 0;
-                if (Input.GetKey(DataManager.playerSettings.keyBinds["Right"]))
+                if(Input.GetKey(DataManager.playerSettings.keyBinds["Right"]))
                 {
                     horizontal += 1;
                 }
-                if (Input.GetKey(DataManager.playerSettings.keyBinds["Left"]))
+                if(Input.GetKey(DataManager.playerSettings.keyBinds["Left"]))
                 {
                     horizontal -= 1;
                 }
                 return horizontal;
             case "Vertical":
                 float vertical = 0;
-                if (Input.GetKey(DataManager.playerSettings.keyBinds["Forward"]))
+                if(Input.GetKey(DataManager.playerSettings.keyBinds["Forward"]))
                 {
                     vertical += 1;
                 }
-                if (Input.GetKey(DataManager.playerSettings.keyBinds["Backward"]))
+                if(Input.GetKey(DataManager.playerSettings.keyBinds["Backward"]))
                 {
                     vertical -= 1;
                 }
@@ -183,9 +183,9 @@ public class PlayerControl : MonoBehaviourPunCallbacks
 
     public void OnDeath()
     {
-        if (!PhotonNetwork.OfflineMode)
+        if(!PhotonNetwork.OfflineMode)
         {
-            if (photonView.IsMine)
+            if(photonView.IsMine)
             {
                 DataManager.playerData.deaths++;
                 PhotonHashtable playerProperties = new PhotonHashtable();
@@ -199,7 +199,7 @@ public class PlayerControl : MonoBehaviourPunCallbacks
             DataManager.playerData.deaths++;
             DataManager.playerData.lives--;
 
-            if (DataManager.playerData.lives > 0)
+            if(DataManager.playerData.lives > 0)
             {
                 GameManager.Instance.LoadScene(-1, 3, true);
             }

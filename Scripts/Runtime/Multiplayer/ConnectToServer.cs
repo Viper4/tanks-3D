@@ -23,7 +23,7 @@ public class ConnectToServer : MonoBehaviourPunCallbacks
 
     public override void OnConnectedToMaster()
     {
-        if (!GameManager.Instance.canceledConnect)
+        if(!GameManager.Instance.canceledConnect)
         {
             PhotonNetwork.JoinLobby();
         }

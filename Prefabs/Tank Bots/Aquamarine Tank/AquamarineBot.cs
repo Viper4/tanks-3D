@@ -50,13 +50,13 @@ public class AquamarineBot : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!GameManager.Instance.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null && !baseTankLogic.disabled)
+        if(!GameManager.Instance.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null && !baseTankLogic.disabled)
         {
             baseTankLogic.targetTankDir = transform.forward;
 
-            if (bulletRicochet.lookPositions.Count > 0)
+            if(bulletRicochet.lookPositions.Count > 0)
             {
-                if (lookIndex >= bulletRicochet.lookPositions.Count)
+                if(lookIndex >= bulletRicochet.lookPositions.Count)
                 {
                     lookIndex = 0;
                 }
@@ -68,51 +68,51 @@ public class AquamarineBot : MonoBehaviour
                 baseTankLogic.targetTurretDir = targetSystem.currentTarget.position - turret.position;
             }
 
-            if (nearbyBullet == null && nearbyMine == null)
+            if(nearbyBullet == null && nearbyMine == null)
             {
-                if (bulletRicochet.shootPositions.Count > 0)
+                if(bulletRicochet.shootPositions.Count > 0)
                 {
                     baseTankLogic.targetTurretDir = shootPosition - turret.position;
 
-                    if (!shooting && fireControl.canFire && fireControl.BulletSpawnClear())
+                    if(!shooting && fireControl.canFire && fireControl.BulletSpawnClear())
                     {
                         fireRoutine = StartCoroutine(Shoot());
                     }
                 }
-                else if (targetSystem.TargetVisible())
+                else if(targetSystem.TargetVisible())
                 {
                     baseTankLogic.targetTurretDir = targetSystem.currentTarget.position - turret.position;
 
-                    if (!shooting && fireControl.canFire && Vector3.Angle(barrel.forward, baseTankLogic.targetTurretDir) < maxShootAngle)
+                    if(!shooting && fireControl.canFire && Vector3.Angle(barrel.forward, baseTankLogic.targetTurretDir) < maxShootAngle)
                     {
                         fireRoutine = StartCoroutine(Shoot());
                     }
                 }
             }
 
-            if (targetSystem.TargetVisible())
+            if(targetSystem.TargetVisible())
             {
                 baseTankLogic.targetTurretDir = targetSystem.currentTarget.position - turret.position;
 
-                if (!shooting && fireControl.canFire && Vector3.Angle(barrel.forward, baseTankLogic.targetTurretDir) < maxShootAngle)
+                if(!shooting && fireControl.canFire && Vector3.Angle(barrel.forward, baseTankLogic.targetTurretDir) < maxShootAngle)
                 {
                     fireRoutine = StartCoroutine(Shoot());
                 }
             }
             else
             {
-                if (bulletRicochet.shootPositions.Count > 0 && nearbyMine == null && nearbyBullet == null)
+                if(bulletRicochet.shootPositions.Count > 0 && nearbyMine == null && nearbyBullet == null)
                 {
                     baseTankLogic.targetTurretDir = shootPosition - turret.position;
 
-                    if (!shooting && fireControl.canFire && fireControl.BulletSpawnClear())
+                    if(!shooting && fireControl.canFire && fireControl.BulletSpawnClear())
                     {
                         fireRoutine = StartCoroutine(Shoot());
                     }
                 }
-                else if (bulletRicochet.lookPositions.Count > 0)
+                else if(bulletRicochet.lookPositions.Count > 0)
                 {
-                    if (lookIndex >= bulletRicochet.lookPositions.Count)
+                    if(lookIndex >= bulletRicochet.lookPositions.Count)
                     {
                         lookIndex = 0;
                     }
@@ -126,13 +126,13 @@ public class AquamarineBot : MonoBehaviour
             }
 
 
-            if (nearbyMine != null)
+            if(nearbyMine != null)
             {
                 baseTankLogic.AvoidMine(nearbyMine, 100);
                 StopFiring();
             }
 
-            if (nearbyBullet != null)
+            if(nearbyBullet != null)
             {
                 baseTankLogic.AvoidBullet(nearbyBullet);
                 StopFiring();
@@ -142,19 +142,19 @@ public class AquamarineBot : MonoBehaviour
 
     void Loop()
     {
-        if (!GameManager.Instance.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null)
+        if(!GameManager.Instance.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null)
         {
             bulletRicochet.ScanArea(turret.position);
 
             Vector3 predictedPos = targetSystem.PredictedTargetPosition(CustomMath.TravelTime(turret.position, targetSystem.currentTarget.position, fireControl.bulletSettings.speed * predictionScale));
             bulletRicochet.CalculateBulletRicochets(barrel, predictedPos);
 
-            if (bulletRicochet.shootPositions.Count > 0)
+            if(bulletRicochet.shootPositions.Count > 0)
             {
                 shootPosition = bulletRicochet.SelectShootPosition(barrel, RicochetCalculation.SelectionMode.Closest);
                 predictedPos = targetSystem.PredictedTargetPosition(bulletRicochet.shootPositions[shootPosition] / fireControl.bulletSettings.speed);
                 bulletRicochet.CalculateBulletRicochets(barrel, predictedPos);
-                if (bulletRicochet.shootPositions.Count > 0)
+                if(bulletRicochet.shootPositions.Count > 0)
                 {
                     shootPosition = bulletRicochet.SelectShootPosition(barrel, RicochetCalculation.SelectionMode.Closest);
                 }
@@ -174,10 +174,10 @@ public class AquamarineBot : MonoBehaviour
 
     void OnTriggerStay(Collider other)
     {
-        if (!GameManager.Instance.frozen && Time.timeScale != 0 && baseTankLogic != null && !baseTankLogic.disabled)
+        if(!GameManager.Instance.frozen && Time.timeScale != 0 && baseTankLogic != null && !baseTankLogic.disabled)
         {
             // Avoiding bullets and mines
-            switch (other.tag)
+            switch(other.tag)
             {
                 case "Bullet":
                     nearbyBullet = other.transform;
@@ -191,16 +191,16 @@ public class AquamarineBot : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-        switch (other.tag)
+        switch(other.tag)
         {
             case "Bullet":
-                if (nearbyBullet == other.transform)
+                if(nearbyBullet == other.transform)
                 {
                     nearbyBullet = null;
                 }
                 break;
             case "Mine":
-                if (nearbyMine == other.transform)
+                if(nearbyMine == other.transform)
                 {
                     nearbyMine = null;
                 }

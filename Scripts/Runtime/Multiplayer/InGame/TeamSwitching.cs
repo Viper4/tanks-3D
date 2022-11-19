@@ -49,16 +49,16 @@ public class TeamSwitching : MonoBehaviourPunCallbacks
 
     void OnEvent(EventData eventData)
     {
-        if (eventData.Code == UpdateTeamsCode)
+        if(eventData.Code == UpdateTeamsCode)
         {
-            PhotonHashtable parameters = (PhotonHashtable)eventData.Parameters[ParameterCode.Data];
-            Invoke(nameof(UpdateRosters), (float)parameters["delay"]);
+            PhotonHashtable parameters =(PhotonHashtable)eventData.Parameters[ParameterCode.Data];
+            Invoke(nameof(UpdateRosters),(float)parameters["delay"]);
         }
     }
 
     public void SetTempTeam()
     {
-        if (tempTeamName != null)
+        if(tempTeamName != null)
         {
             ChangeTeam(tempTeamName);
             ResetTempVariables();
@@ -67,7 +67,7 @@ public class TeamSwitching : MonoBehaviourPunCallbacks
 
     public void ResetTempVariables()
     {
-        if (tempPlayerSlot != null)
+        if(tempPlayerSlot != null)
         {
             currentPlayerSlot.GetComponent<TextMeshProUGUI>().color = playerSlotPrefab.GetComponent<TextMeshProUGUI>().color;
             Destroy(tempPlayerSlot);
@@ -85,32 +85,32 @@ public class TeamSwitching : MonoBehaviourPunCallbacks
     {
         int teamSize = PhotonTeamsManager.Instance.GetTeamMembersCount(teamName);
 
-        if (teamSize < ((RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["RoomSettings"]).teamSize)
+        if(teamSize <((RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["RoomSettings"]).teamSize)
         {
             PhotonTeam currentTeam = PhotonNetwork.LocalPlayer.GetPhotonTeam();
-            if (currentTeam == null || currentTeam.Name != teamName)
+            if(currentTeam == null || currentTeam.Name != teamName)
             {
-                if (GameManager.Instance.inLobby)
+                if(GameManager.Instance.inLobby)
                 {
                     PhotonNetwork.LocalPlayer.JoinOrSwitchTeam(teamName);
                 }
                 else
                 {
-                    if (teamName == "Spectators")
+                    if(teamName == "Spectators")
                     {
                         PhotonNetwork.LocalPlayer.JoinOrSwitchTeam(teamName);
                         PlayerManager.Instance.RespawnAsSpectator(transform.parent);
                     }
-                    else if (PhotonTeamsManager.Instance.TryGetTeamByName(teamName, out var team))
+                    else if(PhotonTeamsManager.Instance.TryGetTeamByName(teamName, out var team))
                     {
                         PhotonNetwork.LocalPlayer.JoinOrSwitchTeam(teamName);
 
-                        switch (DataManager.roomSettings.mode)
+                        switch(DataManager.roomSettings.mode)
                         {
                             case "Co-Op":
                                 break;
                             case "Teams":
-                                if (currentTeam != null && currentTeam.Name != "Spectators")
+                                if(currentTeam != null && currentTeam.Name != "Spectators")
                                 {
                                     PhotonNetwork.Destroy(transform.parent.gameObject);
                                     PlayerManager.Instance.SpawnInLocalPlayer(team);
@@ -122,7 +122,7 @@ public class TeamSwitching : MonoBehaviourPunCallbacks
                                 }
                                 break;
                             default:
-                                if (currentTeam == null || currentTeam.Name == "Spectators")
+                                if(currentTeam == null || currentTeam.Name == "Spectators")
                                 {
                                     PlayerManager.Instance.SpawnInLocalPlayer(team);
                                     Destroy(transform.parent.gameObject);
@@ -146,43 +146,43 @@ public class TeamSwitching : MonoBehaviourPunCallbacks
     {
         playerList.SetActive(DataManager.roomSettings.mode != "Teams");
         teamsTab.SetActive(DataManager.roomSettings.mode == "Teams");
-        foreach (Transform content in rosterContents)
+        foreach(Transform content in rosterContents)
         {
-            foreach (Transform child in content)
+            foreach(Transform child in content)
             {
                 Destroy(child.gameObject);
             }
         }
 
-        foreach (Player player in PhotonNetwork.PlayerList)
+        foreach(Player player in PhotonNetwork.PlayerList)
         {
             PhotonTeam team = player.GetPhotonTeam();
-            if (team != null)
+            if(team != null)
             {
                 GameObject newPlayerSlot = Instantiate(playerSlotPrefab, rosterContents[rosterContentNames.IndexOf(team.Name)]);
                 newPlayerSlot.GetComponent<TextMeshProUGUI>().text = player.NickName;
-                if (player == PhotonNetwork.LocalPlayer)
+                if(player == PhotonNetwork.LocalPlayer)
                 {
                     currentPlayerSlot = newPlayerSlot;
                 }
             }
         }
 
-        if (tempMode && rostersParentObject.activeInHierarchy)
+        if(tempMode && rostersParentObject.activeInHierarchy)
         {
             UpdateTempRosters();
         }
 
         playerListLabel.text = PhotonTeamsManager.Instance.GetTeamMembersCount("Players") + "/" + DataManager.roomSettings.playerLimit + " players";
         spectatorListLabel.text = PhotonTeamsManager.Instance.GetTeamMembersCount("Spectators") + " spectating";
-        for (int i = 0; i < teamListLabels.Length; i++)
+        for(int i = 0; i < teamListLabels.Length; i++)
         {
-            teamListLabels[i].text = PhotonTeamsManager.Instance.GetTeamMembersCount("Team " + (i + 1)) + "/" + DataManager.roomSettings.teamSize + " players";
+            teamListLabels[i].text = PhotonTeamsManager.Instance.GetTeamMembersCount("Team " +(i + 1)) + "/" + DataManager.roomSettings.teamSize + " players";
         }
 
-        for (int i = 0; i < 4; i++)
+        for(int i = 0; i < 4; i++)
         {
-            if (i + 1 > DataManager.roomSettings.teamLimit)
+            if(i + 1 > DataManager.roomSettings.teamLimit)
             {
                 teamsTab.transform.GetChild(i).gameObject.SetActive(false);
             }
@@ -195,17 +195,17 @@ public class TeamSwitching : MonoBehaviourPunCallbacks
 
     private void UpdateTempRosters()
     {
-        if (tempPlayerSlot != null)
+        if(tempPlayerSlot != null)
         {
             Destroy(tempPlayerSlot);
         }
 
-        if (!string.IsNullOrEmpty(tempTeamName))
+        if(!string.IsNullOrEmpty(tempTeamName))
         {
             PhotonTeam localTeam = PhotonNetwork.LocalPlayer.GetPhotonTeam();
-            if (localTeam != null)
+            if(localTeam != null)
             {
-                if (localTeam.Name == tempTeamName)
+                if(localTeam.Name == tempTeamName)
                 {
                     ResetTempVariables();
                     return;

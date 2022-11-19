@@ -36,23 +36,23 @@ public class MineBehaviour : MonoBehaviourPunCallbacks
     // Update is called once per frame
     void Update()
     {
-        if (Time.timeScale > 0 && !GameManager.Instance.frozen)
+        if(Time.timeScale > 0 && !GameManager.Instance.frozen)
         {
             activateDelay -= Time.deltaTime;
 
-            if (activateDelay <= 0)
+            if(activateDelay <= 0)
             {
                 timer -= Time.deltaTime;
                 // Explodes at 0 seconds
-                if (timer <= 0)
+                if(timer <= 0)
                 {
                     explosive.Explode(new List<Transform>());
                     DestroyMine();
                 }
                 // At less than 5 seconds, mine starts to flash
-                else if (timer < 5)
+                else if(timer < 5)
                 {
-                    if (canFlash)
+                    if(canFlash)
                     {
                         canFlash = false;
                         StartCoroutine(FlashLoop());
@@ -65,7 +65,7 @@ public class MineBehaviour : MonoBehaviourPunCallbacks
     public override void OnEnable()
     {
         base.OnEnable();
-        if (!GameManager.Instance.inLobby)
+        if(!GameManager.Instance.inLobby)
         {
             PhotonNetwork.NetworkingClient.EventReceived += OnEvent;
         }
@@ -74,7 +74,7 @@ public class MineBehaviour : MonoBehaviourPunCallbacks
     public override void OnDisable()
     {
         base.OnDisable();
-        if (!GameManager.Instance.inLobby)
+        if(!GameManager.Instance.inLobby)
         {
             PhotonNetwork.NetworkingClient.EventReceived -= OnEvent;
         }
@@ -82,19 +82,19 @@ public class MineBehaviour : MonoBehaviourPunCallbacks
 
     void OnEvent(EventData eventData)
     {
-        if (eventData.Code == GameManager.Instance.DestroyCode)
+        if(eventData.Code == GameManager.Instance.DestroyCode)
         {
-            PhotonHashtable parameters = (PhotonHashtable)eventData.Parameters[ParameterCode.Data];
-            if ((int)parameters["ID"] == mineID)
+            PhotonHashtable parameters =(PhotonHashtable)eventData.Parameters[ParameterCode.Data];
+            if((int)parameters["ID"] == mineID)
             {
                 explosive.Explode(new List<Transform>());
                 DestroyMine();
             }
         }
-        else if (eventData.Code == StartTimerCode)
+        else if(eventData.Code == StartTimerCode)
         {
-            PhotonHashtable parameters = (PhotonHashtable)eventData.Parameters[ParameterCode.Data];
-            if ((int)parameters["ID"] == mineID)
+            PhotonHashtable parameters =(PhotonHashtable)eventData.Parameters[ParameterCode.Data];
+            if((int)parameters["ID"] == mineID)
             {
                 timer = 2;
             }
@@ -103,11 +103,11 @@ public class MineBehaviour : MonoBehaviourPunCallbacks
 
     private void OnTriggerEnter(Collider other)
     {
-        if ((ownerPV == null || ownerPV.IsMine) && (other.CompareTag("Tank") || other.CompareTag("Player") || other.CompareTag("AI Tank")))
+        if((ownerPV == null || ownerPV.IsMine) &&(other.CompareTag("Tank") || other.CompareTag("Player") || other.CompareTag("AI Tank")))
         {
-            if (activateDelay <= 0 && timer > 1.5f)
+            if(activateDelay <= 0 && timer > 1.5f)
             {
-                if (timer > 2)
+                if(timer > 2)
                 {
                     PhotonHashtable parameters = new PhotonHashtable()
                     {
@@ -142,9 +142,9 @@ public class MineBehaviour : MonoBehaviourPunCallbacks
 
     public void DestroyMine()
     {
-        if (owner != null)
+        if(owner != null)
         {
-            if (ownerPV != null && ownerPV.IsMine)
+            if(ownerPV != null && ownerPV.IsMine)
             {
                 PhotonHashtable parameters = new PhotonHashtable()
                 {

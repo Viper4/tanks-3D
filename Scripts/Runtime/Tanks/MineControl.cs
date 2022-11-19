@@ -20,7 +20,7 @@ public class MineControl : MonoBehaviourPun
     private IEnumerator Start()
     {
         baseTankLogic = GetComponent<BaseTankLogic>();
-        if (GameManager.Instance.autoPlay)
+        if(GameManager.Instance.autoPlay)
         {
             mineParent = GameObject.Find("ToClear").transform;
         }
@@ -31,7 +31,7 @@ public class MineControl : MonoBehaviourPun
 
     public IEnumerator LayMine()
     {
-        if (!baseTankLogic.disabled && canLay && laidMines.Count < mineLimit)
+        if(!baseTankLogic.disabled && canLay && laidMines.Count < mineLimit)
         {
             canLay = false;
 
@@ -62,7 +62,7 @@ public class MineControl : MonoBehaviourPun
     {
         mine.gameObject.SetActive(false);
         yield return new WaitUntil(() => mine.GetComponent<MineBehaviour>() != null);
-        if (mine != null)
+        if(mine != null)
         {
             mine.gameObject.SetActive(true);
 
@@ -73,11 +73,11 @@ public class MineControl : MonoBehaviourPun
             explosive.owner = transform;
             explosive.ownerPV = photonView;
             explosive.explosionRadius = explosionRadius;
-            if (!PhotonNetwork.OfflineMode && !GameManager.Instance.inLobby)
+            if(!PhotonNetwork.OfflineMode && !GameManager.Instance.inLobby)
             {
                 mineBehaviour.mineID = ID;
 
-                if (photonView.IsMine)
+                if(photonView.IsMine)
                 {
                     photonView.RPC("MultiplayerInstantiateMine", RpcTarget.Others, new object[] { tankOrigin.position, ID });
                 }

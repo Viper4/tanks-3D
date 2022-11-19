@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: -6831410015427898253}
   - component: {fileID: 7549524306613996966}
   - component: {fileID: 8952849939463885855}
+  - component: {fileID: -748226916324331138}
   m_Layer: 2
   m_Name: Destructable Cube
   m_TagString: Untagged
@@ -4931,6 +4932,19 @@ ParticleSystemRenderer:
   m_MeshWeighting2: 1
   m_MeshWeighting3: 1
   m_MaskInteraction: 0
+--- !u!114 &-748226916324331138
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 474112292520302916}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 115c28a99863dae43902bdb19990c000, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  prefabName: Destructable Cube
 --- !u!1 &7809306434388904304
 GameObject:
   m_ObjectHideFlags: 0

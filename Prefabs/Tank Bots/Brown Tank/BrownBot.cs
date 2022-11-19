@@ -38,18 +38,18 @@ public class BrownBot : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!GameManager.Instance.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null && !baseTankLogic.disabled)
+        if(!GameManager.Instance.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null && !baseTankLogic.disabled)
         {
             float angleX = Mathf.PingPong(Time.time * turretRotSpeed, turretScanRange.x * 2) - turretScanRange.x;
             float angleY = Mathf.PingPong(Time.time * turretRotSpeed, turretScanRange.y * 2) - turretScanRange.y;
 
-            currentScanOffset += (scanOffset + angleY - currentScanOffset) * (Time.deltaTime * turretRotSpeed / 30);
+            currentScanOffset +=(scanOffset + angleY - currentScanOffset) *(Time.deltaTime * turretRotSpeed / 30);
 
             turret.localEulerAngles = new Vector3(0, currentScanOffset, 0);
             barrel.localEulerAngles = new Vector3(angleX, currentScanOffset, 0);
 
             // If target is in front of barrel then fire
-            if (fireControl.canFire && !shooting && targetSystem.TargetInLineOfFire(visibilityDistance))
+            if(fireControl.canFire && !shooting && targetSystem.TargetInLineOfFire(visibilityDistance))
             {
                 StartCoroutine(Shoot());
             }

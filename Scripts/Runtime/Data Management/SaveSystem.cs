@@ -90,11 +90,11 @@ public static class SaveSystem
 
     public static void Init()
     {
-        if (!Directory.Exists(SAVE_FOLDER))
+        if(!Directory.Exists(SAVE_FOLDER))
         {
             Directory.CreateDirectory(SAVE_FOLDER);
         }
-        if (!Directory.Exists(CROSSHAIR_FOLDER))
+        if(!Directory.Exists(CROSSHAIR_FOLDER))
         {
             Directory.CreateDirectory(CROSSHAIR_FOLDER);
         }
@@ -121,7 +121,7 @@ public static class SaveSystem
 
     public static void SavePlayerData(this PlayerData fromPlayerData, string fileName, bool compareTime)
     {
-        if (compareTime && fromPlayerData.lives > 0 && (fromPlayerData.time < fromPlayerData.bestTime || fromPlayerData.bestTime == -1))
+        if(compareTime && fromPlayerData.lives > 0 &&(fromPlayerData.time < fromPlayerData.bestTime || fromPlayerData.bestTime == -1))
         {
             Debug.Log("Updated best Time");
             fromPlayerData.bestTime = fromPlayerData.time;
@@ -136,17 +136,15 @@ public static class SaveSystem
 
     public static PlayerData LoadPlayerData(string fileName)
     {
-        PlayerData newPlayerData;
+        PlayerData loadedPlayerData;
         string filePath = SAVE_FOLDER + fileName + playerDataExtension;
-        if (File.Exists(filePath))
+        if(File.Exists(filePath))
         {
             BinaryFormatter formatter = new BinaryFormatter();
             FileStream stream = new FileStream(filePath, FileMode.Open);
 
-            PlayerData loadedPlayerData = (PlayerData)formatter.Deserialize(stream);
+            loadedPlayerData = (PlayerData)formatter.Deserialize(stream);
             stream.Close();
-
-            newPlayerData = loadedPlayerData;
         }
         else
         {
@@ -154,10 +152,10 @@ public static class SaveSystem
 
             defaultPlayerData.SavePlayerData(fileName, false);
 
-            newPlayerData = defaultPlayerData;
+            loadedPlayerData = defaultPlayerData;
         }
 
-        return newPlayerData;
+        return loadedPlayerData;
     }
 
     public static void SaveChatSettings(this ChatSettings fromSettings, string fileName)
@@ -169,11 +167,11 @@ public static class SaveSystem
 
     public static ChatSettings LoadChatSettings(string fileName)
     {
-        if (File.Exists(SAVE_FOLDER + fileName + chatSettingsExtension))
+        if(File.Exists(SAVE_FOLDER + fileName + chatSettingsExtension))
         {
             string json = File.ReadAllText(SAVE_FOLDER + fileName + chatSettingsExtension);
 
-            if (json != null)
+            if(json != null)
             {
                 return JsonConvert.DeserializeObject<ChatSettings>(json);
             }
@@ -196,11 +194,11 @@ public static class SaveSystem
 
     public static PlayerSettings LoadPlayerSettings(string fileName)
     {
-        if (File.Exists(SAVE_FOLDER + fileName + playerSettingsExtension))
+        if(File.Exists(SAVE_FOLDER + fileName + playerSettingsExtension))
         {
             string json = File.ReadAllText(SAVE_FOLDER + fileName + playerSettingsExtension);
 
-            if (json != null)
+            if(json != null)
             {
                 return JsonConvert.DeserializeObject<PlayerSettings>(json);
             }
@@ -224,11 +222,11 @@ public static class SaveSystem
     public static RoomSettings LoadRoomSettings(string fileName)
     {
         RoomSettings newSettings = new RoomSettings();
-        if (File.Exists(SAVE_FOLDER + fileName + roomSettingsExtension))
+        if(File.Exists(SAVE_FOLDER + fileName + roomSettingsExtension))
         {
             string json = File.ReadAllText(SAVE_FOLDER + fileName + roomSettingsExtension);
 
-            if (json != null)
+            if(json != null)
             {
                 RoomSettings loadedSettings = JsonConvert.DeserializeObject<RoomSettings>(json);
 
@@ -246,9 +244,66 @@ public static class SaveSystem
         return newSettings;
     }
 
+    public static void SaveLevel(string levelName, string levelDescription, string levelCreators, SaveableLevelObject[] levelObjects)
+    {
+        LevelInfo levelInfo = new LevelInfo()
+        {
+            name = levelName,
+            description = levelDescription,
+            creators = levelCreators,
+            levelObjects = new List<LevelInfo.LevelObjectInfo>(),
+        };
+
+        foreach (SaveableLevelObject levelObject in levelObjects)
+        {
+            levelInfo.levelObjects.Add(new LevelInfo.LevelObjectInfo()
+            {
+                prefabName = levelObject.prefabName,
+                name = levelObject.name,
+                tag = levelObject.tag,
+                layer = levelObject.gameObject.layer,
+                posX = levelObject.transform.position.x,
+                posY = levelObject.transform.position.y,
+                posZ = levelObject.transform.position.z,
+                eulerX = levelObject.transform.eulerAngles.x,
+                eulerY = levelObject.transform.eulerAngles.y,
+                eulerZ = levelObject.transform.eulerAngles.z,
+                scaleX = levelObject.transform.localScale.x,
+                scaleY = levelObject.transform.localScale.y,
+                scaleZ = levelObject.transform.localScale.z,
+            });
+        }
+
+        BinaryFormatter formatter = new BinaryFormatter();
+        FileStream stream = new FileStream(SAVE_FOLDER + levelName + ".level", FileMode.Create);
+
+        formatter.Serialize(stream, levelInfo);
+        stream.Close();
+    }
+
+    public static LevelInfo LoadLevel(string fileName)
+    {
+        LevelInfo levelInfo = null;
+        string filePath = SAVE_FOLDER + fileName + ".level";
+        if (File.Exists(filePath))
+        {
+            BinaryFormatter formatter = new BinaryFormatter();
+            FileStream stream = new FileStream(filePath, FileMode.Open);
+
+            levelInfo = (LevelInfo)formatter.Deserialize(stream);
+            stream.Close();
+        }
+        else
+        {
+            Debug.LogWarning("Could not find file '" + filePath + "'.");
+        }
+
+        return levelInfo;
+    }
+
     public static void DeleteFile(string fullFileName)
     {
-        if (File.Exists(SAVE_FOLDER + fullFileName))
+        if(File.Exists(SAVE_FOLDER + fullFileName))
         {
             File.Delete(SAVE_FOLDER + fullFileName);
         }
@@ -258,9 +313,9 @@ public static class SaveSystem
     {
         FileInfo latestFile = new DirectoryInfo(SAVE_FOLDER).GetFiles("*" + fileExtension, SearchOption.AllDirectories).OrderByDescending(f => f.LastWriteTime).FirstOrDefault();
 
-        if (latestFile != null)
+        if(latestFile != null)
         {
-            if (returnExtension)
+            if(returnExtension)
             {
                 return latestFile.Name;
             }
@@ -277,7 +332,7 @@ public static class SaveSystem
 
     public static IEnumerable<string> FilesInSaveFolder(bool returnExtension, string fileExtension = "")
     {
-        if (returnExtension)
+        if(returnExtension)
         {
             return Directory.EnumerateFiles(SAVE_FOLDER, "*" + fileExtension, SearchOption.AllDirectories).Select(Path.GetFileName);
         }

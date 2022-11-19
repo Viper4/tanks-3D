@@ -39,7 +39,7 @@ public class FireControl : MonoBehaviourPun
         originalBulletSettings = bulletSettings;
         baseTankLogic = GetComponent<BaseTankLogic>();
 
-        if (GameManager.Instance.autoPlay)
+        if(GameManager.Instance.autoPlay)
         {
             bulletParent = GameObject.Find("ToClear").transform;
         }
@@ -52,11 +52,11 @@ public class FireControl : MonoBehaviourPun
 
     public IEnumerator Shoot()
     {
-        if (!baseTankLogic.disabled && canFire && firedBullets.Count < bulletLimit && Time.timeScale != 0 && BulletSpawnClear())
+        if(!baseTankLogic.disabled && canFire && firedBullets.Count < bulletLimit && Time.timeScale != 0 && BulletSpawnClear())
         {
             canFire = false;
 
-            if (transform.CompareTag("Player"))
+            if(transform.CompareTag("Player"))
             {
                 DataManager.playerData.shots++;
             }
@@ -99,7 +99,7 @@ public class FireControl : MonoBehaviourPun
     {
         bullet.gameObject.SetActive(false);
         yield return new WaitUntil(() => bullet.GetComponent<BulletBehaviour>() != null);
-        if (bullet != null)
+        if(bullet != null)
         {
             bullet.gameObject.SetActive(true);
 
@@ -111,17 +111,17 @@ public class FireControl : MonoBehaviourPun
             bulletBehaviour.settings.pierceLimit = _pierceLimit;
             bulletBehaviour.settings.ricochetLevel = _ricochetLevel;
             bulletBehaviour.ResetVelocity();
-            if (bullet.TryGetComponent<Explosive>(out var explosive))
+            if(bullet.TryGetComponent<Explosive>(out var explosive))
             {
                 explosive.owner = transform;
                 explosive.ownerPV = photonView;
                 explosive.explosionRadius = bulletSettings.explosionRadius;
             }
-            if (!PhotonNetwork.OfflineMode && !GameManager.Instance.inLobby)
+            if(!PhotonNetwork.OfflineMode && !GameManager.Instance.inLobby)
             {
                 bulletBehaviour.bulletID = ID;
 
-                if (photonView.IsMine)
+                if(photonView.IsMine)
                 {
                     photonView.RPC("MultiplayerInstantiateBullet", RpcTarget.Others, new object[] { spawnPoint.position, spawnPoint.rotation, _speed, _pierceLimit, _ricochetLevel, ID });
                 }

@@ -21,7 +21,7 @@ public class CameraScreenshotting : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyDown(DataManager.playerSettings.keyBinds["Screenshot"]))
+        if(Input.GetKeyDown(DataManager.playerSettings.keyBinds["Screenshot"]))
         {
             StartCoroutine(ScreenCapture());
         }
@@ -42,7 +42,7 @@ public class CameraScreenshotting : MonoBehaviour
         Debug.Log(fileName);
         System.IO.File.WriteAllBytes(Application.dataPath + "/Screenshots/" + fileName + ".png", byteArray);
 
-        if (popupRoutine != null)
+        if(popupRoutine != null)
         {
             StopCoroutine(popupRoutine);
         }
@@ -52,7 +52,7 @@ public class CameraScreenshotting : MonoBehaviour
 
     IEnumerator ShowScreenShotPopup(Texture2D screenshotTexture)
     {
-        if (anim.isPlaying)
+        if(anim.isPlaying)
         {
             anim.Stop();
         }

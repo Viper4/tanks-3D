@@ -28,23 +28,23 @@ public class PlayerManager : MonoBehaviourPunCallbacks
 
     private void Start()
     {
-        if (PhotonNetwork.OfflineMode)
+        if(PhotonNetwork.OfflineMode)
         {
             Destroy(this);
         }
         else
         {
             Instance = this;
-            foreach (Transform child in teamSpawnParent)
+            foreach(Transform child in teamSpawnParent)
             {
                 teamSpawns.Add(child.GetComponent<Collider>());
             }
-            foreach (Transform child in defaultSpawnParent)
+            foreach(Transform child in defaultSpawnParent)
             {
                 defaultSpawns.Add(child.GetComponent<Collider>());
             }
 
-            if (teamSpawns.Count == 0 && defaultSpawns.Count > 0)
+            if(teamSpawns.Count == 0 && defaultSpawns.Count > 0)
             {
                 teamSpawns = defaultSpawns;
             }
@@ -63,9 +63,9 @@ public class PlayerManager : MonoBehaviourPunCallbacks
                 { "New", false },
             };
 
-            if (DataManager.roomSettings.mode == "Co-Op")
+            if(DataManager.roomSettings.mode == "Co-Op")
             {
-                if ((playerTeam != null && playerTeam.Name == "Spectators") || (PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey("Started") && (bool)PhotonNetwork.CurrentRoom.CustomProperties["Started"] && PhotonNetwork.LocalPlayer.CustomProperties.ContainsKey("New") && (bool)PhotonNetwork.LocalPlayer.CustomProperties["New"]))
+                if((playerTeam != null && playerTeam.Name == "Spectators") ||(PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey("Started") &&(bool)PhotonNetwork.CurrentRoom.CustomProperties["Started"] && PhotonNetwork.LocalPlayer.CustomProperties.ContainsKey("New") &&(bool)PhotonNetwork.LocalPlayer.CustomProperties["New"]))
                 {
                     Time.timeScale = 1;
                     GameManager.Instance.loadingScreen.gameObject.SetActive(false);
@@ -82,7 +82,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks
             }
             else
             {
-                if ((playerTeam != null && playerTeam.Name == "Spectators") || CustomNetworkHandling.NonSpectatorList.Length > DataManager.roomSettings.playerLimit)
+                if((playerTeam != null && playerTeam.Name == "Spectators") || CustomNetworkHandling.NonSpectatorList.Length > DataManager.roomSettings.playerLimit)
                 {
                     GameManager.Instance.loadingScreen.gameObject.SetActive(false);
                     DataManager.playerSettings = SaveSystem.LoadPlayerSettings("PlayerSettings");
@@ -90,7 +90,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks
                 }
                 else
                 {
-                    switch (DataManager.roomSettings.mode)
+                    switch(DataManager.roomSettings.mode)
                     {
                         case "FFA":
                             Quaternion randomRotation = Quaternion.AngleAxis(Random.Range(-180, 180), Vector3.up);
@@ -98,9 +98,9 @@ public class PlayerManager : MonoBehaviourPunCallbacks
                             break;
                         case "Teams":
                             int teamIndex = -1;
-                            for (int i = 0; i < teamSpawns.Count; i++)
+                            for(int i = 0; i < teamSpawns.Count; i++)
                             {
-                                if (teamSpawns[i].name == playerTeam.Name)
+                                if(teamSpawns[i].name == playerTeam.Name)
                                 {
                                     teamIndex = i;
                                     break;
@@ -118,7 +118,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks
                 }
             }
 
-            if (newPlayer != null)
+            if(newPlayer != null)
             {
                 newPhotonView = newPlayer.GetComponent<PhotonView>();
                 playerProperties.Add("ViewID", newPhotonView.ViewID);
@@ -147,7 +147,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks
             { "Deaths", 0 },
             { "New", false },
         };
-        switch (DataManager.roomSettings.mode)
+        switch(DataManager.roomSettings.mode)
         {
             case "FFA":
                 Quaternion randomRotation = Quaternion.AngleAxis(Random.Range(-180, 180), Vector3.up);
@@ -155,9 +155,9 @@ public class PlayerManager : MonoBehaviourPunCallbacks
                 break;
             case "Teams":
                 int teamIndex = -1;
-                for (int i = 0; i < teamSpawns.Count; i++)
+                for(int i = 0; i < teamSpawns.Count; i++)
                 {
-                    if (teamSpawns[i].name == team.Name)
+                    if(teamSpawns[i].name == team.Name)
                     {
                         teamIndex = i;
                         break;
@@ -173,7 +173,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks
                 break;
         }
 
-        if (newPlayer != null)
+        if(newPlayer != null)
         {
             newPhotonView = newPlayer.GetComponent<PhotonView>();
             playerProperties.Add("ViewID", newPhotonView.ViewID);
@@ -216,7 +216,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks
 
     public void RespawnAsSpectator(Transform player)
     {
-        if (player.GetComponent<PhotonView>() != null)
+        if(player.GetComponent<PhotonView>() != null)
         {
             Transform camera = player.Find("Camera");
             SpawnSpectator(camera.position, camera.rotation);
@@ -228,24 +228,24 @@ public class PlayerManager : MonoBehaviourPunCallbacks
     {
         yield return new WaitForSecondsRealtime(delay);
         PhotonTeam playerTeam = PhotonNetwork.LocalPlayer.GetPhotonTeam();
-        if (DataManager.roomSettings.mode != "Co-Op")
+        if(DataManager.roomSettings.mode != "Co-Op")
         {
-            if (playerTeam.Name == "Spectators")
+            if(playerTeam.Name == "Spectators")
             {
                 RespawnAsSpectator(tankOrigin.parent);
             }
             else
             {
-                switch (DataManager.roomSettings.mode)
+                switch(DataManager.roomSettings.mode)
                 {
                     case "FFA":
                         tankOrigin.SetPositionAndRotation(CustomRandom.GetSpawnPointInCollider(freeForAllSpawn, Vector3.down, ignoreLayerMask), Quaternion.AngleAxis(Random.Range(-180, 180), Vector3.up));
                         break;
                     case "Teams":
                         int teamSpawnIndex = -1;
-                        for (int i = 0; i < teamSpawns.Count; i++)
+                        for(int i = 0; i < teamSpawns.Count; i++)
                         {
-                            if (teamSpawns[i].name == playerTeam.Name)
+                            if(teamSpawns[i].name == playerTeam.Name)
                             {
                                 teamSpawnIndex = i;
                                 break;
@@ -278,27 +278,27 @@ public class PlayerManager : MonoBehaviourPunCallbacks
 
     public void OnPlayerDeath(Transform tankOrigin, float respawnDelay = 3)
     {
-        if (DataManager.roomSettings.mode == "Co-Op")
+        if(DataManager.roomSettings.mode == "Co-Op")
         {
             tankOrigin.parent.SetParent(null);
 
             GameManager.Instance.totalLives--;
-            if (playerParent.childCount < 1)
+            if(playerParent.childCount < 1)
             {
                 GameManager.Instance.frozen = true;
                 StopCoroutines();
 
-                if (PhotonNetwork.IsMasterClient)
+                if(PhotonNetwork.IsMasterClient)
                 {
                     RestartCoOpGame();
                 }
             }
-            else if (tankOrigin.parent.GetComponent<PhotonView>().IsMine)
+            else if(tankOrigin.parent.GetComponent<PhotonView>().IsMine)
             {
                 StartCoroutine(RespawnPlayerRoutine(tankOrigin, respawnDelay));
             }
         }
-        else if (tankOrigin.parent.GetComponent<PhotonView>().IsMine)
+        else if(tankOrigin.parent.GetComponent<PhotonView>().IsMine)
         {
             StartCoroutine(RespawnPlayerRoutine(tankOrigin, respawnDelay));
         }
@@ -311,7 +311,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks
             { "Total Lives", GameManager.Instance.totalLives }
         };
         PhotonNetwork.CurrentRoom.SetCustomProperties(roomProperties);
-        if (GameManager.Instance.totalLives > 0 && CustomNetworkHandling.NonSpectatorList.Length > 0)
+        if(GameManager.Instance.totalLives > 0 && CustomNetworkHandling.NonSpectatorList.Length > 0)
         {
             GameManager.Instance.PhotonLoadScene(-1, 3, true);
         }
@@ -329,11 +329,11 @@ public class PlayerManager : MonoBehaviourPunCallbacks
     IEnumerator DelayedOnPlayerLeftCheck()
     {
         yield return new WaitForEndOfFrame();
-        if (DataManager.roomSettings.mode == "Co-Op" && playerParent.childCount < 1)
+        if(DataManager.roomSettings.mode == "Co-Op" && playerParent.childCount < 1)
         {
             GameManager.Instance.frozen = true;
 
-            if (PhotonNetwork.IsMasterClient)
+            if(PhotonNetwork.IsMasterClient)
             {
                 RestartCoOpGame();
             }

@@ -19,7 +19,7 @@ public class Invisibility : MonoBehaviour
     [PunRPC]
     public void SetInvisible(float duration)
     {
-        if (invisibilityRoutine != null)
+        if(invisibilityRoutine != null)
         {
             StopCoroutine(invisibilityRoutine);
             invisibilityRoutine = null;
@@ -33,11 +33,11 @@ public class Invisibility : MonoBehaviour
         Instantiate(disappearEffect, tankOrigin.position, tankOrigin.rotation);
         Instantiate(circleEffect, tankOrigin);
 
-        for (int i = 0; i < visibleRenderers.Length; i++)
+        for(int i = 0; i < visibleRenderers.Length; i++)
         {
             visibleRenderers[i].enabled = false;
         }
-        if (username != null)
+        if(username != null)
         {
             username.SetActive(false);
         }
@@ -47,11 +47,11 @@ public class Invisibility : MonoBehaviour
         cameraControl.invisible = false;
         Instantiate(disappearEffect, tankOrigin.position, tankOrigin.rotation);
 
-        for (int i = 0; i < visibleRenderers.Length; i++)
+        for(int i = 0; i < visibleRenderers.Length; i++)
         {
             visibleRenderers[i].enabled = true;
         }
-        if (username != null)
+        if(username != null)
         {
             username.SetActive(true);
         }

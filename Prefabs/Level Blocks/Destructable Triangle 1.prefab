@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 4324177249481429917}
   - component: {fileID: 1443000624442374266}
   - component: {fileID: 5054585337696253612}
+  - component: {fileID: 5827100020062103074}
   m_Layer: 2
   m_Name: Destructable Triangle 1
   m_TagString: Untagged
@@ -4931,6 +4932,19 @@ ParticleSystemRenderer:
   m_MeshWeighting2: 1
   m_MeshWeighting3: 1
   m_MaskInteraction: 0
+--- !u!114 &5827100020062103074
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8628183819059575296}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 115c28a99863dae43902bdb19990c000, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  prefabName: Destructable Triangle
 --- !u!1 &8898020677601311466
 GameObject:
   m_ObjectHideFlags: 0

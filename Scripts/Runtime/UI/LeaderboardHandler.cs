@@ -27,11 +27,11 @@ public class LeaderboardHandler : MonoBehaviour
     // Update is called once per frame
     void LateUpdate()
     {
-        if (clientManager == null || clientManager.photonView.IsMine)
+        if(clientManager == null || clientManager.photonView.IsMine)
         {
-            if (Input.GetKeyDown(DataManager.playerSettings.keyBinds["Leaderboard"]))
+            if(Input.GetKeyDown(DataManager.playerSettings.keyBinds["Leaderboard"]))
             {
-                if (leaderboardCanvas.gameObject.activeSelf)
+                if(leaderboardCanvas.gameObject.activeSelf)
                 {
                     leaderboardCanvas.gameObject.SetActive(false);
                 }
@@ -46,30 +46,30 @@ public class LeaderboardHandler : MonoBehaviour
 
     void UpdateLeaderboard()
     {
-        foreach (Transform child in playerList)
+        foreach(Transform child in playerList)
         {
             Destroy(child.gameObject);
         }
 
         Dictionary<string, LeaderboardData> leaderboard = new Dictionary<string, LeaderboardData>();
 
-        Player[] leaderboardPlayers = ((RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["RoomSettings"]).mode == "Co-Op" ? PhotonNetwork.PlayerList : CustomNetworkHandling.NonSpectatorList;
+        Player[] leaderboardPlayers =((RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["RoomSettings"]).mode == "Co-Op" ? PhotonNetwork.PlayerList : CustomNetworkHandling.NonSpectatorList;
 
-        foreach (Player player in leaderboardPlayers)
+        foreach(Player player in leaderboardPlayers)
         {
             LeaderboardData leaderboardData = new LeaderboardData()
             {
-                kills = (int)player.CustomProperties["Kills"],
-                deaths = (int)player.CustomProperties["Deaths"],
+                kills =(int)player.CustomProperties["Kills"],
+                deaths =(int)player.CustomProperties["Deaths"],
                 teamName = player.GetPhotonTeam().Name,
             };
 
-            leaderboardData.KD = leaderboardData.deaths == 0 ? leaderboardData.kills : (Mathf.Round((float)leaderboardData.kills / leaderboardData.deaths * 100) / 100);
+            leaderboardData.KD = leaderboardData.deaths == 0 ? leaderboardData.kills :(Mathf.Round((float)leaderboardData.kills / leaderboardData.deaths * 100) / 100);
 
             leaderboard[player.NickName] = leaderboardData;
         }
 
-        foreach (KeyValuePair<string, LeaderboardData> slot in leaderboard.OrderByDescending((x) => x.Value.kills))
+        foreach(KeyValuePair<string, LeaderboardData> slot in leaderboard.OrderByDescending((x) => x.Value.kills))
         {
             string username = slot.Key;
             LeaderboardData leaderboardData = slot.Value;

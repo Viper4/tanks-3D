@@ -40,21 +40,21 @@ public class YellowBot : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!GameManager.Instance.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null)
+        if(!GameManager.Instance.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null)
         {
-            if (fireControl.canFire && !shooting && targetSystem.TargetVisible())
+            if(fireControl.canFire && !shooting && targetSystem.TargetVisible())
             {
                 StartCoroutine(Shoot());
             }
 
-            if (mineControl.canLay && !layingMine)
+            if(mineControl.canLay && !layingMine)
             {
                 StartCoroutine(LayMine());
             }
 
-            if (!layingMine)
+            if(!layingMine)
             {
-                if (nearbyMine != null)
+                if(nearbyMine != null)
                 {
                     baseTankLogic.AvoidMine(nearbyMine, 100);
                 }
@@ -71,7 +71,7 @@ public class YellowBot : MonoBehaviour
 
     private void OnTriggerStay(Collider other)
     {
-        switch (other.tag)
+        switch(other.tag)
         {
             case "Mine":
                 nearbyMine = other.transform;
@@ -81,10 +81,10 @@ public class YellowBot : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-        switch (other.tag)
+        switch(other.tag)
         {
             case "Mine":
-                if (nearbyMine == other.transform)
+                if(nearbyMine == other.transform)
                 {
                     nearbyMine = null;
                 }

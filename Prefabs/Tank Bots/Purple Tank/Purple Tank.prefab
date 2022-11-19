@@ -903,6 +903,7 @@ GameObject:
   - component: {fileID: 5630658949621447858}
   - component: {fileID: 222640088891493764}
   - component: {fileID: 2134372190508770214}
+  - component: {fileID: -325997501670861763}
   m_Layer: 25
   m_Name: Purple Tank
   m_TagString: Tank
@@ -950,15 +951,11 @@ MonoBehaviour:
   - {fileID: 4307626717143694363, guid: de9dbd5b8f77ecb4a866f8d8cf75c17d, type: 3}
   - {fileID: 439779918157275786, guid: e82b6db23e6ee9f45931e68f161c1c36, type: 3}
   - {fileID: 5124250838519604896, guid: 9da335a328db8da49938f47ad88f2c2d, type: 3}
-  bulletIndex: 0
   spawnPoint: {fileID: 6762536917903161150}
   shootEffect: {fileID: 7275907135579404139, guid: 71b07424ffcb49a41830ab0761db5c07, type: 3}
   bulletParent: {fileID: 0}
-  speed: 16
-  pierceLevel: 0
-  pierceLimit: 0
-  ricochetLevel: 1
   bulletLimit: 5
+  firedBullets: []
   fireCooldown:
   - 0.5
   - 0.75
@@ -966,6 +963,20 @@ MonoBehaviour:
   solidLayerMask:
     serializedVersion: 2
     m_Bits: 605028353
+  originalBulletSettings:
+    bulletIndex: 0
+    speed: 0
+    pierceLevel: 0
+    pierceLimit: 0
+    ricochetLevel: 0
+    explosionRadius: 0
+  bulletSettings:
+    bulletIndex: 0
+    speed: 16
+    pierceLevel: 0
+    pierceLimit: 0
+    ricochetLevel: 1
+    explosionRadius: 5
 --- !u!114 &4060378702649525591
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -978,7 +989,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e86729278561f7641a9aed8cc39ff1e7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  PV: {fileID: 5630658949621447858}
   tankOrigin: {fileID: 8530993442464327376}
   mine: {fileID: 4223942867902412960, guid: 8a98f2906960e414d93db694525801d9, type: 3}
   mineParent: {fileID: 0}
@@ -1218,3 +1228,16 @@ MonoBehaviour:
   tankOrigin: {fileID: 8530993442464327376}
   trackMarks: {fileID: 9069381433934400627}
   baseTankLogic: {fileID: 8147042413594737687}
+--- !u!114 &-325997501670861763
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9020707831748607082}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 115c28a99863dae43902bdb19990c000, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  prefabName: Purple Tank

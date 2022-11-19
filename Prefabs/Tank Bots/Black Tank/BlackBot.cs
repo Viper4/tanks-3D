@@ -60,7 +60,7 @@ public class BlackBot : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!GameManager.Instance.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null && !baseTankLogic.disabled)
+        if(!GameManager.Instance.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null && !baseTankLogic.disabled)
         {
             targetDir = targetSystem.currentTarget.position - turret.position;
             angleToTarget = Mathf.Abs(Vector3.SignedAngle(transform.forward, targetDir, transform.up));
@@ -68,7 +68,7 @@ public class BlackBot : MonoBehaviour
             predictedTargetPosition = targetSystem.PredictedTargetPosition(CustomMath.TravelTime(turret.position, targetSystem.currentTarget.position, fireControl.bulletSettings.speed));
             bool targetVisible = targetSystem.TargetVisible();
             bool predictedPosVisible = !Physics.Linecast(turret.position, predictedTargetPosition, ~targetSystem.ignoreLayerMask);
-            if (predictedPosVisible)
+            if(predictedPosVisible)
             {
                 baseTankLogic.targetTurretDir = predictedTargetPosition - turret.position;
             }
@@ -77,11 +77,11 @@ public class BlackBot : MonoBehaviour
                 baseTankLogic.targetTurretDir = targetDir;
             }
 
-            switch (mode)
+            switch(mode)
             {
                 case Mode.Offense:
                     // Rotating towards target when target is getting behind this tank
-                    if (angleToTarget > maxTargetAngle)
+                    if(angleToTarget > maxTargetAngle)
                     {
                         baseTankLogic.targetTankDir = targetDir;
                     }
@@ -92,7 +92,7 @@ public class BlackBot : MonoBehaviour
                     break;
                 case Mode.Defense:
                     // Rotating away from target when target is in front of tank
-                    if (angleToTarget < minTargetAngle)
+                    if(angleToTarget < minTargetAngle)
                     {
                         baseTankLogic.targetTankDir = -targetDir;
                     }
@@ -100,31 +100,31 @@ public class BlackBot : MonoBehaviour
                     {
                         baseTankLogic.targetTankDir = transform.forward;
                     }
-                    if (!resettingMode)
+                    if(!resettingMode)
                     {
                         StartCoroutine(ResetMode());
                     }
                     break;
             }
 
-            if ((targetVisible || predictedPosVisible) && !shooting && Vector3.Angle(barrel.forward, targetDir) < maxShootAngle && fireControl.canFire && fireControl.firedBullets.Count < fireControl.bulletLimit)
+            if((targetVisible || predictedPosVisible) && !shooting && Vector3.Angle(barrel.forward, targetDir) < maxShootAngle && fireControl.canFire && fireControl.firedBullets.Count < fireControl.bulletLimit)
             {
                 StartCoroutine(Shoot());
             }
-            else if (mode == Mode.Defense)
+            else if(mode == Mode.Defense)
             {
-                if (mineControl.canLay && !layingMine && Mathf.Abs(Vector3.SignedAngle(turret.forward, targetDir, turret.up)) > 15)
+                if(mineControl.canLay && !layingMine && Mathf.Abs(Vector3.SignedAngle(turret.forward, targetDir, turret.up)) > 15)
                 {
                     StartCoroutine(LayMine());
                 }
             }
 
-            if (nearbyMine != null)
+            if(nearbyMine != null)
             {
                 baseTankLogic.AvoidMine(nearbyMine, 100);
             }
 
-            if (nearbyBullet != null)
+            if(nearbyBullet != null)
             {
                 baseTankLogic.AvoidBullet(nearbyBullet);
             }
@@ -133,16 +133,16 @@ public class BlackBot : MonoBehaviour
 
     void OnTriggerStay(Collider other)
     {
-        if (!GameManager.Instance.frozen && Time.timeScale != 0 && baseTankLogic != null && !baseTankLogic.disabled)
+        if(!GameManager.Instance.frozen && Time.timeScale != 0 && baseTankLogic != null && !baseTankLogic.disabled)
         {
             // Avoiding bullets and mines
-            switch (other.tag)
+            switch(other.tag)
             {
                 case "Bullet":
                     // Move perpendicular to bullets
-                    if (other.TryGetComponent<BulletBehaviour>(out var bulletBehaviour))
+                    if(other.TryGetComponent<BulletBehaviour>(out var bulletBehaviour))
                     {
-                        if (bulletBehaviour.owner != null && bulletBehaviour.owner != transform)
+                        if(bulletBehaviour.owner != null && bulletBehaviour.owner != transform)
                         {
                             nearbyBullet = other.transform;
                             mode = Mode.Defense;
@@ -158,16 +158,16 @@ public class BlackBot : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-        switch (other.tag)
+        switch(other.tag)
         {
             case "Bullet":
-                if (nearbyBullet == other.transform)
+                if(nearbyBullet == other.transform)
                 {
                     nearbyBullet = null;
                 }
                 break;
             case "Mine":
-                if (nearbyMine == other.transform)
+                if(nearbyMine == other.transform)
                 {
                     nearbyMine = null;
                 }

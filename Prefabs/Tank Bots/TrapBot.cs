@@ -76,13 +76,13 @@ public class TrapBot : MonoBehaviour
         mineControl = GetComponent<MineControl>();
         trapBots = FindObjectsOfType<TrapBot>();
 
-        if (trapBots.Length > 1)
+        if(trapBots.Length > 1)
         {
             partner = transform.ClosestTransform(trapBots.Select((x) => x.transform).ToList());
-            if (partner != null)
+            if(partner != null)
             {
                 TrapBot partnerScript = partner.GetComponent<TrapBot>();
-                if (partnerScript.partner == null)
+                if(partnerScript.partner == null)
                 {
                     partnerScript.partner = transform;
                     partnerScript.mode = Mode.Pincer;
@@ -95,16 +95,16 @@ public class TrapBot : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!GameManager.Instance.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null && !baseTankLogic.disabled)
+        if(!GameManager.Instance.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null && !baseTankLogic.disabled)
         {
             targetDir = targetSystem.currentTarget.position - turret.position;
             angleToTarget = Mathf.Abs(Vector3.SignedAngle(transform.forward, targetDir, transform.up));
 
-            switch (mode)
+            switch(mode)
             {
                 case Mode.Pincer:
                     // Rotating towards target when target is getting behind this tank
-                    if (angleToTarget > maxTargetAngle)
+                    if(angleToTarget > maxTargetAngle)
                     {
                         baseTankLogic.targetTankDir = targetDir;
                     }
@@ -113,14 +113,14 @@ public class TrapBot : MonoBehaviour
                         baseTankLogic.targetTankDir = transform.forward;
                     }
 
-                    if (partner == null)
+                    if(partner == null)
                     {
                         trapBots = trapBots.Where(x => x != null).ToArray();
                         partner = transform.ClosestTransform(trapBots.Select(x => x.transform).ToList());
-                        if (partner != null)
+                        if(partner != null)
                         {
                             TrapBot partnerScript = partner.GetComponent<TrapBot>();
-                            if (partnerScript.partner == null)
+                            if(partnerScript.partner == null)
                             {
                                 partnerScript.partner = transform;
                                 partnerScript.mode = Mode.Pincer;
@@ -139,7 +139,7 @@ public class TrapBot : MonoBehaviour
                             break;
                         }
                     }
-                    else if (partner.GetComponent<TrapBot>().partner != transform)
+                    else if(partner.GetComponent<TrapBot>().partner != transform)
                     {
                         partner = null;
                         mode = Mode.Offense;
@@ -148,7 +148,7 @@ public class TrapBot : MonoBehaviour
 
                     // If going towards partner then turn around
                     Vector3 partnerDir = partner.position - transform.position;
-                    if (Vector3.Angle(transform.forward, partnerDir) < 30)
+                    if(Vector3.Angle(transform.forward, partnerDir) < 30)
                     {
                         partnerDir.y = 0;
                         baseTankLogic.targetTankDir = -partnerDir;
@@ -157,7 +157,7 @@ public class TrapBot : MonoBehaviour
                     break;
                 case Mode.Offense:
                     // Rotating towards target when target is getting behind this tank
-                    if (angleToTarget > maxTargetAngle)
+                    if(angleToTarget > maxTargetAngle)
                     {
                         baseTankLogic.targetTankDir = targetDir;
                     }
@@ -170,7 +170,7 @@ public class TrapBot : MonoBehaviour
                     break;
                 case Mode.Defense:
                     // Rotating away from target when target is in front of tank
-                    if (angleToTarget < minTargetAngle)
+                    if(angleToTarget < minTargetAngle)
                     {
                         baseTankLogic.targetTankDir = -targetDir;
                     }
@@ -182,16 +182,16 @@ public class TrapBot : MonoBehaviour
             }
 
             float turretAngleToTarget = Mathf.Abs(Vector3.SignedAngle(turret.forward, targetDir, transform.up));
-            if (targetSystem.TargetVisible())
+            if(targetSystem.TargetVisible())
             {
-                if (turretAngleToTarget < 15 && fireControl.canFire && fireControl.firedBullets.Count < fireControl.bulletLimit && firePattern == FirePattern.None)
+                if(turretAngleToTarget < 15 && fireControl.canFire && fireControl.firedBullets.Count < fireControl.bulletLimit && firePattern == FirePattern.None)
                 {
                     fireRoutine = StartCoroutine(TrapFirePattern());
                 }
             }
             else
             {
-                if (firePattern != FirePattern.None)
+                if(firePattern != FirePattern.None)
                 {
                     StopCoroutine(fireRoutine);
                     fireRoutine = null;
@@ -201,26 +201,26 @@ public class TrapBot : MonoBehaviour
                 }
             }
 
-            if (firePattern == FirePattern.None)
+            if(firePattern == FirePattern.None)
             {
                 baseTankLogic.targetTurretDir = targetDir;
-                if (mode == Mode.Defense && mineControl.canLay && !layingMine && (turretAngleToTarget > maxRicochetAngle || !targetSystem.TargetVisible() || fireControl.bulletLimit >= fireControl.firedBullets.Count))
+                if(mode == Mode.Defense && mineControl.canLay && !layingMine &&(turretAngleToTarget > maxRicochetAngle || !targetSystem.TargetVisible() || fireControl.bulletLimit >= fireControl.firedBullets.Count))
                 {
                     Transform closestTank = transform.ClosestTransform(transform.parent);
                     float closestTankDst = closestTank == null ? Mathf.Infinity : Vector3.Distance(closestTank.position, transform.position);
-                    if (closestTankDst > layDistance)
+                    if(closestTankDst > layDistance)
                     {
                         StartCoroutine(LayMine());
                     }
                 }
             }
 
-            if (nearbyMine != null)
+            if(nearbyMine != null)
             {
                 baseTankLogic.AvoidMine(nearbyMine, 100);
             }
 
-            if (nearbyBullet != null)
+            if(nearbyBullet != null)
             {
                 baseTankLogic.AvoidBullet(nearbyBullet);
             }
@@ -229,16 +229,16 @@ public class TrapBot : MonoBehaviour
 
     void OnTriggerStay(Collider other)
     {
-        if (!GameManager.Instance.frozen && Time.timeScale != 0 && baseTankLogic != null && !baseTankLogic.disabled)
+        if(!GameManager.Instance.frozen && Time.timeScale != 0 && baseTankLogic != null && !baseTankLogic.disabled)
         {
             // Avoiding bullets and mines
-            switch (other.tag)
+            switch(other.tag)
             {
                 case "Bullet":
                     // Move perpendicular to bullets
-                    if (other.TryGetComponent<BulletBehaviour>(out var bulletBehaviour))
+                    if(other.TryGetComponent<BulletBehaviour>(out var bulletBehaviour))
                     {
-                        if (bulletBehaviour.owner != null && bulletBehaviour.owner != transform)
+                        if(bulletBehaviour.owner != null && bulletBehaviour.owner != transform)
                         {
                             nearbyBullet = other.transform;
                         }
@@ -253,16 +253,16 @@ public class TrapBot : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-        switch (other.tag)
+        switch(other.tag)
         {
             case "Bullet":
-                if (nearbyBullet == other.transform)
+                if(nearbyBullet == other.transform)
                 {
                     nearbyBullet = null;
                 }
                 break;
             case "Mine":
-                if (nearbyMine == other.transform)
+                if(nearbyMine == other.transform)
                 {
                     nearbyMine = null;
                 }
@@ -282,14 +282,14 @@ public class TrapBot : MonoBehaviour
         yield return new WaitForSeconds(Random.Range(fireDelay[0], fireDelay[1]));
 
         float angle = Random.Range(0, 2) == 0 ? 90 : -90;
-        Vector3 leftTarget = targetSystem.currentTarget.position + (Quaternion.AngleAxis(angle, targetSystem.currentTarget.up) * targetDir).normalized * trapWidth;
-        Vector3 rightTarget = targetSystem.currentTarget.position + (Quaternion.AngleAxis(-angle, targetSystem.currentTarget.up) * targetDir).normalized * trapWidth;
+        Vector3 leftTarget = targetSystem.currentTarget.position +(Quaternion.AngleAxis(angle, targetSystem.currentTarget.up) * targetDir).normalized * trapWidth;
+        Vector3 rightTarget = targetSystem.currentTarget.position +(Quaternion.AngleAxis(-angle, targetSystem.currentTarget.up) * targetDir).normalized * trapWidth;
 
         Debug.DrawLine(targetSystem.currentTarget.position, leftTarget, Color.blue, 5f);
         Debug.DrawLine(targetSystem.currentTarget.position, rightTarget, Color.blue, 5f);
 
         // Firing to left of target
-        if (!Physics.Linecast(turret.position, leftTarget, ~targetSystem.ignoreLayerMask))
+        if(!Physics.Linecast(turret.position, leftTarget, ~targetSystem.ignoreLayerMask))
         {
             baseTankLogic.targetTurretDir = leftTarget - turret.position;
             yield return new WaitUntil(() => Vector3.Angle(barrel.forward, baseTankLogic.targetTurretDir) < maxShootAngle);
@@ -300,7 +300,7 @@ public class TrapBot : MonoBehaviour
         }
 
         // Firing to right of target
-        if (!Physics.Linecast(turret.position, rightTarget, ~targetSystem.ignoreLayerMask))
+        if(!Physics.Linecast(turret.position, rightTarget, ~targetSystem.ignoreLayerMask))
         {
             baseTankLogic.targetTurretDir = rightTarget - turret.position;
             yield return new WaitUntil(() => fireControl.canFire && Vector3.Angle(barrel.forward, baseTankLogic.targetTurretDir) < maxShootAngle);
@@ -314,7 +314,7 @@ public class TrapBot : MonoBehaviour
         bulletRicochet.CalculateBulletRicochets(barrel, targetSystem.currentTarget.position);
         Vector3 shootPosition = bulletRicochet.SelectShootPosition(barrel, bulletRicochet.selectionMode);
         baseTankLogic.targetTurretDir = shootPosition - turret.position;
-        if (bulletRicochet.shootPositions.Count > 0 && (Mathf.Abs(Vector3.SignedAngle(turret.forward, shootPosition - turret.position, turret.up)) < maxRicochetAngle || !turret.CanRotateTo(targetDir, baseTankLogic.turretRangeX, baseTankLogic.turretRangeY)))
+        if(bulletRicochet.shootPositions.Count > 0 &&(Mathf.Abs(Vector3.SignedAngle(turret.forward, shootPosition - turret.position, turret.up)) < maxRicochetAngle || !turret.CanRotateTo(targetDir, baseTankLogic.turretRangeX, baseTankLogic.turretRangeY)))
         {
             // Firing ricochet bullet to target
             baseTankLogic.stationary = true;
@@ -333,7 +333,7 @@ public class TrapBot : MonoBehaviour
             StartCoroutine(fireControl.Shoot());
             baseTankLogic.stationary = false;
         }
-        if (mode != Mode.Defense)
+        if(mode != Mode.Defense)
         {
             StartCoroutine(ResetMode());
             mode = Mode.Defense;
@@ -356,45 +356,45 @@ public class TrapBot : MonoBehaviour
         baseTankLogic.stationary = false;
 
         List<Vector3> movePositions = new List<Vector3>();
-        if (!Physics.Raycast(transform.position, -transform.right, mineControl.explosionRadius, ~targetSystem.ignoreLayerMask))
+        if(!Physics.Raycast(transform.position, -transform.right, mineControl.explosionRadius, ~targetSystem.ignoreLayerMask))
         {
             Vector3 newPosition = transform.position - transform.right * mineControl.explosionRadius;
-            if (Physics.Linecast(targetSystem.currentTarget.position, newPosition, ~targetSystem.ignoreLayerMask))
+            if(Physics.Linecast(targetSystem.currentTarget.position, newPosition, ~targetSystem.ignoreLayerMask))
             {
                 movePositions.Add(newPosition);
             }
         }
-        if (!Physics.Raycast(transform.position, transform.forward, mineControl.explosionRadius, ~targetSystem.ignoreLayerMask))
+        if(!Physics.Raycast(transform.position, transform.forward, mineControl.explosionRadius, ~targetSystem.ignoreLayerMask))
         {
             Vector3 newPosition = transform.position + transform.forward * mineControl.explosionRadius;
-            if (Physics.Linecast(targetSystem.currentTarget.position, newPosition, ~targetSystem.ignoreLayerMask))
+            if(Physics.Linecast(targetSystem.currentTarget.position, newPosition, ~targetSystem.ignoreLayerMask))
             {
                 movePositions.Add(newPosition);
             }
         }
-        if (!Physics.Raycast(transform.position, transform.right, mineControl.explosionRadius, ~targetSystem.ignoreLayerMask))
+        if(!Physics.Raycast(transform.position, transform.right, mineControl.explosionRadius, ~targetSystem.ignoreLayerMask))
         {
             Vector3 newPosition = transform.position + transform.right * mineControl.explosionRadius;
-            if (Physics.Linecast(targetSystem.currentTarget.position, newPosition, ~targetSystem.ignoreLayerMask))
+            if(Physics.Linecast(targetSystem.currentTarget.position, newPosition, ~targetSystem.ignoreLayerMask))
             {
                 movePositions.Add(newPosition);
             }
         }
-        if (!Physics.Raycast(transform.position, -transform.forward, mineControl.explosionRadius, ~targetSystem.ignoreLayerMask))
+        if(!Physics.Raycast(transform.position, -transform.forward, mineControl.explosionRadius, ~targetSystem.ignoreLayerMask))
         {
             Vector3 newPosition = transform.position - transform.forward * mineControl.explosionRadius;
-            if (Physics.Linecast(targetSystem.currentTarget.position, newPosition, ~targetSystem.ignoreLayerMask))
+            if(Physics.Linecast(targetSystem.currentTarget.position, newPosition, ~targetSystem.ignoreLayerMask))
             {
                 movePositions.Add(newPosition);
             }
         }
 
-        if (movePositions.Count > 0)
+        if(movePositions.Count > 0)
         {
             Vector3 newLayPosition = movePositions[Random.Range(0, movePositions.Count)];
             baseTankLogic.targetTankDir = newLayPosition - transform.position;
             yield return new WaitUntil(() => Vector3.Distance(transform.position, newLayPosition) < 1);
-            if (mineControl.mineLimit - mineControl.laidMines.Count > 0 && mineControl.canLay)
+            if(mineControl.mineLimit - mineControl.laidMines.Count > 0 && mineControl.canLay)
             {
                 layingMine = true;
                 baseTankLogic.stationary = true;

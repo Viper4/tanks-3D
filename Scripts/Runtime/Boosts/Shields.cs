@@ -25,7 +25,7 @@ public class Shields : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        shieldParent.localRotation = Quaternion.Euler(0, lastTankRotation.eulerAngles.y - tankOrigin.localEulerAngles.y, 0) * (Quaternion.AngleAxis(Time.deltaTime * spinRate, Vector3.up) * shieldParent.localRotation);
+        shieldParent.localRotation = Quaternion.Euler(0, lastTankRotation.eulerAngles.y - tankOrigin.localEulerAngles.y, 0) *(Quaternion.AngleAxis(Time.deltaTime * spinRate, Vector3.up) * shieldParent.localRotation);
         lastTankRotation = tankOrigin.localRotation;
     }
 
@@ -34,18 +34,18 @@ public class Shields : MonoBehaviour
     {
         shieldAmount += amount;
         int newShields = amount;
-        if (shieldAmount > shieldLimit)
+        if(shieldAmount > shieldLimit)
         {
             newShields -= shieldAmount - shieldLimit;
             shieldAmount = shieldLimit;
         }
 
-        for (int i = 0; i < newShields; i++)
+        for(int i = 0; i < newShields; i++)
         {
             Instantiate(shieldPrefab, shieldParent);
         }
 
-        if (newShields > 0)
+        if(newShields > 0)
         {
             UpdateShields();
         }
@@ -58,17 +58,17 @@ public class Shields : MonoBehaviour
         int previousShieldAmount = shieldAmount; // Using this instead of shieldParent.childCount since children update too slowly
         shieldAmount -= amount;
         int shieldsToRemove = amount;
-        if (shieldAmount < 0)
+        if(shieldAmount < 0)
         {
             shieldsToRemove += shieldAmount;
         }
 
-        for (int i = previousShieldAmount - 1; i > previousShieldAmount - shieldsToRemove - 1; i--)
+        for(int i = previousShieldAmount - 1; i > previousShieldAmount - shieldsToRemove - 1; i--)
         {
             Destroy(shieldParent.GetChild(i).gameObject);
         }
 
-        if (shieldAmount > 0)
+        if(shieldAmount > 0)
         {
             UpdateShields();
         }
@@ -77,7 +77,7 @@ public class Shields : MonoBehaviour
     public void DeleteShields()
     {
         shieldAmount = 0;
-        foreach (Transform child in shieldParent)
+        foreach(Transform child in shieldParent)
         {
             Destroy(child.gameObject);
         }
@@ -86,10 +86,10 @@ public class Shields : MonoBehaviour
     public void UpdateShields()
     {
         float angleBetween = 360 / shieldAmount;
-        for (int i = 0; i < shieldAmount; i++)
+        for(int i = 0; i < shieldAmount; i++)
         {
             Transform shield = shieldParent.GetChild(i);
-            Quaternion shieldRotation = Quaternion.AngleAxis(angleBetween * (i + 1), shieldParent.up);
+            Quaternion shieldRotation = Quaternion.AngleAxis(angleBetween *(i + 1), shieldParent.up);
             Vector3 rotatedForward = shieldRotation * Vector3.forward * distanceFromTank;
             shield.SetPositionAndRotation(shieldParent.position + rotatedForward, shieldRotation);
         }

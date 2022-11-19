@@ -38,20 +38,20 @@ public class RedBot : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!GameManager.Instance.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null && !baseTankLogic.disabled)
+        if(!GameManager.Instance.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null && !baseTankLogic.disabled)
         {
             Vector3 targetDir = targetSystem.currentTarget.position - turret.position;
             baseTankLogic.targetTurretDir = targetDir;
 
-            if (fireControl.canFire && fireControl.firedBullets.Count < fireControl.bulletLimit && !shooting && targetSystem.TargetVisible())
+            if(fireControl.canFire && fireControl.firedBullets.Count < fireControl.bulletLimit && !shooting && targetSystem.TargetVisible())
             {
                 StartCoroutine(Shoot());
             }
 
-            if (nearbyMine == null)
+            if(nearbyMine == null)
             {
                 // Rotating towards target when target is getting behind this tank
-                if (Mathf.Abs(Vector3.SignedAngle(transform.forward, targetDir, transform.up)) > maxTargetAngle)
+                if(Mathf.Abs(Vector3.SignedAngle(transform.forward, targetDir, transform.up)) > maxTargetAngle)
                 {
                     baseTankLogic.targetTankDir = targetDir;
                 }
@@ -69,7 +69,7 @@ public class RedBot : MonoBehaviour
 
     private void OnTriggerStay(Collider other)
     {
-        switch (other.tag)
+        switch(other.tag)
         {
             case "Mine":
                 nearbyMine = other.transform;
@@ -79,10 +79,10 @@ public class RedBot : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-        switch (other.tag)
+        switch(other.tag)
         {
             case "Mine":
-                if (nearbyMine == other.transform)
+                if(nearbyMine == other.transform)
                 {
                     nearbyMine = null;
                 }
@@ -93,7 +93,7 @@ public class RedBot : MonoBehaviour
     IEnumerator Shoot()
     {
         // When angle between barrel and target is less than shootAngle, then stop and fire
-        if (Vector3.Angle(barrel.forward, baseTankLogic.targetTurretDir) < maxShootAngle)
+        if(Vector3.Angle(barrel.forward, baseTankLogic.targetTurretDir) < maxShootAngle)
         {
             shooting = true;
 

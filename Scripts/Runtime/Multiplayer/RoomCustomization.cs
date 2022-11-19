@@ -37,12 +37,12 @@ public class RoomCustomization : MonoBehaviour
         PVESettings.gameObject.SetActive(option == "PvE");
         teamSettings.gameObject.SetActive(option == "Teams");
 
-        if (option == "Co-Op")
+        if(option == "Co-Op")
         {
             CoOpSettings.gameObject.SetActive(true);
             mapSelection.gameObject.SetActive(false);
 
-            if (DataManager.roomSettings.map != "Classic 1" && DataManager.roomSettings.map != "Regular 1")
+            if(DataManager.roomSettings.map != "Classic 1" && DataManager.roomSettings.map != "Regular 1")
             {
                 DataManager.roomSettings.map = "Classic 1";
             }
@@ -52,7 +52,7 @@ public class RoomCustomization : MonoBehaviour
             CoOpSettings.gameObject.SetActive(false);
             mapSelection.gameObject.SetActive(true);
 
-            if (DataManager.roomSettings.map == "Classic 1" || DataManager.roomSettings.map == "Regular 1")
+            if(DataManager.roomSettings.map == "Classic 1" || DataManager.roomSettings.map == "Regular 1")
             {
                 DataManager.roomSettings.map = "Classic";
             }
@@ -82,7 +82,7 @@ public class RoomCustomization : MonoBehaviour
     public void ChangeBotSelection(MultiDropdown multiDropdown)
     {
         DataManager.roomSettings.bots.Clear();
-        foreach (int value in multiDropdown.values)
+        foreach(int value in multiDropdown.values)
         {
             DataManager.roomSettings.bots.Add(multiDropdown.options[value].text);
         }
@@ -101,7 +101,7 @@ public class RoomCustomization : MonoBehaviour
     public void ChangeBoostSelection(MultiDropdown multiDropdown)
     {
         DataManager.roomSettings.boosts.Clear();
-        foreach (int value in multiDropdown.values)
+        foreach(int value in multiDropdown.values)
         {
             DataManager.roomSettings.boosts.Add(multiDropdown.options[value].text);
         }
@@ -120,9 +120,9 @@ public class RoomCustomization : MonoBehaviour
     public void UpdateSettingsUI()
     {
         GameObject[] allUISettings = GameObject.FindGameObjectsWithTag("UI Setting");
-        foreach (GameObject setting in allUISettings)
+        foreach(GameObject setting in allUISettings)
         {
-            switch (setting.name)
+            switch(setting.name)
             {
                 case "Is Public":
                     setting.GetComponent<Toggle>().isOn = DataManager.roomSettings.isPublic;
@@ -170,9 +170,9 @@ public class RoomCustomization : MonoBehaviour
 
     private void SetValueToOption(Dropdown dropdown, string optionText)
     {
-        for (int i = 0; i < dropdown.options.Count; i++)
+        for(int i = 0; i < dropdown.options.Count; i++)
         {
-            if (dropdown.options[i].text == optionText)
+            if(dropdown.options[i].text == optionText)
             {
                 dropdown.value = i;
                 break;
@@ -182,11 +182,11 @@ public class RoomCustomization : MonoBehaviour
 
     private void SetValuesToOptions(MultiDropdown multiDropdown, List<string> optionTexts)
     {
-        for (int i = 0; i < optionTexts.Count; i++)
+        for(int i = 0; i < optionTexts.Count; i++)
         {
-            for (int j = 0; j < multiDropdown.options.Count; j++)
+            for(int j = 0; j < multiDropdown.options.Count; j++)
             {
-                if (multiDropdown.options[j].text == optionTexts[i])
+                if(multiDropdown.options[j].text == optionTexts[i])
                 {
                     multiDropdown.AddValue(j);
                     break;

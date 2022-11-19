@@ -2,7 +2,7 @@ Shader "TextMeshPro/Mobile/Bitmap" {
 
 Properties {
 	_MainTex		("Font Atlas", 2D) = "white" {}
-	[HDR]_Color		("Text Color", Color) = (1,1,1,1)
+	[HDR]_Color		("Text Color", Color) =(1,1,1,1)
 	_DiffusePower	("Diffuse Power", Range(1.0,4.0)) = 1.0
 
 	_VertexOffsetX("Vertex OffsetX", float) = 0
@@ -10,7 +10,7 @@ Properties {
 	_MaskSoftnessX("Mask SoftnessX", float) = 0
 	_MaskSoftnessY("Mask SoftnessY", float) = 0
 
-	_ClipRect("Clip Rect", vector) = (-32767, -32767, 32767, 32767)
+	_ClipRect("Clip Rect", vector) =(-32767, -32767, 32767, 32767)
 
 	_StencilComp("Stencil Comparison", Float) = 8
 	_Stencil("Stencil ID", Float) = 0
@@ -80,14 +80,14 @@ SubShader {
 		uniform float		_MaskSoftnessX;
 		uniform float		_MaskSoftnessY;
 
-		v2f vert (appdata_t v)
+		v2f vert(appdata_t v)
 		{
 			v2f OUT;
 			float4 vert = v.vertex;
 			vert.x += _VertexOffsetX;
 			vert.y += _VertexOffsetY;
 
-			vert.xy += (vert.w * 0.5) / _ScreenParams.xy;
+			vert.xy +=(vert.w * 0.5) / _ScreenParams.xy;
 
 			OUT.vertex = UnityPixelSnap(UnityObjectToClipPos(vert));
 			OUT.color = v.color;
@@ -100,12 +100,12 @@ SubShader {
 
 			// Clamp _ClipRect to 16bit.
 			float4 clampedRect = clamp(_ClipRect, -2e10, 2e10);
-			OUT.mask = float4(vert.xy * 2 - clampedRect.xy - clampedRect.zw, 0.25 / (0.25 * half2(_MaskSoftnessX, _MaskSoftnessY) + pixelSize.xy));
+			OUT.mask = float4(vert.xy * 2 - clampedRect.xy - clampedRect.zw, 0.25 /(0.25 * half2(_MaskSoftnessX, _MaskSoftnessY) + pixelSize.xy));
 
 			return OUT;
 		}
 
-		fixed4 frag (v2f IN) : COLOR
+		fixed4 frag(v2f IN) : COLOR
 		{
 			fixed4 color = fixed4(IN.color.rgb, IN.color.a * tex2D(_MainTex, IN.texcoord0).a);
 

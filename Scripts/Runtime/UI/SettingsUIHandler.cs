@@ -18,14 +18,14 @@ public class SettingsUIHandler : MonoBehaviour
     {
         Event currentEvent = new Event();
 
-        if (selectedKeyBind != null && Event.PopEvent(currentEvent))
+        if(selectedKeyBind != null && Event.PopEvent(currentEvent))
         {
-            if (currentEvent.isKey)
+            if(currentEvent.isKey)
             {
                 DataManager.playerSettings.keyBinds[selectedKeyBind.name] = currentEvent.keyCode;
                 selectedKeyBind.Find("Button").GetChild(0).GetComponent<Text>().text = currentEvent.keyCode.ToString();
             }
-            else if (currentEvent.isMouse)
+            else if(currentEvent.isMouse)
             {
                 DataManager.playerSettings.keyBinds[selectedKeyBind.name] = mouseKeyCodes[currentEvent.button];
                 selectedKeyBind.Find("Button").GetChild(0).GetComponent<Text>().text = mouseKeyCodes[currentEvent.button].ToString();
@@ -74,8 +74,8 @@ public class SettingsUIHandler : MonoBehaviour
 
     public void ChangeTargetFramerate(Slider slider)
     {
-        Application.targetFrameRate = DataManager.playerSettings.targetFramerate = (int)slider.value;
-        if (slider.value <= 300)
+        Application.targetFrameRate = DataManager.playerSettings.targetFramerate =(int)slider.value;
+        if(slider.value <= 300)
         {
             slider.transform.Find("Value Text").GetComponent<Text>().text = slider.value.ToString();
         }
@@ -90,9 +90,9 @@ public class SettingsUIHandler : MonoBehaviour
     {
         DataManager.playerSettings.silhouettes = toggle.isOn;
 
-        foreach (ScriptableRendererFeature feature in forwardRenderer.rendererFeatures)
+        foreach(ScriptableRendererFeature feature in forwardRenderer.rendererFeatures)
         {
-            if (feature.name.Contains("Hidden"))
+            if(feature.name.Contains("Hidden"))
             {
                 feature.SetActive(toggle.isOn);
             }
@@ -147,22 +147,22 @@ public class SettingsUIHandler : MonoBehaviour
     public void UpdateSettingsUI()
     {
         // Updating renderer features
-        foreach (ScriptableRendererFeature feature in forwardRenderer.rendererFeatures)
+        foreach(ScriptableRendererFeature feature in forwardRenderer.rendererFeatures)
         {
-            if (feature.name == "TankHidden" || feature.name == "BulletHidden")
+            if(feature.name == "TankHidden" || feature.name == "BulletHidden")
             {
                 feature.SetActive(DataManager.playerSettings.silhouettes);
             }
         }
         // Updating UI elements in settings
-        foreach (Transform content in transform.Find("Scroll View").Find("Viewport"))
+        foreach(Transform content in transform.Find("Scroll View").Find("Viewport"))
         {
-            switch (content.name)
+            switch(content.name)
             {
                 case "General":
-                    foreach (Transform setting in content)
+                    foreach(Transform setting in content)
                     {
-                        switch (setting.name)
+                        switch(setting.name)
                         {
                             case "Sensitivity":
                                 setting.GetComponent<Slider>().value = DataManager.playerSettings.sensitivity;
@@ -178,15 +178,15 @@ public class SettingsUIHandler : MonoBehaviour
                     }
                     break;
                 case "Keybinds":
-                    foreach (Transform keybind in content)
+                    foreach(Transform keybind in content)
                     {
                         keybind.Find("Button").GetChild(0).GetComponent<Text>().text = DataManager.playerSettings.keyBinds[keybind.name].ToString();
                     }
                     break;
                 case "Video":
-                    foreach (Transform setting in content)
+                    foreach(Transform setting in content)
                     {
-                        switch (setting.name)
+                        switch(setting.name)
                         {
                             case "Target Framerate":
                                 setting.GetComponent<Slider>().value = DataManager.playerSettings.targetFramerate;
@@ -207,9 +207,9 @@ public class SettingsUIHandler : MonoBehaviour
                     }
                     break;
                 case "Audio":
-                    foreach (Transform setting in content)
+                    foreach(Transform setting in content)
                     {
-                        switch (setting.name)
+                        switch(setting.name)
                         {
                             case "Master Volume":
                                 setting.GetComponent<Slider>().value = DataManager.playerSettings.masterVolume;

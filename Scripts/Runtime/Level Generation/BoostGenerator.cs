@@ -19,18 +19,18 @@ public class BoostGenerator : MonoBehaviour
     {
         Instance = this;
 
-        if (!PhotonNetwork.OfflineMode)
+        if(!PhotonNetwork.OfflineMode)
         {
-            foreach (GameObject boost in boosts.ToList())
+            foreach(GameObject boost in boosts.ToList())
             {
-                if (!DataManager.roomSettings.boosts.Contains(boost.name))
+                if(!DataManager.roomSettings.boosts.Contains(boost.name))
                 {
                     boosts.Remove(boost);
                 }
             }
         }
 
-        if (PhotonNetwork.IsMasterClient)
+        if(PhotonNetwork.IsMasterClient)
         {
             boostLimit = DataManager.roomSettings.boostLimit;
             SpawnBoosts();
@@ -40,7 +40,7 @@ public class BoostGenerator : MonoBehaviour
     public void SpawnNewBoost()
     {
         GameObject newBoost = boosts[Random.Range(0, boosts.Count)];
-        if (PhotonNetwork.OfflineMode)
+        if(PhotonNetwork.OfflineMode)
         {
             Instantiate(newBoost, CustomRandom.GetSpawnPointInCollider(spawnCollider, Vector3.down, ignoreLayers, newBoost.GetComponent<BoxCollider>(), newBoost.transform.rotation, true), Quaternion.AngleAxis(Random.Range(-180.0f, 180.0f), Vector3.up), transform);
         }
@@ -53,7 +53,7 @@ public class BoostGenerator : MonoBehaviour
 
     void SpawnBoosts()
     {
-        for (int i = 0; i < boostLimit; i++)
+        for(int i = 0; i < boostLimit; i++)
         {
             SpawnNewBoost();
         }

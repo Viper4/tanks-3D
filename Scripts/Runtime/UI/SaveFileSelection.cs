@@ -6,8 +6,6 @@ using UnityEngine.UI;
 
 public class SaveFileSelection : MonoBehaviour
 {
-    [SerializeField] DataManager dataManager;
-
     [SerializeField] RectTransform template;
     [SerializeField] RectTransform container;
 
@@ -16,10 +14,14 @@ public class SaveFileSelection : MonoBehaviour
 
     RectTransform selectedSaveSlot;
 
-    public void RefreshSaveSlots()
+    private void Start()
     {
         template.gameObject.SetActive(false);
-        foreach (RectTransform child in container)
+    }
+
+    public void RefreshSaveSlots()
+    {
+        foreach(RectTransform child in container)
         {
             if(child != template)
             {
@@ -51,9 +53,9 @@ public class SaveFileSelection : MonoBehaviour
         string fileName = input.text;
         IEnumerable<string> allSaveFiles = SaveSystem.FilesInSaveFolder(false, ".roomsettings");
 
-        if (fileName != null && fileName.Length != 0)
+        if(fileName != null && fileName.Length != 0)
         {
-            if (!allSaveFiles.Contains(fileName))
+            if(!allSaveFiles.Contains(fileName))
             {
                 DataManager.roomSettings.SaveRoomSettings(fileName);
 
@@ -72,7 +74,7 @@ public class SaveFileSelection : MonoBehaviour
 
     public void SaveSelected()
     {
-        if (selectedSaveSlot != null)
+        if(selectedSaveSlot != null)
         {
             DataManager.roomSettings.SaveRoomSettings(selectedSaveSlot.Find("Label").GetComponent<Text>().text);
         }
@@ -84,11 +86,11 @@ public class SaveFileSelection : MonoBehaviour
 
     public void LoadSelected()
     {
-        if (selectedSaveSlot != null)
+        if(selectedSaveSlot != null)
         {
             DataManager.roomSettings = SaveSystem.LoadRoomSettings(selectedSaveSlot.Find("Label").GetComponent<Text>().text);
         }
-        else if (popupText.gameObject.activeInHierarchy)
+        else if(popupText.gameObject.activeInHierarchy)
         {
             ShowPopup(2.5f, "No file selected");
         }
@@ -96,7 +98,7 @@ public class SaveFileSelection : MonoBehaviour
 
     public void DeleteSelected()
     {
-        if (selectedSaveSlot != null)
+        if(selectedSaveSlot != null)
         {
             SaveSystem.DeleteFile(selectedSaveSlot.Find("Label").GetComponent<Text>().text + ".roomsettings");
 
@@ -110,7 +112,7 @@ public class SaveFileSelection : MonoBehaviour
 
     private void ShowPopup(float time, string text)
     {
-        if (popupCoroutine != null)
+        if(popupCoroutine != null)
         {
             StopCoroutine(popupCoroutine);
         }

@@ -35,25 +35,25 @@ public class AreaScanner : MonoBehaviour
     {
         List<Transform> visibleObjects = new List<Transform>();
         Collider[] overlappingColliders = Physics.OverlapSphere(origin.position, viewDistance, objectLayerMask);
-        foreach (Collider collider in overlappingColliders)
+        foreach(Collider collider in overlappingColliders)
         {
-            if (Mathf.Abs(collider.bounds.min.y - origin.position.y) < heightLimit)
+            if(Mathf.Abs(collider.bounds.min.y - origin.position.y) < heightLimit)
             {
                 Vector3[] vertices = collider.GetComponent<MeshFilter>().sharedMesh.vertices;
-                foreach (Vector3 vertex in vertices)
+                foreach(Vector3 vertex in vertices)
                 {
-                    if (Physics.Raycast(origin.position, vertex - origin.position, out RaycastHit hit, viewDistance, objectLayerMask))
+                    if(Physics.Raycast(origin.position, vertex - origin.position, out RaycastHit hit, viewDistance, objectLayerMask))
                     {
-                        if (hit.transform == collider.transform)
+                        if(hit.transform == collider.transform)
                         {
-                            if (showRays)
+                            if(showRays)
                             {
                                 Debug.DrawLine(origin.position, hit.point, Color.magenta, drawDuration);
                             }
                             visibleObjects.Add(hit.transform);
                             break;
                         }
-                        else if (showRays)
+                        else if(showRays)
                         {
                             Debug.DrawLine(origin.position, hit.point, Color.red, drawDuration);
                         }
@@ -68,26 +68,26 @@ public class AreaScanner : MonoBehaviour
     {
         List<Transform> visibleObjects = new List<Transform>();
         Collider[] overlappingColliders = Physics.OverlapSphere(origin.position, viewDistance, objectLayerMask);
-        foreach (Collider collider in overlappingColliders)
+        foreach(Collider collider in overlappingColliders)
         {
-            if (!Physics.CheckSphere(collider.bounds.center, nearRadius, nearLayerMask) && Mathf.Abs(collider.bounds.min.y - origin.position.y) < heightLimit)
+            if(!Physics.CheckSphere(collider.bounds.center, nearRadius, nearLayerMask) && Mathf.Abs(collider.bounds.min.y - origin.position.y) < heightLimit)
             {
                 Debug.Log(collider.GetType());
 
-                foreach (Vector3 vertex in collider.Vertices())
+                foreach(Vector3 vertex in collider.Vertices())
                 {
-                    if (Physics.Raycast(origin.position, vertex - origin.position, out RaycastHit hit, viewDistance, objectLayerMask | obstructLayerMask))
+                    if(Physics.Raycast(origin.position, vertex - origin.position, out RaycastHit hit, viewDistance, objectLayerMask | obstructLayerMask))
                     {
-                        if (hit.transform == collider.transform)
+                        if(hit.transform == collider.transform)
                         {
-                            if (showRays)
+                            if(showRays)
                             {
                                 Debug.DrawLine(origin.position, hit.point, Color.magenta, drawDuration);
                             }
                             visibleObjects.Add(hit.transform);
                             break;
                         }
-                        else if (showRays)
+                        else if(showRays)
                         {
                             Debug.DrawLine(origin.position, hit.point, Color.red, drawDuration);
                         }
@@ -102,24 +102,24 @@ public class AreaScanner : MonoBehaviour
     {
         List<Transform> visibleObjects = new List<Transform>();
         Collider[] overlappingColliders = Physics.OverlapSphere(origin.position, viewDistance, objectLayerMask);
-        foreach (Collider collider in overlappingColliders)
+        foreach(Collider collider in overlappingColliders)
         {
-            if (collider.transform.CompareTag(objectTag) && !Physics.CheckSphere(collider.bounds.center, nearRadius, nearLayerMask) && Mathf.Abs(collider.bounds.min.y - origin.position.y) < heightLimit)
+            if(collider.transform.CompareTag(objectTag) && !Physics.CheckSphere(collider.bounds.center, nearRadius, nearLayerMask) && Mathf.Abs(collider.bounds.min.y - origin.position.y) < heightLimit)
             {
-                foreach (Vector3 vertex in collider.Vertices())
+                foreach(Vector3 vertex in collider.Vertices())
                 {
-                    if (Physics.Raycast(origin.position, vertex - origin.position, out RaycastHit hit, viewDistance, objectLayerMask | obstructLayerMask))
+                    if(Physics.Raycast(origin.position, vertex - origin.position, out RaycastHit hit, viewDistance, objectLayerMask | obstructLayerMask))
                     {
-                        if (hit.transform == collider.transform)
+                        if(hit.transform == collider.transform)
                         {
-                            if (showRays)
+                            if(showRays)
                             {
                                 Debug.DrawLine(origin.position, hit.point, Color.magenta, drawDuration);
                             }
                             visibleObjects.Add(hit.transform);
                             break;
                         }
-                        else if (showRays)
+                        else if(showRays)
                         {
                             Debug.DrawLine(origin.position, hit.point, Color.red, drawDuration);
                         }
@@ -135,24 +135,24 @@ public class AreaScanner : MonoBehaviour
         List<Transform> visibleObjects = new List<Transform>();
         Collider[] overlappingColliders = Physics.OverlapSphere(origin.position, viewDistance, objectLayerMask);
 
-        foreach (Collider collider in overlappingColliders)
+        foreach(Collider collider in overlappingColliders)
         {
-            if (collider.transform.CompareTag(objectTag) && Mathf.Abs(collider.bounds.min.y - origin.position.y) < heightLimit)
+            if(collider.transform.CompareTag(objectTag) && Mathf.Abs(collider.bounds.min.y - origin.position.y) < heightLimit)
             {
-                foreach (Vector3 vertex in collider.Vertices())
+                foreach(Vector3 vertex in collider.Vertices())
                 {
-                    if (Physics.Raycast(origin.position, vertex - origin.position, out RaycastHit hit, viewDistance, objectLayerMask | obstructLayerMask))
+                    if(Physics.Raycast(origin.position, vertex - origin.position, out RaycastHit hit, viewDistance, objectLayerMask | obstructLayerMask))
                     {
-                        if (hit.transform == collider.transform)
+                        if(hit.transform == collider.transform)
                         {
-                            if (showRays)
+                            if(showRays)
                             {
                                 Debug.DrawLine(origin.position, hit.point, Color.magenta, drawDuration);
                             }
                             visibleObjects.Add(hit.transform);
                             break;
                         }
-                        else if (showRays)
+                        else if(showRays)
                         {
                             Debug.DrawLine(origin.position, hit.point, Color.red, drawDuration);
                         }
@@ -165,15 +165,15 @@ public class AreaScanner : MonoBehaviour
 
     public void SelectObject(Transform origin, List<Transform> objectList)
     {
-        if (objectList.Count > 0)
+        if(objectList.Count > 0)
         {
             objectIndex++;
-            if (objectIndex > objectList.Count - 1)
+            if(objectIndex > objectList.Count - 1)
             {
                 objectIndex = 0;
             }
 
-            switch (selectionMode)
+            switch(selectionMode)
             {
                 case SelectionMode.Random:
                     selectedObject = objectList[Random.Range(0, objectList.Count)];

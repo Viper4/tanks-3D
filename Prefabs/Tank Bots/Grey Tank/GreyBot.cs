@@ -36,9 +36,9 @@ public class GreyBot : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!GameManager.Instance.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null && !baseTankLogic.disabled)
+        if(!GameManager.Instance.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null && !baseTankLogic.disabled)
         {
-            if (fireControl.canFire && !shooting && targetSystem.TargetVisible())
+            if(fireControl.canFire && !shooting && targetSystem.TargetVisible())
             {
                 StartCoroutine(Shoot());
             }
@@ -53,7 +53,7 @@ public class GreyBot : MonoBehaviour
     {
         // When angle between barrel and target is less than maxShootAngle, then stop and fire
         float angle = Vector3.Angle(barrel.forward, baseTankLogic.targetTurretDir);
-        if (angle < maxShootAngle)
+        if(angle < maxShootAngle)
         {
             shooting = true;
             yield return new WaitForSeconds(Random.Range(fireDelay[0], fireDelay[1]));
