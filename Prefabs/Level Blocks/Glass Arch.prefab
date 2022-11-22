@@ -108,7 +108,6 @@ GameObject:
   m_Component:
   - component: {fileID: 9184779533493177992}
   - component: {fileID: 3324802315721454119}
-  - component: {fileID: 8743758396326015311}
   - component: {fileID: 6400584864079135678}
   - component: {fileID: 1236179373557914219}
   - component: {fileID: 422334894458094546}
@@ -159,19 +158,6 @@ MonoBehaviour:
   pitchRange:
   - 0.9
   - 1.1
---- !u!65 &8743758396326015311
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9184779533493177993}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 3, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &6400584864079135678
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5167,3 +5153,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   prefabName: Glass Arch
+  thisRenderer: {fileID: 7923411418813751110}
+  thisCollider: {fileID: 7923411418813751111}

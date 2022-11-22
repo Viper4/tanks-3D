@@ -366,6 +366,15 @@ namespace MyUnityAddons
             {
                 return Vector3.Distance(start, end) / speed;
             }
+
+            public static Vector3 GetClosestPointOnSphere(Vector3 fromPoint, Vector3 sphereCenter, float radius)
+            {
+                float vX = fromPoint.x - sphereCenter.x;
+                float vY = fromPoint.y - sphereCenter.y;
+                float vZ = fromPoint.z - sphereCenter.z;
+                float magV = Mathf.Sqrt(vX * vX + vY * vY + vZ * vZ);
+                return new Vector3(sphereCenter.x + vX / magV * radius, sphereCenter.y + vY / magV * radius, sphereCenter.z + vZ / magV * radius);
+            }
         }
 
         public static class Extensions
@@ -589,6 +598,70 @@ namespace MyUnityAddons
                     return true;
                 }
                 return false;
+            }
+
+            public static bool IsVisibleFrom(this Vector3 point, Camera camera)
+            {
+                Vector3 screenPoint = camera.WorldToViewportPoint(point);
+                return screenPoint.z > 0 && screenPoint.x > 0 && screenPoint.x < 1 && screenPoint.y > 0 && screenPoint.y < 1;
+            }
+
+            public static bool IsVisibleFrom(this Mesh mesh, Camera camera)
+            {
+                Vector3[] vertices = mesh.vertices;
+                for(int i = 0; i < vertices.Length; i++)
+                {
+                    if(vertices[i].IsVisibleFrom(camera))
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            public static bool IsVisibleFrom(this Collider collider, Camera camera)
+            {
+                Vector3[] vertices = collider.Vertices();
+                for(int i = 0; i < vertices.Length; i++)
+                {
+                    if(vertices[i].IsVisibleFrom(camera))
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            public static Vector3 ToNormal(this Vector3 vector)
+            {
+                Vector3 normalizedVector = vector.normalized;
+                Vector3 normal = Vector3.zero;
+                if(normalizedVector.x > 0)
+                {
+                    normal.x = normalizedVector.x < 0.5f ? 0 : 1;
+                }
+                else
+                {
+                    normal.x = normalizedVector.x > -0.5f ? 0 : -1;
+                }
+                if (normalizedVector.y > 0)
+                {
+                    normal.y = normalizedVector.y < 0.5f ? 0 : 1;
+                }
+                else
+                {
+                    normal.y = normalizedVector.y > -0.5f ? 0 : -1;
+                }
+                if (normalizedVector.z > 0)
+                {
+                    normal.z = normalizedVector.z < 0.5f ? 0 : 1;
+                }
+                else
+                {
+                    normal.z = normalizedVector.z > -0.5f ? 0 : -1;
+                }
+
+                return normal;
             }
         }
     }

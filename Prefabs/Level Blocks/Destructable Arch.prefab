@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 445845715882296467}
   - component: {fileID: 6304195145010116668}
-  - component: {fileID: 285792411925332}
   - component: {fileID: 2416849736704526757}
   - component: {fileID: 7529693762855719024}
   - component: {fileID: 8972715663299021257}
@@ -60,19 +59,6 @@ MonoBehaviour:
   pitchRange:
   - 0.9
   - 1.1
---- !u!65 &285792411925332
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 445845715882296466}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 3, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &2416849736704526757
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4945,6 +4931,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   prefabName: Destructable Arch
+  thisRenderer: {fileID: 1489722493219509597}
+  thisCollider: {fileID: 1489722493219509596}
 --- !u!1 &7844054617174742182
 GameObject:
   m_ObjectHideFlags: 0

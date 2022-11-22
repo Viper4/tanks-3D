@@ -61,7 +61,7 @@ public class ObstacleGeneration : MonoBehaviour
                     // If the user did not input distances away to generate each obstacle set it to obstacle's collider size x
                     else
                     {
-                        dstAway = obstacle.GetComponent<BoxCollider>().size.x;
+                        dstAway = obstacle.GetComponentInChildren<Collider>().bounds.size.x;
                     }
 
                     // Setting newPosition to instantiate at
@@ -116,7 +116,7 @@ public class ObstacleGeneration : MonoBehaviour
                         if(Physics.Raycast(newPosition, Vector3.down, out RaycastHit groundHit, Mathf.Infinity, ~2, QueryTriggerInteraction.Collide))
                         {
                             // Setting new position to the distance to ground, instantiating the object, and updating last position
-                            newPosition -= Vector3.up *(groundHit.distance -(obstacle.GetComponent<BoxCollider>().size.y * obstacle.transform.localScale.y * 0.5f));
+                            newPosition -= Vector3.up *(groundHit.distance -(obstacle.GetComponentInChildren<Collider>().bounds.size.y * obstacle.transform.localScale.y * 0.5f));
 
                             clonedObstacles.Add(Instantiate(obstacle, newPosition, newRotation, transform.parent));
                             lastPosition = newPosition;

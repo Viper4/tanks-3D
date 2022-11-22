@@ -30,7 +30,8 @@ public class BulletBoost : MonoBehaviour
 
     IEnumerator BoostRoutine(float duration, int bulletIndex, float speed, int pierceLimit, int ricochetLevel, float explosionRadius)
     {
-        playerUIHandler.ChangeBulletIconIndex(bulletIndex);
+        if(playerUIHandler != null)
+            playerUIHandler.ChangeBulletIconIndex(bulletIndex);
         fireControl.bulletSettings.bulletIndex = bulletIndex;
         fireControl.bulletSettings.speed = speed;
         fireControl.bulletSettings.pierceLimit = pierceLimit;
@@ -39,7 +40,8 @@ public class BulletBoost : MonoBehaviour
 
         yield return new WaitForSeconds(duration);
 
-        playerUIHandler.ChangeBulletIconIndex(fireControl.originalBulletSettings.bulletIndex);
+        if(playerUIHandler != null)
+            playerUIHandler.ChangeBulletIconIndex(fireControl.originalBulletSettings.bulletIndex);
         fireControl.bulletSettings.bulletIndex = fireControl.originalBulletSettings.bulletIndex;
         fireControl.bulletSettings.speed = fireControl.originalBulletSettings.speed;
         fireControl.bulletSettings.pierceLimit = fireControl.originalBulletSettings.pierceLimit;

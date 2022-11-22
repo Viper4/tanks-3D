@@ -1929,7 +1929,7 @@ GameObject:
   - component: {fileID: 6120456207515052346}
   m_Layer: 7
   m_Name: Camera
-  m_TagString: Camera
+  m_TagString: MainCamera
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -2045,7 +2045,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f2562ed487af46e408c078b5f71bef02, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sensitivity: 15
   target: {fileID: 3294769830514609549}
   reticle: {fileID: 6715520413140875281}
   playerControl: {fileID: 2411737411322316673}
@@ -2055,7 +2054,6 @@ MonoBehaviour:
   altTargetDstMinMax: {x: 30, y: 70}
   pitchMinMaxN: {x: -40, y: 80}
   pitchMinMaxL: {x: -20, y: 20}
-  rotationSmoothTime: 0.1
   mouseIgnoreLayers:
     serializedVersion: 2
     m_Bits: 2098694

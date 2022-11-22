@@ -107,7 +107,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2749612926984758436}
-  - component: {fileID: 8138986359732356136}
   - component: {fileID: 4428085693607950201}
   - component: {fileID: -8189485921537101598}
   - component: {fileID: 8968672602055287718}
@@ -137,19 +136,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!65 &8138986359732356136
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3270535609475661342}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &4428085693607950201
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5167,3 +5153,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   prefabName: Glass Triangle
+  thisRenderer: {fileID: 3874590310831128962}
+  thisCollider: {fileID: 24355453673426857}

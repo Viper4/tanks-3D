@@ -7,7 +7,6 @@ using Photon.Realtime;
 using TMPro;
 using PhotonHashtable = ExitGames.Client.Photon.Hashtable;
 using MyUnityAddons.CustomPhoton;
-using Photon.Pun.UtilityScripts;
 
 public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
 {
@@ -130,9 +129,7 @@ public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
         DataManager.chatSettings.username = usernameInput.text;
         SaveSystem.SaveChatSettings(DataManager.chatSettings, "ChatSettings");
         PhotonNetwork.LocalPlayer.AllocatePlayerToTeam();
-
-        PhotonChatController.Instance.ConnectToPhotonChat();
-        PhotonChatController.Instance.SubscribeToRoomChannel(PhotonNetwork.CurrentRoom.Name);
+        PhotonChatController.Instance.SubscribeToChannel(PhotonNetwork.CurrentRoom.Name, 60, true, true);
 
         if(PhotonNetwork.IsMasterClient)
         {

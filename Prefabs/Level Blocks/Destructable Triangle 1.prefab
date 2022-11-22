@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 9004569037126099130}
   - component: {fileID: 5429507448604913437}
-  - component: {fileID: 8170263170025885982}
   - component: {fileID: 4324177249481429917}
   - component: {fileID: 1443000624442374266}
   - component: {fileID: 5054585337696253612}
@@ -60,19 +59,6 @@ MonoBehaviour:
   pitchRange:
   - 0.9
   - 1.1
---- !u!65 &8170263170025885982
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8628183819059575296}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &4324177249481429917
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4945,6 +4931,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   prefabName: Destructable Triangle
+  thisRenderer: {fileID: 8898020677601311465}
+  thisCollider: {fileID: 8898020677601311464}
 --- !u!1 &8898020677601311466
 GameObject:
   m_ObjectHideFlags: 0

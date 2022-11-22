@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 7388442114654519641}
   - component: {fileID: 4794886546605571249}
   - component: {fileID: 6860334143931448412}
-  - component: {fileID: 9020029826878429739}
   - component: {fileID: 5850302818818305569}
   - component: {fileID: 2982432025010140231}
   - component: {fileID: -1084130353260897735}
@@ -87,19 +86,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &9020029826878429739
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4704265161098795565}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 3, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!64 &5850302818818305569
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -109,7 +95,7 @@ MeshCollider:
   m_GameObject: {fileID: 4704265161098795565}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 4
   m_Convex: 0
   m_CookingOptions: -1
@@ -139,3 +125,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   prefabName: Normal Arch
+  thisRenderer: {fileID: 6860334143931448412}
+  thisCollider: {fileID: 5850302818818305569}

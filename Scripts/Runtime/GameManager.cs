@@ -21,6 +21,7 @@ public class GameManager : MonoBehaviourPunCallbacks
     public bool autoPlay;
     public bool inLobby;
     public bool reachedLastLevel = false;
+    public bool editingMode = false;
 
     bool loadingScene = false;
 
@@ -722,6 +723,7 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     public override void OnDisconnected(DisconnectCause cause)
     {
+        PhotonChatController.Instance.Disconnect();
         canceledConnect = false;
         PhotonNetwork.OfflineMode = true;
         SceneManager.LoadScene("Main Menu");

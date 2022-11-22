@@ -9,7 +9,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5420564977874806406}
-  - component: {fileID: 3155734159610906906}
   - component: {fileID: 7351543712109813020}
   - component: {fileID: 1367292582955621442}
   - component: {fileID: 1931567861660409654}
@@ -39,19 +38,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!65 &3155734159610906906
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1367292582955621443}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &7351543712109813020
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5069,6 +5055,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   prefabName: Glass Cube
+  thisRenderer: {fileID: 8667239095106646987}
+  thisCollider: {fileID: 8667239095106646989}
 --- !u!1 &8667239095106646985
 GameObject:
   m_ObjectHideFlags: 0

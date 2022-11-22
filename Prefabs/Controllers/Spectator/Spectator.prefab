@@ -1702,7 +1702,7 @@ GameObject:
   - component: {fileID: 2704942694870626244}
   m_Layer: 7
   m_Name: Spectator
-  m_TagString: Camera
+  m_TagString: MainCamera
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1819,14 +1819,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 72a46c6361c34274b9f79ddda0f4deb6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  RB: {fileID: 2704942694870626244}
-  sensitivity: 15
+  rb: {fileID: 0}
   target: {fileID: 5032541992079575805}
   dstFromTarget: 1
   targetDstLimit: {x: 0, y: 50}
   movementSpeed: 6
   speedLimit: 100
-  rotationSmoothTime: 0.1
 --- !u!54 &2704942694870626244
 Rigidbody:
   m_ObjectHideFlags: 0

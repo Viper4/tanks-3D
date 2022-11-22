@@ -25,6 +25,9 @@ public class ConnectToServer : MonoBehaviourPunCallbacks
     {
         if(!GameManager.Instance.canceledConnect)
         {
+            PhotonChatController.Instance.ConnectToPhotonChat();
+            PhotonChatController.Instance.SubscribeToChannel("RegionLobby", 100, true);
+
             PhotonNetwork.JoinLobby();
         }
     }
