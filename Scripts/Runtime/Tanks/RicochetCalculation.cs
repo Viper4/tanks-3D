@@ -10,6 +10,7 @@ public class RicochetCalculation : MonoBehaviour
     [SerializeField] LayerMask mirrorLayerMask;
     [SerializeField] LayerMask nonObstructLayerMask;
     [SerializeField] float drawDuration = 1;
+    float halfDrawDuration;
     [SerializeField] int ricochetPredictions = 1;
     [SerializeField] float viewDistance = 50;
     [SerializeField] float[] maxHorizontalAngle = new float[] {-180, 180};
@@ -39,6 +40,11 @@ public class RicochetCalculation : MonoBehaviour
     }
     public SelectionMode selectionMode = SelectionMode.NextClosest;
     int shootIndex = -1;
+
+    private void Start()
+    {
+        halfDrawDuration = drawDuration * 0.5f;
+    }
 
     Vector3 Mirror(Vector3 inDirection, RaycastHit mirrorHit, float mirrorDistance = 0)
     {
@@ -139,18 +145,14 @@ public class RicochetCalculation : MonoBehaviour
                 shootPositions.AddOrReplace(reflectHit.point, totalDistance);
 
                 if(showRays)
-                {
                     Debug.DrawLine(origin.position, reflectHit.point, Color.green, drawDuration);
-                }
             }
             else
             {
                 lookPositions.Add(reflectHit.point);
 
                 if(showRays)
-                {
                     Debug.DrawLine(origin.position, reflectHit.point, Color.cyan, drawDuration * 0.5f);
-                }
             }
         }
     }
@@ -159,7 +161,6 @@ public class RicochetCalculation : MonoBehaviour
     {
         shootPositions.Clear();
         lookPositions.Clear();
-        float halfDrawDuration = drawDuration * 0.5f;
         foreach(Transform mirror in mirrorPositionPairs.Keys)
         {
             foreach(Vector3 mirroredPosition in mirrorPositionPairs[mirror][ricochetPredictions - 1])
@@ -206,9 +207,7 @@ public class RicochetCalculation : MonoBehaviour
                                         lookPositions.Add(reflectHit.point);
 
                                         if(showRays)
-                                        {
                                             Debug.DrawLine(origin.position, finalReflectHit.point, Color.red, halfDrawDuration);
-                                        }
                                     }
                                 }
                             }

@@ -26,7 +26,7 @@ RenderSettings:
   m_AmbientIntensity: 1
   m_AmbientMode: 0
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
-  m_SkyboxMaterial: {fileID: 10304, guid: 0000000000000000f000000000000000, type: 0}
+  m_SkyboxMaterial: {fileID: 2100000, guid: d9dca9ae1786c394f9e79c637aa9a7bf, type: 2}
   m_HaloStrength: 0.5
   m_FlareStrength: 1
   m_FlareFadeSpeed: 3
@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.43748918, g: 0.4853124, b: 0.56558746, a: 1}
+  m_IndirectSpecularColor: {r: 0.1733874, g: 0.21673934, b: 0.29880834, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -5335,6 +5335,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 903597137734f0249a51d13d579f2a6d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  destructableID: 0
   particles: {fileID: 16030222}
   destroyResistance: 1
   overlapLayerMask:
@@ -10266,6 +10267,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 903597137734f0249a51d13d579f2a6d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  destructableID: 0
   particles: {fileID: 25224383}
   destroyResistance: 1
   overlapLayerMask:
@@ -15713,6 +15715,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 903597137734f0249a51d13d579f2a6d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  destructableID: 0
   particles: {fileID: 75046604}
   destroyResistance: 0
   overlapLayerMask:
@@ -16984,11 +16987,6 @@ PrefabInstance:
 --- !u!4 &167710282 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2056052579605499053, guid: 0e556c1cb7d74124c9251069c4e6fb5f, type: 3}
-  m_PrefabInstance: {fileID: 167710281}
-  m_PrefabAsset: {fileID: 0}
---- !u!4 &167710283 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 8806413667185271746, guid: 0e556c1cb7d74124c9251069c4e6fb5f, type: 3}
   m_PrefabInstance: {fileID: 167710281}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &194521512
@@ -21912,6 +21910,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 903597137734f0249a51d13d579f2a6d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  destructableID: 0
   particles: {fileID: 194521515}
   destroyResistance: 1
   overlapLayerMask:
@@ -26843,6 +26842,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 903597137734f0249a51d13d579f2a6d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  destructableID: 0
   particles: {fileID: 235882774}
   destroyResistance: 1
   overlapLayerMask:
@@ -32364,6 +32364,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 903597137734f0249a51d13d579f2a6d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  destructableID: 0
   particles: {fileID: 382667849}
   destroyResistance: 0
   overlapLayerMask:
@@ -33165,7 +33166,7 @@ PrefabInstance:
     - target: {fileID: 4119571113264518645, guid: 85a5b7f330200974ebf4d3e1f9d4b23d, type: 3}
       propertyPath: defaultSpawnPoints.Array.data[0]
       value: 
-      objectReference: {fileID: 1126868117}
+      objectReference: {fileID: 0}
     - target: {fileID: 4119571113264518645, guid: 85a5b7f330200974ebf4d3e1f9d4b23d, type: 3}
       propertyPath: defaultSpawnPoints.Array.data[1]
       value: 
@@ -38210,6 +38211,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 903597137734f0249a51d13d579f2a6d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  destructableID: 0
   particles: {fileID: 539994033}
   destroyResistance: 0
   overlapLayerMask:
@@ -43265,6 +43267,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 903597137734f0249a51d13d579f2a6d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  destructableID: 0
   particles: {fileID: 563297852}
   destroyResistance: 0
   overlapLayerMask:
@@ -48695,6 +48698,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 903597137734f0249a51d13d579f2a6d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  destructableID: 0
   particles: {fileID: 736248561}
   destroyResistance: 1
   overlapLayerMask:
@@ -54209,6 +54213,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 903597137734f0249a51d13d579f2a6d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  destructableID: 0
   particles: {fileID: 977935711}
   destroyResistance: 1
   overlapLayerMask:
@@ -59394,6 +59399,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 903597137734f0249a51d13d579f2a6d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  destructableID: 0
   particles: {fileID: 1016905661}
   destroyResistance: 0
   overlapLayerMask:
@@ -64757,6 +64763,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 903597137734f0249a51d13d579f2a6d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  destructableID: 0
   particles: {fileID: 1126101928}
   destroyResistance: 0
   overlapLayerMask:
@@ -64792,51 +64799,6 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!1 &1126868116
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1126868117}
-  - component: {fileID: 1126868118}
-  m_Layer: 2
-  m_Name: 1
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1126868117
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1126868116}
-  m_LocalRotation: {x: -0, y: 0.7071068, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: -19, y: 0, z: -9}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 167710283}
-  m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
---- !u!65 &1126868118
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1126868116}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 6, y: 2, z: 6}
-  m_Center: {x: 0, y: 1, z: 0}
 --- !u!1001 &1129626261
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -69914,6 +69876,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 903597137734f0249a51d13d579f2a6d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  destructableID: 0
   particles: {fileID: 1133150421}
   destroyResistance: 0
   overlapLayerMask:
@@ -74870,6 +74833,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 903597137734f0249a51d13d579f2a6d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  destructableID: 0
   particles: {fileID: 1135122876}
   destroyResistance: 1
   overlapLayerMask:
@@ -80327,6 +80291,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 903597137734f0249a51d13d579f2a6d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  destructableID: 0
   particles: {fileID: 1326658292}
   destroyResistance: 0
   overlapLayerMask:
@@ -85451,6 +85416,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 903597137734f0249a51d13d579f2a6d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  destructableID: 0
   particles: {fileID: 1398844712}
   destroyResistance: 0
   overlapLayerMask:
@@ -90407,6 +90373,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 903597137734f0249a51d13d579f2a6d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  destructableID: 0
   particles: {fileID: 1425315990}
   destroyResistance: 1
   overlapLayerMask:
@@ -95619,6 +95586,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 903597137734f0249a51d13d579f2a6d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  destructableID: 0
   particles: {fileID: 1537170556}
   destroyResistance: 1
   overlapLayerMask:
@@ -95725,51 +95693,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1578120052}
   m_Mesh: {fileID: -946708481997747587, guid: 25e744005558c7d4d9064fd84e13ff44, type: 3}
---- !u!1 &1599574419
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1599574420}
-  - component: {fileID: 1599574421}
-  m_Layer: 2
-  m_Name: 2
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1599574420
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1599574419}
-  m_LocalRotation: {x: -0, y: 0.7071068, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: -19, y: 0, z: 9}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 167710283}
-  m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
---- !u!65 &1599574421
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1599574419}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 6, y: 2, z: 6}
-  m_Center: {x: 0, y: 1, z: 0}
 --- !u!1001 &1604858786
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -101076,6 +100999,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 903597137734f0249a51d13d579f2a6d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  destructableID: 0
   particles: {fileID: 1694509489}
   destroyResistance: 1
   overlapLayerMask:
@@ -106261,6 +106185,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 903597137734f0249a51d13d579f2a6d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  destructableID: 0
   particles: {fileID: 1767434548}
   destroyResistance: 0
   overlapLayerMask:
@@ -111313,6 +111238,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 903597137734f0249a51d13d579f2a6d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  destructableID: 0
   particles: {fileID: 1813560744}
   destroyResistance: 1
   overlapLayerMask:
@@ -116449,6 +116375,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 903597137734f0249a51d13d579f2a6d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  destructableID: 0
   particles: {fileID: 1832970337}
   destroyResistance: 0
   overlapLayerMask:
@@ -121780,6 +121707,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 903597137734f0249a51d13d579f2a6d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  destructableID: 0
   particles: {fileID: 2020719120}
   destroyResistance: 0
   overlapLayerMask:
@@ -126793,6 +126721,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 903597137734f0249a51d13d579f2a6d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  destructableID: 0
   particles: {fileID: 2068871627}
   destroyResistance: 1
   overlapLayerMask:
