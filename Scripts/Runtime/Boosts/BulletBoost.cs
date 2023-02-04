@@ -5,17 +5,11 @@ using UnityEngine;
 
 public class BulletBoost : MonoBehaviour
 {
-    FireControl fireControl;
-    PlayerUIHandler playerUIHandler;
+    [SerializeField] PhotonView photonView;
+    [SerializeField] FireControl fireControl;
+    [SerializeField] PlayerUI playerUI;
 
     Coroutine boostRoutine;
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        fireControl = GetComponent<FireControl>();
-        playerUIHandler = transform.Find("Player UI").GetComponent<PlayerUIHandler>();
-    }
 
     [PunRPC]
     public void ApplyBulletBoost(float duration, int bulletIndex, float speed, int pierceLimit, int ricochetLevel, float explosionRadius)
@@ -30,8 +24,8 @@ public class BulletBoost : MonoBehaviour
 
     IEnumerator BoostRoutine(float duration, int bulletIndex, float speed, int pierceLimit, int ricochetLevel, float explosionRadius)
     {
-        if(playerUIHandler != null)
-            playerUIHandler.ChangeBulletIconIndex(bulletIndex);
+        if(playerUI != null && (PhotonNetwork.OfflineMode || photonView.IsMine))
+            playerUI.ChangeBulletIconIndex(bulletIndex);
         fireControl.bulletSettings.bulletIndex = bulletIndex;
         fireControl.bulletSettings.speed = speed;
         fireControl.bulletSettings.pierceLimit = pierceLimit;
@@ -40,8 +34,8 @@ public class BulletBoost : MonoBehaviour
 
         yield return new WaitForSeconds(duration);
 
-        if(playerUIHandler != null)
-            playerUIHandler.ChangeBulletIconIndex(fireControl.originalBulletSettings.bulletIndex);
+        if(playerUI != null && (PhotonNetwork.OfflineMode || photonView.IsMine))
+            playerUI.ChangeBulletIconIndex(fireControl.originalBulletSettings.bulletIndex);
         fireControl.bulletSettings.bulletIndex = fireControl.originalBulletSettings.bulletIndex;
         fireControl.bulletSettings.speed = fireControl.originalBulletSettings.speed;
         fireControl.bulletSettings.pierceLimit = fireControl.originalBulletSettings.pierceLimit;

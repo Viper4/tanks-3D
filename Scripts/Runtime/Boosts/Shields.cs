@@ -13,6 +13,7 @@ public class Shields : MonoBehaviour
     [SerializeField] float spinRate = 100;
     [SerializeField] Transform shieldParent;
     [SerializeField] AudioSource shieldAudio;
+    int lastDamageID = 1;
 
     Quaternion lastTankRotation;
 
@@ -52,23 +53,33 @@ public class Shields : MonoBehaviour
     }
 
     [PunRPC]
+    public void DamageShieldsRPC(int amount, int damageID)
+    {
+        if(damageID != lastDamageID)
+        {
+            DamageShields(amount);
+            lastDamageID = damageID;
+        }
+    }
+
+    [PunRPC]
     public void DamageShields(int amount)
     {
         shieldAudio.Play();
-        int previousShieldAmount = shieldAmount; // Using this instead of shieldParent.childCount since children update too slowly
+        int previousShieldAmount = shieldAmount; // shieldParent.childCount updates too slowly
         shieldAmount -= amount;
         int shieldsToRemove = amount;
-        if(shieldAmount < 0)
+        if (shieldAmount < 0)
         {
             shieldsToRemove += shieldAmount;
         }
 
-        for(int i = previousShieldAmount - 1; i > previousShieldAmount - shieldsToRemove - 1; i--)
+        for (int i = previousShieldAmount - 1; i > previousShieldAmount - shieldsToRemove - 1; i--)
         {
             Destroy(shieldParent.GetChild(i).gameObject);
         }
 
-        if(shieldAmount > 0)
+        if (shieldAmount > 0)
         {
             UpdateShields();
         }
@@ -89,7 +100,7 @@ public class Shields : MonoBehaviour
         for(int i = 0; i < shieldAmount; i++)
         {
             Transform shield = shieldParent.GetChild(i);
-            Quaternion shieldRotation = Quaternion.AngleAxis(angleBetween *(i + 1), shieldParent.up);
+            Quaternion shieldRotation = Quaternion.AngleAxis(angleBetween * (i + 1), shieldParent.up);
             Vector3 rotatedForward = shieldRotation * Vector3.forward * distanceFromTank;
             shield.SetPositionAndRotation(shieldParent.position + rotatedForward, shieldRotation);
         }

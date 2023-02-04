@@ -5,6 +5,8 @@ using UnityEngine;
 
 public class Boost : MonoBehaviourPun, IPunInstantiateMagicCallback
 {
+    public int boostID = 0;
+
     [SerializeField] float value = 1;
     [SerializeField] float effectDuration = 10;
     public float[] duration = { 25, 40 };
@@ -55,7 +57,7 @@ public class Boost : MonoBehaviourPun, IPunInstantiateMagicCallback
     public void OnPhotonInstantiate(PhotonMessageInfo info)
     {
         object[] instantiationData = info.photonView.InstantiationData;
-        currentDuration =(float)instantiationData[0];
+        currentDuration = (float)instantiationData[0];
         transform.SetParent(BoostGenerator.Instance.transform);
     }
 
@@ -87,15 +89,16 @@ public class Boost : MonoBehaviourPun, IPunInstantiateMagicCallback
                         StartCoroutine(Flash());
                     }
                 }
-                else if(PhotonNetwork.IsMasterClient)
+                else
                 {
-                    BoostGenerator.Instance.SpawnNewBoost();
                     if(PhotonNetwork.OfflineMode)
                     {
+                        BoostGenerator.Instance.SpawnNewBoost();
                         Destroy(gameObject);
                     }
-                    else
+                    else if(photonView.IsMine)
                     {
+                        BoostGenerator.Instance.SpawnNewBoost();
                         PhotonNetwork.Destroy(gameObject);
                     }
                 }
@@ -105,9 +108,18 @@ public class Boost : MonoBehaviourPun, IPunInstantiateMagicCallback
 
     private void OnTriggerEnter(Collider other)
     {
-        if(other.CompareTag("Player") &&(PhotonNetwork.OfflineMode || other.transform.parent.parent.GetComponent<PhotonView>().IsMine))
+        if(other.CompareTag("Player"))
         {
-            StartCoroutine(Activate(other.transform.parent.parent));
+            if (PhotonNetwork.OfflineMode)
+            {
+                StartCoroutine(Activate(other.transform.parent.parent));
+            }
+            else if(other.transform.parent.parent.TryGetComponent<PhotonView>(out var otherPhotonView) && otherPhotonView.IsMine)
+            {
+                if(!photonView.IsMine)
+                    photonView.TransferOwnership(otherPhotonView.Owner);
+                StartCoroutine(Activate(other.transform.parent.parent));
+            }
         }
     }
 
@@ -153,12 +165,10 @@ public class Boost : MonoBehaviourPun, IPunInstantiateMagicCallback
         activated = true;
         if(!PhotonNetwork.OfflineMode)
         {
-            photonView.RPC("PlayEffects", RpcTarget.All, null);
+            photonView.RPC("PlayEffects", RpcTarget.Others, null);
         }
-        else
-        {
-            PlayEffects();
-        }
+        PlayEffects();
+
         FireControl fireControl = player.GetComponent<FireControl>();
         MineControl mineControl = player.GetComponent<MineControl>();
         BaseTankLogic baseTankLogic = player.GetComponent<BaseTankLogic>();
@@ -166,32 +176,32 @@ public class Boost : MonoBehaviourPun, IPunInstantiateMagicCallback
         switch(type)
         {
             case BoostType.Bullet:
-                fireControl.bulletLimit +=(int)value;
-                player.Find("Player UI").GetComponent<PlayerUIHandler>().UpdateBulletIcons();
+                fireControl.bulletLimit += (int)value;
+                player.Find("Player UI").GetComponent<PlayerUI>().UpdateBulletIcons();
 
                 yield return new WaitForSeconds(effectDuration);
-                fireControl.bulletLimit -=(int)value;
-                fireControl.transform.Find("Player UI").GetComponent<PlayerUIHandler>().UpdateBulletIcons();
+                fireControl.bulletLimit -= (int)value;
+                fireControl.transform.Find("Player UI").GetComponent<PlayerUI>().UpdateBulletIcons();
                 break;
             case BoostType.Mine:
-                mineControl.mineLimit +=(int)value;
-                player.Find("Player UI").GetComponent<PlayerUIHandler>().UpdateMineIcons();
+                mineControl.mineLimit += (int)value;
+                player.Find("Player UI").GetComponent<PlayerUI>().UpdateMineIcons();
 
                 yield return new WaitForSeconds(effectDuration);
-                mineControl.mineLimit -=(int)value;
-                mineControl.transform.Find("Player UI").GetComponent<PlayerUIHandler>().UpdateMineIcons();
+                mineControl.mineLimit -= (int)value;
+                mineControl.transform.Find("Player UI").GetComponent<PlayerUI>().UpdateMineIcons();
                 break;
             case BoostType.Bounce:
-                fireControl.bulletSettings.ricochetLevel +=(int)value;
+                fireControl.bulletSettings.ricochetLevel += (int)value;
 
                 yield return new WaitForSeconds(effectDuration);
-                fireControl.bulletSettings.ricochetLevel -=(int)value;
+                fireControl.bulletSettings.ricochetLevel -= (int)value;
                 break;
             case BoostType.Pierce:
-                fireControl.bulletSettings.pierceLimit +=(int)value;
+                fireControl.bulletSettings.pierceLimit += (int)value;
 
                 yield return new WaitForSeconds(effectDuration);
-                fireControl.bulletSettings.pierceLimit -=(int)value;
+                fireControl.bulletSettings.pierceLimit -= (int)value;
                 break;
             case BoostType.Speed:
                 baseTankLogic.normalSpeed += value;
@@ -233,7 +243,6 @@ public class Boost : MonoBehaviourPun, IPunInstantiateMagicCallback
                     player.GetComponent<BulletBoost>().ApplyBulletBoost(effectDuration, 3, 14.0f, 0, 0, 5.0f);
                 }
 
-                yield return new WaitForSeconds(4); // Wait for particles to finish playing
                 break;
             case BoostType.Invisibility:
                 if(!PhotonNetwork.OfflineMode && player.TryGetComponent(out playerPV))
@@ -244,11 +253,12 @@ public class Boost : MonoBehaviourPun, IPunInstantiateMagicCallback
                 {
                     player.GetComponent<Invisibility>().SetInvisible(effectDuration);
                 }
+
                 break;
             case BoostType.Shields:
                 if(!PhotonNetwork.OfflineMode && player.TryGetComponent(out playerPV))
                 {
-                    playerPV.RPC("AddShields", RpcTarget.All, new object[] {(int)value });
+                    playerPV.RPC("AddShields", RpcTarget.All, new object[] { (int)value });
                 }
                 else
                 {
@@ -266,33 +276,35 @@ public class Boost : MonoBehaviourPun, IPunInstantiateMagicCallback
                 {
                     uses++;
                     yield return new WaitForSeconds(respawnDelay);
-                    Respawn();
                     if(!PhotonNetwork.OfflineMode)
                     {
                         photonView.RPC("Respawn", RpcTarget.Others, null);
                     }
+                    Respawn();
                 }
                 else
                 {
-                    if(PhotonNetwork.OfflineMode)
+                    if(!PhotonNetwork.OfflineMode)
                     {
-                        Destroy(gameObject);
+                        yield return new WaitUntil(() => photonView.IsMine); // Wait for photonView ownership to transfer
+                        PhotonNetwork.Destroy(gameObject);
                     }
                     else
                     {
-                        PhotonNetwork.Destroy(gameObject);
+                        Destroy(gameObject);
                     }
                 }
                 break;
             case Mode.Dynamic:
                 BoostGenerator.Instance.SpawnNewBoost();
-                if(PhotonNetwork.OfflineMode)
+                if (!PhotonNetwork.OfflineMode)
                 {
-                    Destroy(gameObject);
+                    yield return new WaitUntil(() => photonView.IsMine); // Wait for photonView ownership to transfer
+                    PhotonNetwork.Destroy(gameObject);
                 }
                 else
                 {
-                    PhotonNetwork.Destroy(gameObject);
+                    Destroy(gameObject);
                 }
                 break;
         }

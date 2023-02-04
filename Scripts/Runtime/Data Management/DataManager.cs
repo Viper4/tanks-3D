@@ -37,7 +37,7 @@ public class DataManager : MonoBehaviourPun
         }
         else if(!PhotonNetwork.IsMasterClient && PhotonNetwork.InRoom)
         {
-            roomSettings =(RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["RoomSettings"];
+            roomSettings = (RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["roomSettings"];
         }
     }
 
@@ -52,7 +52,8 @@ public class DataManager : MonoBehaviourPun
 
     void RegisterCustomTypes()
     {
-        PhotonPeer.RegisterType(typeof(Transform),(byte)'T', PhotonDataSerialization.ObjectToByteArray, PhotonDataSerialization.ByteArrayToObject);
-        PhotonPeer.RegisterType(typeof(RoomSettings),(byte)'R', PhotonDataSerialization.ObjectToByteArray, PhotonDataSerialization.ByteArrayToObject);
+        PhotonPeer.RegisterType(typeof(Transform), (byte)'T', PhotonDataSerialization.ObjectToByteArray, PhotonDataSerialization.ByteArrayToObject);
+        PhotonPeer.RegisterType(typeof(RoomSettings), (byte)'R', PhotonDataSerialization.ObjectToByteArray, PhotonDataSerialization.ByteArrayToObject);
+        PhotonPeer.RegisterType(typeof(List<LevelObjectInfo>), (byte)'L', PhotonDataSerialization.ObjectToByteArray, PhotonDataSerialization.ByteArrayToObject);
     }
 }

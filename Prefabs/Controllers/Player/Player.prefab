@@ -1719,23 +1719,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f2562ed487af46e408c078b5f71bef02, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sensitivity: 15
   target: {fileID: 6161557077281983732}
   reticle: {fileID: 9164104404222908190}
   playerControl: {fileID: 6432079618835187448}
-  baseUIHandler: {fileID: 5649241332685557866}
+  baseUI: {fileID: 5649241332685557866}
   dstFromTarget: 6
   targetDstMinMax: {x: 0, y: 25}
   altTargetDstMinMax: {x: 30, y: 55}
   pitchMinMaxN: {x: -40, y: 80}
   pitchMinMaxL: {x: -20, y: 20}
-  rotationSmoothTime: 0.1
+  rotationSmoothing: 0.05
   mouseIgnoreLayers:
     serializedVersion: 2
     m_Bits: 33556150
   cameraIgnoreLayers:
     serializedVersion: 2
     m_Bits: 301991678
+  alternateCamera: 0
   invisible: 0
 --- !u!114 &9007769207834555923
 MonoBehaviour:
@@ -2608,8 +2608,8 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 5649241332685557866}
         m_TargetAssemblyTypeName: BaseUIHandler, Assembly-CSharp
-        m_MethodName: LoadScene
-        m_Mode: 5
+        m_MethodName: MainMenu
+        m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine

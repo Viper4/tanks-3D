@@ -15,45 +15,47 @@ public class TankManager : MonoBehaviourPunCallbacks
 
     public bool lastCampaignScene = false;
     public Transform tankParent;
+    Dictionary<Transform, SaveableLevelObject.TransformInfo> resetInfoDictionary = new Dictionary<Transform, SaveableLevelObject.TransformInfo>();
+
     [SerializeField] int tankLimit = 12;
     [SerializeField] float deviateChance;
     [SerializeField] int amountDeviationMin;
     [SerializeField] int amountDeviationMax;
     [SerializeField] List<GameObject> tanks;
-    [SerializeField] Collider freeForAllSpawn;
-    [SerializeField] Transform teamSpawnParent;
-    [SerializeField] Transform PVESpawnParent;
-    List<Collider> teamSpawns = new List<Collider>();
-    List<Collider> PVESpawns = new List<Collider>();
+    List<GameObject> spawnedTanks = new List<GameObject>();
+    public Transform spawnParent;
+    List<Collider> spawns = new List<Collider>();
     [SerializeField] LayerMask ignoreLayerMask;
     bool checking = false;
 
     int teamIndex = 0;
 
-    public enum GenerationMode
-    {
-        FFA,
-        Teams,
-        PVE
-    }
-    [SerializeField] GenerationMode generationMode;
+    [SerializeField] bool autoInit = true;
 
     private void Start()
     {
         Instance = this;
 
-        foreach(Transform child in teamSpawnParent)
+        if (autoInit && !GameManager.Instance.editing)
+            Init();
+    }
+
+    public void Init()
+    {
+        foreach(Transform child in spawnParent)
         {
-            teamSpawns.Add(child.GetComponent<Collider>());
-        }
-        foreach(Transform child in PVESpawnParent)
-        {
-            PVESpawns.Add(child.GetComponent<Collider>());
+            spawns.Add(child.GetComponent<Collider>());
         }
 
-        if(!PhotonNetwork.OfflineMode && !GameManager.Instance.inLobby)
+        resetInfoDictionary.Clear();
+        foreach(Transform tank in tankParent)
         {
-            if(DataManager.roomSettings.fillLobby)
+            resetInfoDictionary.Add(tank, new SaveableLevelObject.TransformInfo() { position = tank.position, rotation = tank.rotation });
+        }
+
+        if (GameManager.Instance.editing || (!PhotonNetwork.OfflineMode && !GameManager.Instance.inLobby))
+        {
+            if (DataManager.roomSettings.fillLobby)
             {
                 tankLimit = DataManager.roomSettings.playerLimit - CustomNetworkHandling.NonSpectatorList.Length;
             }
@@ -62,32 +64,25 @@ public class TankManager : MonoBehaviourPunCallbacks
                 tankLimit = DataManager.roomSettings.botLimit;
             }
 
-            if(DataManager.roomSettings.mode != "Co-Op")
+            if (DataManager.roomSettings.mode != "Co-Op")
             {
-                if(PhotonNetwork.IsMasterClient && DataManager.roomSettings.botLimit > 0)
+                if (PhotonNetwork.IsMasterClient && DataManager.roomSettings.botLimit > 0)
                 {
-                    foreach(GameObject tank in tanks.ToList())
+                    foreach (GameObject tank in tanks.ToList())
                     {
-                        if(!DataManager.roomSettings.bots.Contains(tank.name))
+                        if (!DataManager.roomSettings.bots.Contains(tank.name))
                         {
                             tanks.Remove(tank);
                         }
                     }
-                    if(tanks.Count > 0)
+                    if (tanks.Count > 0)
                     {
-                        GenerateTanks(true);
+                        GenerateTanks();
                     }
                 }
             }
-            else
-            {
-                foreach(Transform tank in tankParent)
-                {
-                    tank.GetComponent<TargetSystem>().enemyParents.Add(PlayerManager.Instance.playerParent);
-                }
-            }
 
-            if(PhotonNetwork.IsMasterClient)
+            if (!PhotonNetwork.OfflineMode && PhotonNetwork.IsMasterClient)
             {
                 AllocateOwnershipOfTanks();
             }
@@ -124,14 +119,11 @@ public class TankManager : MonoBehaviourPunCallbacks
         }
     }
 
-    public void GenerateTanks(bool cleanup = false)
+    public void GenerateTanks()
     {
-        if(cleanup)
+        foreach(GameObject tank in spawnedTanks)
         {
-            foreach(Transform child in tankParent)
-            {
-                Destroy(child.gameObject);
-            }
+            Destroy(tank);
         }
 
         int[] distribution = CustomRandom.Distribute(tankLimit, tanks.Count, deviateChance, amountDeviationMin, amountDeviationMax);
@@ -158,50 +150,78 @@ public class TankManager : MonoBehaviourPunCallbacks
 
         if(tankParent.childCount < tankLimit)
         {
-            switch(generationMode)
+            Collider spawn = null;
+            if(spawns.Count > 0)
             {
-                case GenerationMode.FFA:
-                    Quaternion randomRotation = Quaternion.AngleAxis(Random.Range(-180.0f, 180.0f), freeForAllSpawn.transform.up);
-                    if(GameManager.Instance.inLobby)
+                spawn = spawns[Random.Range(0, spawns.Count)];
+            }
+
+            if (GameManager.Instance.inLobby)
+            {
+                Quaternion randomRotation = Quaternion.AngleAxis(Random.Range(-180.0f, 180.0f), spawn.transform.up);
+                Instantiate(tank, CustomRandom.GetSpawnPointInCollider(spawn, -spawn.transform.up, ignoreLayerMask, tank.transform.Find("Body").GetComponent<BoxCollider>(), randomRotation), randomRotation, tankParent);
+            }
+            else
+            {
+                GameObject newTank;
+
+                try
+                {
+                    switch (DataManager.roomSettings.mode)
                     {
-                        TargetSystem targetSystem = Instantiate(tank, CustomRandom.GetSpawnPointInCollider(freeForAllSpawn, -freeForAllSpawn.transform.up, ignoreLayerMask, tank.transform.Find("Body").GetComponent<BoxCollider>(), randomRotation), randomRotation, tankParent).GetComponent<TargetSystem>();
-                        targetSystem.enemyParents.Add(tankParent);
+                        case "FFA":
+                            Quaternion randomRotation = Quaternion.AngleAxis(Random.Range(-180.0f, 180.0f), spawn.transform.up);
+                            if (PhotonNetwork.OfflineMode)
+                            {
+                                newTank = Instantiate(tank, CustomRandom.GetSpawnPointInCollider(spawn, -spawn.transform.up, ignoreLayerMask, tank.transform.Find("Body").GetComponent<BoxCollider>(), randomRotation), randomRotation, tankParent);
+                            }
+                            else
+                            {
+                                newTank = PhotonNetwork.InstantiateRoomObject(tank.name, CustomRandom.GetSpawnPointInCollider(spawn, -spawn.transform.up, ignoreLayerMask, tank.transform.Find("Body").GetComponent<BoxCollider>(), randomRotation), randomRotation, 0, new object[] { true, true });
+                            }
+                            break;
+                        case "Teams":
+                            spawn = PlayerManager.Instance.teamSpawnParent.GetChild(teamIndex).GetComponent<Collider>();
+                            if (PhotonNetwork.OfflineMode)
+                            {
+                                newTank = Instantiate(tank, CustomRandom.GetSpawnPointInCollider(spawn, -spawn.transform.up, ignoreLayerMask, tank.transform.Find("Body").GetComponent<BoxCollider>(), spawn.transform.rotation), spawn.transform.rotation, tankParent);
+                                PTV = newTank.GetComponent<PhotonTankView>();
+                            }
+                            else
+                            {
+                                newTank = PhotonNetwork.InstantiateRoomObject(tank.name, CustomRandom.GetSpawnPointInCollider(spawn, -spawn.transform.up, ignoreLayerMask, tank.transform.Find("Body").GetComponent<BoxCollider>(), spawn.transform.rotation), spawn.transform.rotation, 0, new object[] { true, false });
+                                PTV = newTank.GetComponent<PhotonTankView>();
+                            }
+                            PTV.teamName = spawn.name;
+                            teamIndex++;
+                            if (teamIndex >= PlayerManager.Instance.teamSpawnParent.childCount)
+                            {
+                                teamIndex = 0;
+                            }
+                            break;
+                        default:
+                            if (PhotonNetwork.OfflineMode)
+                            {
+                                newTank = Instantiate(tank, CustomRandom.GetSpawnPointInCollider(spawn, -spawn.transform.up, ignoreLayerMask, tank.transform.Find("Body").GetComponent<BoxCollider>(), spawn.transform.rotation), spawn.transform.rotation, tankParent);
+                                PTV = newTank.GetComponent<PhotonTankView>();
+                            }
+                            else
+                            {
+                                newTank = PhotonNetwork.InstantiateRoomObject(tank.name, CustomRandom.GetSpawnPointInCollider(spawn, -spawn.transform.up, ignoreLayerMask, tank.transform.Find("Body").GetComponent<BoxCollider>(), spawn.transform.rotation), spawn.transform.rotation, 0, new object[] { true, false });
+                                spawnedTanks.Add(newTank);
+                                PTV = newTank.GetComponent<PhotonTankView>();
+                            }
+                            PTV.teamName = "PVE Bots";
+                            break;
                     }
-                    else
-                    {
-                        PhotonNetwork.InstantiateRoomObject(tank.name, CustomRandom.GetSpawnPointInCollider(freeForAllSpawn, -freeForAllSpawn.transform.up, ignoreLayerMask, tank.transform.Find("Body").GetComponent<BoxCollider>(), randomRotation), randomRotation, 0, new object[] { true, true });
-                    }
-                    break;
-                case GenerationMode.Teams:
-                    if(GameManager.Instance.inLobby)
-                    {
-                        PTV = Instantiate(tank, CustomRandom.GetSpawnPointInCollider(teamSpawns[teamIndex], -teamSpawns[teamIndex].transform.up, ignoreLayerMask, tank.transform.Find("Body").GetComponent<BoxCollider>(), teamSpawns[teamIndex].transform.rotation), teamSpawns[teamIndex].transform.rotation, tankParent).GetComponent<PhotonTankView>();
-                        PTV.GetComponent<TargetSystem>().enemyParents.Add(tankParent);
-                    }
-                    else
-                    {
-                        PTV = PhotonNetwork.InstantiateRoomObject(tank.name, CustomRandom.GetSpawnPointInCollider(teamSpawns[teamIndex], -teamSpawns[teamIndex].transform.up, ignoreLayerMask, tank.transform.Find("Body").GetComponent<BoxCollider>(), teamSpawns[teamIndex].transform.rotation), teamSpawns[teamIndex].transform.rotation, 0, new object[] { true, false }).GetComponent<PhotonTankView>();
-                    }
-                    PTV.teamName = teamSpawns[teamIndex].name;
-                    teamIndex++;
-                    if(teamIndex >= teamSpawns.Count)
-                    {
-                        teamIndex = 0;
-                    }
-                    break;
-                case GenerationMode.PVE:
-                    int spawnIndex = Random.Range(0, PVESpawns.Count);
-                    if(GameManager.Instance.inLobby)
-                    {
-                        PTV = Instantiate(tank, CustomRandom.GetSpawnPointInCollider(PVESpawns[spawnIndex], -PVESpawns[spawnIndex].transform.up, ignoreLayerMask, tank.transform.Find("Body").GetComponent<BoxCollider>(), PVESpawns[spawnIndex].transform.rotation), PVESpawns[spawnIndex].transform.rotation, tankParent).GetComponent<PhotonTankView>();
-                        PTV.GetComponent<TargetSystem>().enemyParents.Add(tankParent);
-                    }
-                    else
-                    {
-                        PTV = PhotonNetwork.InstantiateRoomObject(tank.name, CustomRandom.GetSpawnPointInCollider(PVESpawns[spawnIndex], -PVESpawns[spawnIndex].transform.up, ignoreLayerMask, tank.transform.Find("Body").GetComponent<BoxCollider>(), PVESpawns[spawnIndex].transform.rotation), PVESpawns[spawnIndex].transform.rotation, 0, new object[] { true, false }).GetComponent<PhotonTankView>();
-                    }
-                    PTV.teamName = "PVE Tanks";
-                    break;
+
+                    spawnedTanks.Add(newTank);
+                }
+                catch (System.Exception e)
+                {
+                    Debug.LogWarning("TankManager failed to spawn tank: " + e.Message + e.StackTrace);
+                    return;
+                }
             }
         }
     }
@@ -215,29 +235,30 @@ public class TankManager : MonoBehaviourPunCallbacks
     {
         yield return new WaitForSecondsRealtime(delay);
 
-        switch(generationMode)
+        Collider spawn = spawns[Random.Range(0, spawns.Count)];
+        switch (DataManager.roomSettings.mode)
         {
-            case GenerationMode.FFA:
-                tankOrigin.SetPositionAndRotation(CustomRandom.GetSpawnPointInCollider(freeForAllSpawn, Vector3.down, ignoreLayerMask), Quaternion.AngleAxis(Random.Range(-180, 180), Vector3.up));
+            case "FFA":
+                tankOrigin.SetPositionAndRotation(CustomRandom.GetSpawnPointInCollider(spawn, Vector3.down, ignoreLayerMask), Quaternion.AngleAxis(Random.Range(-180, 180), Vector3.up));
                 break;
-            case GenerationMode.Teams:
-                int teamSpawnIndex = Random.Range(0, teamSpawns.Count);
+            case "Teams":
+                int teamSpawnCount = PlayerManager.Instance.teamSpawnParent.childCount;
+                spawn = PlayerManager.Instance.teamSpawnParent.GetChild(Random.Range(0, teamSpawnCount)).GetComponent<Collider>();
 
                 string tankTeam = tankOrigin.GetComponent<PhotonTankView>().teamName;
-                for(int i = 0; i < teamSpawns.Count; i++)
+                foreach(Transform child in PlayerManager.Instance.teamSpawnParent)
                 {
-                    if(teamSpawns[i].name == tankTeam)
+                    if (child.name == tankTeam)
                     {
-                        teamSpawnIndex = i;
+                        spawn = child.GetComponent<Collider>();
                         break;
                     }
                 }
 
-                tankOrigin.SetPositionAndRotation(CustomRandom.GetSpawnPointInCollider(teamSpawns[teamSpawnIndex], Vector3.down, ignoreLayerMask), teamSpawns[teamSpawnIndex].transform.rotation);
+                tankOrigin.SetPositionAndRotation(CustomRandom.GetSpawnPointInCollider(spawn, Vector3.down, ignoreLayerMask), spawn.transform.rotation);
                 break;
-            case GenerationMode.PVE:
-                int spawnIndex = Random.Range(0, PVESpawns.Count);
-                tankOrigin.SetPositionAndRotation(CustomRandom.GetSpawnPointInCollider(PVESpawns[spawnIndex], Vector3.down, ignoreLayerMask), PVESpawns[spawnIndex].transform.rotation);
+            default:
+                tankOrigin.SetPositionAndRotation(CustomRandom.GetSpawnPointInCollider(spawn, Vector3.down, ignoreLayerMask), spawn.transform.rotation);
                 break;
         }
 
@@ -249,7 +270,8 @@ public class TankManager : MonoBehaviourPunCallbacks
 
     public void StartCheckTankCount()
     {
-        StartCoroutine(CheckTankCount());
+        if(!GameManager.Instance.editing)
+            StartCoroutine(CheckTankCount());
     }
 
     // Have to wait before checking childCount since mines can blow up multiple tanks simultaneously
@@ -302,8 +324,8 @@ public class TankManager : MonoBehaviourPunCallbacks
 
                             PhotonHashtable roomProperties = new PhotonHashtable()
                             {
-                                { "RoomSettings", DataManager.roomSettings },
-                                { "Total Lives", GameManager.Instance.totalLives }
+                                { "roomSettings", DataManager.roomSettings },
+                                { "totalLives", GameManager.Instance.totalLives }
                             };
                             PhotonNetwork.CurrentRoom.SetCustomProperties(roomProperties);
                         }
@@ -331,6 +353,22 @@ public class TankManager : MonoBehaviourPunCallbacks
                 }
             }
             checking = false;
+        }
+    }
+
+    public void ResetTanks()
+    {
+        foreach(GameObject tank in spawnedTanks.ToList())
+        {
+            Destroy(tank);
+        }
+        spawnedTanks.Clear();
+        foreach(Transform tankTransform in tankParent)
+        {
+            if(resetInfoDictionary.TryGetValue(tankTransform, out SaveableLevelObject.TransformInfo resetInfo))
+            {
+                tankTransform.SetPositionAndRotation(resetInfo.position, resetInfo.rotation);
+            }
         }
     }
 

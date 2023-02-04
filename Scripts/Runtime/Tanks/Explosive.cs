@@ -108,10 +108,7 @@ public class Explosive : MonoBehaviourPun
                                 {
                                     if(otherPlayer.TryGetComponent<PhotonView>(out var otherPV))
                                     {
-                                        if(otherPV.IsMine)
-                                        {
-                                            otherPV.RPC("DamageShields", RpcTarget.All, new object[] { 3 });
-                                        }
+                                        otherPV.RPC("DamageShields", RpcTarget.All, new object[] { 3 });
                                     }
                                     else
                                     {
@@ -160,7 +157,7 @@ public class Explosive : MonoBehaviourPun
         {
             PhotonHashtable playerProperties = new PhotonHashtable
             {
-                { "Kills", DataManager.playerData.kills }
+                { "kills", DataManager.playerData.kills }
             };
             PhotonNetwork.LocalPlayer.SetCustomProperties(playerProperties);
         }

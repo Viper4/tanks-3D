@@ -62,6 +62,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 903597137734f0249a51d13d579f2a6d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  destructableID: 0
   particles: {fileID: 1931567861660409654}
   destroyResistance: 0
   overlapLayerMask:
@@ -4931,7 +4932,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 8300000, guid: ae7040c7ef5462947b254a0efa32bf81, type: 3}
   m_PlayOnAwake: 0
-  m_Volume: 0.65
+  m_Volume: 0.6
   m_Pitch: 1
   Loop: 0
   Mute: 0
@@ -5054,9 +5055,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 115c28a99863dae43902bdb19990c000, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  prefabName: Glass Cube
+  prefabIndex: 10
   thisRenderer: {fileID: 8667239095106646987}
   thisCollider: {fileID: 8667239095106646989}
+  overrideColliderHiding: 0
 --- !u!1 &8667239095106646985
 GameObject:
   m_ObjectHideFlags: 0

@@ -6,7 +6,7 @@ using UnityEngine;
 public class PlayerSettings
 {
     public float sensitivity;
-    public float cameraSmoothing;
+    public bool cameraSmoothing;
     public float fieldOfView;
     public Dictionary<string, KeyCode> keyBinds;
     public int targetFramerate;

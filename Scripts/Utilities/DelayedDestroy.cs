@@ -8,7 +8,7 @@ public class DelayedDestroy : MonoBehaviour
     public float delay = 5;
 
     // Start is called before the first frame Update
-    void Awake()
+    void Start()
     {
         // Start timer to destroy this gameObject
         StartCoroutine(KillTimer());

@@ -100,7 +100,7 @@ public class SaveFileSelection : MonoBehaviour
     {
         if(selectedSaveSlot != null)
         {
-            SaveSystem.DeleteFile(selectedSaveSlot.Find("Label").GetComponent<Text>().text + ".roomsettings");
+            SaveSystem.DeleteFile("Settings/" + selectedSaveSlot.Find("Label").GetComponent<Text>().text + ".roomsettings");
 
             Destroy(selectedSaveSlot.gameObject);
         }

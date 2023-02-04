@@ -105,13 +105,18 @@ public class BulletBehaviour : MonoBehaviourPunCallbacks
 
     void OnEvent(EventData eventData)
     {
-        if(eventData.Code == GameManager.Instance.DestroyCode)
+        if(eventData.Code == EventCodes.Destroy)
         {
-            PhotonHashtable parameters =(PhotonHashtable)eventData.Parameters[ParameterCode.Data];
+            PhotonHashtable parameters = (PhotonHashtable)eventData.Parameters[ParameterCode.Data];
             if((int)parameters["ID"] == bulletID)
             {
                 SubtractBulletsFired();
-                if(!(bool)parameters["Safe"])
+                if (explosive != null)
+                {
+                    explosive.Explode(new List<Transform>());
+                }
+
+                if (!(bool)parameters["safe"])
                 {
                     Instantiate(explosionEffect, transform.position, Quaternion.identity);
                 }
@@ -185,10 +190,7 @@ public class BulletBehaviour : MonoBehaviourPunCallbacks
                             {
                                 if(otherPlayer.TryGetComponent<PhotonView>(out var otherPV))
                                 {
-                                    if(otherPV.IsMine)
-                                    {
-                                        otherPV.RPC("DamageShields", RpcTarget.All, new object[] { damageAmount });
-                                    }
+                                    otherPV.RPC("DamageShieldsRPC", RpcTarget.All, new object[] { damageAmount, bulletID });
                                 }
                                 else
                                 {
@@ -268,10 +270,7 @@ public class BulletBehaviour : MonoBehaviourPunCallbacks
                             {
                                 if(otherPlayer.TryGetComponent<PhotonView>(out var otherPV))
                                 {
-                                    if(otherPV.IsMine)
-                                    {
-                                        otherPV.RPC("DamageShields", RpcTarget.All, new object[] { damageAmount });
-                                    }
+                                    otherPV.RPC("DamageShieldsRPC", RpcTarget.All, new object[] { damageAmount, bulletID });
                                 }
                                 else
                                 {
@@ -294,7 +293,7 @@ public class BulletBehaviour : MonoBehaviourPunCallbacks
                         {
                             if(settings.pierceLevel >= destructableObject.destroyResistance)
                             {
-                                destructableObject.DestroyObject();
+                                destructableObject.DestroyObject(true);
                                 if(pierces < settings.pierceLimit)
                                 {
                                     // Resetting velocity
@@ -423,7 +422,7 @@ public class BulletBehaviour : MonoBehaviourPunCallbacks
                     }
                     PhotonHashtable playerProperties = new PhotonHashtable
                     {
-                        { "Kills", DataManager.playerData.kills }
+                        { "kills", DataManager.playerData.kills }
                     };
                     PhotonNetwork.LocalPlayer.SetCustomProperties(playerProperties);
                 }
@@ -455,9 +454,9 @@ public class BulletBehaviour : MonoBehaviourPunCallbacks
             PhotonHashtable parameters = new PhotonHashtable
             {
                 { "ID", bulletID },
-                { "Safe", false },
+                { "safe", false },
             };
-            PhotonNetwork.RaiseEvent(GameManager.Instance.DestroyCode, parameters, RaiseEventOptions.Default, SendOptions.SendUnreliable);
+            PhotonNetwork.RaiseEvent(EventCodes.Destroy, parameters, RaiseEventOptions.Default, SendOptions.SendUnreliable);
         }
         Instantiate(explosionEffect, transform.position, Quaternion.identity);
         Destroy(gameObject);
@@ -472,9 +471,9 @@ public class BulletBehaviour : MonoBehaviourPunCallbacks
             PhotonHashtable parameters = new PhotonHashtable
             {
                 { "ID", bulletID },
-                { "Safe", true },
+                { "safe", true },
             };
-            PhotonNetwork.RaiseEvent(GameManager.Instance.DestroyCode, parameters, RaiseEventOptions.Default, SendOptions.SendUnreliable);
+            PhotonNetwork.RaiseEvent(EventCodes.Destroy, parameters, RaiseEventOptions.Default, SendOptions.SendUnreliable);
         }
         Destroy(gameObject);
     }

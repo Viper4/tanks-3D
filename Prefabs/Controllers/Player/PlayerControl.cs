@@ -18,11 +18,10 @@ public class PlayerControl : MonoBehaviourPunCallbacks
     [SerializeField] bool cheats = false;
     public bool godMode = false;
     public bool Dead { get; set; } = false;
-    public bool Paused { get; set; } = false;
     public bool showHUD = true;
 
     float currentSpeed;
-    public float speedSmoothTime = 0.1f;
+    public float speedSmoothTime = 0.05f;
     float speedSmoothVelocity;
 
     public float turnSmoothTime = 0.2f;
@@ -47,7 +46,7 @@ public class PlayerControl : MonoBehaviourPunCallbacks
                 {
                     Vector2 inputDir = Vector2.zero;
 
-                    if(!Paused)
+                    if(!GameManager.Instance.paused)
                     {
                         if(Input.GetKeyDown(DataManager.playerSettings.keyBinds["Shoot"]))
                         {
@@ -189,7 +188,7 @@ public class PlayerControl : MonoBehaviourPunCallbacks
             {
                 DataManager.playerData.deaths++;
                 PhotonHashtable playerProperties = new PhotonHashtable();
-                playerProperties.Add("Deaths", DataManager.playerData.deaths);
+                playerProperties.Add("deaths", DataManager.playerData.deaths);
                 PhotonNetwork.LocalPlayer.SetCustomProperties(playerProperties);
             }
             PlayerManager.Instance.OnPlayerDeath(tankOrigin);

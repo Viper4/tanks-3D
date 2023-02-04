@@ -9,12 +9,11 @@ using UnityEngine.UI;
 using Photon.Pun.UtilityScripts;
 using MyUnityAddons.CustomPhoton;
 using System.Text.RegularExpressions;
+using TMPro;
 
 public class WaitingRoom : MonoBehaviourPunCallbacks
 {
-    readonly byte UpdateUICode = 0;
-    readonly byte LeaveWaitingRoomCode = 2;
-
+    int readyPlayers = 0;
     [SerializeField] GameObject playerSlotPrefab;
 
     [SerializeField] GameObject[] ownerElements;
@@ -24,9 +23,25 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
 
     [SerializeField] TeamSwitching teamSwitcher;
 
+    [SerializeField] GameObject loadingScreen;
+    [SerializeField] GameObject customLoadingScreen;
+    [SerializeField] TextMeshProUGUI customLoadingLabel;
+    [SerializeField] Slider customLoadingProgressBar;
+    [SerializeField] TextMeshProUGUI progressBarText;
+
+    LevelInfo tempLevelInfo;
+
+    int currentPacket;
+    int totalPackets;
+
     // Start is called before the first frame update
     IEnumerator Start()
     {
+        tempLevelInfo = new LevelInfo()
+        {
+            levelObjects = new List<LevelObjectInfo>(),
+        };
+
         if(!PhotonNetwork.IsMasterClient)
         {
             foreach(GameObject UIElement in ownerElements)
@@ -45,12 +60,11 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
         yield return new WaitForSecondsRealtime(0.2f);
         UpdateBasicUI();
         teamSwitcher.MasterUpdateRosters();
-        transform.Find("Loading").gameObject.SetActive(false);
+        loadingScreen.SetActive(false);
     }
 
     public void StartGame() // Accessable only by MasterClient
     {
-        PhotonNetwork.RaiseEvent(LeaveWaitingRoomCode, null, RaiseEventOptions.Default, SendOptions.SendUnreliable);
         if(DataManager.roomSettings.mode == "Co-Op")
         {
             string campaign = Regex.Match(DataManager.roomSettings.map, @"(.*?)[ ][0-9]+$").Groups[1].ToString();
@@ -61,16 +75,59 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
             DataManager.playerData = SaveSystem.defaultPlayerData.Copy(new PlayerData());
         }
 
-        PhotonHashtable roomProperties = new PhotonHashtable
+        if(DataManager.roomSettings.customMap)
         {
-            { "Waiting", false },
-            { "RoomSettings", DataManager.roomSettings },
-            { "Total Lives", DataManager.roomSettings.totalLives }
-        };
-        PhotonNetwork.CurrentRoom.SetCustomProperties(roomProperties);
+            customLoadingScreen.SetActive(true);
+            customLoadingLabel.text = "Uploading Map...";
+            
+            PhotonHashtable roomProperties = new PhotonHashtable
+            {
+                { "waiting", false },
+                { "roomSettings", DataManager.roomSettings },
+                { "totalLives", DataManager.roomSettings.totalLives },
+            };
+            PhotonNetwork.CurrentRoom.SetCustomProperties(roomProperties);
 
-        GameManager.Instance.PhotonLoadScene(DataManager.roomSettings.map, 0, false);
-    }
+            if(PhotonNetwork.CurrentRoom.PlayerCount <= 1)
+            {
+                GameManager.Instance.LoadScene("Custom");
+            }
+            else
+            {
+                LevelInfo levelInfo = SaveSystem.LoadLevel(DataManager.roomSettings.map);
+                int packetSize = 5;
+                for (int i = 0; i < levelInfo.levelObjects.Count; i += packetSize)
+                {
+                    PhotonHashtable parameters = new PhotonHashtable()
+                    {
+                        { "packet", levelInfo.levelObjects.GetRange(i, Mathf.Min(packetSize, levelInfo.levelObjects.Count - i)) }
+                    };
+                    if (i == 0)
+                    {
+                        parameters.Add("start", Mathf.CeilToInt(levelInfo.levelObjects.Count / (float)packetSize));
+                    }
+
+                    PhotonNetwork.RaiseEvent(EventCodes.LevelObjectUpload, parameters, RaiseEventOptions.Default, SendOptions.SendReliable);
+                }
+
+                readyPlayers++;
+            }
+        }
+        else
+        {
+            PhotonNetwork.RaiseEvent(EventCodes.LeaveWaitingRoom, null, RaiseEventOptions.Default, SendOptions.SendUnreliable);
+
+            PhotonHashtable roomProperties = new PhotonHashtable
+            {
+                { "waiting", false },
+                { "roomSettings", DataManager.roomSettings },
+                { "totalLives", DataManager.roomSettings.totalLives }
+            };
+            PhotonNetwork.CurrentRoom.SetCustomProperties(roomProperties);
+
+            GameManager.Instance.PhotonLoadScene(DataManager.roomSettings.map);
+        }
+    } 
 
     public void ChangeMode(string mode) // Accessable only by MasterClient
     {
@@ -101,8 +158,8 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
     {
         PhotonHashtable roomProperties = new PhotonHashtable
         {
-            { "RoomSettings", DataManager.roomSettings },
-            { "Total Lives", DataManager.roomSettings.totalLives }
+            { "roomSettings", DataManager.roomSettings },
+            { "totalLives", DataManager.roomSettings.totalLives }
         };
         PhotonNetwork.CurrentRoom.IsVisible = DataManager.roomSettings.isPublic;
         PhotonNetwork.CurrentRoom.SetCustomProperties(roomProperties);
@@ -114,17 +171,18 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
         {
             player.AllocatePlayerToTeam();
         }
-        PhotonNetwork.RaiseEvent(UpdateUICode, null, RaiseEventOptions.Default, SendOptions.SendUnreliable);
+        PhotonNetwork.RaiseEvent(EventCodes.UpdateUI, null, RaiseEventOptions.Default, SendOptions.SendUnreliable);
         UpdateBasicUI();
         teamSwitcher.MasterUpdateRosters();
     }
 
     private void UpdateBasicUI()
     {
-        DataManager.roomSettings =(RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["RoomSettings"];
+        if(!PhotonNetwork.IsMasterClient)
+            DataManager.roomSettings = (RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["roomSettings"];
 
         roomName.text = PhotonNetwork.CurrentRoom.Name;
-        mapName.text = DataManager.roomSettings.map + "(" + DataManager.roomSettings.mode + ")";
+        mapName.text = DataManager.roomSettings.map + " (" + DataManager.roomSettings.mode + ")";
 
         teamSwitcher.UpdateRosters();
     }
@@ -143,13 +201,13 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
 
     void OnEvent(EventData eventData)
     {
-        if(eventData.Code == UpdateUICode)
+        if(eventData.Code == EventCodes.UpdateUI)
         {
             UpdateBasicUI();
         }
-        else if(eventData.Code == LeaveWaitingRoomCode)
+        else if(eventData.Code == EventCodes.LeaveWaitingRoom)
         {
-            DataManager.roomSettings =(RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["RoomSettings"];
+            DataManager.roomSettings = (RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["roomSettings"];
 
             if(DataManager.roomSettings.mode == "Co-Op")
             {
@@ -159,6 +217,55 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
             else
             {
                 DataManager.playerData = SaveSystem.defaultPlayerData.Copy(new PlayerData());
+            }
+
+            if(DataManager.roomSettings.customMap)
+            {
+                GameManager.Instance.LoadScene("Custom");
+            }
+        }
+        else if(eventData.Code == EventCodes.LevelObjectUpload)
+        {
+            customLoadingScreen.SetActive(true);
+            customLoadingLabel.text = "Downloading Map...";
+
+            PhotonHashtable parameters = (PhotonHashtable)eventData.Parameters[ParameterCode.Data];
+            if(parameters.ContainsKey("start"))
+            {
+                currentPacket = 0;
+                totalPackets = (int)parameters["start"];
+            }
+
+            currentPacket++;
+            List<LevelObjectInfo> packet = (List<LevelObjectInfo>)parameters["packet"];
+            foreach(LevelObjectInfo levelObjectInfo in packet)
+            {
+                tempLevelInfo.levelObjects.Add(levelObjectInfo);
+            }
+            if(currentPacket >= totalPackets)
+            {
+                customLoadingLabel.text = "Waiting On Others...";
+                SaveSystem.SaveTempLevel(tempLevelInfo);
+                PhotonNetwork.RaiseEvent(EventCodes.ReadyToLeave, null, RaiseEventOptions.Default, SendOptions.SendUnreliable);
+            }
+            float progress = currentPacket / (float)totalPackets;
+            customLoadingProgressBar.SetValueWithoutNotify(progress);
+            progressBarText.text = (Mathf.Round(progress * 10000) / 100) + "%";
+        }
+        else if(eventData.Code == EventCodes.ReadyToLeave)
+        {
+            if(PhotonNetwork.IsMasterClient)
+            {
+                int totalPlayers = PhotonNetwork.CurrentRoom.PlayerCount;
+                readyPlayers++;
+                float progress = readyPlayers / totalPlayers;
+                customLoadingProgressBar.value = progress;
+                progressBarText.text = (Mathf.Round(progress * 10000) / 100) + "%";
+                if (readyPlayers == totalPlayers)
+                {
+                    PhotonNetwork.RaiseEvent(EventCodes.LeaveWaitingRoom, null, RaiseEventOptions.Default, SendOptions.SendUnreliable);
+                    GameManager.Instance.LoadScene("Custom");
+                }
             }
         }
     }

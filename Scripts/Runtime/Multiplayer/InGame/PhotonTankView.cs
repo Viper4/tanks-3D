@@ -89,7 +89,7 @@ public class PhotonTankView : MonoBehaviourPunCallbacks, IPunObservable, IPunOwn
                 {
                     barrel.rotation = targetBarrelRotation;
                 }
-                teamName =(string)stream.ReceiveNext();
+                teamName = (string)stream.ReceiveNext();
             }
         }
     }

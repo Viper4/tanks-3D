@@ -39,7 +39,7 @@ public class DebugDisplay : MonoBehaviour
         dt += Time.unscaledDeltaTime;
         if(dt > 1.0 / refreshRate)
         {
-            fps =(int)(frameCount / dt);
+            fps = (int)(frameCount / dt);
             frameCount = 0;
             dt -= 1.0f / refreshRate;
             RefreshDisplay();
@@ -74,7 +74,7 @@ public class DebugDisplay : MonoBehaviour
             {
                 if(PhotonNetwork.CurrentRoom != null)
                 {
-                    pingText.text = $"<mark={textHighlightHexCode}>{PhotonNetwork.CurrentRoom.Name}({PhotonNetwork.MasterClient.NickName}): {PhotonNetwork.GetPing()} ms</mark>";
+                    pingText.text = $"<mark={textHighlightHexCode}>{PhotonNetwork.CurrentRoom.Name} ({PhotonNetwork.MasterClient.NickName}): {PhotonNetwork.GetPing()} ms</mark>";
                 }
                 else
                 {

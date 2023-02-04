@@ -82,7 +82,7 @@ public class MineBehaviour : MonoBehaviourPunCallbacks
 
     void OnEvent(EventData eventData)
     {
-        if(eventData.Code == GameManager.Instance.DestroyCode)
+        if(eventData.Code == EventCodes.Destroy)
         {
             PhotonHashtable parameters =(PhotonHashtable)eventData.Parameters[ParameterCode.Data];
             if((int)parameters["ID"] == mineID)
@@ -150,7 +150,7 @@ public class MineBehaviour : MonoBehaviourPunCallbacks
                 {
                     { "ID", mineID }
                 };
-                PhotonNetwork.RaiseEvent(GameManager.Instance.DestroyCode, parameters, RaiseEventOptions.Default, SendOptions.SendUnreliable);
+                PhotonNetwork.RaiseEvent(EventCodes.Destroy, parameters, RaiseEventOptions.Default, SendOptions.SendUnreliable);
             }
             owner.GetComponent<MineControl>().laidMines.Remove(transform);
         }

@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 using Photon.Pun;
 using Photon.Realtime;
 using TMPro;
@@ -10,9 +9,9 @@ using MyUnityAddons.CustomPhoton;
 
 public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
 {
-    public InputField createInput;
-    public InputField joinInput;
-    public InputField usernameInput;
+    public TMP_InputField createInput;
+    public TMP_InputField joinInput;
+    public TMP_InputField usernameInput;
 
     [SerializeField] RectTransform joiningOrCreating;
 
@@ -21,7 +20,7 @@ public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
 
     private void Start()
     {
-        if(DataManager.chatSettings.username != null)
+        if(!string.IsNullOrEmpty(DataManager.chatSettings.username))
         {
             usernameInput.SetTextWithoutNotify(DataManager.chatSettings.username);
         }
@@ -33,15 +32,15 @@ public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
         {
             PhotonHashtable playerProperties = new PhotonHashtable()
             {
-                { "New", true }
+                { "new", true }
             };
             PhotonNetwork.LocalPlayer.SetCustomProperties(playerProperties);
             PhotonHashtable roomProperties = new PhotonHashtable
             {
-                { "RoomSettings", DataManager.roomSettings },
-                { "Waiting", true },
-                { "Ready Players", 0 },
-                { "Total Lives", DataManager.roomSettings.totalLives }
+                { "roomSettings", DataManager.roomSettings },
+                { "waiting", true },
+                { "readyPlayers", 0 },
+                { "totalLives", DataManager.roomSettings.totalLives }
             };
             RoomOptions roomOptions = new RoomOptions
             {
@@ -65,7 +64,7 @@ public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
         {
             PhotonHashtable playerProperties = new PhotonHashtable()
             {
-                { "New", true }
+                { "new", true }
             };
             PhotonNetwork.LocalPlayer.SetCustomProperties(playerProperties);
             PhotonNetwork.JoinRoom(joinInput.text);
@@ -125,10 +124,10 @@ public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
 
     public override void OnJoinedRoom()
     {
-        PhotonNetwork.NickName = GetUniqueUsername(usernameInput.text);
-        DataManager.chatSettings.username = usernameInput.text;
+        PhotonNetwork.NickName = DataManager.chatSettings.username = GetUniqueUsername(usernameInput.text);
         SaveSystem.SaveChatSettings(DataManager.chatSettings, "ChatSettings");
         PhotonNetwork.LocalPlayer.AllocatePlayerToTeam();
+        PhotonChatController.Instance.SendPublicUserUpdate();
         PhotonChatController.Instance.SubscribeToChannel(PhotonNetwork.CurrentRoom.Name, 60, true, true);
 
         if(PhotonNetwork.IsMasterClient)
@@ -137,13 +136,21 @@ public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
         }
         else
         {
-            if((bool)PhotonNetwork.CurrentRoom.CustomProperties["Waiting"])
+            if((bool)PhotonNetwork.CurrentRoom.CustomProperties["waiting"])
             {
                 PhotonNetwork.LoadLevel("Waiting Room");
             }
             else
             {
-                PhotonNetwork.LoadLevel(((RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["RoomSettings"]).map);
+                RoomSettings roomSettings = (RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["roomSettings"];
+                if (roomSettings.customMap)
+                {
+                    PhotonNetwork.LoadLevel("Custom");
+                }
+                else
+                {
+                    PhotonNetwork.LoadLevel(roomSettings.map);
+                }
             }
         }
     }
@@ -213,5 +220,11 @@ public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
 
         StartShowPopup("Join failed: " + message, 2.5f);
         Debug.Log(returnCode);
+    }
+
+    public void OnUsernameEndEdit(TMP_InputField inputField)
+    {
+        DataManager.chatSettings.username = inputField.text;
+        PhotonChatController.Instance.SendPublicUserUpdate();
     }
 }

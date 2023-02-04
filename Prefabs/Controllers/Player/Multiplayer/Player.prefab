@@ -905,7 +905,7 @@ GameObject:
   - component: {fileID: 6861238813857332368}
   m_Layer: 7
   m_Name: Camera
-  m_TagString: Camera
+  m_TagString: MainCamera
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1024,18 +1024,20 @@ MonoBehaviour:
   target: {fileID: 2620104219958361089}
   reticle: {fileID: 2244845849713473088}
   playerControl: {fileID: 2926516457120658957}
-  baseUIHandler: {fileID: 1088903691027755432}
+  baseUI: {fileID: 1088903691027755432}
   dstFromTarget: 4
   targetDstMinMax: {x: 0, y: 30}
   altTargetDstMinMax: {x: 30, y: 70}
   pitchMinMaxN: {x: -40, y: 80}
   pitchMinMaxL: {x: -20, y: 20}
+  rotationSmoothing: 0.05
   mouseIgnoreLayers:
     serializedVersion: 2
     m_Bits: 2098694
   cameraIgnoreLayers:
     serializedVersion: 2
     m_Bits: 304088974
+  alternateCamera: 0
   invisible: 0
 --- !u!1 &2620104219958361088
 GameObject:
@@ -1519,6 +1521,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f897659aca0e25043993350714b48655, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  photonView: {fileID: 2243231744049258819}
+  fireControl: {fileID: 2926516457120658956}
+  playerUI: {fileID: 8791697556208755565}
 --- !u!1 &2983809502732183837
 GameObject:
   m_ObjectHideFlags: 0

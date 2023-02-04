@@ -5,6 +5,7 @@ using UnityEngine;
 [System.Serializable]
 public class RoomSettings
 {
+    public bool customMap;
     public bool isPublic;
     public string map;
     public string mode;

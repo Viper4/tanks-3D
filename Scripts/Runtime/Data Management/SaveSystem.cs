@@ -8,6 +8,10 @@ using System.Runtime.Serialization.Formatters.Binary;
 public static class SaveSystem
 {
     private static readonly string SAVE_FOLDER = Application.dataPath + "/SaveData/";
+    private static readonly string SETTINGS_FOLDER = SAVE_FOLDER + "Settings/";
+    private static readonly string LEVELS_FOLDER = SAVE_FOLDER + "Levels/";
+    private static readonly string DATA_FOLDER = SAVE_FOLDER + "Data/";
+
     public static readonly string CROSSHAIR_FOLDER = Application.dataPath + "/Crosshairs/";
 
     private static readonly string chatSettingsExtension = ".chatsettings";
@@ -17,7 +21,7 @@ public static class SaveSystem
 
     public static readonly ChatSettings defaultChatSettings = new ChatSettings()
     {
-        username = null,
+        username = "",
         whitelistActive = false,
         whitelist = new List<string>(),
         blacklist = new List<string>(),
@@ -27,7 +31,7 @@ public static class SaveSystem
     public static readonly PlayerSettings defaultPlayerSettings = new PlayerSettings
     {
         sensitivity = 15,
-        cameraSmoothing = 0.1f,
+        cameraSmoothing = true,
         fieldOfView = 60,
         keyBinds = new Dictionary<string, KeyCode>()
         {
@@ -55,7 +59,7 @@ public static class SaveSystem
         crosshairFileName = "Default",
         crosshairColorIndex = 0,
         crosshairScale = 1,
-        slowZoomSpeed = 0.5f,
+        slowZoomSpeed = 1f,
         fastZoomSpeed = 5f,
     };
 
@@ -90,11 +94,23 @@ public static class SaveSystem
 
     public static void Init()
     {
-        if(!Directory.Exists(SAVE_FOLDER))
+        if (!Directory.Exists(SAVE_FOLDER))
         {
             Directory.CreateDirectory(SAVE_FOLDER);
         }
-        if(!Directory.Exists(CROSSHAIR_FOLDER))
+        if (!Directory.Exists(SETTINGS_FOLDER))
+        {
+            Directory.CreateDirectory(SETTINGS_FOLDER);
+        }
+        if (!Directory.Exists(LEVELS_FOLDER))
+        {
+            Directory.CreateDirectory(LEVELS_FOLDER);
+        }
+        if (!Directory.Exists(DATA_FOLDER))
+        {
+            Directory.CreateDirectory(DATA_FOLDER);
+        }
+        if (!Directory.Exists(CROSSHAIR_FOLDER))
         {
             Directory.CreateDirectory(CROSSHAIR_FOLDER);
         }
@@ -121,14 +137,14 @@ public static class SaveSystem
 
     public static void SavePlayerData(this PlayerData fromPlayerData, string fileName, bool compareTime)
     {
-        if(compareTime && fromPlayerData.lives > 0 &&(fromPlayerData.time < fromPlayerData.bestTime || fromPlayerData.bestTime == -1))
+        if (compareTime && fromPlayerData.lives > 0 && (fromPlayerData.time < fromPlayerData.bestTime || fromPlayerData.bestTime == -1))
         {
             Debug.Log("Updated best Time");
             fromPlayerData.bestTime = fromPlayerData.time;
         }
 
         BinaryFormatter formatter = new BinaryFormatter();
-        FileStream stream = new FileStream(SAVE_FOLDER + fileName + playerDataExtension, FileMode.Create);
+        FileStream stream = new FileStream(DATA_FOLDER + fileName + playerDataExtension, FileMode.Create);
 
         formatter.Serialize(stream, fromPlayerData);
         stream.Close();
@@ -136,15 +152,15 @@ public static class SaveSystem
 
     public static PlayerData LoadPlayerData(string fileName)
     {
-        PlayerData loadedPlayerData;
-        string filePath = SAVE_FOLDER + fileName + playerDataExtension;
-        if(File.Exists(filePath))
+        string filePath = DATA_FOLDER + fileName + playerDataExtension;
+        if (File.Exists(filePath))
         {
             BinaryFormatter formatter = new BinaryFormatter();
             FileStream stream = new FileStream(filePath, FileMode.Open);
 
-            loadedPlayerData = (PlayerData)formatter.Deserialize(stream);
+            PlayerData loadedPlayerData = (PlayerData)formatter.Deserialize(stream);
             stream.Close();
+            return loadedPlayerData;
         }
         else
         {
@@ -152,33 +168,31 @@ public static class SaveSystem
 
             defaultPlayerData.SavePlayerData(fileName, false);
 
-            loadedPlayerData = defaultPlayerData;
+            return defaultPlayerData;
         }
-
-        return loadedPlayerData;
     }
 
     public static void SaveChatSettings(this ChatSettings fromSettings, string fileName)
     {
         string json = JsonConvert.SerializeObject(fromSettings, Formatting.Indented);
 
-        File.WriteAllText(SAVE_FOLDER + fileName + chatSettingsExtension, json);
+        File.WriteAllText(SETTINGS_FOLDER + fileName + chatSettingsExtension, json);
     }
 
     public static ChatSettings LoadChatSettings(string fileName)
     {
-        if(File.Exists(SAVE_FOLDER + fileName + chatSettingsExtension))
+        if (File.Exists(SETTINGS_FOLDER + fileName + chatSettingsExtension))
         {
-            string json = File.ReadAllText(SAVE_FOLDER + fileName + chatSettingsExtension);
+            string json = File.ReadAllText(SETTINGS_FOLDER + fileName + chatSettingsExtension);
 
-            if(json != null)
+            if (json != null)
             {
                 return JsonConvert.DeserializeObject<ChatSettings>(json);
             }
         }
         else
         {
-            Debug.LogWarning("Could not find file '" + SAVE_FOLDER + fileName + chatSettingsExtension + "', saving and loading defaults.");
+            Debug.LogWarning("Could not find file '" + SETTINGS_FOLDER + fileName + chatSettingsExtension + "', saving and loading defaults.");
 
             defaultChatSettings.SaveChatSettings(fileName);
         }
@@ -189,23 +203,23 @@ public static class SaveSystem
     {
         string json = JsonConvert.SerializeObject(fromSettings, Formatting.Indented);
 
-        File.WriteAllText(SAVE_FOLDER + fileName + playerSettingsExtension, json);
+        File.WriteAllText(SETTINGS_FOLDER + fileName + playerSettingsExtension, json);
     }
 
     public static PlayerSettings LoadPlayerSettings(string fileName)
     {
-        if(File.Exists(SAVE_FOLDER + fileName + playerSettingsExtension))
+        if (File.Exists(SETTINGS_FOLDER + fileName + playerSettingsExtension))
         {
-            string json = File.ReadAllText(SAVE_FOLDER + fileName + playerSettingsExtension);
+            string json = File.ReadAllText(SETTINGS_FOLDER + fileName + playerSettingsExtension);
 
-            if(json != null)
+            if (json != null)
             {
                 return JsonConvert.DeserializeObject<PlayerSettings>(json);
             }
         }
         else
         {
-            Debug.LogWarning("Could not find file '" + SAVE_FOLDER + fileName + playerSettingsExtension + "', saving and loading defaults.");
+            Debug.LogWarning("Could not find file '" + SETTINGS_FOLDER + fileName + playerSettingsExtension + "', saving and loading defaults.");
 
             defaultPlayerSettings.SavePlayerSettings(fileName);
         }
@@ -216,17 +230,17 @@ public static class SaveSystem
     {
         string json = JsonConvert.SerializeObject(fromSettings, Formatting.Indented);
 
-        File.WriteAllText(SAVE_FOLDER + fileName + roomSettingsExtension, json);
+        File.WriteAllText(SETTINGS_FOLDER + fileName + roomSettingsExtension, json);
     }
 
     public static RoomSettings LoadRoomSettings(string fileName)
     {
         RoomSettings newSettings = new RoomSettings();
-        if(File.Exists(SAVE_FOLDER + fileName + roomSettingsExtension))
+        if (File.Exists(SETTINGS_FOLDER + fileName + roomSettingsExtension))
         {
-            string json = File.ReadAllText(SAVE_FOLDER + fileName + roomSettingsExtension);
+            string json = File.ReadAllText(SETTINGS_FOLDER + fileName + roomSettingsExtension);
 
-            if(json != null)
+            if (json != null)
             {
                 RoomSettings loadedSettings = JsonConvert.DeserializeObject<RoomSettings>(json);
 
@@ -235,13 +249,21 @@ public static class SaveSystem
         }
         else
         {
-            Debug.LogWarning("Could not find file '" + SAVE_FOLDER + fileName + roomSettingsExtension + "', saving and loading defaults.");
+            Debug.LogWarning("Could not find file '" + SETTINGS_FOLDER + fileName + roomSettingsExtension + "', saving and loading defaults.");
 
             defaultRoomSettings.SaveRoomSettings(fileName);
 
             newSettings = defaultRoomSettings;
         }
         return newSettings;
+    }
+
+    public static void SaveTempLevel(LevelInfo levelInfo)
+    {
+        BinaryFormatter formatter = new BinaryFormatter();
+        FileStream stream = new FileStream(Application.temporaryCachePath + "/temp.level", FileMode.Create);
+        formatter.Serialize(stream, levelInfo);
+        stream.Close();
     }
 
     public static void SaveLevel(string levelName, string levelDescription, string levelCreators, SaveableLevelObject[] levelObjects)
@@ -251,40 +273,96 @@ public static class SaveSystem
             name = levelName,
             description = levelDescription,
             creators = levelCreators,
-            levelObjects = new List<LevelInfo.LevelObjectInfo>(),
+            levelObjects = new List<LevelObjectInfo>(),
         };
 
         foreach (SaveableLevelObject levelObject in levelObjects)
         {
-            levelInfo.levelObjects.Add(new LevelInfo.LevelObjectInfo()
+            if (levelObject.CompareTag("Spawnpoint"))
             {
-                prefabName = levelObject.prefabName,
-                name = levelObject.name,
-                tag = levelObject.tag,
-                layer = levelObject.gameObject.layer,
-                posX = levelObject.transform.position.x,
-                posY = levelObject.transform.position.y,
-                posZ = levelObject.transform.position.z,
-                eulerX = levelObject.transform.eulerAngles.x,
-                eulerY = levelObject.transform.eulerAngles.y,
-                eulerZ = levelObject.transform.eulerAngles.z,
-                scaleX = levelObject.transform.localScale.x,
-                scaleY = levelObject.transform.localScale.y,
-                scaleZ = levelObject.transform.localScale.z,
-            });
+                Color color = levelObject.GetComponent<MeshRenderer>().material.color;
+                int spawnpointType = levelObject.name switch
+                {
+                    "Players" => 0,
+                    "Bots" => 1,
+                    _ => 2,
+                };
+                levelInfo.levelObjects.Add(new LevelObjectInfo()
+                {
+                    ID = levelObject.GetInstanceID(),
+                    prefabIndex = levelObject.prefabIndex,
+                    name = levelObject.name,
+                    tag = levelObject.tag,
+                    layer = levelObject.gameObject.layer,
+                    posX = levelObject.transform.position.x,
+                    posY = levelObject.transform.position.y,
+                    posZ = levelObject.transform.position.z,
+                    eulerX = levelObject.transform.eulerAngles.x,
+                    eulerY = levelObject.transform.eulerAngles.y,
+                    eulerZ = levelObject.transform.eulerAngles.z,
+                    scaleX = levelObject.transform.localScale.x,
+                    scaleY = levelObject.transform.localScale.y,
+                    scaleZ = levelObject.transform.localScale.z,
+                    colorR = color.r,
+                    colorG = color.g,
+                    colorB = color.b,
+                    colorA = color.a,
+                    spawnType = spawnpointType,
+                });
+            }
+            else
+            {
+                levelInfo.levelObjects.Add(new LevelObjectInfo()
+                {
+                    ID = levelObject.GetInstanceID(),
+                    prefabIndex = levelObject.prefabIndex,
+                    name = levelObject.name,
+                    tag = levelObject.tag,
+                    layer = levelObject.gameObject.layer,
+                    posX = levelObject.transform.position.x,
+                    posY = levelObject.transform.position.y,
+                    posZ = levelObject.transform.position.z,
+                    eulerX = levelObject.transform.eulerAngles.x,
+                    eulerY = levelObject.transform.eulerAngles.y,
+                    eulerZ = levelObject.transform.eulerAngles.z,
+                    scaleX = levelObject.transform.localScale.x,
+                    scaleY = levelObject.transform.localScale.y,
+                    scaleZ = levelObject.transform.localScale.z,
+                });
+            }
         }
 
         BinaryFormatter formatter = new BinaryFormatter();
-        FileStream stream = new FileStream(SAVE_FOLDER + levelName + ".level", FileMode.Create);
+        FileStream stream = new FileStream(LEVELS_FOLDER + levelName + ".level", FileMode.Create);
 
         formatter.Serialize(stream, levelInfo);
         stream.Close();
     }
 
+    public static LevelInfo LoadTempLevel()
+    {
+        LevelInfo levelInfo = null;
+        string filePath = Application.temporaryCachePath + "/temp.level";
+        if(File.Exists(filePath))
+        {
+            BinaryFormatter formatter = new BinaryFormatter();
+            FileStream stream = new FileStream(filePath, FileMode.Open);
+
+            levelInfo = (LevelInfo)formatter.Deserialize(stream);
+            stream.Close();
+        }
+        else
+        {
+            Debug.LogWarning("Could not find file '" + filePath + "'.");
+        }
+
+        return levelInfo;
+    }
+
     public static LevelInfo LoadLevel(string fileName)
     {
         LevelInfo levelInfo = null;
-        string filePath = SAVE_FOLDER + fileName + ".level";
+        string filePath = LEVELS_FOLDER + fileName + ".level";
         if (File.Exists(filePath))
         {
             BinaryFormatter formatter = new BinaryFormatter();
@@ -332,7 +410,7 @@ public static class SaveSystem
 
     public static IEnumerable<string> FilesInSaveFolder(bool returnExtension, string fileExtension = "")
     {
-        if(returnExtension)
+        if (returnExtension)
         {
             return Directory.EnumerateFiles(SAVE_FOLDER, "*" + fileExtension, SearchOption.AllDirectories).Select(Path.GetFileName);
         }

@@ -6,12 +6,18 @@ using TMPro;
 using Photon.Pun;
 using UnityEngine.UI;
 using System.Linq;
+using Photon.Pun.UtilityScripts;
+using MyUnityAddons.CustomPhoton;
 
 public class LevelEditorControl : MonoBehaviour
 {
     [SerializeField] Rigidbody rb;
-    BaseUIHandler baseUIHandler;
+    BaseUI baseUI;
+    Camera editCamera;
+    Camera playCamera;
+    GameObject player;
 
+    [SerializeField] TextMeshProUGUI errorMessage;
     string levelName = "Custom";
     string levelDescription = "A custom level.";
     string levelCreators = "";
@@ -23,6 +29,7 @@ public class LevelEditorControl : MonoBehaviour
     [SerializeField] float movementSpeed = 6;
     [SerializeField] float speedLimit = 100;
 
+    [SerializeField] float rotationSmoothing = 0.05f;
     Vector3 rotationSmoothVelocity;
     Vector3 currentRotation;
 
@@ -34,11 +41,14 @@ public class LevelEditorControl : MonoBehaviour
 
     [SerializeField] LayerMask ignoreLayers;
     [SerializeField] Transform previewObject;
-    [SerializeField] Color previewColor = Color.yellow;
     Collider previewCollider;
     MeshRenderer previewRenderer;
     [SerializeField] Vector3Int cellSize;
     public int brushSize = 0;
+    int halfBrushSize;
+
+    Vector3 lastEulerAngles;
+    Vector3 rotationAxis;
 
     bool hollowBrush = false;
     enum BrushType
@@ -51,19 +61,38 @@ public class LevelEditorControl : MonoBehaviour
     }
     BrushType brushType = BrushType.Cube;
 
-    [SerializeField] List<string> prefabKeys = new List<string>();
-    [SerializeField] List<GameObject> prefabValues = new List<GameObject>();
+    private struct CellInfo
+    {
+        public string name;
+        public Vector3 eulerAngles;
+    }
+
     Dictionary<string, GameObject> prefabDictionary = new Dictionary<string, GameObject>();
 
+    Dictionary<Vector3Int, GameObject> placedSpawnpoints = new Dictionary<Vector3Int, GameObject>();
     Dictionary<Vector3Int, GameObject> placedBlocks = new Dictionary<Vector3Int, GameObject>();
-    Dictionary<Vector3Int, string> destroyedBlocks = new Dictionary<Vector3Int, string>();
+    Dictionary<Vector3Int, CellInfo> destroyedBlocks = new Dictionary<Vector3Int, CellInfo>();
     float destroyHoldTimer = 0.75f;
     float placeHoldTimer = 0.75f;
+
+    enum SpawnpointType
+    {
+        Players,
+        Bots,
+        Team1,
+        Team2,
+        Team3,
+        Team4,
+    }
+    SpawnpointType spawnpointType = SpawnpointType.Players;
+    Vector3 spawnpointScale;
 
     enum UndoAction
     {
         Fill,
         Clear,
+        Instantiate,
+        DestroySpawnpoint,
     }
 
     List<UndoAction> undoActions = new List<UndoAction>();
@@ -72,234 +101,435 @@ public class LevelEditorControl : MonoBehaviour
     List<UndoAction> redoActions = new List<UndoAction>();
     List<object[]> redoObjects = new List<object[]>();
 
-    public bool Paused { get; set; }
-
     private Vector3Int hitGridPoint;
     private RaycastHit hit;
+    Vector3 hitRight;
+    Vector3 hitUp;
+
+    List<DestructableObject> destructables = new List<DestructableObject>();
+    List<SaveableLevelObject> dynamicObjects = new List<SaveableLevelObject>();
 
     private void Start()
     {
-        baseUIHandler = GetComponentInChildren<BaseUIHandler>();
-        baseUIHandler.UIElements["PauseMenu"].Find("LabelBackground").GetChild(0).GetComponent<Text>().text = "Paused\nEditing " + GameManager.Instance.currentScene.name;
+        baseUI = GetComponentInChildren<BaseUI>();
+        editCamera = GetComponent<Camera>();
+        baseUI.UIElements["PauseMenu"].Find("LabelBackground").GetChild(0).GetComponent<Text>().text = "Paused\nEditing " + levelName;
 
         levelSlotTemplate.gameObject.SetActive(false);
-
         levelDescription = "A custom level by " + PhotonNetwork.NickName + ".";
 
-        for(int i = 0; i < prefabKeys.Count; i++)
+        spawnpointScale = cellSize;
+
+        for(int i = 0; i < GameManager.Instance.editorPrefabs.Count; i++)
         {
-            prefabDictionary.Add(prefabKeys[i], prefabValues[i]);
+            prefabDictionary.Add(GameManager.Instance.editorNames[i], GameManager.Instance.editorPrefabs[i]);
         }
+        rotationAxis = Vector3.up;
+
         InvokeRepeating(nameof(MouseHoldLoop), 0, 0.125f);
+        PhotonChatController.Instance.Resume();
+        Resume();
     }
 
     // Update is called once per frame
     void Update()
     {
-        if(Input.GetKeyDown(KeyCode.Escape))
+        if (editCamera.enabled)
         {
-            if(baseUIHandler.UIElements["PauseMenu"].gameObject.activeSelf || baseUIHandler.UIElements["EditorMenu"].gameObject.activeSelf)
+            if (Input.GetKeyDown(KeyCode.Escape))
             {
-                Resume();
-            }
-            else
-            {
-                baseUIHandler.UIElements["PauseMenu"].gameObject.SetActive(true);
-                Pause();
-            }
-        }
-        else if(Input.GetKeyDown(KeyCode.Tab))
-        {
-            if(baseUIHandler.UIElements["EditorMenu"].gameObject.activeSelf)
-            {
-                Resume();
-            }
-            else
-            {
-                baseUIHandler.UIElements["EditorMenu"].gameObject.SetActive(true);
-                Pause();
-            }
-        }
-
-        if(Input.GetKey(KeyCode.LeftControl))
-        {
-            if(Input.GetKeyDown(KeyCode.S))
-            {
-                baseUIHandler.UIElements["SaveMenu"].gameObject.SetActive(true);
-                baseUIHandler.UIElements["SaveMenu"].Find("Level Name").GetComponent<TMP_InputField>().SetTextWithoutNotify(levelName);
-                baseUIHandler.UIElements["SaveMenu"].Find("Level Description").GetComponent<TMP_InputField>().SetTextWithoutNotify(levelDescription);
-                baseUIHandler.UIElements["SaveMenu"].Find("Level Creators").GetComponent<TMP_InputField>().SetTextWithoutNotify(levelCreators);
-                Pause();
-            }
-            else if(Input.GetKeyDown(KeyCode.L))
-            {
-                RefreshLevelSlots();
-                baseUIHandler.UIElements["LoadMenu"].gameObject.SetActive(true);
-                Pause();
-            }
-        }
-
-        if (!Paused && Time.timeScale != 0)
-        {
-            Cursor.visible = false;
-            Cursor.lockState = CursorLockMode.Locked;
-            bool leftShiftDown = Input.GetKey(KeyCode.LeftShift);
-            float scrollRate = leftShiftDown ? DataManager.playerSettings.slowZoomSpeed : DataManager.playerSettings.fastZoomSpeed;
-
-            Vector3 inputDir = new Vector3(GetInputAxis("x"), GetInputAxis("y"), GetInputAxis("z")).normalized;
-
-            float targetSpeed = movementSpeed / 2 * inputDir.magnitude;
-
-            if(Input.GetKeyDown(KeyCode.LeftAlt))
-            {
-                scrollForSpeed = !scrollForSpeed;
-            }
-
-            // Speed up/down with scroll
-            if(scrollForSpeed)
-            {
-                if(Input.GetAxisRaw("Mouse ScrollWheel") < 0)
+                if (baseUI.UIElements["PauseMenu"].gameObject.activeSelf || baseUI.UIElements["EditorMenu"].gameObject.activeSelf || baseUI.UIElements["LoadMenu"].gameObject.activeSelf || baseUI.UIElements["SaveMenu"].gameObject.activeSelf)
                 {
-                    movementSpeed = Mathf.Clamp(movementSpeed - scrollRate, 0, speedLimit);
-                }
-                else if(Input.GetAxisRaw("Mouse ScrollWheel") > 0)
-                {
-                    movementSpeed = Mathf.Clamp(movementSpeed + scrollRate, 0, speedLimit);
-                }
-            }
-            else
-            {
-                if(Input.GetAxisRaw("Mouse ScrollWheel") < 0)
-                {
-                    previewDistance = Mathf.Clamp(previewDistance - scrollRate, previewDistanceLimit[0], previewDistanceLimit[1]);
-                }
-                else if(Input.GetAxisRaw("Mouse ScrollWheel") > 0)
-                {
-                    previewDistance = Mathf.Clamp(previewDistance + scrollRate, previewDistanceLimit[0], previewDistanceLimit[1]);
-                }
-            }
-
-            MouseCameraRotation();
-
-            Vector3 velocity = targetSpeed *(Quaternion.AngleAxis(transform.eulerAngles.y, Vector3.up) * inputDir);
-            rb.velocity = velocity;
-
-            if(previewObject != null)
-            {
-                if(!leftShiftDown && Physics.Raycast(transform.position, transform.forward, out hit, Mathf.Infinity, ~ignoreLayers))
-                {
-                    hit.normal.Scale(previewCollider.bounds.extents);
-                    hitGridPoint = WorldToGrid(hit.point.Round(2) + hit.normal);
+                    Resume();
                 }
                 else
                 {
-                    hitGridPoint = WorldToGrid(transform.position + transform.forward * previewDistance);
-                    hit.normal = transform.forward.ToNormal();
+                    baseUI.UIElements["PauseMenu"].gameObject.SetActive(true);
+                    Pause();
                 }
-                previewObject.position = hitGridPoint;
+            }
 
-                if (Input.GetMouseButton(0))
+            if (Input.GetKey(KeyCode.LeftControl))
+            {
+                if (Input.GetKeyDown(KeyCode.S))
                 {
-                    destroyHoldTimer -= Time.unscaledDeltaTime;
+                    baseUI.UIElements["SaveMenu"].gameObject.SetActive(true);
+                    baseUI.UIElements["SaveMenu"].Find("Level Name").GetComponent<TMP_InputField>().SetTextWithoutNotify(levelName);
+                    baseUI.UIElements["SaveMenu"].Find("Level Description").GetComponent<TMP_InputField>().SetTextWithoutNotify(levelDescription);
+                    baseUI.UIElements["SaveMenu"].Find("Level Creators").GetComponent<TMP_InputField>().SetTextWithoutNotify(levelCreators);
+                    Pause();
                 }
-                else
+                else if (Input.GetKeyDown(KeyCode.L))
                 {
-                    destroyHoldTimer = 0.75f;
+                    RefreshLevelSlots();
+                    baseUI.UIElements["LoadMenu"].gameObject.SetActive(true);
+                    Pause();
                 }
-                if (Input.GetMouseButton(1))
+                else if (Input.GetKeyDown(KeyCode.P))
                 {
-                    placeHoldTimer -= Time.unscaledDeltaTime;
-                }
-                else
-                {
-                    placeHoldTimer = 0.75f;
-                }
-
-                if (Input.GetMouseButtonDown(0)) // Object destruction
-                {
-                    OnMouseOne();
-                }
-                else if(Input.GetMouseButtonDown(1)) // Object placement
-                {
-                    OnMouseTwo();
-                }
-
-                if(Input.GetKey(KeyCode.LeftControl))
-                {
-                    if(Input.GetKeyDown(KeyCode.Z)) // Undo
+                    if (!GameManager.Instance.playMode)
                     {
-                        if(undoActions.Count > 0)
+                        baseUI.UIElements["PlayMenu"].gameObject.SetActive(true);
+                        Pause();
+                    }
+                    else
+                    {
+                        ExitPlayMode();
+                    }
+                }
+                else if (Input.GetKeyDown(KeyCode.E) && GameManager.Instance.playMode)
+                {
+                    SwitchPlayCamera();
+                }
+            }
+
+            if (!GameManager.Instance.paused && Time.timeScale != 0)
+            {
+                if (Input.GetKeyDown(KeyCode.Tab))
+                {
+                    if (baseUI.UIElements["EditorMenu"].gameObject.activeSelf)
+                    {
+                        Resume();
+                    }
+                    else
+                    {
+                        baseUI.UIElements["EditorMenu"].gameObject.SetActive(true);
+                        Pause();
+                    }
+                }
+                else if (Input.GetKeyDown(KeyCode.R) && previewObject != null)
+                {
+                    previewObject.Rotate(rotationAxis, 90);
+                }
+                else if (Input.GetKeyDown(KeyCode.X))
+                {
+                    rotationAxis = Vector3.right;
+                }
+                else if (Input.GetKeyDown(KeyCode.Y))
+                {
+                    rotationAxis = Vector3.up;
+                }
+                else if (Input.GetKeyDown(KeyCode.Z))
+                {
+                    rotationAxis = Vector3.forward;
+                }
+                else if (Input.GetKeyDown(KeyCode.C))
+                {
+                    List<Vector3Int> placedBlocksList = placedBlocks.Keys.ToList();
+                    AddUndoAction(UndoAction.Clear, new object[] { placedBlocksList });
+                    foreach (Vector3Int cell in placedBlocksList)
+                    {
+                        DestroyCell(cell);
+                    }
+                    foreach (Vector3Int collider in placedSpawnpoints.Keys.ToList())
+                    {
+                        DestroySpawnpoint(collider);
+                    }
+                }
+
+                bool leftShiftDown = Input.GetKey(KeyCode.LeftShift);
+                if (Input.GetKeyDown(KeyCode.LeftShift))
+                {
+                    UpdatePreviewObject(true);
+                }
+                else if (Input.GetKeyUp(KeyCode.LeftShift))
+                {
+                    UpdatePreviewObject(false);
+                }
+                float scrollRate = Input.GetKey(DataManager.playerSettings.keyBinds["Zoom Control"]) ? DataManager.playerSettings.slowZoomSpeed : DataManager.playerSettings.fastZoomSpeed;
+
+                Vector3 inputDir = new Vector3(GetInputAxis("x"), GetInputAxis("y"), GetInputAxis("z")).normalized;
+
+                float targetSpeed = movementSpeed / 2 * inputDir.magnitude;
+
+                if (Input.GetKeyDown(KeyCode.LeftAlt))
+                {
+                    scrollForSpeed = !scrollForSpeed;
+                }
+
+                // Speed up/down with scroll
+                if (scrollForSpeed)
+                {
+                    if (Input.GetAxisRaw("Mouse ScrollWheel") < 0)
+                    {
+                        movementSpeed = Mathf.Clamp(movementSpeed - scrollRate, 0, speedLimit);
+                    }
+                    else if (Input.GetAxisRaw("Mouse ScrollWheel") > 0)
+                    {
+                        movementSpeed = Mathf.Clamp(movementSpeed + scrollRate, 0, speedLimit);
+                    }
+                }
+                else
+                {
+                    if (Input.GetAxisRaw("Mouse ScrollWheel") < 0)
+                    {
+                        previewDistance = Mathf.Clamp(previewDistance - scrollRate, previewDistanceLimit[0], previewDistanceLimit[1]);
+                        UpdatePreviewObject(leftShiftDown);
+                    }
+                    else if (Input.GetAxisRaw("Mouse ScrollWheel") > 0)
+                    {
+                        previewDistance = Mathf.Clamp(previewDistance + scrollRate, previewDistanceLimit[0], previewDistanceLimit[1]);
+                        UpdatePreviewObject(leftShiftDown);
+                    }
+                }
+
+                MouseCameraRotation();
+
+                Vector3 velocity = targetSpeed * (Quaternion.AngleAxis(transform.eulerAngles.y, Vector3.up) * inputDir);
+                rb.velocity = velocity;
+
+                if (previewObject != null)
+                {
+                    if(targetSpeed != 0 || lastEulerAngles != transform.eulerAngles)
+                    {
+                        UpdatePreviewObject(leftShiftDown);
+                    }
+                    lastEulerAngles = transform.eulerAngles;
+
+                    if (Input.GetMouseButtonDown(0)) // Object destruction
+                    {
+                        OnMouseOne();
+                    }
+                    else if (Input.GetMouseButtonDown(1)) // Object placement
+                    {
+                        OnMouseTwo();
+                    }
+
+                    if (Input.GetMouseButton(0))
+                    {
+                        destroyHoldTimer -= Time.unscaledDeltaTime;
+                        UpdatePreviewObject(leftShiftDown);
+                    }
+                    else
+                    {
+                        destroyHoldTimer = 0.75f;
+                    }
+                    if (Input.GetMouseButton(1))
+                    {
+                        placeHoldTimer -= Time.unscaledDeltaTime;
+                        UpdatePreviewObject(leftShiftDown);
+                    }
+                    else
+                    {
+                        placeHoldTimer = 0.75f;
+                    }
+
+                    if (Input.GetKey(KeyCode.LeftControl))
+                    {
+                        if (Input.GetKeyDown(KeyCode.Z)) // Undo
                         {
-                            object[] undoData = undoObjects[^1];
-                            switch(undoActions[^1])
+                            if (undoActions.Count > 0)
                             {
-                                case UndoAction.Fill:
-                                    List<Vector3Int> cells = (List<Vector3Int>)undoData[0];
-                                    foreach(Vector3Int cell in cells)
-                                    {
-                                        DestroyCell(cell);
-                                    }
-                                    AddRedoAction(UndoAction.Fill, new object[] { cells });
-                                    break;
-                                case UndoAction.Clear:
-                                    cells = (List<Vector3Int>)undoData[0];
-                                    foreach(Vector3Int cell in cells)
-                                    {
-                                        FillCell(cell, prefabDictionary[destroyedBlocks[cell]]);
-                                    }
-                                    AddRedoAction(UndoAction.Clear, new object[] { cells });
-                                    break;
+                                object[] undoData = undoObjects[^1];
+                                switch (undoActions[^1])
+                                {
+                                    case UndoAction.Fill:
+                                        List<Vector3Int> cells = (List<Vector3Int>)undoData[0];
+                                        foreach (Vector3Int cell in cells)
+                                        {
+                                            DestroyCell(cell);
+                                        }
+                                        AddRedoAction(UndoAction.Fill, new object[] { cells });
+                                        break;
+                                    case UndoAction.Clear:
+                                        cells = (List<Vector3Int>)undoData[0];
+                                        foreach (Vector3Int cell in cells)
+                                        {
+                                            CellInfo cellInfo = destroyedBlocks[cell];
+                                            FillCell(cell, prefabDictionary[cellInfo.name], cellInfo.eulerAngles);
+                                        }
+                                        AddRedoAction(UndoAction.Clear, new object[] { cells });
+                                        break;
+                                    case UndoAction.Instantiate:
+                                        GameObject undoGO = (GameObject)undoData[0];
+                                        AddRedoAction(UndoAction.Instantiate, new object[] { undoGO.name, undoGO.transform.position, undoGO.transform.localScale, undoGO.transform.eulerAngles, undoGO.GetComponentInChildren<MeshRenderer>().material.color, (int)undoData[1] });
+                                        Destroy(undoGO);
+                                        break;
+                                    case UndoAction.DestroySpawnpoint:
+                                        GameObject prefab = prefabDictionary["Spawnpoint"];
+                                        GameObject undoSpawnpoint = Instantiate(prefab, (Vector3)undoData[1], Quaternion.Euler((Vector3)undoData[3]));
+                                        undoSpawnpoint.name = (string)undoData[0];
+                                        undoSpawnpoint.transform.localScale = (Vector3)undoData[2];
+                                        Color undoColor = (Color)undoData[4];
+                                        MeshRenderer undoRenderer = undoSpawnpoint.GetComponentInChildren<MeshRenderer>();
+                                        undoRenderer.material.color = undoColor;
+                                        undoRenderer.material.SetColor("_EmissionColor", undoColor);
+                                        SpawnpointType spawnType = (SpawnpointType)undoData[5];
+                                        switch (spawnType)
+                                        {
+                                            case SpawnpointType.Players:
+                                                undoSpawnpoint.transform.SetParent(PlayerManager.Instance.defaultSpawnParent);
+                                                break;
+                                            case SpawnpointType.Bots:
+                                                undoSpawnpoint.transform.SetParent(TankManager.Instance.spawnParent);
+                                                break;
+                                            default:
+                                                undoSpawnpoint.transform.SetParent(PlayerManager.Instance.teamSpawnParent);
+                                                break;
+                                        }
+
+                                        AddRedoAction(UndoAction.DestroySpawnpoint, new object[] { undoSpawnpoint, spawnType });
+                                        break;
+                                }
+                                undoActions.RemoveAt(undoActions.Count - 1);
+                                undoObjects.RemoveAt(undoObjects.Count - 1);
                             }
-                            undoActions.RemoveAt(undoActions.Count - 1);
-                            undoObjects.RemoveAt(undoObjects.Count - 1);
                         }
-                    }
-                    else if(Input.GetKeyDown(KeyCode.Y)) // Redo
-                    {
-                        if(redoActions.Count > 0)
+                        else if (Input.GetKeyDown(KeyCode.Y)) // Redo
                         {
-                            object[] redoData = redoObjects[^1];
-                            switch(redoActions[^1])
+                            if (redoActions.Count > 0)
                             {
-                                case UndoAction.Fill:
-                                    List<Vector3Int> cells = (List<Vector3Int>)redoData[0];
-                                    foreach(Vector3Int cell in cells)
-                                    {
-                                        FillCell(cell, prefabDictionary[destroyedBlocks[cell]]);
-                                    }
-                                    AddUndoAction(UndoAction.Fill, new object[] { cells });
-                                    break;
-                                case UndoAction.Clear:
-                                    cells = (List<Vector3Int>)redoData[0];
-                                    foreach(Vector3Int cell in cells)
-                                    {
-                                        DestroyCell(cell);
-                                    }
-                                    AddUndoAction(UndoAction.Clear, new object[] { cells });
-                                    break;
+                                object[] redoData = redoObjects[^1];
+                                switch (redoActions[^1])
+                                {
+                                    case UndoAction.Fill:
+                                        List<Vector3Int> cells = (List<Vector3Int>)redoData[0];
+                                        foreach (Vector3Int cell in cells)
+                                        {
+                                            CellInfo cellInfo = destroyedBlocks[cell];
+                                            FillCell(cell, prefabDictionary[cellInfo.name], cellInfo.eulerAngles);
+                                        }
+                                        AddUndoAction(UndoAction.Fill, new object[] { cells });
+                                        break;
+                                    case UndoAction.Clear:
+                                        cells = (List<Vector3Int>)redoData[0];
+                                        foreach (Vector3Int cell in cells)
+                                        {
+                                            DestroyCell(cell);
+                                        }
+                                        AddUndoAction(UndoAction.Clear, new object[] { cells });
+                                        break;
+                                    case UndoAction.Instantiate:
+                                        GameObject prefab = prefabDictionary["Spawnpoint"];
+                                        GameObject undoSpawnpoint = Instantiate(prefab, (Vector3)redoData[1], Quaternion.Euler((Vector3)redoData[3]));
+                                        undoSpawnpoint.name = (string)redoData[0];
+                                        undoSpawnpoint.transform.localScale = (Vector3)redoData[2];
+                                        Color redoColor = (Color)redoData[4];
+                                        MeshRenderer redoRenderer = undoSpawnpoint.GetComponentInChildren<MeshRenderer>();
+                                        redoRenderer.material.color = redoColor;
+                                        redoRenderer.material.SetColor("_EmissionColor", redoColor);
+                                        SpawnpointType spawnType = (SpawnpointType)redoData[5];
+                                        switch (spawnType)
+                                        {
+                                            case SpawnpointType.Players:
+                                                undoSpawnpoint.transform.SetParent(PlayerManager.Instance.defaultSpawnParent);
+                                                break;
+                                            case SpawnpointType.Bots:
+                                                undoSpawnpoint.transform.SetParent(TankManager.Instance.spawnParent);
+                                                break;
+                                            default:
+                                                undoSpawnpoint.transform.SetParent(PlayerManager.Instance.teamSpawnParent);
+                                                break;
+                                        }
+
+                                        AddUndoAction(UndoAction.Instantiate, new object[] { undoSpawnpoint, spawnType });
+                                        break;
+                                    case UndoAction.DestroySpawnpoint:
+                                        GameObject redoGO = (GameObject)redoData[0];
+                                        AddUndoAction(UndoAction.DestroySpawnpoint, new object[] { redoGO.name, redoGO.transform.position, redoGO.transform.localScale, redoGO.transform.eulerAngles, redoGO.GetComponentInChildren<MeshRenderer>().material.color, (int)redoData[1] });
+                                        Destroy(redoGO);
+                                        break;
+                                }
+                                redoActions.RemoveAt(redoActions.Count - 1);
+                                redoObjects.RemoveAt(redoObjects.Count - 1);
                             }
-                            redoActions.RemoveAt(redoActions.Count - 1);
-                            redoObjects.RemoveAt(redoObjects.Count - 1);
                         }
                     }
                 }
-                else
-                {
-                    if(Input.GetKeyDown(KeyCode.C))
-                    {
-                        List<Vector3Int> placedBlocksList = placedBlocks.Keys.ToList();
-                        AddUndoAction(UndoAction.Clear, new object[] { placedBlocksList });
-                        foreach (Vector3Int cell in placedBlocksList)
-                        {
-                            DestroyCell(cell);
-                        }
-                    }
-                }
+            }
+            else
+            {
+                rb.velocity = Vector3.zero;
             }
         }
         else
         {
             rb.velocity = Vector3.zero;
+
+            if (Input.GetKey(KeyCode.LeftControl))
+            {
+                if (Input.GetKeyDown(KeyCode.P))
+                {
+                    ExitPlayMode();
+                }
+                else if (Input.GetKeyDown(KeyCode.E))
+                {
+                    SwitchPlayCamera();
+                }
+            }
+        }
+    }
+
+    void UpdatePreviewObject(bool leftShiftDown)
+    {
+        if (!leftShiftDown && Physics.Raycast(transform.position, transform.forward, out hit, Mathf.Infinity, ~ignoreLayers))
+        {
+            hitGridPoint = WorldToGrid(hit.point.Round(2) + hit.normal.Multiply(previewCollider.bounds.extents));
+            if (hit.normal == Vector3.forward || hit.normal == Vector3.back)
+            {
+                hitUp = Vector3.Cross(hit.normal, Vector3.right);
+            }
+            else
+            {
+                hitUp = Vector3.Cross(hit.normal, Vector3.forward);
+            }
+            hitRight = Vector3.Cross(hit.normal, hitUp);
+        }
+        else
+        {
+            hitGridPoint = WorldToGrid(transform.position + transform.forward * previewDistance);
+            hit.normal = transform.forward;
+            hitRight = transform.right;
+            hitUp = transform.up;
+        }
+        if (placedBlocks.ContainsKey(hitGridPoint))
+        {
+            previewRenderer.material.color = Color.red;
+        }
+        else
+        {
+            previewRenderer.material.color = Color.green;
+        }
+
+        previewObject.position = hitGridPoint;
+    }
+
+    void DestroySolidCircle(Vector3 center, List<Vector3Int> destroyedCells, int evenOffset)
+    {
+        float offsetRight, offsetUp;
+        for (int i = -halfBrushSize; i <= halfBrushSize; i++)
+        {
+            offsetRight = i * cellSize.x;
+
+            for (int j = -halfBrushSize; j <= halfBrushSize; j++)
+            {
+                offsetUp = j * cellSize.y;
+                Vector3Int gridPosition = WorldToGrid(center + offsetRight * hitRight.ToNormal() + offsetUp * hitUp.ToNormal());
+                if (Vector3.Distance(center + (0.5f * evenOffset * (Vector3)cellSize - hit.normal), gridPosition) <= brushSize)
+                {
+                    RaycastDestroyCell(gridPosition, hit.normal, destroyedCells);
+                }
+            }
+        }
+    }
+
+    void DestroyHollowCircle(Vector3 center, List<Vector3Int> destroyedCells, int evenOffset)
+    {
+        int offsetRight, offsetUp;
+        for (int i = -halfBrushSize; i <= halfBrushSize; i++)
+        {
+            offsetRight = i * cellSize.x;
+
+            for (int j = -halfBrushSize; j <= halfBrushSize; j++)
+            {
+                offsetUp = j * cellSize.y;
+                Vector3Int gridPosition = WorldToGrid(center + offsetRight * hitRight.ToNormal() + offsetUp * hitUp.ToNormal());
+                float dst = Vector3.Distance(center + (0.5f * evenOffset * (Vector3)cellSize - hit.normal), gridPosition);
+                if (dst <= brushSize && dst > brushSize - cellSize.x)
+                {
+                    RaycastDestroyCell(gridPosition, hit.normal, destroyedCells);
+                }
+            }
         }
     }
 
@@ -308,94 +538,49 @@ public class LevelEditorControl : MonoBehaviour
         List<Vector3Int> destroyedCells = new List<Vector3Int>();
         if (brushSize > 1)
         {
-            int halfBrushSize = brushSize / 2;
+            halfBrushSize = brushSize / 2;
+            int evenOffset = brushSize % 2 == 0 ? 1 : 0;
             switch (brushType)
             {
                 case BrushType.Cube:
+                    int x, y, z, i_y;
                     if (hollowBrush)
                     {
-                        if (brushSize % 2 == 0)
+                        for (int i = -halfBrushSize + evenOffset; i <= halfBrushSize; i++)
                         {
-                            for (int i = -halfBrushSize + 1; i <= halfBrushSize; i++)
+                            x = hitGridPoint.x + (i * cellSize.x);
+                            i_y = hitGridPoint.y + (i * cellSize.y);
+
+                            for (int j = -halfBrushSize + evenOffset; j <= halfBrushSize; j++)
                             {
-                                int x = hitGridPoint.x + (i * cellSize.x);
-                                int x_y = hitGridPoint.y + (i * cellSize.y);
+                                // x side
+                                z = hitGridPoint.z + (j * cellSize.z);
+                                RaycastDestroyCell(new Vector3Int(hitGridPoint.x - ((halfBrushSize - evenOffset) * cellSize.x), i_y, z), hit.normal, destroyedCells);
+                                RaycastDestroyCell(new Vector3Int(hitGridPoint.x + (halfBrushSize * cellSize.x), i_y, z), hit.normal, destroyedCells);
 
-                                for (int j = -halfBrushSize + 1; j <= halfBrushSize; j++)
-                                {
-                                    // x side
-                                    int z = hitGridPoint.z + (j * cellSize.z);
-                                    RaycastDestroyCell(new Vector3Int(hitGridPoint.x - ((halfBrushSize - 1) * cellSize.x), x_y, z), hit.normal, destroyedCells);
-                                    RaycastDestroyCell(new Vector3Int(hitGridPoint.x + (halfBrushSize * cellSize.x), x_y, z), hit.normal, destroyedCells);
+                                // y side
+                                y = hitGridPoint.y + (j * cellSize.y);
+                                RaycastDestroyCell(new Vector3Int(x, hitGridPoint.y - ((halfBrushSize - evenOffset) * cellSize.y), z), hit.normal, destroyedCells);
+                                RaycastDestroyCell(new Vector3Int(x, hitGridPoint.y + (halfBrushSize * cellSize.y), z), hit.normal, destroyedCells);
 
-                                    // y side
-                                    int y = hitGridPoint.y + (j * cellSize.y);
-                                    RaycastDestroyCell(new Vector3Int(x, hitGridPoint.y - ((halfBrushSize - 1) * cellSize.y), z), hit.normal, destroyedCells);
-                                    RaycastDestroyCell(new Vector3Int(x, hitGridPoint.y + (halfBrushSize * cellSize.y), z), hit.normal, destroyedCells);
-
-                                    // z side
-                                    RaycastDestroyCell(new Vector3Int(x, y, hitGridPoint.z - ((halfBrushSize - 1) * cellSize.z)), hit.normal, destroyedCells);
-                                    RaycastDestroyCell(new Vector3Int(x, y, hitGridPoint.z + (halfBrushSize * cellSize.z)), hit.normal, destroyedCells);
-                                }
-                            }
-                        }
-                        else
-                        {
-                            for (int i = -halfBrushSize; i <= halfBrushSize; i++)
-                            {
-                                int x = hitGridPoint.x + (i * cellSize.x);
-                                int x_y = hitGridPoint.y + (i * cellSize.y);
-
-                                for (int j = -halfBrushSize; j <= halfBrushSize; j++)
-                                {
-                                    // x side
-                                    int z = hitGridPoint.z + (j * cellSize.z);
-                                    RaycastDestroyCell(new Vector3Int(hitGridPoint.x - (halfBrushSize * cellSize.x), x_y, z), hit.normal, destroyedCells);
-                                    RaycastDestroyCell(new Vector3Int(hitGridPoint.x + (halfBrushSize * cellSize.x), x_y, z), hit.normal, destroyedCells);
-
-                                    // y side
-                                    int y = hitGridPoint.y + (j * cellSize.y);
-                                    RaycastDestroyCell(new Vector3Int(x, hitGridPoint.y - (halfBrushSize * cellSize.y), z), hit.normal, destroyedCells);
-                                    RaycastDestroyCell(new Vector3Int(x, hitGridPoint.y + (halfBrushSize * cellSize.y), z), hit.normal, destroyedCells);
-
-                                    // z side
-                                    RaycastDestroyCell(new Vector3Int(x, y, hitGridPoint.z - (halfBrushSize * cellSize.z)), hit.normal, destroyedCells);
-                                    RaycastDestroyCell(new Vector3Int(x, y, hitGridPoint.z + (halfBrushSize * cellSize.z)), hit.normal, destroyedCells);
-                                }
+                                // z side
+                                RaycastDestroyCell(new Vector3Int(x, y, hitGridPoint.z - ((halfBrushSize - evenOffset) * cellSize.z)), hit.normal, destroyedCells);
+                                RaycastDestroyCell(new Vector3Int(x, y, hitGridPoint.z + (halfBrushSize * cellSize.z)), hit.normal, destroyedCells);
                             }
                         }
                     }
                     else
                     {
-                        if (brushSize % 2 == 0)
+                        for (int i = -halfBrushSize + evenOffset; i <= halfBrushSize; i++)
                         {
-                            for (int i = -halfBrushSize + 1; i <= halfBrushSize; i++)
+                            x = hitGridPoint.x + (i * cellSize.x);
+                            for (int j = -halfBrushSize + evenOffset; j <= halfBrushSize; j++)
                             {
-                                int x = hitGridPoint.x + (i * cellSize.x);
-                                for (int j = -halfBrushSize + 1; j <= halfBrushSize; j++)
+                                y = hitGridPoint.y + (j * cellSize.y);
+                                for (int k = -halfBrushSize + evenOffset; k <= halfBrushSize; k++)
                                 {
-                                    int y = hitGridPoint.y + (j * cellSize.y);
-                                    for (int k = -halfBrushSize + 1; k <= halfBrushSize; k++)
-                                    {
-                                        int z = hitGridPoint.z + (k * cellSize.z);
-                                        RaycastDestroyCell(new Vector3Int(x, y, z), hit.normal, destroyedCells);
-                                    }
-                                }
-                            }
-                        }
-                        else
-                        {
-                            for (int i = -halfBrushSize; i <= halfBrushSize; i++)
-                            {
-                                int x = hitGridPoint.x + (i * cellSize.x);
-                                for (int j = -halfBrushSize; j <= halfBrushSize; j++)
-                                {
-                                    int y = hitGridPoint.y + (j * cellSize.y);
-                                    for (int k = -halfBrushSize; k <= halfBrushSize; k++)
-                                    {
-                                        int z = hitGridPoint.z + (k * cellSize.z);
-                                        RaycastDestroyCell(new Vector3Int(x, y, z), hit.normal, destroyedCells);
-                                    }
+                                    z = hitGridPoint.z + (k * cellSize.z);
+                                    RaycastDestroyCell(new Vector3Int(x, y, z), hit.normal, destroyedCells);
                                 }
                             }
                         }
@@ -404,52 +589,20 @@ public class LevelEditorControl : MonoBehaviour
                 case BrushType.Sphere:
                     if (hollowBrush)
                     {
-                        if (brushSize % 2 == 0)
+                        for (int i = -halfBrushSize + evenOffset; i <= halfBrushSize; i++)
                         {
-                            for (int i = -halfBrushSize + 1; i <= halfBrushSize; i++)
+                            x = hitGridPoint.x + (i * cellSize.x);
+                            for (int j = -halfBrushSize + evenOffset; j <= halfBrushSize; j++)
                             {
-                                int x = hitGridPoint.x + (i * cellSize.x);
-                                for (int j = -halfBrushSize + 1; j <= halfBrushSize; j++)
+                                y = hitGridPoint.y + (j * cellSize.y);
+                                for (int k = -halfBrushSize + evenOffset; k <= halfBrushSize; k++)
                                 {
-                                    int y = hitGridPoint.y + (j * cellSize.y);
-                                    for (int k = -halfBrushSize + 1; k <= halfBrushSize; k++)
+                                    z = hitGridPoint.z + (k * cellSize.z);
+                                    Vector3Int gridPosition = new Vector3Int(x, y, z);
+                                    float dst = Vector3.Distance(hitGridPoint + (0.5f * evenOffset * (Vector3)cellSize), gridPosition);
+                                    if (dst <= brushSize && dst > brushSize - cellSize.x)
                                     {
-                                        int z = hitGridPoint.z + (k * cellSize.z);
-                                        Vector3Int gridPosition = new Vector3Int(x, y, z);
-                                        Vector3 pointOnSphere = CustomMath.GetClosestPointOnSphere(gridPosition, hitGridPoint + (Vector3)cellSize * 0.5f, brushSize);
-
-                                        float dstX = Mathf.Abs(pointOnSphere.x - gridPosition.x);
-                                        float dstY = Mathf.Abs(pointOnSphere.y - gridPosition.y);
-                                        float dstZ = Mathf.Abs(pointOnSphere.z - gridPosition.z);
-                                        if (dstX <= cellSize.x * 0.5f && dstY <= cellSize.y * 0.5f && dstZ <= cellSize.z * 0.5f)
-                                        {
-                                            RaycastDestroyCell(gridPosition, hit.normal, destroyedCells);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        else
-                        {
-                            for (int i = -halfBrushSize; i <= halfBrushSize; i++)
-                            {
-                                int x = hitGridPoint.x + (i * cellSize.x);
-                                for (int j = -halfBrushSize; j <= halfBrushSize; j++)
-                                {
-                                    int y = hitGridPoint.y + (j * cellSize.y);
-                                    for (int k = -halfBrushSize; k <= halfBrushSize; k++)
-                                    {
-                                        int z = hitGridPoint.z + (k * cellSize.z);
-                                        Vector3Int gridPosition = new Vector3Int(x, y, z);
-                                        Vector3 pointOnSphere = CustomMath.GetClosestPointOnSphere(gridPosition, hitGridPoint, brushSize);
-
-                                        float dstX = Mathf.Abs(pointOnSphere.x - gridPosition.x);
-                                        float dstY = Mathf.Abs(pointOnSphere.y - gridPosition.y);
-                                        float dstZ = Mathf.Abs(pointOnSphere.z - gridPosition.z);
-                                        if (dstX <= cellSize.x * 0.5f && dstY <= cellSize.y * 0.5f && dstZ <= cellSize.z * 0.5f)
-                                        {
-                                            RaycastDestroyCell(gridPosition, hit.normal, destroyedCells);
-                                        }
+                                        RaycastDestroyCell(gridPosition, hit.normal, destroyedCells);
                                     }
                                 }
                             }
@@ -457,73 +610,122 @@ public class LevelEditorControl : MonoBehaviour
                     }
                     else
                     {
-                        if (brushSize % 2 == 0)
+                        for (int i = -halfBrushSize + evenOffset; i <= halfBrushSize; i++)
                         {
-                            for (int i = -halfBrushSize + 1; i <= halfBrushSize; i++)
+                            x = hitGridPoint.x + (i * cellSize.x);
+                            for (int j = -halfBrushSize + evenOffset; j <= halfBrushSize; j++)
                             {
-                                int x = hitGridPoint.x + (i * cellSize.x);
-                                for (int j = -halfBrushSize + 1; j <= halfBrushSize; j++)
+                                y = hitGridPoint.y + (j * cellSize.y);
+                                for (int k = -halfBrushSize + evenOffset; k <= halfBrushSize; k++)
                                 {
-                                    int y = hitGridPoint.y + (j * cellSize.y);
-                                    for (int k = -halfBrushSize + 1; k <= halfBrushSize; k++)
+                                    z = hitGridPoint.z + (k * cellSize.z);
+                                    Vector3Int gridPosition = new Vector3Int(x, y, z);
+                                    if (Vector3.Distance(hitGridPoint + (0.5f * evenOffset * (Vector3)cellSize), gridPosition) <= brushSize)
                                     {
-                                        int z = hitGridPoint.z + (k * cellSize.z);
-                                        Vector3Int gridPosition = new Vector3Int(x, y, z);
-                                        if (Vector3.Distance(hitGridPoint + (Vector3)cellSize * 0.5f, gridPosition) <= brushSize)
-                                        {
-                                            RaycastDestroyCell(gridPosition, hit.normal, destroyedCells);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        else
-                        {
-                            for (int i = -halfBrushSize; i <= halfBrushSize; i++)
-                            {
-                                int x = hitGridPoint.x + (i * cellSize.x);
-                                for (int j = -halfBrushSize; j <= halfBrushSize; j++)
-                                {
-                                    int y = hitGridPoint.y + (j * cellSize.y);
-                                    for (int k = -halfBrushSize; k <= halfBrushSize; k++)
-                                    {
-                                        int z = hitGridPoint.z + (k * cellSize.z);
-                                        Vector3Int gridPosition = new Vector3Int(x, y, z);
-                                        if (Vector3Int.Distance(hitGridPoint, gridPosition) <= brushSize)
-                                        {
-                                            RaycastDestroyCell(gridPosition, hit.normal, destroyedCells);
-                                        }
+                                        RaycastDestroyCell(gridPosition, hit.normal, destroyedCells);
                                     }
                                 }
                             }
                         }
                     }
                     break;
-                case BrushType.Square:
+                case BrushType.Cylinder:
+                    int negativeHalfBrush = -halfBrushSize + evenOffset;
+                    hit.normal = hit.normal.ToNormal();
                     if (hollowBrush)
                     {
-
+                        DestroySolidCircle(hitGridPoint + negativeHalfBrush * cellSize.x * hit.normal, destroyedCells, evenOffset);
+                        DestroySolidCircle(hitGridPoint + halfBrushSize * cellSize.x * hit.normal, destroyedCells, evenOffset);
+                        for (int i = negativeHalfBrush + 1; i < halfBrushSize; i++)
+                        {
+                            DestroyHollowCircle(hitGridPoint + i * cellSize.x * hit.normal, destroyedCells, evenOffset);
+                        }
                     }
                     else
                     {
+                        for (int i = negativeHalfBrush; i <= halfBrushSize; i++)
+                        {
+                            DestroySolidCircle(hitGridPoint + i * cellSize.x * hit.normal, destroyedCells, evenOffset);
+                        }
+                    }
+                    break;
+                case BrushType.Square:
+                    int offsetRight, offsetUp;
+                    hitRight = hitRight.ToNormal();
+                    hitUp = hitUp.ToNormal();
+                    if (hollowBrush)
+                    {
+                        int offset;
+                        for (int i = -halfBrushSize + evenOffset; i <= halfBrushSize; i++)
+                        {
+                            offset = i * cellSize.x;
+                            RaycastDestroyCell(WorldToGrid(hitGridPoint + (((cellSize.x * -halfBrushSize + evenOffset) * hitRight) + offset * hitUp)), hit.normal, destroyedCells);
+                            RaycastDestroyCell(WorldToGrid(hitGridPoint + ((cellSize.x * halfBrushSize * hitRight) + offset * hitUp)), hit.normal, destroyedCells);
 
+                            RaycastDestroyCell(WorldToGrid(hitGridPoint + (((cellSize.x * -halfBrushSize + evenOffset) * hitUp) + offset * hitRight)), hit.normal, destroyedCells);
+                            RaycastDestroyCell(WorldToGrid(hitGridPoint + ((cellSize.x * halfBrushSize * hitUp) + offset * hitRight)), hit.normal, destroyedCells);
+                        }
+                    }
+                    else
+                    {
+                        for (int i = -halfBrushSize + evenOffset; i <= halfBrushSize; i++)
+                        {
+                            offsetRight = i * cellSize.x;
+
+                            for (int j = -halfBrushSize + evenOffset; j <= halfBrushSize; j++)
+                            {
+                                offsetUp = j * cellSize.y;
+                                Vector3Int gridPosition = WorldToGrid(hitGridPoint + offsetRight * hitRight + offsetUp * hitUp);
+                                RaycastDestroyCell(gridPosition, hit.normal, destroyedCells);
+                            }
+                        }
                     }
                     break;
                 case BrushType.Circle:
                     if (hollowBrush)
                     {
+                        for (int i = -halfBrushSize + evenOffset; i <= halfBrushSize; i++)
+                        {
+                            offsetRight = i * cellSize.x;
 
+                            for (int j = -halfBrushSize + evenOffset; j <= halfBrushSize; j++)
+                            {
+                                offsetUp = j * cellSize.y;
+                                Vector3Int gridPosition = WorldToGrid(hitGridPoint + offsetRight * hitRight.ToNormal() + offsetUp * hitUp.ToNormal());
+                                float dst = Vector3.Distance(hitGridPoint + (0.5f * evenOffset * (Vector3)cellSize), gridPosition);
+                                if (dst <= brushSize && dst > brushSize - cellSize.x)
+                                {
+                                    RaycastDestroyCell(gridPosition, hit.normal, destroyedCells);
+                                }
+                            }
+                        }
                     }
                     else
                     {
+                        for (int i = -halfBrushSize + evenOffset; i <= halfBrushSize; i++)
+                        {
+                            offsetRight = i * cellSize.x;
 
+                            for (int j = -halfBrushSize + evenOffset; j <= halfBrushSize; j++)
+                            {
+                                offsetUp = j * cellSize.y;
+                                Vector3Int gridPosition = WorldToGrid(hitGridPoint + offsetRight * hitRight.ToNormal() + offsetUp * hitUp.ToNormal());
+                                if (Vector3.Distance(hitGridPoint + (0.5f * evenOffset * (Vector3)cellSize), gridPosition) <= brushSize)
+                                {
+                                    RaycastDestroyCell(gridPosition, hit.normal, destroyedCells);
+                                }
+                            }
+                        }
                     }
                     break;
             }
         }
-        else
+        else if(hit.transform != null)
         {
-            RaycastDestroyCell(hitGridPoint, hit.normal, destroyedCells);
+
+            Vector3Int hitCell = WorldToGrid(hit.transform.position);
+            if (DestroyCell(hitCell))
+                destroyedCells.Add(hitCell);
         }
 
         if (destroyedCells.Count > 0)
@@ -532,290 +734,244 @@ public class LevelEditorControl : MonoBehaviour
         }
     }
 
+    void FillSolidCircle(Vector3 center, List<Vector3Int> filledCells, int evenOffset)
+    {
+        float offsetRight, offsetUp;
+        for (int i = -halfBrushSize; i <= halfBrushSize; i++)
+        {
+            offsetRight = i * cellSize.x;
+
+            for (int j = -halfBrushSize; j <= halfBrushSize; j++)
+            {
+                offsetUp = j * cellSize.y;
+                Vector3Int gridPosition = WorldToGrid(center + offsetRight * hitRight.ToNormal() + offsetUp * hitUp.ToNormal());
+                if (Vector3.Distance(center + (0.5f * evenOffset * (Vector3)cellSize - hit.normal), gridPosition) <= brushSize)
+                {
+                    RaycastFillCell(gridPosition, filledCells);
+                }
+            }
+        }
+    }
+
+    void FillHollowCircle(Vector3 center, List<Vector3Int> filledCells, int evenOffset)
+    {
+        int offsetRight, offsetUp;
+        for (int i = -halfBrushSize; i <= halfBrushSize; i++)
+        {
+            offsetRight = i * cellSize.x;
+
+            for (int j = -halfBrushSize; j <= halfBrushSize; j++)
+            {
+                offsetUp = j * cellSize.y;
+                Vector3Int gridPosition = WorldToGrid(center + offsetRight * hitRight.ToNormal() + offsetUp * hitUp.ToNormal());
+                float dst = Vector3.Distance(center + (0.5f * evenOffset * (Vector3)cellSize - hit.normal), gridPosition);
+                if (dst <= brushSize && dst > brushSize - cellSize.x)
+                {
+                    RaycastFillCell(gridPosition, filledCells);
+                }
+            }
+        }
+    }
+
     void OnMouseTwo()
     {
-        List<Vector3Int> filledCells = new List<Vector3Int>();
-        if (brushSize > 1)
+        if (previewObject.CompareTag("Spawnpoint"))
         {
-            int halfBrushSize = brushSize / 2;
-            switch (brushType)
+            if (!placedSpawnpoints.ContainsKey(hitGridPoint))
             {
-                case BrushType.Cube:
-                    if (hollowBrush)
-                    {
-                        if (brushSize % 2 == 0)
-                        {
-                            for (int i = -halfBrushSize + 1; i <= halfBrushSize; i++)
-                            {
-                                int x = hitGridPoint.x + (i * cellSize.x);
-                                int x_y = hitGridPoint.y + (i * cellSize.y);
+                GameObject newSpawnpoint = Instantiate(prefabDictionary[previewObject.name], hitGridPoint, Quaternion.identity);
+                switch (spawnpointType)
+                {
+                    case SpawnpointType.Players:
+                        newSpawnpoint.transform.SetParent(PlayerManager.Instance.defaultSpawnParent);
+                        break;
+                    case SpawnpointType.Bots:
+                        newSpawnpoint.transform.SetParent(TankManager.Instance.spawnParent);
+                        break;
+                    default:
+                        newSpawnpoint.transform.SetParent(PlayerManager.Instance.teamSpawnParent);
+                        break;
+                }
+                newSpawnpoint.transform.rotation = previewObject.rotation;
+                newSpawnpoint.name = spawnpointType.ToString();
+                newSpawnpoint.transform.localScale = spawnpointScale;
+                MeshRenderer newRenderer = newSpawnpoint.GetComponentInChildren<MeshRenderer>();
+                newRenderer.material.color = previewRenderer.material.color;
+                newRenderer.material.SetColor("_EmissionColor", previewRenderer.material.color);
+                placedSpawnpoints.Add(hitGridPoint, newSpawnpoint);
 
-                                for (int j = -halfBrushSize + 1; j <= halfBrushSize; j++)
-                                {
-                                    // x side
-                                    int z = hitGridPoint.z + (j * cellSize.z);
-                                    RaycastFillCell(new Vector3Int(hitGridPoint.x - ((halfBrushSize - 1) * cellSize.x), x_y, z), filledCells);
-                                    RaycastFillCell(new Vector3Int(hitGridPoint.x + (halfBrushSize * cellSize.x), x_y, z), filledCells);
-
-                                    // y side
-                                    int y = hitGridPoint.y + (j * cellSize.y);
-                                    RaycastFillCell(new Vector3Int(x, hitGridPoint.y - ((halfBrushSize - 1) * cellSize.y), z), filledCells);
-                                    RaycastFillCell(new Vector3Int(x, hitGridPoint.y + (halfBrushSize * cellSize.y), z), filledCells);
-
-                                    // z side
-                                    RaycastFillCell(new Vector3Int(x, y, hitGridPoint.z - ((halfBrushSize - 1) * cellSize.z)), filledCells);
-                                    RaycastFillCell(new Vector3Int(x, y, hitGridPoint.z + (halfBrushSize * cellSize.z)), filledCells);
-                                }
-                            }
-                        }
-                        else
-                        {
-                            for (int i = -halfBrushSize; i <= halfBrushSize; i++)
-                            {
-                                int x = hitGridPoint.x + (i * cellSize.x);
-                                int x_y = hitGridPoint.y + (i * cellSize.y);
-
-                                for (int j = -halfBrushSize; j <= halfBrushSize; j++)
-                                {
-                                    // x side
-                                    int z = hitGridPoint.z + (j * cellSize.z);
-                                    RaycastFillCell(new Vector3Int(hitGridPoint.x - (halfBrushSize * cellSize.x), x_y, z), filledCells);
-                                    RaycastFillCell(new Vector3Int(hitGridPoint.x + (halfBrushSize * cellSize.x), x_y, z), filledCells);
-
-                                    // y side
-                                    int y = hitGridPoint.y + (j * cellSize.y);
-                                    RaycastFillCell(new Vector3Int(x, hitGridPoint.y - (halfBrushSize * cellSize.y), z), filledCells);
-                                    RaycastFillCell(new Vector3Int(x, hitGridPoint.y + (halfBrushSize * cellSize.y), z), filledCells);
-
-                                    // z side
-                                    RaycastFillCell(new Vector3Int(x, y, hitGridPoint.z - (halfBrushSize * cellSize.z)), filledCells);
-                                    RaycastFillCell(new Vector3Int(x, y, hitGridPoint.z + (halfBrushSize * cellSize.z)), filledCells);
-                                }
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if (brushSize % 2 == 0)
-                        {
-                            for (int i = -halfBrushSize + 1; i <= halfBrushSize; i++)
-                            {
-                                int x = hitGridPoint.x + (i * cellSize.x);
-                                for (int j = -halfBrushSize + 1; j <= halfBrushSize; j++)
-                                {
-                                    int y = hitGridPoint.y + (j * cellSize.y);
-                                    for (int k = -halfBrushSize + 1; k <= halfBrushSize; k++)
-                                    {
-                                        int z = hitGridPoint.z + (k * cellSize.z);
-                                        RaycastFillCell(new Vector3Int(x, y, z), filledCells);
-                                    }
-                                }
-                            }
-                        }
-                        else
-                        {
-                            for (int i = -halfBrushSize; i <= halfBrushSize; i++)
-                            {
-                                int x = hitGridPoint.x + (i * cellSize.x);
-                                for (int j = -halfBrushSize; j <= halfBrushSize; j++)
-                                {
-                                    int y = hitGridPoint.y + (j * cellSize.y);
-                                    for (int k = -halfBrushSize; k <= halfBrushSize; k++)
-                                    {
-                                        int z = hitGridPoint.z + (k * cellSize.z);
-                                        RaycastFillCell(new Vector3Int(x, y, z), filledCells);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    break;
-                case BrushType.Sphere:
-                    if (hollowBrush)
-                    {
-                        if (brushSize % 2 == 0)
-                        {
-                            for (int i = -halfBrushSize + 1; i <= halfBrushSize; i++)
-                            {
-                                int x = hitGridPoint.x + (i * cellSize.x);
-                                for (int j = -halfBrushSize + 1; j <= halfBrushSize; j++)
-                                {
-                                    int y = hitGridPoint.y + (j * cellSize.y);
-                                    for (int k = -halfBrushSize + 1; k <= halfBrushSize; k++)
-                                    {
-                                        int z = hitGridPoint.z + (k * cellSize.z);
-                                        Vector3Int gridPosition = new Vector3Int(x, y, z);
-                                        Vector3 pointOnSphere = CustomMath.GetClosestPointOnSphere(gridPosition, hitGridPoint + (Vector3)cellSize * 0.5f, brushSize);
-
-                                        float dstX = Mathf.Abs(pointOnSphere.x - gridPosition.x);
-                                        float dstY = Mathf.Abs(pointOnSphere.y - gridPosition.y);
-                                        float dstZ = Mathf.Abs(pointOnSphere.z - gridPosition.z);
-                                        if (dstX <= cellSize.x * 0.5f && dstY <= cellSize.y * 0.5f && dstZ <= cellSize.z * 0.5f)
-                                        {
-                                            RaycastFillCell(gridPosition, filledCells);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        else
-                        {
-                            for (int i = -halfBrushSize; i <= halfBrushSize; i++)
-                            {
-                                int x = hitGridPoint.x + (i * cellSize.x);
-                                for (int j = -halfBrushSize; j <= halfBrushSize; j++)
-                                {
-                                    int y = hitGridPoint.y + (j * cellSize.y);
-                                    for (int k = -halfBrushSize; k <= halfBrushSize; k++)
-                                    {
-                                        int z = hitGridPoint.z + (k * cellSize.z);
-                                        Vector3Int gridPosition = new Vector3Int(x, y, z);
-                                        Vector3 pointOnSphere = CustomMath.GetClosestPointOnSphere(gridPosition, hitGridPoint, brushSize);
-
-                                        float dstX = Mathf.Abs(pointOnSphere.x - gridPosition.x);
-                                        float dstY = Mathf.Abs(pointOnSphere.y - gridPosition.y);
-                                        float dstZ = Mathf.Abs(pointOnSphere.z - gridPosition.z);
-                                        if (dstX <= cellSize.x * 0.5f && dstY <= cellSize.y * 0.5f && dstZ <= cellSize.z * 0.5f)
-                                        {
-                                            RaycastFillCell(gridPosition, filledCells);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if (brushSize % 2 == 0)
-                        {
-                            for (int i = -halfBrushSize + 1; i <= halfBrushSize; i++)
-                            {
-                                int x = hitGridPoint.x + (i * cellSize.x);
-                                for (int j = -halfBrushSize + 1; j <= halfBrushSize; j++)
-                                {
-                                    int y = hitGridPoint.y + (j * cellSize.y);
-                                    for (int k = -halfBrushSize + 1; k <= halfBrushSize; k++)
-                                    {
-                                        int z = hitGridPoint.z + (k * cellSize.z);
-                                        Vector3Int gridPosition = new Vector3Int(x, y, z);
-                                        if (Vector3.Distance(hitGridPoint + (Vector3)cellSize * 0.5f, gridPosition) <= brushSize)
-                                        {
-                                            RaycastFillCell(gridPosition, filledCells);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        else
-                        {
-                            for (int i = -halfBrushSize; i <= halfBrushSize; i++)
-                            {
-                                int x = hitGridPoint.x + (i * cellSize.x);
-                                for (int j = -halfBrushSize; j <= halfBrushSize; j++)
-                                {
-                                    int y = hitGridPoint.y + (j * cellSize.y);
-                                    for (int k = -halfBrushSize; k <= halfBrushSize; k++)
-                                    {
-                                        int z = hitGridPoint.z + (k * cellSize.z);
-                                        Vector3Int gridPosition = new Vector3Int(x, y, z);
-                                        if (Vector3Int.Distance(hitGridPoint, gridPosition) <= brushSize)
-                                        {
-                                            RaycastFillCell(gridPosition, filledCells);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    break;
-                case BrushType.Square:
-                    Vector3Int normalInt = hit.normal.FloorToInt();
-                    if (hollowBrush)
-                    {
-                        
-                    }
-                    else
-                    {
-                        if (brushSize % 2 == 0)
-                        {
-                            for (int i = -halfBrushSize + 1; i <= halfBrushSize; i++)
-                            {
-                                int i_x = hitGridPoint.x + (i * cellSize.x);
-                                int i_y = hitGridPoint.y + (i * cellSize.y);
-
-                                for (int j = -halfBrushSize + 1; j <= halfBrushSize; j++)
-                                {
-                                    int j_y = hitGridPoint.y + (j * cellSize.y);
-                                    int j_z = hitGridPoint.z + (j * cellSize.z);
-
-                                    Vector3Int edgePoint = hitGridPoint;
-                                    if (normalInt.x == 0)
-                                    {
-                                        edgePoint.x = i_x;
-                                    }
-                                    if (normalInt.y == 0)
-                                    {
-                                        edgePoint.y = hit.normal.x == 0 ? j_y : i_y;
-                                    }
-                                    if (normalInt.z == 0)
-                                    {
-                                        edgePoint.z = j_z;
-                                    }
-                                    RaycastFillCell(edgePoint, filledCells);
-                                }
-                            }
-                        }
-                        else
-                        {
-                            for (int i = -halfBrushSize; i <= halfBrushSize; i++)
-                            {
-                                int i_x = hitGridPoint.x + (i * cellSize.x);
-                                int i_y = hitGridPoint.y + (i * cellSize.y);
-
-                                for (int j = -halfBrushSize; j <= halfBrushSize; j++)
-                                {
-                                    int j_y = hitGridPoint.y + (j * cellSize.y);
-                                    int j_z = hitGridPoint.z + (j * cellSize.z);
-
-                                    Vector3Int edgePoint = hitGridPoint;
-                                    if (normalInt.x == 0)
-                                    {
-                                        edgePoint.x = i_x;
-                                    }
-                                    if (normalInt.y == 0)
-                                    {
-                                        edgePoint.y = hit.normal.x == 0 ? j_y : i_y;
-                                    }
-                                    if (normalInt.z == 0)
-                                    {
-                                        edgePoint.z = j_z;
-                                    }
-                                    RaycastFillCell(edgePoint, filledCells);
-                                }
-                            }
-                        }
-                    }
-                    break;
-                case BrushType.Circle:
-                    if (hollowBrush)
-                    {
-
-                    }
-                    else
-                    {
-
-                    }
-                    break;
+                AddUndoAction(UndoAction.Instantiate, new object[] { newSpawnpoint, spawnpointType, previewObject.eulerAngles });
             }
         }
         else
         {
-            RaycastFillCell(hitGridPoint, filledCells);
-        }
+            List<Vector3Int> filledCells = new List<Vector3Int>();
+            if (brushSize > 1)
+            {
+                halfBrushSize = brushSize / 2;
+                int evenOffset = brushSize % 2 == 0 ? 1 : 0;
+                switch (brushType)
+                {
+                    case BrushType.Cube:
+                        int x, y, z, i_y;
+                        if (hollowBrush)
+                        {
+                            for (int i = -halfBrushSize + evenOffset; i <= halfBrushSize; i++)
+                            {
+                                x = hitGridPoint.x + (i * cellSize.x);
+                                i_y = hitGridPoint.y + (i * cellSize.y);
 
-        if (filledCells.Count > 0)
-        {
-            AddUndoAction(UndoAction.Fill, new object[] { filledCells });
+                                for (int j = -halfBrushSize + evenOffset; j <= halfBrushSize; j++)
+                                {
+                                    // x side
+                                    z = hitGridPoint.z + (j * cellSize.z);
+                                    RaycastFillCell(new Vector3Int(hitGridPoint.x - ((halfBrushSize - evenOffset) * cellSize.x), i_y, z), filledCells);
+                                    RaycastFillCell(new Vector3Int(hitGridPoint.x + (halfBrushSize * cellSize.x), i_y, z), filledCells);
+
+                                    // y side
+                                    y = hitGridPoint.y + (j * cellSize.y);
+                                    RaycastFillCell(new Vector3Int(x, hitGridPoint.y - ((halfBrushSize - evenOffset) * cellSize.y), z), filledCells);
+                                    RaycastFillCell(new Vector3Int(x, hitGridPoint.y + (halfBrushSize * cellSize.y), z), filledCells);
+
+                                    // z side
+                                    RaycastFillCell(new Vector3Int(x, y, hitGridPoint.z - ((halfBrushSize - evenOffset) * cellSize.z)), filledCells);
+                                    RaycastFillCell(new Vector3Int(x, y, hitGridPoint.z + (halfBrushSize * cellSize.z)), filledCells);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            for (int i = -halfBrushSize + evenOffset; i <= halfBrushSize; i++)
+                            {
+                                x = hitGridPoint.x + (i * cellSize.x);
+                                for (int j = -halfBrushSize + evenOffset; j <= halfBrushSize; j++)
+                                {
+                                    y = hitGridPoint.y + (j * cellSize.y);
+                                    for (int k = -halfBrushSize + evenOffset; k <= halfBrushSize; k++)
+                                    {
+                                        z = hitGridPoint.z + (k * cellSize.z);
+                                        RaycastFillCell(new Vector3Int(x, y, z), filledCells);
+                                    }
+                                }
+                            }
+                        }
+                        break;
+                    case BrushType.Sphere:
+                        if (hollowBrush)
+                        {
+                            for (int i = -halfBrushSize + evenOffset; i <= halfBrushSize; i++)
+                            {
+                                x = hitGridPoint.x + (i * cellSize.x);
+                                for (int j = -halfBrushSize + evenOffset; j <= halfBrushSize; j++)
+                                {
+                                    y = hitGridPoint.y + (j * cellSize.y);
+                                    for (int k = -halfBrushSize + evenOffset; k <= halfBrushSize; k++)
+                                    {
+                                        z = hitGridPoint.z + (k * cellSize.z);
+                                        Vector3Int gridPosition = new Vector3Int(x, y, z);
+                                        float dst = Vector3.Distance(hitGridPoint + (0.5f * evenOffset * (Vector3)cellSize), gridPosition);
+                                        if (dst <= brushSize && dst >= brushSize - cellSize.x)
+                                        {
+                                            RaycastFillCell(gridPosition, filledCells);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            for (int i = -halfBrushSize + evenOffset; i <= halfBrushSize; i++)
+                            {
+                                x = hitGridPoint.x + (i * cellSize.x);
+                                for (int j = -halfBrushSize + evenOffset; j <= halfBrushSize; j++)
+                                {
+                                    y = hitGridPoint.y + (j * cellSize.y);
+                                    for (int k = -halfBrushSize + evenOffset; k <= halfBrushSize; k++)
+                                    {
+                                        z = hitGridPoint.z + (k * cellSize.z);
+                                        Vector3Int gridPosition = new Vector3Int(x, y, z);
+                                        if (Vector3.Distance(hitGridPoint + (0.5f * evenOffset * (Vector3)cellSize), gridPosition) <= brushSize)
+                                        {
+                                            RaycastFillCell(gridPosition, filledCells);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        break;
+                    case BrushType.Cylinder:
+                        int negativeHalfBrush = -halfBrushSize + evenOffset;
+                        hit.normal = hit.normal.ToNormal();
+                        if (hollowBrush)
+                        {
+                            FillSolidCircle(hitGridPoint + negativeHalfBrush * cellSize.x * hit.normal, filledCells, evenOffset);
+                            FillSolidCircle(hitGridPoint + halfBrushSize * cellSize.x * hit.normal, filledCells, evenOffset);
+                            for (int i = negativeHalfBrush + 1; i < halfBrushSize; i++)
+                            {
+                                FillHollowCircle(hitGridPoint + i * cellSize.x * hit.normal, filledCells, evenOffset);
+                            }
+                        }
+                        else
+                        {
+                            for (int i = negativeHalfBrush; i <= halfBrushSize; i++)
+                            {
+                                FillSolidCircle(hitGridPoint + i * cellSize.x * hit.normal, filledCells, evenOffset);
+                            }
+                        }
+                        break;
+                    case BrushType.Square:
+                        int offsetRight, offsetUp;
+                        hitRight = hitRight.ToNormal();
+                        hitUp = hitUp.ToNormal();
+                        if (hollowBrush)
+                        {
+                            int offset;
+                            for (int i = -halfBrushSize + evenOffset; i <= halfBrushSize; i++)
+                            {
+                                offset = i * cellSize.x;
+                                RaycastFillCell(WorldToGrid(hitGridPoint + (((cellSize.x * -halfBrushSize + evenOffset) * hitRight) + offset * hitUp)), filledCells);
+                                RaycastFillCell(WorldToGrid(hitGridPoint + ((cellSize.x * halfBrushSize * hitRight) + offset * hitUp)), filledCells);
+
+                                RaycastFillCell(WorldToGrid(hitGridPoint + (((cellSize.x * -halfBrushSize + evenOffset) * hitUp) + offset * hitRight)), filledCells);
+                                RaycastFillCell(WorldToGrid(hitGridPoint + ((cellSize.x * halfBrushSize * hitUp) + offset * hitRight)), filledCells);
+                            }
+                        }
+                        else
+                        {
+                            for (int i = -halfBrushSize + evenOffset; i <= halfBrushSize; i++)
+                            {
+                                offsetRight = i * cellSize.x;
+
+                                for (int j = -halfBrushSize + evenOffset; j <= halfBrushSize; j++)
+                                {
+                                    offsetUp = j * cellSize.y;
+                                    Vector3Int gridPosition = WorldToGrid(hitGridPoint + offsetRight * hitRight + offsetUp * hitUp);
+                                    RaycastFillCell(gridPosition, filledCells);
+                                }
+                            }
+                        }
+                        break;
+                    case BrushType.Circle:
+                        if (hollowBrush)
+                        {
+                            FillHollowCircle(hitGridPoint, filledCells, evenOffset);
+                        }
+                        else
+                        {
+                            FillSolidCircle(hitGridPoint, filledCells, evenOffset);
+                        }
+                        break;
+                }
+            }
+            else
+            {
+                RaycastFillCell(hitGridPoint, filledCells);
+            }
+
+            if (filledCells.Count > 0)
+            {
+                AddUndoAction(UndoAction.Fill, new object[] { filledCells });
+            }
         }
     }
 
@@ -839,29 +995,55 @@ public class LevelEditorControl : MonoBehaviour
     void RaycastDestroyCell(Vector3Int gridPosition, Vector3 normal, List<Vector3Int> destroyedCells)
     {
         gridPosition -= normal.FloorToInt() * cellSize;
-        if (DestroyCell(gridPosition))
+        if (previewObject.CompareTag("Spawnpoint"))
         {
-            destroyedCells.Add(gridPosition);
+            DestroySpawnpoint(gridPosition);
+        }
+        else
+        {
+            if (DestroyCell(gridPosition))
+            {
+                destroyedCells.Add(gridPosition);
+            }
         }
     }
 
     void RaycastFillCell(Vector3Int gridPosition, List<Vector3Int> filledCells)
     {
-        if (FillCell(gridPosition, prefabDictionary[previewObject.name]))
+        if(FillCell(gridPosition, prefabDictionary[previewObject.name]))
         {
             filledCells.Add(gridPosition);
         }
     }
 
+    void DestroySpawnpoint(Vector3Int gridPosition)
+    {
+        if (placedSpawnpoints.TryGetValue(gridPosition, out GameObject placedCollider))
+        {
+            Destroy(placedCollider);
+            placedSpawnpoints.Remove(gridPosition);
+        }
+    }
+
     private bool DestroyCell(Vector3Int gridPosition)
     {
-        if(placedBlocks.TryGetValue(gridPosition, out GameObject placedBlock))
+        if (placedBlocks.TryGetValue(gridPosition, out GameObject placedBlock))
         {
-            destroyedBlocks.Add(gridPosition, placedBlock.name);
+            if (placedBlock.GetComponentInChildren<Rigidbody>() != null && placedBlock.TryGetComponent<SaveableLevelObject>(out var saveableLevelObject))
+            {
+                dynamicObjects.Remove(saveableLevelObject);
+            }
+            if (placedBlock.TryGetComponent<DestructableObject>(out var destructableScript))
+            {
+                destructables.Remove(destructableScript);
+            }
+            
+            destroyedBlocks.Add(gridPosition, new CellInfo() { name = placedBlock.name, eulerAngles = placedBlock.transform.eulerAngles });
             Destroy(placedBlock);
             placedBlocks.Remove(gridPosition);
             return true;
         }
+        
         return false;
     }
 
@@ -870,7 +1052,52 @@ public class LevelEditorControl : MonoBehaviour
         if(!placedBlocks.ContainsKey(gridPosition))
         {
             GameObject newObject = Instantiate(withObject, gridPosition, Quaternion.identity);
+            newObject.transform.rotation = previewObject.rotation;
             newObject.name = previewObject.name;
+            Rigidbody newRigidbody = newObject.GetComponentInChildren<Rigidbody>();
+            if (newRigidbody != null)
+            {
+                if (!GameManager.Instance.playMode)
+                    newRigidbody.isKinematic = true;
+                if (newObject.TryGetComponent<SaveableLevelObject>(out var saveableLevelObject))
+                {
+                    dynamicObjects.Add(saveableLevelObject);
+                }
+            }
+            if (newObject.TryGetComponent<DestructableObject>(out var destructableScript))
+            {
+                destructables.Add(destructableScript);
+            }
+            
+            placedBlocks.Add(gridPosition, newObject);
+            destroyedBlocks.Remove(gridPosition);
+            return true;
+        }
+        return false;
+    }
+
+    private bool FillCell(Vector3Int gridPosition, GameObject withObject, Vector3 eulerAngles)
+    {
+        if (!placedBlocks.ContainsKey(gridPosition))
+        {
+            GameObject newObject = Instantiate(withObject, gridPosition, Quaternion.identity);
+            newObject.transform.eulerAngles = eulerAngles;
+            newObject.name = previewObject.name;
+            Rigidbody newRigidbody = newObject.GetComponentInChildren<Rigidbody>();
+            if (newRigidbody != null)
+            {
+                if (!GameManager.Instance.playMode)
+                    newRigidbody.isKinematic = true;
+                if (newObject.TryGetComponent<SaveableLevelObject>(out var saveableLevelObject))
+                {
+                    dynamicObjects.Add(saveableLevelObject);
+                }
+            }
+            if (newObject.TryGetComponent<DestructableObject>(out var destructableScript))
+            {
+                destructables.Add(destructableScript);
+            }
+
             placedBlocks.Add(gridPosition, newObject);
             destroyedBlocks.Remove(gridPosition);
             return true;
@@ -927,7 +1154,14 @@ public class LevelEditorControl : MonoBehaviour
         pitch -= Input.GetAxis("Mouse Y") * DataManager.playerSettings.sensitivity / 4;
         pitch = Mathf.Clamp(pitch, -90, 90);
 
-        currentRotation = Vector3.SmoothDamp(currentRotation, new Vector3(pitch, yaw), ref rotationSmoothVelocity, DataManager.playerSettings.cameraSmoothing);
+        if (DataManager.playerSettings.cameraSmoothing)
+        {
+            currentRotation = Vector3.SmoothDamp(currentRotation, new Vector3(pitch, yaw), ref rotationSmoothVelocity, rotationSmoothing);
+        }
+        else
+        {
+            currentRotation = new Vector3(pitch, yaw, currentRotation.z);
+        }
         // Setting rotation and position of camera on previous params and target and dstFromTarget
         transform.eulerAngles = currentRotation;
     }
@@ -956,19 +1190,19 @@ public class LevelEditorControl : MonoBehaviour
 
     public void Resume()
     {
-        foreach(Transform element in baseUIHandler.UIElements.Values)
+        foreach(Transform element in baseUI.UIElements.Values)
         {
             element.gameObject.SetActive(false);
         }
 
-        Paused = false;
+        GameManager.Instance.paused = false;
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
     }
 
     public void Pause()
     {
-        Paused = true;
+        GameManager.Instance.paused = true;
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
     }
@@ -1009,38 +1243,101 @@ public class LevelEditorControl : MonoBehaviour
 
     public void Save()
     {
-        SaveSystem.SaveLevel(levelName, levelDescription, levelCreators, FindObjectsOfType<SaveableLevelObject>());
-        Resume();
+        if (placedSpawnpoints.Count > 0)
+        {
+            SaveSystem.SaveLevel(levelName, levelDescription, levelCreators, FindObjectsOfType<SaveableLevelObject>());
+            Resume();
+        }
+        else
+        {
+            errorMessage.text = "Failed to save. Place at least one player spawnpoint";
+            errorMessage.gameObject.SetActive(true);
+            Invoke(nameof(HideErrorMessage), 2.5f);
+        }
+    }
+
+    void HideErrorMessage()
+    {
+        errorMessage.gameObject.SetActive(false);
     }
 
     public void Load()
     {
-        foreach(Vector3Int cell in placedBlocks.Keys.ToList())
+        if(selectedLevelSlot != null)
         {
-            DestroyCell(cell);
-        }
-        destroyedBlocks.Clear();
-        undoActions.Clear();
-        undoObjects.Clear();
-        redoActions.Clear();
-        redoObjects.Clear();
+            foreach(Vector3Int cell in placedBlocks.Keys.ToList())
+            {
+                DestroyCell(cell);
+            }
+            foreach(Vector3Int spawnpoint in placedSpawnpoints.Keys.ToList())
+            {
+                DestroySpawnpoint(spawnpoint);
+            }
+            destroyedBlocks.Clear();
+            undoActions.Clear();
+            undoObjects.Clear();
+            redoActions.Clear();
+            redoObjects.Clear();
+            destructables.Clear();
+            dynamicObjects.Clear();
 
-        LevelInfo levelInfo = SaveSystem.LoadLevel(selectedLevelSlot);
-        levelName = levelInfo.name;
-        levelDescription = levelInfo.description;
-        levelCreators = levelInfo.creators;
+            LevelInfo levelInfo = SaveSystem.LoadLevel(selectedLevelSlot);
+            levelName = levelInfo.name;
+            levelDescription = levelInfo.description;
+            levelCreators = levelInfo.creators;
+            baseUI.UIElements["PauseMenu"].Find("LabelBackground").GetChild(0).GetComponent<Text>().text = "Paused\nEditing " + levelName;
 
-        foreach(LevelInfo.LevelObjectInfo levelObjectInfo in levelInfo.levelObjects)
-        {
-            Vector3 levelObjectPosition = new Vector3(levelObjectInfo.posX, levelObjectInfo.posY, levelObjectInfo.posZ);
-            GameObject levelObject = Instantiate(prefabDictionary[levelObjectInfo.prefabName], levelObjectPosition, Quaternion.Euler(new Vector3(levelObjectInfo.eulerX, levelObjectInfo.eulerY, levelObjectInfo.eulerZ)));
-            levelObject.transform.localScale = new Vector3(levelObjectInfo.scaleX, levelObjectInfo.scaleY, levelObjectInfo.scaleZ);
-            levelObject.name = levelObjectInfo.name;
-            levelObject.tag = levelObjectInfo.tag;
-            levelObject.layer = levelObjectInfo.layer;
-            placedBlocks.Add(WorldToGrid(levelObjectPosition), levelObject);
+            foreach (LevelObjectInfo levelObjectInfo in levelInfo.levelObjects)
+            {
+                Vector3 levelObjectPosition = new Vector3(levelObjectInfo.posX, levelObjectInfo.posY, levelObjectInfo.posZ);
+                GameObject levelObject = Instantiate(GameManager.Instance.editorPrefabs[levelObjectInfo.prefabIndex], levelObjectPosition, Quaternion.Euler(new Vector3(levelObjectInfo.eulerX, levelObjectInfo.eulerY, levelObjectInfo.eulerZ)));
+                levelObject.transform.localScale = new Vector3(levelObjectInfo.scaleX, levelObjectInfo.scaleY, levelObjectInfo.scaleZ);
+                levelObject.name = levelObjectInfo.name;
+                levelObject.tag = levelObjectInfo.tag;
+                levelObject.layer = levelObjectInfo.layer;
+                if (levelObjectInfo.tag == "Spawnpoint")
+                {
+                    MeshRenderer levelObjectRenderer = levelObject.GetComponent<MeshRenderer>();
+                    Color savedColor = new Color(levelObjectInfo.colorR, levelObjectInfo.colorG, levelObjectInfo.colorB, levelObjectInfo.colorA);
+                    levelObjectRenderer.material.color = savedColor;
+                    levelObjectRenderer.material.SetColor("_EmissionColor", savedColor);
+                    switch (levelObjectInfo.spawnType)
+                    {
+                        case 0:
+                            levelObject.transform.SetParent(PlayerManager.Instance.defaultSpawnParent);
+                            break;
+                        case 1:
+                            levelObject.transform.SetParent(TankManager.Instance.spawnParent);
+                            break;
+                        case 2:
+                            levelObject.transform.SetParent(PlayerManager.Instance.teamSpawnParent);
+                            break;
+                    }
+
+                    placedSpawnpoints.Add(WorldToGrid(levelObjectPosition), levelObject);
+                }
+                else
+                {
+                    if (levelObject.TryGetComponent<DestructableObject>(out var destructableScript))
+                    {
+                        destructables.Add(destructableScript);
+                    }
+                    Rigidbody attachedRigidbody = levelObject.GetComponentInChildren<Rigidbody>();
+                    if (attachedRigidbody != null)
+                    {
+                        if (!GameManager.Instance.playMode)
+                            attachedRigidbody.isKinematic = true;
+                        if (attachedRigidbody.TryGetComponent<SaveableLevelObject>(out var saveableLevelObject))
+                        {
+                            dynamicObjects.Add(saveableLevelObject);
+                        }
+                    }
+
+                    placedBlocks.Add(WorldToGrid(levelObjectPosition), levelObject);
+                }
+            }
+            Resume();
         }
-        Resume();
     }
 
     public void SetLevelName(TMP_InputField inputField)
@@ -1064,7 +1361,8 @@ public class LevelEditorControl : MonoBehaviour
         {
             Destroy(previewObject.gameObject);
         }
-        previewObject = Instantiate(prefabValues[prefabKeys.IndexOf(button.name)], Vector3.zero, Quaternion.identity).transform;
+        previewObject = Instantiate(prefabDictionary[button.name], Vector3.zero, Quaternion.identity).transform;
+        previewObject.name = button.name;
 
         if (previewObject.TryGetComponent<SaveableLevelObject>(out var saveableLevelObject))
         {
@@ -1085,23 +1383,63 @@ public class LevelEditorControl : MonoBehaviour
                 previewCollider = previewObject.GetComponentInChildren<Collider>();
             }
         }
+        if(previewCollider.TryGetComponent<MeshCollider>(out var meshCollider))
+        {
+            meshCollider.convex = true;
+        }
+        previewCollider.isTrigger = true;
 
         Rigidbody previewRigidbody = previewObject.GetComponentInChildren<Rigidbody>();
         if (previewRigidbody != null)
         {
-            Destroy(previewRigidbody);
+            previewRigidbody.isKinematic = true;
         }
 
         if (previewRenderer != null)
         {
-            previewRenderer.material.color = previewColor;
+            previewRenderer.material.color = Color.green;
             previewRenderer.gameObject.layer = 2;
         }
-        if (previewCollider != null)
+
+        if (previewObject.CompareTag("Spawnpoint"))
         {
-            previewCollider.isTrigger = true;
+            previewObject.localScale = spawnpointScale;
+            switch (spawnpointType)
+            {
+                case SpawnpointType.Players:
+                    previewRenderer.material.color = Color.magenta;
+                    previewRenderer.material.SetColor("_EmissionColor", Color.magenta);
+                    break;
+                case SpawnpointType.Bots:
+                    previewRenderer.material.color = Color.cyan;
+                    previewRenderer.material.SetColor("_EmissionColor", Color.cyan);
+                    break;
+                case SpawnpointType.Team1:
+                    previewRenderer.material.color = Color.red;
+                    previewRenderer.material.SetColor("_EmissionColor", Color.red);
+                    break;
+                case SpawnpointType.Team2:
+                    previewRenderer.material.color = Color.green;
+                    previewRenderer.material.SetColor("_EmissionColor", Color.green);
+                    break;
+                case SpawnpointType.Team3:
+                    previewRenderer.material.color = Color.blue;
+                    previewRenderer.material.SetColor("_EmissionColor", Color.blue);
+                    break;
+                case SpawnpointType.Team4:
+                    previewRenderer.material.color = Color.yellow;
+                    previewRenderer.material.SetColor("_EmissionColor", Color.yellow);
+                    break;
+            }
         }
-        previewObject.name = button.name;
+        else if (previewObject.CompareTag("Tank"))
+        {
+            foreach(Transform child in previewObject)
+            {
+                child.gameObject.layer = 2;
+            }
+        }
+        UpdatePreviewObject(false);
     }
 
     public void ChangeBrushType(Button button)
@@ -1143,5 +1481,202 @@ public class LevelEditorControl : MonoBehaviour
     public void ToggleHollowBrush(Toggle toggle)
     {
         hollowBrush = toggle.isOn;
+    }
+
+    public void SetSpawnpointType(TMP_Dropdown dropdown)
+    {
+        switch (dropdown.value)
+        {
+            case 0:
+                spawnpointType = SpawnpointType.Players;
+                previewRenderer.material.color = Color.magenta;
+                previewRenderer.material.SetColor("_EmissionColor", Color.magenta);
+                break;
+            case 1:
+                spawnpointType = SpawnpointType.Bots;
+                previewRenderer.material.color = Color.cyan;
+                previewRenderer.material.SetColor("_EmissionColor", Color.cyan);
+                break;
+            case 2:
+                spawnpointType = SpawnpointType.Team1;
+                previewRenderer.material.color = Color.red;
+                previewRenderer.material.SetColor("_EmissionColor", Color.red);
+                break;
+            case 3:
+                spawnpointType = SpawnpointType.Team2;
+                previewRenderer.material.color = Color.green;
+                previewRenderer.material.SetColor("_EmissionColor", Color.green);
+                break;
+            case 4:
+                spawnpointType = SpawnpointType.Team3;
+                previewRenderer.material.color = Color.blue;
+                previewRenderer.material.SetColor("_EmissionColor", Color.blue);
+                break;
+            case 5:
+                spawnpointType = SpawnpointType.Team4;
+                previewRenderer.material.color = Color.yellow;
+                previewRenderer.material.SetColor("_EmissionColor", Color.yellow);
+                break;
+        }
+    }
+
+    void UpdateSpawnpointScale()
+    {
+        if (previewObject != null && previewObject.CompareTag("Spawnpoint"))
+        {
+            previewObject.localScale = spawnpointScale;
+        }
+    }
+
+    public void SetSpawnScaleX(TMP_InputField inputField)
+    {
+        if (string.IsNullOrEmpty(inputField.text))
+        {
+            spawnpointScale.x = 2;
+        }
+        else
+        {
+            float.TryParse(inputField.text, out spawnpointScale.x);
+        }
+        UpdateSpawnpointScale();
+    }
+
+    public void SetSpawnScaleY(TMP_InputField inputField)
+    {
+        if (string.IsNullOrEmpty(inputField.text))
+        {
+            spawnpointScale.y = 2;
+        }
+        else
+        {
+            float.TryParse(inputField.text, out spawnpointScale.y);
+        }
+        UpdateSpawnpointScale();
+    }
+
+    public void SetSpawnScaleZ(TMP_InputField inputField)
+    {
+        if (string.IsNullOrEmpty(inputField.text))
+        {
+            spawnpointScale.z = 2;
+        }
+        else
+        {
+            float.TryParse(inputField.text, out spawnpointScale.z);
+        }
+        UpdateSpawnpointScale();
+    }
+
+    public void ChangePlayMode(TMP_Dropdown dropdown)
+    {
+        DataManager.roomSettings.mode = dropdown.options[dropdown.value].text;
+    }
+
+    void ResetLevelObjects()
+    {
+        foreach(DestructableObject destructable in destructables)
+        {
+            destructable.solidObject.SetActive(true);
+        }
+        foreach(SaveableLevelObject dynamicObject in dynamicObjects)
+        {
+            Rigidbody dynamicRigidbody = dynamicObject.GetComponentInChildren<Rigidbody>();
+            if(dynamicRigidbody != null)
+            {
+                dynamicRigidbody.isKinematic = true;
+            }
+            dynamicObject.ResetTransform();
+        }
+    }
+
+    public void EnterPlayMode()
+    {
+        GameManager.Instance.playMode = true;
+        editCamera.enabled = GetComponent<AudioListener>().enabled = false;
+        if (previewObject != null)
+        {
+            previewObject.gameObject.SetActive(false);
+        }
+        Resume();
+
+        SaveableLevelObject[] saveableLevelObjects = FindObjectsOfType<SaveableLevelObject>();
+        foreach(SaveableLevelObject saveableLevelObject in saveableLevelObjects)
+        {
+            Rigidbody thisRigidbody = saveableLevelObject.GetComponentInChildren<Rigidbody>();
+            if (thisRigidbody != null)
+                thisRigidbody.isKinematic = false;
+            if (saveableLevelObject.thisCollider != null)
+                saveableLevelObject.thisCollider.enabled = true;
+        }
+        PlayerManager.Instance.Init();
+        PhotonTeam team;
+        switch (DataManager.roomSettings.mode)
+        {
+            case "Teams":
+                PhotonNetwork.LocalPlayer.JoinOrSwitchTeam("Team 1");
+                PhotonTeamsManager.Instance.TryGetTeamByName("Team 1", out team);
+                break;
+            default:
+                PhotonNetwork.LocalPlayer.JoinOrSwitchTeam("Players");
+                PhotonTeamsManager.Instance.TryGetTeamByName("Players", out team);
+                break;
+        }
+        player = PlayerManager.Instance.SpawnInLocalPlayer(team);
+
+        playCamera = player.transform.Find("Camera").GetComponent<Camera>();
+        TankManager.Instance.Init();
+        BoostGenerator.Instance.Init();
+        GameManager.Instance.frozen = false;
+    }
+
+    public void ExitPlayMode()
+    {
+        GameManager.Instance.playMode = false;
+        editCamera.enabled = true;
+        if (previewObject != null)
+        {
+            previewObject.gameObject.SetActive(true);
+        }
+        GameManager.Instance.frozen = true;
+        TankManager.Instance.ResetTanks();
+        BoostGenerator.Instance.ResetBoosts();
+        ResetLevelObjects();
+
+        if (PhotonNetwork.OfflineMode)
+        {
+            Destroy(player);
+        }
+        else
+        {
+            PhotonNetwork.Destroy(player);
+        }
+    }
+
+    public void SwitchPlayCamera()
+    {
+        if (editCamera.enabled)
+        {
+            editCamera.enabled = GetComponent<AudioListener>().enabled = false;
+            playCamera.gameObject.SetActive(true);
+            if (previewObject != null)
+            {
+                previewObject.gameObject.SetActive(false);
+            }
+            player.GetComponent<PlayerControl>().enabled = true;
+            player.transform.Find("Player UI").gameObject.SetActive(true);
+            GameManager.Instance.frozen = false;
+        }
+        else
+        {
+            editCamera.enabled = GetComponent<AudioListener>().enabled = true;
+            playCamera.gameObject.SetActive(false);
+            if (previewObject != null)
+            {
+                previewObject.gameObject.SetActive(true);
+            }
+            player.GetComponent<PlayerControl>().enabled = false;
+            player.transform.Find("Player UI").gameObject.SetActive(false);
+            GameManager.Instance.frozen = true;
+        }
     }
 }

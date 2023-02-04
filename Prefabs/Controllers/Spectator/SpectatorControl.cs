@@ -16,35 +16,30 @@ public class SpectatorControl : MonoBehaviour
     [SerializeField] float movementSpeed = 6;
     [SerializeField] float speedLimit = 100;
 
+    [SerializeField] float rotationSmoothing = 0.05f;
     Vector3 rotationSmoothVelocity;
     Vector3 currentRotation;
 
     float yaw;
     float pitch;
 
-    public bool Paused { get; set; }
-
     private void Start()
     {
         currentRotation = transform.eulerAngles;
         pitch = transform.eulerAngles.x;
         yaw = transform.eulerAngles.y;
+
+        foreach(UsernameSystem username in FindObjectsOfType<UsernameSystem>())
+        {
+            username.UpdateMainCamera();
+        }
     }
 
     // Update is called once per frame
     void Update()
     {
-        if(!Paused && Time.timeScale != 0)
+        if(!GameManager.Instance.paused && Time.timeScale != 0)
         {
-            // Updating every username to rotate to this camera for this client
-            UsernameSystem[] allUsernames = FindObjectsOfType<UsernameSystem>();
-            foreach(UsernameSystem username in allUsernames)
-            {
-                username.UpdateTextMeshTo(transform, false);
-            }
-
-            Cursor.visible = false;
-            Cursor.lockState = CursorLockMode.Locked;
             float zoomRate = Input.GetKey(KeyCode.LeftShift) ? DataManager.playerSettings.slowZoomSpeed : DataManager.playerSettings.fastZoomSpeed;
 
             Vector3 inputDir = new Vector3(GetInputAxis("x"), GetInputAxis("y"), GetInputAxis("z")).normalized;
@@ -140,7 +135,7 @@ public class SpectatorControl : MonoBehaviour
                 transform.position = target.position - transform.forward * dstFromTarget;
             }
 
-            Vector3 velocity = targetSpeed *(Quaternion.AngleAxis(transform.eulerAngles.y, Vector3.up) * inputDir);
+            Vector3 velocity = targetSpeed * (Quaternion.AngleAxis(transform.eulerAngles.y, Vector3.up) * inputDir);
             rb.velocity = velocity;
         }
         else
@@ -198,7 +193,14 @@ public class SpectatorControl : MonoBehaviour
         pitch -= Input.GetAxis("Mouse Y") * DataManager.playerSettings.sensitivity / 4;
         pitch = Mathf.Clamp(pitch, -90, 90);
 
-        currentRotation = Vector3.SmoothDamp(currentRotation, new Vector3(pitch, yaw), ref rotationSmoothVelocity, DataManager.playerSettings.cameraSmoothing);
+        if (DataManager.playerSettings.cameraSmoothing)
+        {
+            currentRotation = Vector3.SmoothDamp(currentRotation, new Vector3(pitch, yaw), ref rotationSmoothVelocity, rotationSmoothing);
+        }
+        else
+        {
+            currentRotation = new Vector3(pitch, yaw, currentRotation.z);
+        }
         // Setting rotation and position of camera on previous params and target and dstFromTarget
         transform.eulerAngles = currentRotation;
     }

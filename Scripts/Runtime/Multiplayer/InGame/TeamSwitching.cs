@@ -51,7 +51,7 @@ public class TeamSwitching : MonoBehaviourPunCallbacks
     {
         if(eventData.Code == UpdateTeamsCode)
         {
-            PhotonHashtable parameters =(PhotonHashtable)eventData.Parameters[ParameterCode.Data];
+            PhotonHashtable parameters = (PhotonHashtable)eventData.Parameters[ParameterCode.Data];
             Invoke(nameof(UpdateRosters),(float)parameters["delay"]);
         }
     }
@@ -85,7 +85,7 @@ public class TeamSwitching : MonoBehaviourPunCallbacks
     {
         int teamSize = PhotonTeamsManager.Instance.GetTeamMembersCount(teamName);
 
-        if(teamSize <((RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["RoomSettings"]).teamSize)
+        if(teamSize < DataManager.roomSettings.teamSize)
         {
             PhotonTeam currentTeam = PhotonNetwork.LocalPlayer.GetPhotonTeam();
             if(currentTeam == null || currentTeam.Name != teamName)
@@ -107,8 +107,6 @@ public class TeamSwitching : MonoBehaviourPunCallbacks
 
                         switch(DataManager.roomSettings.mode)
                         {
-                            case "Co-Op":
-                                break;
                             case "Teams":
                                 if(currentTeam != null && currentTeam.Name != "Spectators")
                                 {

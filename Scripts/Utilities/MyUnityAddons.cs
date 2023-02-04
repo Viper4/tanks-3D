@@ -181,7 +181,7 @@ namespace MyUnityAddons
 
             public static Vector3 GetPointInCollider(Collider collider)
             {
-                Vector3 extents = collider.bounds.size / 2;
+                Vector3 extents = collider.bounds.extents;
                 Vector3 point = new Vector3(
                     Random.Range(-extents.x, extents.x),
                     Random.Range(-extents.y, extents.y),
@@ -192,40 +192,48 @@ namespace MyUnityAddons
 
             public static Vector3 GetSpawnPointInCollider(Collider collider, Vector3 direction, LayerMask ignoreLayers, BoxCollider spawnCollider = null, Quaternion? spawnRotation = null, bool onTopOfPoint = false)
             {
-                for(int i = 0; i < 30; i++)
+                if(collider != null)
                 {
-                    Vector3 origin = GetPointInCollider(collider);
-                    if(Physics.Raycast(origin, direction, out RaycastHit hit, Mathf.Infinity, ~ignoreLayers))
+                    for (int i = 0; i < 30; i++)
                     {
-                        if(collider.bounds.Contains(hit.point))
+                        Vector3 origin = GetPointInCollider(collider);
+                        if (Physics.Raycast(origin, direction, out RaycastHit hit, Mathf.Infinity, ~ignoreLayers))
                         {
-                            if(spawnCollider != null)
+                            if (collider.bounds.Contains(hit.point))
                             {
-                                Vector3 testPosition = hit.point - direction *(spawnCollider.size.y + 0.01f);
-
-                                Debug.DrawLine(testPosition, origin, Color.red, 10f);
-                                Quaternion rotation = spawnRotation == null ? spawnCollider.transform.rotation :(Quaternion)spawnRotation;
-                                if(!Physics.CheckBox(testPosition, spawnCollider.size * 0.5f, rotation, ~ignoreLayers))
+                                if (spawnCollider != null)
                                 {
-                                    if(onTopOfPoint)
+                                    Vector3 testPosition = hit.point - direction * (spawnCollider.size.y + 0.01f);
+
+                                    Debug.DrawLine(testPosition, origin, Color.red, 10f);
+                                    Quaternion rotation = spawnRotation == null ? spawnCollider.transform.rotation : (Quaternion)spawnRotation;
+                                    if (!Physics.CheckBox(testPosition, spawnCollider.size * 0.5f, rotation, ~ignoreLayers))
                                     {
-                                        return testPosition;
-                                    }
-                                    else
-                                    {
-                                        return hit.point;
+                                        if (onTopOfPoint)
+                                        {
+                                            return testPosition;
+                                        }
+                                        else
+                                        {
+                                            return hit.point;
+                                        }
                                     }
                                 }
-                            }
-                            else
-                            {
-                                return hit.point;
+                                else
+                                {
+                                    return hit.point;
+                                }
                             }
                         }
                     }
+
+                    Debug.LogWarning("No valid spawn point found in " + collider.name + ", returning Vector3.zero.");
+                }
+                else
+                {
+                    Debug.LogWarning("Collider is null! Returning Vector3.zero.");
                 }
 
-                Debug.Log("No valid spawn point found in " + collider.name + ", returning Vector3.zero.");
                 return Vector3.zero;
             }
         }
@@ -243,6 +251,11 @@ namespace MyUnityAddons
             public static Vector3 Divide(this Vector3 a, Vector3 b)
             {
                 return new Vector3(a.x / b.x, a.y / b.y, a.z / b.z);
+            }
+
+            public static Vector3 Multiply(this Vector3 a, Vector3 b)
+            {
+                return new Vector3(a.x * b.x, a.y * b.y, a.z * b.z);
             }
 
             public static string FormattedTime(this float time)
@@ -354,12 +367,12 @@ namespace MyUnityAddons
 
             public static Vector3 FuturePosition(Vector3 currentPosition, Rigidbody rigidbody, float seconds)
             {
-                return currentPosition +(rigidbody.velocity * seconds);
+                return currentPosition + (rigidbody.velocity * seconds);
             }
 
             public static Vector3 FuturePosition(Vector3 currentPosition, Rigidbody rigidbody, int frames)
             {
-                return currentPosition +(frames * Time.deltaTime * rigidbody.velocity);
+                return currentPosition + (frames * Time.deltaTime * rigidbody.velocity);
             }
 
             public static float TravelTime(Vector3 start, Vector3 end, float speed)
@@ -714,7 +727,7 @@ namespace MyUnityAddons
             {
                 get
                 {
-                    return PhotonNetwork.PlayerList.Where((x) => !x.CustomProperties.ContainsKey("Spectator") || !(bool)x.CustomProperties["Spectator"]).ToArray();
+                    return PhotonNetwork.PlayerList.Where((x) => !x.CustomProperties.ContainsKey("spectator") || !(bool)x.CustomProperties["spectator"]).ToArray();
                 }
             }
 
@@ -722,7 +735,7 @@ namespace MyUnityAddons
             {
                 get
                 {
-                    return PhotonNetwork.PlayerList.Where((x) => x.CustomProperties.ContainsKey("Spectator") &&(bool)x.CustomProperties["Spectator"]).ToArray();
+                    return PhotonNetwork.PlayerList.Where((x) => x.CustomProperties.ContainsKey("spectator") &&(bool)x.CustomProperties["spectator"]).ToArray();
                 }
             }
 
@@ -839,52 +852,63 @@ namespace MyUnityAddons
 
             public static void AllocatePlayerToTeam(this Player player)
             {
-                RoomSettings roomSettings =(RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["RoomSettings"];
+                RoomSettings roomSettings;
+                if (PhotonNetwork.IsMasterClient)
+                {
+                    roomSettings = DataManager.roomSettings;
+                }
+                else
+                {
+                    roomSettings = (RoomSettings)PhotonNetwork.CurrentRoom.CustomProperties["roomSettings"];
+                }
                 PhotonTeam currentTeam = player.GetPhotonTeam();
 
-                switch(roomSettings.mode)
+                switch (roomSettings.mode)
                 {
                     case "Teams":
-                        Dictionary<string, int> teamCounts = new Dictionary<string, int>()
+                        if(currentTeam == null || currentTeam.Name != "Spectators")
                         {
-                            { "Team 4", PhotonTeamsManager.Instance.GetTeamMembersCount("Team 4") },
-                            { "Team 3", PhotonTeamsManager.Instance.GetTeamMembersCount("Team 3") },
-                            { "Team 2", PhotonTeamsManager.Instance.GetTeamMembersCount("Team 2") },
-                            { "Team 1", PhotonTeamsManager.Instance.GetTeamMembersCount("Team 1") },
-                        };
-
-                        if(teamCounts.Values.Sum() < roomSettings.playerLimit)
-                        {
-                            PhotonTeam smallestTeam = null;
-                            foreach(string key in teamCounts.Keys)
+                            Dictionary<string, int> teamCounts = new Dictionary<string, int>()
                             {
-                                if(smallestTeam == null)
+                                { "Team 1", PhotonTeamsManager.Instance.GetTeamMembersCount("Team 1") },
+                                { "Team 2", PhotonTeamsManager.Instance.GetTeamMembersCount("Team 2") },
+                                { "Team 3", PhotonTeamsManager.Instance.GetTeamMembersCount("Team 3") },
+                                { "Team 4", PhotonTeamsManager.Instance.GetTeamMembersCount("Team 4") },
+                            };
+                            if (teamCounts.Values.Sum() < roomSettings.playerLimit)
+                            {
+                                PhotonTeam smallestTeam = null;
+                                for(int i = roomSettings.teamLimit; i > 0; i--)
                                 {
-                                    if(teamCounts[key] < roomSettings.teamSize)
+                                    string team = "Team " + i;
+                                    if (smallestTeam == null)
                                     {
-                                        PhotonTeamsManager.Instance.TryGetTeamByName(key, out smallestTeam);
+                                        if (teamCounts[team] < roomSettings.teamSize)
+                                        {
+                                            PhotonTeamsManager.Instance.TryGetTeamByName(team, out smallestTeam);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if (teamCounts[smallestTeam.Name] < roomSettings.teamSize && teamCounts[team] <= teamCounts[smallestTeam.Name])
+                                        {
+                                            PhotonTeamsManager.Instance.TryGetTeamByName(team, out smallestTeam);
+                                        }
                                     }
                                 }
-                                else
+                                
+                                if (smallestTeam != null)
                                 {
-                                    if(teamCounts[smallestTeam.Name] < roomSettings.teamSize && teamCounts[key] <= teamCounts[smallestTeam.Name])
-                                    {
-                                        PhotonTeamsManager.Instance.TryGetTeamByName(key, out smallestTeam);
-                                    }
-                                }
-                            }
-                            if(smallestTeam != null)
-                            {
-                                if(currentTeam != null)
-                                {
-                                    if(currentTeam.Name == "Players")
+                                    if(currentTeam != null)
                                     {
                                         player.SwitchTeam(smallestTeam);
+                                        return;
                                     }
-                                }
-                                else
-                                {
-                                    player.JoinTeam(smallestTeam);
+                                    else
+                                    {
+                                        player.JoinTeam(smallestTeam);
+                                        return;
+                                    }
                                 }
                             }
                         }
@@ -894,20 +918,23 @@ namespace MyUnityAddons
                         {
                             if(currentTeam != null)
                             {
-                                if(currentTeam.Name != "Players" && currentTeam.Name.Contains("Team"))
+                                if(currentTeam.Name.Contains("Team"))
                                 {
                                     player.SwitchTeam("Players");
+                                    return;
                                 }
                             }
                             else
                             {
                                 player.JoinTeam("Players");
+                                return;
                             }
                         }
                         break;
                 }
 
-                player.JoinOrSwitchTeam("Spectators");
+                if(currentTeam == null)
+                    player.JoinTeam("Spectators");
             }
         }
 

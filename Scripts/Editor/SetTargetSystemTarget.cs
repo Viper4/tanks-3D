@@ -44,10 +44,6 @@ public class SetTargetSystemTarget : EditorWindow
         }
         else if (GUILayout.Button("Set Targets (All Build Scenes)"))
         {
-            /*foreach (EditorBuildSettingsScene scene in EditorBuildSettings.scenes)
-            {
-
-            }*/
             for (int i = 0; i < SceneManager.sceneCountInBuildSettings; i++)
             {
                 string scenePath = SceneUtility.GetScenePathByBuildIndex(i);

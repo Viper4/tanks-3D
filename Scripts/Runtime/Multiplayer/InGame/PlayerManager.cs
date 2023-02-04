@@ -5,7 +5,6 @@ using MyUnityAddons.CustomPhoton;
 using MyUnityAddons.Calculations;
 using Photon.Pun.UtilityScripts;
 using Photon.Realtime;
-using ExitGames.Client.Photon;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -19,53 +18,52 @@ public class PlayerManager : MonoBehaviourPunCallbacks
     [SerializeField] Transform[] teamPlayerPrefabs;
     [SerializeField] Transform spectatorPrefab;
 
-    [SerializeField] Collider freeForAllSpawn;
-    [SerializeField] Transform teamSpawnParent;
-    [SerializeField] Transform defaultSpawnParent;
-    List<Collider> teamSpawns = new List<Collider>();
+    public Transform defaultSpawnParent;
+    public Transform teamSpawnParent;
     List<Collider> defaultSpawns = new List<Collider>();
+    List<Collider> teamSpawns = new List<Collider>();
     [SerializeField] LayerMask ignoreLayerMask;
+
+    [SerializeField] bool autoInit = true;
 
     private void Start()
     {
-        if(PhotonNetwork.OfflineMode)
+        Instance = this;
+
+        if(autoInit)
+            Init();
+    }
+
+    public void Init()
+    {
+        foreach (Transform child in defaultSpawnParent)
         {
-            Destroy(this);
+            defaultSpawns.Add(child.GetComponent<Collider>());
         }
-        else
+        foreach (Transform child in teamSpawnParent)
         {
-            Instance = this;
-            foreach(Transform child in teamSpawnParent)
-            {
-                teamSpawns.Add(child.GetComponent<Collider>());
-            }
-            foreach(Transform child in defaultSpawnParent)
-            {
-                defaultSpawns.Add(child.GetComponent<Collider>());
-            }
+            teamSpawns.Add(child.GetComponent<Collider>());
+        }
 
-            if(teamSpawns.Count == 0 && defaultSpawns.Count > 0)
-            {
-                teamSpawns = defaultSpawns;
-            }
-
+        if (!GameManager.Instance.editing && !PhotonNetwork.OfflineMode)
+        {
             PhotonTeam playerTeam = PhotonNetwork.LocalPlayer.GetPhotonTeam();
 
             BoxCollider playerSpawnCollider = playerPrefab.Find("Tank Origin").Find("Body").GetComponent<BoxCollider>();
-            int spawnIndex = Random.Range(0, defaultSpawns.Count);
+            Collider spawn = defaultSpawns[Random.Range(0, defaultSpawns.Count)];
 
             PhotonView newPhotonView;
             GameObject newPlayer = null;
             PhotonHashtable playerProperties = new PhotonHashtable
             {
-                { "Kills", 0 },
-                { "Deaths", 0 },
-                { "New", false },
+                { "kills", 0 },
+                { "deaths", 0 },
+                { "new", false },
             };
 
-            if(DataManager.roomSettings.mode == "Co-Op")
+            if (DataManager.roomSettings.mode == "Co-Op")
             {
-                if((playerTeam != null && playerTeam.Name == "Spectators") ||(PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey("Started") &&(bool)PhotonNetwork.CurrentRoom.CustomProperties["Started"] && PhotonNetwork.LocalPlayer.CustomProperties.ContainsKey("New") &&(bool)PhotonNetwork.LocalPlayer.CustomProperties["New"]))
+                if ((playerTeam != null && playerTeam.Name == "Spectators") || (PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey("started") && (bool)PhotonNetwork.CurrentRoom.CustomProperties["started"] && PhotonNetwork.LocalPlayer.CustomProperties.ContainsKey("new") && (bool)PhotonNetwork.LocalPlayer.CustomProperties["new"]))
                 {
                     Time.timeScale = 1;
                     GameManager.Instance.loadingScreen.gameObject.SetActive(false);
@@ -75,14 +73,14 @@ public class PlayerManager : MonoBehaviourPunCallbacks
                 else
                 {
                     PhotonNetwork.LocalPlayer.JoinOrSwitchTeam("Players");
-                    newPlayer = SpawnPlayer(playerPrefab, CustomRandom.GetSpawnPointInCollider(defaultSpawns[spawnIndex], Vector3.down, ignoreLayerMask, playerSpawnCollider, defaultSpawns[spawnIndex].transform.rotation), defaultSpawns[spawnIndex].transform.rotation);
-                    playerProperties["Kills"] = DataManager.playerData.kills;
-                    playerProperties["Deaths"] = DataManager.playerData.deaths;
+                    newPlayer = SpawnPlayer(playerPrefab, CustomRandom.GetSpawnPointInCollider(spawn, Vector3.down, ignoreLayerMask, playerSpawnCollider, spawn.transform.rotation), spawn.transform.rotation);
+                    playerProperties["kills"] = DataManager.playerData.kills;
+                    playerProperties["deaths"] = DataManager.playerData.deaths;
                 }
             }
             else
             {
-                if((playerTeam != null && playerTeam.Name == "Spectators") || CustomNetworkHandling.NonSpectatorList.Length > DataManager.roomSettings.playerLimit)
+                if ((playerTeam != null && playerTeam.Name == "Spectators") || CustomNetworkHandling.NonSpectatorList.Length > DataManager.roomSettings.playerLimit)
                 {
                     GameManager.Instance.loadingScreen.gameObject.SetActive(false);
                     DataManager.playerSettings = SaveSystem.LoadPlayerSettings("PlayerSettings");
@@ -90,17 +88,17 @@ public class PlayerManager : MonoBehaviourPunCallbacks
                 }
                 else
                 {
-                    switch(DataManager.roomSettings.mode)
+                    switch (DataManager.roomSettings.mode)
                     {
                         case "FFA":
                             Quaternion randomRotation = Quaternion.AngleAxis(Random.Range(-180, 180), Vector3.up);
-                            newPlayer = SpawnPlayer(playerPrefab, CustomRandom.GetSpawnPointInCollider(freeForAllSpawn, Vector3.down, ignoreLayerMask, playerSpawnCollider, randomRotation), randomRotation);
+                            newPlayer = SpawnPlayer(playerPrefab, CustomRandom.GetSpawnPointInCollider(spawn, Vector3.down, ignoreLayerMask, playerSpawnCollider, randomRotation), randomRotation);
                             break;
                         case "Teams":
                             int teamIndex = -1;
-                            for(int i = 0; i < teamSpawns.Count; i++)
+                            for (int i = 0; i < teamSpawns.Count; i++)
                             {
-                                if(teamSpawns[i].name == playerTeam.Name)
+                                if (teamSpawns[i].name == playerTeam.Name)
                                 {
                                     teamIndex = i;
                                     break;
@@ -110,15 +108,15 @@ public class PlayerManager : MonoBehaviourPunCallbacks
                             newPlayer = SpawnPlayer(teamPlayerPrefabs[teamIndex], CustomRandom.GetSpawnPointInCollider(teamSpawns[teamIndex], Vector3.down, ignoreLayerMask, playerSpawnCollider, teamSpawns[teamIndex].transform.rotation), teamSpawns[teamIndex].transform.rotation, false);
                             break;
                         default:
-                            newPlayer = SpawnPlayer(playerPrefab, CustomRandom.GetSpawnPointInCollider(defaultSpawns[spawnIndex], Vector3.down, ignoreLayerMask, playerSpawnCollider, defaultSpawns[spawnIndex].transform.rotation), defaultSpawns[spawnIndex].transform.rotation);
-                            playerProperties["Kills"] = DataManager.playerData.kills;
-                            playerProperties["Deaths"] = DataManager.playerData.deaths;
+                            newPlayer = SpawnPlayer(playerPrefab, CustomRandom.GetSpawnPointInCollider(spawn, Vector3.down, ignoreLayerMask, playerSpawnCollider, spawn.transform.rotation), spawn.transform.rotation);
+                            playerProperties["kills"] = DataManager.playerData.kills;
+                            playerProperties["deaths"] = DataManager.playerData.deaths;
                             break;
                     }
                 }
             }
 
-            if(newPlayer != null)
+            if (newPlayer != null)
             {
                 newPhotonView = newPlayer.GetComponent<PhotonView>();
                 playerProperties.Add("ViewID", newPhotonView.ViewID);
@@ -135,23 +133,28 @@ public class PlayerManager : MonoBehaviourPunCallbacks
         }
     }
 
-    public void SpawnInLocalPlayer(PhotonTeam team)
+    public GameObject SpawnInLocalPlayer(PhotonTeam team)
     {
         BoxCollider playerSpawnCollider = playerPrefab.Find("Tank Origin").Find("Body").GetComponent<BoxCollider>();
-        int spawnIndex = Random.Range(0, defaultSpawns.Count);
+        Collider spawn = null;
+        if(defaultSpawns.Count > 0)
+        {
+            spawn = defaultSpawns[Random.Range(0, defaultSpawns.Count)];
+        }
+
         PhotonView newPhotonView;
         GameObject newPlayer;
         PhotonHashtable playerProperties = new PhotonHashtable
         {
-            { "Kills", 0 },
-            { "Deaths", 0 },
-            { "New", false },
+            { "kills", 0 },
+            { "deaths", 0 },
+            { "new", false },
         };
         switch(DataManager.roomSettings.mode)
         {
             case "FFA":
                 Quaternion randomRotation = Quaternion.AngleAxis(Random.Range(-180, 180), Vector3.up);
-                newPlayer = SpawnPlayer(playerPrefab, CustomRandom.GetSpawnPointInCollider(freeForAllSpawn, Vector3.down, ignoreLayerMask, playerSpawnCollider, randomRotation), randomRotation);
+                newPlayer = SpawnPlayer(playerPrefab, CustomRandom.GetSpawnPointInCollider(spawn, Vector3.down, ignoreLayerMask, playerSpawnCollider, randomRotation), randomRotation);
                 break;
             case "Teams":
                 int teamIndex = -1;
@@ -167,9 +170,9 @@ public class PlayerManager : MonoBehaviourPunCallbacks
                 newPlayer = SpawnPlayer(teamPlayerPrefabs[teamIndex], CustomRandom.GetSpawnPointInCollider(teamSpawns[teamIndex], Vector3.down, ignoreLayerMask, playerSpawnCollider, teamSpawns[teamIndex].transform.rotation), teamSpawns[teamIndex].transform.rotation, false);
                 break;
             default:
-                newPlayer = SpawnPlayer(playerPrefab, CustomRandom.GetSpawnPointInCollider(defaultSpawns[spawnIndex], Vector3.down, ignoreLayerMask, playerSpawnCollider, defaultSpawns[spawnIndex].transform.rotation), defaultSpawns[spawnIndex].transform.rotation);
-                playerProperties["Kills"] = DataManager.playerData.kills;
-                playerProperties["Deaths"] = DataManager.playerData.deaths;
+                newPlayer = SpawnPlayer(playerPrefab, CustomRandom.GetSpawnPointInCollider(spawn, Vector3.down, ignoreLayerMask, playerSpawnCollider, spawn.transform.rotation), spawn.transform.rotation);
+                playerProperties["kills"] = DataManager.playerData.kills;
+                playerProperties["deaths"] = DataManager.playerData.deaths;
                 break;
         }
 
@@ -183,13 +186,14 @@ public class PlayerManager : MonoBehaviourPunCallbacks
         }
 
         PhotonNetwork.LocalPlayer.SetCustomProperties(playerProperties);
+        return newPlayer;
     }
 
     private Transform SpawnSpectator(Vector3 position, Quaternion rotation)
     {
         PhotonHashtable playerProperties = new PhotonHashtable()
         {
-            { "Spectator", true }
+            { "spectator", true }
         };
         PhotonNetwork.LocalPlayer.SetCustomProperties(playerProperties);
         Transform newSpectator = Instantiate(spectatorPrefab, position, rotation);
@@ -202,11 +206,20 @@ public class PlayerManager : MonoBehaviourPunCallbacks
     {
         PhotonHashtable playerProperties = new PhotonHashtable()
         {
-            { "Spectator", false }
+            { "spectator", false }
         };
         PhotonNetwork.LocalPlayer.SetCustomProperties(playerProperties);
-        GameObject newPlayer = PhotonNetwork.Instantiate(prefab.name, position, rotation);
-        newPlayer.GetComponent<PhotonView>().RPC("InitializePlayer", RpcTarget.All, new object[] { randomColors, new float[] { Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), 1 }, new float[] { Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), 1 } });
+        GameObject newPlayer;
+        if (PhotonNetwork.OfflineMode)
+        {
+            newPlayer = Instantiate(prefab, position, rotation).gameObject;
+            newPlayer.transform.SetParent(playerParent);
+        }
+        else
+        {
+            newPlayer = PhotonNetwork.Instantiate(prefab.name, position, rotation);
+            newPlayer.GetComponent<PhotonView>().RPC("InitializePlayer", RpcTarget.All, new object[] { randomColors, new float[] { Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), 1 }, new float[] { Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), 1 } });
+        }
         newPlayer.name = prefab.name;
         newPlayer.transform.Find("Camera").gameObject.SetActive(true);
         newPlayer.transform.Find("Player UI").gameObject.SetActive(true);
@@ -236,10 +249,11 @@ public class PlayerManager : MonoBehaviourPunCallbacks
             }
             else
             {
-                switch(DataManager.roomSettings.mode)
+                Collider spawn = defaultSpawns[Random.Range(0, defaultSpawns.Count)];
+                switch (DataManager.roomSettings.mode)
                 {
                     case "FFA":
-                        tankOrigin.SetPositionAndRotation(CustomRandom.GetSpawnPointInCollider(freeForAllSpawn, Vector3.down, ignoreLayerMask), Quaternion.AngleAxis(Random.Range(-180, 180), Vector3.up));
+                        tankOrigin.SetPositionAndRotation(CustomRandom.GetSpawnPointInCollider(spawn, Vector3.down, ignoreLayerMask), Quaternion.AngleAxis(Random.Range(-180, 180), Vector3.up));
                         break;
                     case "Teams":
                         int teamSpawnIndex = -1;
@@ -255,8 +269,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks
                         tankOrigin.SetPositionAndRotation(CustomRandom.GetSpawnPointInCollider(teamSpawns[teamSpawnIndex], Vector3.down, ignoreLayerMask), teamSpawns[teamSpawnIndex].transform.rotation);
                         break;
                     default: // PvE
-                        int randomSpawnIndex = Random.Range(0, defaultSpawns.Count);
-                        tankOrigin.SetPositionAndRotation(CustomRandom.GetSpawnPointInCollider(defaultSpawns[randomSpawnIndex], Vector3.down, ignoreLayerMask), defaultSpawns[randomSpawnIndex].transform.rotation);
+                        tankOrigin.SetPositionAndRotation(CustomRandom.GetSpawnPointInCollider(spawn, Vector3.down, ignoreLayerMask), spawn.transform.rotation);
                         break;
                 }
                 PhotonView PV = tankOrigin.parent.GetComponent<PhotonView>();
@@ -308,7 +321,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks
     {
         PhotonHashtable roomProperties = new PhotonHashtable()
         {
-            { "Total Lives", GameManager.Instance.totalLives }
+            { "totalLives", GameManager.Instance.totalLives }
         };
         PhotonNetwork.CurrentRoom.SetCustomProperties(roomProperties);
         if(GameManager.Instance.totalLives > 0 && CustomNetworkHandling.NonSpectatorList.Length > 0)

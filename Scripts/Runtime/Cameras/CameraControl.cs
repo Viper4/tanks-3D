@@ -10,7 +10,7 @@ public class CameraControl : MonoBehaviour
     public Transform reticle;
 
     [SerializeField] PlayerControl playerControl;
-    [SerializeField] BaseUIHandler baseUIHandler;
+    [SerializeField] BaseUI baseUI;
 
     Transform tankOrigin;
     Transform body;
@@ -28,6 +28,7 @@ public class CameraControl : MonoBehaviour
 
     Vector2 pitchMinMax = new Vector2(-40, 80);
 
+    [SerializeField] float rotationSmoothing = 0.05f;
     Vector3 rotationSmoothVelocity;
     Vector3 currentRotation;
 
@@ -38,7 +39,7 @@ public class CameraControl : MonoBehaviour
     float pitch;
     bool lockTurret = false;
     bool lockCamera = false;
-    bool alternateCamera = false;
+    public bool alternateCamera = false;
 
     public bool invisible = false;
 
@@ -64,6 +65,10 @@ public class CameraControl : MonoBehaviour
             Cursor.lockState = CursorLockMode.None;
 
             lastParentRotation = tankOrigin.localRotation;
+            foreach(UsernameSystem username in FindObjectsOfType<UsernameSystem>())
+            {
+                username.UpdateMainCamera();
+            }
         }
         else
         {
@@ -74,143 +79,145 @@ public class CameraControl : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(!playerControl.Paused &&(PhotonNetwork.OfflineMode || playerControl.photonView.IsMine))
+        if((PhotonNetwork.OfflineMode || playerControl.photonView.IsMine))
         {
-            // Updating every username to rotate to this camera for this client
-            UsernameSystem[] allUsernames = FindObjectsOfType<UsernameSystem>();
-            foreach(UsernameSystem username in allUsernames)
+            if (!GameManager.Instance.paused)
             {
-                username.UpdateTextMeshTo(transform, alternateCamera);
-            }
-
-            float zoomRate = Input.GetKey(DataManager.playerSettings.keyBinds["Zoom Control"]) ? DataManager.playerSettings.slowZoomSpeed : DataManager.playerSettings.fastZoomSpeed;
-            if(alternateCamera)
-            {
-                // Zoom with scroll
-                if(Input.GetAxisRaw("Mouse ScrollWheel") > 0)
+                float zoomRate = Input.GetKey(DataManager.playerSettings.keyBinds["Zoom Control"]) ? DataManager.playerSettings.slowZoomSpeed : DataManager.playerSettings.fastZoomSpeed;
+                if (alternateCamera)
                 {
-                    dstFromTarget = Mathf.Clamp(dstFromTarget - zoomRate, altTargetDstMinMax.x, altTargetDstMinMax.y);
-                }
-                else if(Input.GetAxisRaw("Mouse ScrollWheel") < 0)
-                {
-                    dstFromTarget = Mathf.Clamp(dstFromTarget + zoomRate, altTargetDstMinMax.x, altTargetDstMinMax.y);
-                }
-            }
-            else
-            {
-                // Zoom with scroll
-                if(Input.GetAxisRaw("Mouse ScrollWheel") > 0)
-                {
-                    dstFromTarget = Mathf.Clamp(dstFromTarget - zoomRate, targetDstMinMax.x, targetDstMinMax.y);
-                }
-                else if(Input.GetAxisRaw("Mouse ScrollWheel") < 0)
-                {
-                    dstFromTarget = Mathf.Clamp(dstFromTarget + zoomRate, targetDstMinMax.x, targetDstMinMax.y);
-                }
-            }
-
-            // Lock turret toggle
-            if(Input.GetKeyDown(DataManager.playerSettings.keyBinds["Lock Turret"]))
-            {
-                lockTurret = !lockTurret;
-                baseUIHandler.UIElements["Lock Turret"].gameObject.SetActive(lockTurret);
-            }
-            else if(!alternateCamera && Input.GetKeyDown(DataManager.playerSettings.keyBinds["Lock Camera"]))
-            {
-                lockCamera = !lockCamera;
-                baseUIHandler.UIElements["Lock Camera"].gameObject.SetActive(lockCamera);
-            }
-            else if(Input.GetKeyDown(DataManager.playerSettings.keyBinds["Switch Camera"]))
-            {
-                alternateCamera = !alternateCamera;
-                lockCamera = false;
-
-                if(alternateCamera)
-                {
-                    dstFromTarget = Mathf.Clamp(dstFromTarget, altTargetDstMinMax.x, altTargetDstMinMax.y);
-                    transform.eulerAngles = new Vector3(90, 0, 0);
-                }
-            }
-
-            if(!playerControl.Dead && Time.timeScale != 0)
-            {
-                // Unlinking y eulers of turret, barrel, and target from parent
-                Quaternion inverseParentRot = Quaternion.Euler(0, lastParentRotation.eulerAngles.y - tankOrigin.localEulerAngles.y, 0);
-                turret.localRotation = inverseParentRot * turret.localRotation;
-                barrel.localRotation = inverseParentRot * barrel.localRotation;
-
-                reticle.gameObject.SetActive(true);
-                Cursor.visible = false;
-                if(alternateCamera)
-                {
-                    transform.position = new Vector3(0, dstFromTarget, 0);
-                }
-
-                if(dstFromTarget == 0 && !alternateCamera)
-                {
-                    Cursor.lockState = CursorLockMode.Locked;
-                    float eulerXOffset = CustomMath.FormattedAngle(turret.eulerAngles.x);
-                    pitchMinMax = new Vector2(pitchMinMaxL.x + eulerXOffset, pitchMinMaxL.y + eulerXOffset);
-
-                    turret.rotation = barrel.rotation = transform.rotation;
-                    reticle.position = new Vector3(Screen.width * 0.5f, Screen.height * 0.5f, 0);
-
-                    body.GetComponent<MeshRenderer>().enabled = turret.GetComponent<MeshRenderer>().enabled = barrel.GetComponent<MeshRenderer>().enabled = false;
+                    // Zoom with scroll
+                    if (Input.GetAxisRaw("Mouse ScrollWheel") > 0)
+                    {
+                        dstFromTarget = Mathf.Clamp(dstFromTarget - zoomRate, altTargetDstMinMax.x, altTargetDstMinMax.y);
+                    }
+                    else if (Input.GetAxisRaw("Mouse ScrollWheel") < 0)
+                    {
+                        dstFromTarget = Mathf.Clamp(dstFromTarget + zoomRate, altTargetDstMinMax.x, altTargetDstMinMax.y);
+                    }
                 }
                 else
                 {
-                    if(!invisible)
+                    // Zoom with scroll
+                    if (Input.GetAxisRaw("Mouse ScrollWheel") > 0)
                     {
-                        body.GetComponent<MeshRenderer>().enabled = turret.GetComponent<MeshRenderer>().enabled = barrel.GetComponent<MeshRenderer>().enabled = true;
+                        dstFromTarget = Mathf.Clamp(dstFromTarget - zoomRate, targetDstMinMax.x, targetDstMinMax.y);
+                    }
+                    else if (Input.GetAxisRaw("Mouse ScrollWheel") < 0)
+                    {
+                        dstFromTarget = Mathf.Clamp(dstFromTarget + zoomRate, targetDstMinMax.x, targetDstMinMax.y);
+                    }
+                }
+
+                // Lock turret toggle
+                if (Input.GetKeyDown(DataManager.playerSettings.keyBinds["Lock Turret"]))
+                {
+                    lockTurret = !lockTurret;
+                    baseUI.UIElements["Lock Turret"].gameObject.SetActive(lockTurret);
+                }
+                else if (!alternateCamera && Input.GetKeyDown(DataManager.playerSettings.keyBinds["Lock Camera"]))
+                {
+                    lockCamera = !lockCamera;
+                    baseUI.UIElements["Lock Camera"].gameObject.SetActive(lockCamera);
+                }
+                else if (Input.GetKeyDown(DataManager.playerSettings.keyBinds["Switch Camera"]))
+                {
+                    alternateCamera = !alternateCamera;
+                    lockCamera = false;
+
+                    if (alternateCamera)
+                    {
+                        dstFromTarget = Mathf.Clamp(dstFromTarget, altTargetDstMinMax.x, altTargetDstMinMax.y);
+                        transform.eulerAngles = new Vector3(90, 0, 0);
+                    }
+                }
+
+                if (!playerControl.Dead && Time.timeScale != 0)
+                {
+                    // Unlinking y eulers of turret, barrel, and target from parent
+                    Quaternion inverseParentRot = Quaternion.Euler(0, lastParentRotation.eulerAngles.y - tankOrigin.localEulerAngles.y, 0);
+                    turret.localRotation = inverseParentRot * turret.localRotation;
+                    barrel.localRotation = inverseParentRot * barrel.localRotation;
+
+                    reticle.gameObject.SetActive(true);
+                    Cursor.visible = false;
+                    if (alternateCamera)
+                    {
+                        transform.position = new Vector3(0, dstFromTarget, 0);
                     }
 
-                    Cursor.lockState = CursorLockMode.Confined;
-                    pitchMinMax = pitchMinMaxN;
-
-                    if(!lockTurret)
+                    if (dstFromTarget == 0 && !alternateCamera)
                     {
-                        RotateToMousePoint();
+                        Cursor.lockState = CursorLockMode.Locked;
+                        float eulerXOffset = CustomMath.FormattedAngle(turret.eulerAngles.x);
+                        pitchMinMax = new Vector2(pitchMinMaxL.x + eulerXOffset, pitchMinMaxL.y + eulerXOffset);
+
+                        turret.rotation = barrel.rotation = transform.rotation;
+                        reticle.position = new Vector3(Screen.width * 0.5f, Screen.height * 0.5f, 0);
+
+                        body.GetComponent<MeshRenderer>().enabled = turret.GetComponent<MeshRenderer>().enabled = barrel.GetComponent<MeshRenderer>().enabled = false;
                     }
                     else
                     {
-                        if(Physics.Raycast(barrel.position + barrel.forward, barrel.forward, out RaycastHit barrelHit, Mathf.Infinity, ~mouseIgnoreLayers))
+                        if (!invisible)
                         {
-                            reticle.position = thisCamera.WorldToScreenPoint(barrelHit.point);
+                            body.GetComponent<MeshRenderer>().enabled = turret.GetComponent<MeshRenderer>().enabled = barrel.GetComponent<MeshRenderer>().enabled = true;
+                        }
+
+                        Cursor.lockState = CursorLockMode.Confined;
+                        pitchMinMax = pitchMinMaxN;
+
+                        if (!lockTurret)
+                        {
+                            RotateToMousePoint();
+                        }
+                        else
+                        {
+                            if (Physics.Raycast(barrel.position + barrel.forward, barrel.forward, out RaycastHit barrelHit, Mathf.Infinity, ~mouseIgnoreLayers))
+                            {
+                                reticle.position = thisCamera.WorldToScreenPoint(barrelHit.point);
+                            }
                         }
                     }
+
+                    // Zeroing x and z eulers of turret and clamping barrel x euler
+                    turret.localEulerAngles = new Vector3(0, turret.localEulerAngles.y, 0);
+                    barrel.localEulerAngles = new Vector3(CustomMath.ClampAngle(barrel.localEulerAngles.x, pitchMinMaxL.x, pitchMinMaxL.y), barrel.localEulerAngles.y, 0);
+
+                    lastParentRotation = tankOrigin.localRotation;
                 }
 
-                // Zeroing x and z eulers of turret and clamping barrel x euler
-                turret.localEulerAngles = new Vector3(0, turret.localEulerAngles.y, 0);
-                barrel.localEulerAngles = new Vector3(CustomMath.ClampAngle(barrel.localEulerAngles.x, pitchMinMaxL.x, pitchMinMaxL.y), barrel.localEulerAngles.y, 0);
+                if (!alternateCamera)
+                {
+                    if (!lockCamera)
+                    {
+                        // Translating inputs from mouse into smoothed rotation of camera
+                        yaw += Input.GetAxis("Mouse X") * DataManager.playerSettings.sensitivity / 4;
+                        pitch -= Input.GetAxis("Mouse Y") * DataManager.playerSettings.sensitivity / 4;
+                        pitch = Mathf.Clamp(pitch, pitchMinMax.x, pitchMinMax.y);
 
-                lastParentRotation = tankOrigin.localRotation;
+                        if (DataManager.playerSettings.cameraSmoothing)
+                        {
+                            currentRotation = Vector3.SmoothDamp(currentRotation, new Vector3(pitch, yaw), ref rotationSmoothVelocity, rotationSmoothing);
+                        }
+                        else
+                        {
+                            currentRotation = new Vector3(pitch, yaw, currentRotation.z);
+                        }
+                        // Setting rotation and position of camera on previous params and target and dstFromTarget
+                        transform.eulerAngles = currentRotation;
+                    }
+                }
+            }
+
+            // Prevent clipping of camera
+            if (Physics.Raycast(target.position, -transform.forward, out RaycastHit clippingHit, dstFromTarget, ~cameraIgnoreLayers))
+            {
+                transform.position = clippingHit.point;
             }
             else
             {
-                reticle.position = Input.mousePosition;
-            }
-
-            if(!alternateCamera)
-            {
-                if(!lockCamera)
-                {
-                    // Translating inputs from mouse into smoothed rotation of camera
-                    yaw += Input.GetAxis("Mouse X") * DataManager.playerSettings.sensitivity / 4;
-                    pitch -= Input.GetAxis("Mouse Y") * DataManager.playerSettings.sensitivity / 4;
-                    pitch = Mathf.Clamp(pitch, pitchMinMax.x, pitchMinMax.y);
-
-                    currentRotation = Vector3.SmoothDamp(currentRotation, new Vector3(pitch, yaw), ref rotationSmoothVelocity, DataManager.playerSettings.cameraSmoothing);
-                    // Setting rotation and position of camera on previous params and target and dstFromTarget
-                    transform.eulerAngles = currentRotation;
-                }
                 transform.position = target.position - transform.forward * dstFromTarget;
-
-                // Prevent clipping of camera
-                if(Physics.Raycast(target.position,(transform.position - target.position).normalized, out RaycastHit clippingHit, dstFromTarget, ~cameraIgnoreLayers))
-                {
-                    transform.position = clippingHit.point -(transform.position - target.position).normalized;
-                }
             }
         }
     }
@@ -221,11 +228,14 @@ public class CameraControl : MonoBehaviour
 
         if(Physics.Raycast(mouseRay, out RaycastHit mouseHit, Mathf.Infinity, ~mouseIgnoreLayers))
         {
-            Debug.DrawLine(transform.position, mouseHit.point, Color.red, 0.1f);
+            Debug.DrawLine(transform.position, mouseHit.point, Color.green, 0.1f);
             // Rotating turret and barrel towards the mouseHit point
-            Quaternion lookRotation = Quaternion.LookRotation(mouseHit.point - target.position, tankOrigin.up);
-
-            barrel.rotation = turret.rotation = lookRotation;
+            barrel.rotation = turret.rotation = Quaternion.LookRotation(mouseHit.point - target.position, tankOrigin.up);
+        }
+        else
+        {
+            Debug.DrawRay(transform.position, mouseRay.direction * 5, Color.red, 0.1f);
+            barrel.rotation = turret.rotation = Quaternion.LookRotation(mouseRay.direction, tankOrigin.up);
         }
         reticle.position = Input.mousePosition;
     }

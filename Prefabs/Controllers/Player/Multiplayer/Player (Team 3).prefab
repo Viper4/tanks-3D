@@ -3885,6 +3885,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f897659aca0e25043993350714b48655, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  photonView: {fileID: 8503986742886749549}
+  fireControl: {fileID: 8503986742886749546}
+  playerUI: {fileID: 2637785072666247179}
 --- !u!1 &8642890626476460667
 GameObject:
   m_ObjectHideFlags: 0
@@ -4196,18 +4199,20 @@ MonoBehaviour:
   target: {fileID: 8846568523182972775}
   reticle: {fileID: 4758538136159699646}
   playerControl: {fileID: 8503986742886749547}
-  baseUIHandler: {fileID: 5874305763143684814}
+  baseUI: {fileID: 5874305763143684814}
   dstFromTarget: 4
   targetDstMinMax: {x: 0, y: 30}
   altTargetDstMinMax: {x: 30, y: 70}
   pitchMinMaxN: {x: -40, y: 80}
   pitchMinMaxL: {x: -20, y: 20}
+  rotationSmoothing: 0.05
   mouseIgnoreLayers:
     serializedVersion: 2
     m_Bits: 2098694
   cameraIgnoreLayers:
     serializedVersion: 2
     m_Bits: 304088974
+  alternateCamera: 0
   invisible: 0
 --- !u!1 &8846568523182972774
 GameObject:

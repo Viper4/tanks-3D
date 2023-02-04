@@ -42,7 +42,7 @@ public class LevelGenerator : MonoBehaviour
 
         GameObject obstacle = Instantiate(obstacles[0], CustomRandom.GetSpawnPointInCollider(boundingCollider, Vector3.down, ignoreLayerMask, obstacles[0].GetComponent<BoxCollider>(), obstacles[0].transform.rotation, true), obstacles[0].transform.rotation, obstacleParent);
         GenerateObstacles(obstacle.GetComponent<ObstacleGeneration>());
-        FindObjectOfType<TankManager>().GenerateTanks(true);
+        FindObjectOfType<TankManager>().GenerateTanks();
     }
 
     public void GenerateObstacles(ObstacleGeneration selectedObject)

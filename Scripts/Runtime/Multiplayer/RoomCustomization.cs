@@ -7,11 +7,15 @@ using UnityEngine.UI;
 public class RoomCustomization : MonoBehaviour
 {
     [SerializeField] RectTransform mapSelection;
-
     [SerializeField] RectTransform FFASettings;
     [SerializeField] RectTransform teamSettings;
     [SerializeField] RectTransform PVESettings;
     [SerializeField] RectTransform CoOpSettings;
+
+    private void Start()
+    {
+        UpdateSettingsUI();
+    }
 
     public void TogglePublic(Toggle toggle)
     {
@@ -21,6 +25,7 @@ public class RoomCustomization : MonoBehaviour
     public void ChangeMap(Dropdown dropdown)
     {
         DataManager.roomSettings.map = dropdown.options[dropdown.value].text;
+        DataManager.roomSettings.customMap = dropdown.value > 1;
     }
 
     public void ChangeCampaign(Dropdown dropdown)
@@ -40,7 +45,8 @@ public class RoomCustomization : MonoBehaviour
         if(option == "Co-Op")
         {
             CoOpSettings.gameObject.SetActive(true);
-            mapSelection.gameObject.SetActive(false);
+            if (!GameManager.Instance.editing)
+                mapSelection.gameObject.SetActive(false);
 
             if(DataManager.roomSettings.map != "Classic 1" && DataManager.roomSettings.map != "Regular 1")
             {
@@ -50,7 +56,8 @@ public class RoomCustomization : MonoBehaviour
         else
         {
             CoOpSettings.gameObject.SetActive(false);
-            mapSelection.gameObject.SetActive(true);
+            if(!GameManager.Instance.editing)
+                mapSelection.gameObject.SetActive(true);
 
             if(DataManager.roomSettings.map == "Classic 1" || DataManager.roomSettings.map == "Regular 1")
             {
@@ -128,6 +135,14 @@ public class RoomCustomization : MonoBehaviour
                     setting.GetComponent<Toggle>().isOn = DataManager.roomSettings.isPublic;
                     break;
                 case "Map Dropdown":
+                    Dropdown settingDropdown = setting.GetComponent<Dropdown>();
+                    settingDropdown.options.RemoveRange(2, settingDropdown.options.Count - 2);
+                    List<Dropdown.OptionData> customMaps = new List<Dropdown.OptionData>();
+                    foreach(string level in SaveSystem.FilesInSaveFolder(false, ".level"))
+                    {
+                        customMaps.Add(new Dropdown.OptionData() { text = level });
+                    }
+                    settingDropdown.AddOptions(customMaps);
                     SetValueToOption(setting.GetComponent<Dropdown>(), DataManager.roomSettings.map);
                     break;
                 case "Map Preview":

@@ -24,7 +24,7 @@ public class TargetSystem : MonoBehaviour
 
         if(GameManager.Instance != null)
         {
-            chooseTarget = !PhotonNetwork.OfflineMode || GameManager.Instance.autoPlay;
+            chooseTarget = !PhotonNetwork.OfflineMode || GameManager.Instance.autoPlay || GameManager.Instance.editing;
         }
 
         if(!chooseTarget)
@@ -37,9 +37,31 @@ public class TargetSystem : MonoBehaviour
             currentTarget = primaryTarget;
         }
 
-        if(enemyParents == null)
+        if (enemyParents.Count == 0)
         {
-            enemyParents.Add(transform.parent);
+            if (GameManager.Instance.inLobby)
+            {
+                enemyParents.Add(TankManager.Instance.tankParent);
+            }
+            else
+            {
+                switch (DataManager.roomSettings.mode)
+                {
+                    case "FFA":
+                        enemyParents.Add(TankManager.Instance.tankParent);
+                        enemyParents.Add(PlayerManager.Instance.playerParent);
+                        break;
+                    case "Co-Op":
+                        enemyParents.Add(PlayerManager.Instance.playerParent);
+                        break;
+                    case "PvE":
+                        enemyParents.Add(PlayerManager.Instance.playerParent);
+                        break;
+                    case "Teams":
+                        enemyParents.Add(PlayerManager.Instance.teamSpawnParent);
+                        break;
+                }
+            }
         }
 
         myPTV = GetComponent<PhotonTankView>();
@@ -61,7 +83,7 @@ public class TargetSystem : MonoBehaviour
                         Transform enemyParent = enemyParents[i];
                         foreach(Transform tank in enemyParent)
                         {
-                            if(tank != transform &&(myPTV.teamName == "FFA" || tank.GetComponent<PhotonTankView>().teamName != myPTV.teamName))
+                            if(tank != transform && (myPTV.teamName == "FFA" || tank.GetComponent<PhotonTankView>().teamName != myPTV.teamName))
                             {
                                 Transform target = GetTargetArea(tank);
 
@@ -104,7 +126,7 @@ public class TargetSystem : MonoBehaviour
 
     public Transform GetTargetArea(Transform target)
     {
-        Transform targetArea = target;
+        Transform targetArea;
         if(target.CompareTag("Player"))
         {
             targetArea = target.Find("Tank Origin").Find(preferredTargetArea);
