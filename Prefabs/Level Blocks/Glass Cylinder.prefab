@@ -9,7 +9,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8618229775775213659}
-  - component: {fileID: 2400381148326687758}
   - component: {fileID: 7424270739883214541}
   - component: {fileID: 7424270739883214540}
   - component: {fileID: 7424270739883214531}
@@ -38,18 +37,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2400381148326687758
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2841735797702003158}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0549988d5d52649489373fc266387c45, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!198 &7424270739883214541
 ParticleSystem:
   m_ObjectHideFlags: 0
@@ -5058,7 +5045,10 @@ MonoBehaviour:
   prefabIndex: 12
   thisRenderer: {fileID: 4176289168828236815}
   thisCollider: {fileID: 4176289168828236814}
-  overrideColliderHiding: 0
+  colliderVisibility:
+  - {fileID: 4176289168828236814}
+  rendererVisibility: []
+  gameObjectVisibility: []
 --- !u!1 &4176289168828236808
 GameObject:
   m_ObjectHideFlags: 0

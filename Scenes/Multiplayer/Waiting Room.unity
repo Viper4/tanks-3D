@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
+  m_IndirectSpecularColor: {r: 0.43494964, g: 0.552472, b: 0.5424881, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -98,7 +98,7 @@ LightmapSettings:
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
   m_LightingDataAsset: {fileID: 0}
-  m_LightingSettings: {fileID: 0}
+  m_LightingSettings: {fileID: 4890085278179872738, guid: f6337cb80241084458a84695e8c16e89, type: 2}
 --- !u!196 &4
 NavMeshSettings:
   serializedVersion: 2
@@ -3249,7 +3249,6 @@ GameObject:
   - component: {fileID: 273521953}
   - component: {fileID: 273521956}
   - component: {fileID: 273521955}
-  - component: {fileID: 273521954}
   m_Layer: 2
   m_Name: TriangleWall 1 (3)
   m_TagString: Untagged
@@ -3272,18 +3271,6 @@ Transform:
   m_Father: {fileID: 2055752695}
   m_RootOrder: 10
   m_LocalEulerAnglesHint: {x: -90, y: -114.5, z: 0}
---- !u!114 &273521954
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 273521952}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0549988d5d52649489373fc266387c45, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!23 &273521955
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -15566,6 +15553,80 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1341979419}
   m_CullTransparentMesh: 1
+--- !u!1 &1343248694
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1343248696}
+  - component: {fileID: 1343248695}
+  m_Layer: 0
+  m_Name: LevelGenerator
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1343248695
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1343248694}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 32bb5ba5a6f439449b53a3b2a5280685, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mazeDimensions: {x: 25, y: 1, z: 25}
+  cellSize: 2
+  randomSeed: 1
+  offsetX: 0
+  offsetY: 0
+  noiseScale: {x: 8, y: 4}
+  cellsToInstantiate:
+  - prefabs:
+    - {fileID: 1789137517761687661, guid: 716ebcd9db95e4540a052e5f9f478e48, type: 3}
+    minNoise: 0.6
+    maxNoise: 1
+    minNeighbors: 2
+    maxNeighbors: 4
+    height: 1
+  - prefabs:
+    - {fileID: 474112292520302916, guid: 966e4c9e2448c9846bfe93aec5074577, type: 3}
+    minNoise: 0.5
+    maxNoise: 1
+    minNeighbors: 3
+    maxNeighbors: 4
+    height: 1
+  - prefabs:
+    - {fileID: 2831163616137155589, guid: defe1b009e3710f4c81d00cd9cc9d535, type: 3}
+    - {fileID: 1367292582955621443, guid: 56361916b4ac5a847b4d563c44dce338, type: 3}
+    minNoise: 0
+    maxNoise: 0.25
+    minNeighbors: 0
+    maxNeighbors: 1
+    height: 0
+  toClearParent: {fileID: 871075317}
+--- !u!4 &1343248696
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1343248694}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 8
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1343826013
 GameObject:
   m_ObjectHideFlags: 0
@@ -16254,7 +16315,6 @@ GameObject:
   - component: {fileID: 1425357671}
   - component: {fileID: 1425357674}
   - component: {fileID: 1425357673}
-  - component: {fileID: 1425357672}
   m_Layer: 2
   m_Name: TriangleWall 1 (3)
   m_TagString: Untagged
@@ -16277,18 +16337,6 @@ Transform:
   m_Father: {fileID: 729344631}
   m_RootOrder: 9
   m_LocalEulerAnglesHint: {x: -90, y: -127.4, z: -68.29999}
---- !u!114 &1425357672
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1425357670}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0549988d5d52649489373fc266387c45, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!23 &1425357673
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -18855,14 +18903,14 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1614636966}
-  m_LocalRotation: {x: 0.5825634, y: -0.3237444, z: 0.27165374, w: 0.69427216}
+  m_LocalRotation: {x: 0.9630321, y: 0.031024238, z: -0.12678555, w: 0.23565257}
   m_LocalPosition: {x: 0, y: 3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1654388072}
   m_RootOrder: 12
-  m_LocalEulerAnglesHint: {x: 80, y: -50, z: 0}
+  m_LocalEulerAnglesHint: {x: 152.5, y: 15, z: 0}
 --- !u!114 &1614636968
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -19391,7 +19439,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1654388072}
-  - component: {fileID: 1654388071}
   m_Layer: 0
   m_Name: Level
   m_TagString: Untagged
@@ -19399,78 +19446,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1654388071
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1654388070}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 92f2a0c1234d9594ea6006b7ea7a55c6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ignoreLayerMask:
-    serializedVersion: 2
-    m_Bits: 1038
-  obstacleParent: {fileID: 1403546645}
-  tankParent: {fileID: 0}
-  clearParent: {fileID: 871075317}
-  boundingCollider: {fileID: 807294707}
-  tankLimit: 16
-  tanks:
-  - {fileID: 6353959912858125971, guid: c9f541d7851ab9a47a33057f6c146edd, type: 3}
-  - {fileID: 4033695715270616719, guid: 8c192097c6438ea419f6b4c11af8dd65, type: 3}
-  - {fileID: 8152485418157340697, guid: a2089b8661e86fd4c99f5c815f926e03, type: 3}
-  - {fileID: 5691383199726689912, guid: a6e3c718b071f3840ab0fe546320d584, type: 3}
-  - {fileID: 1323752777862920504, guid: debcf5b4aa7147a4da9c55ed29c20294, type: 3}
-  - {fileID: 4033695715270616719, guid: a9a3826477b88174fa5e0688e442dcae, type: 3}
-  - {fileID: 9020707831748607082, guid: cb64a51ec564b42458a7ffa1d700509f, type: 3}
-  - {fileID: 8152485418157340697, guid: 013dcda7d98c1ff44a08d58dc3401393, type: 3}
-  - {fileID: 5631725004334847937, guid: 8cacd9a3d9b692a438ac9612d5ea47e3, type: 3}
-  - {fileID: 5691383199726689912, guid: 1ae9f2a095504fe4392926e601b04037, type: 3}
-  - {fileID: 4033695715270616719, guid: 98fde336cd14fcd4f93a5793fe41626d, type: 3}
-  - {fileID: 5691383199726689912, guid: 7619ee5bf5490a0469ecf1254334414b, type: 3}
-  - {fileID: 8152485418157340697, guid: 586794c7bf9033e4985021cc8d6a5e52, type: 3}
-  - {fileID: 4033695715270616719, guid: 53f802116a3414f48bc745248268985f, type: 3}
-  obstacleLimit: 100
-  obstacles:
-  - {fileID: 474112292520302916, guid: 966e4c9e2448c9846bfe93aec5074577, type: 3}
-  - {fileID: 1789137517761687661, guid: 716ebcd9db95e4540a052e5f9f478e48, type: 3}
-  - {fileID: 8628183819059575296, guid: ff2520d73f903f148a067071ade7c29e, type: 3}
-  - {fileID: 6011413356270360582, guid: a1c3af60c2dd9f64083a6e9a8f1f54fc, type: 3}
-  - {fileID: 2205347069199695584, guid: 08c863c87b398d64899bd19f648704b2, type: 3}
-  - {fileID: 4704265161098795565, guid: 4e6c37d9e3832a04dae61c1b644a9f38, type: 3}
-  - {fileID: 1367292582955621443, guid: 56361916b4ac5a847b4d563c44dce338, type: 3}
-  - {fileID: 9184779533493177993, guid: 44f2d77966b3f454d9053b18cb885493, type: 3}
-  - {fileID: 2841735797702003158, guid: f79507d1cb7ddad4f8e882207f0d0b73, type: 3}
-  - {fileID: 3270535609475661342, guid: ac221bee791ad4d41a40fe172407ed4b, type: 3}
-  - {fileID: 2831163616137155589, guid: defe1b009e3710f4c81d00cd9cc9d535, type: 3}
-  possibleDistances:
-  - value: 2
-    weight: 10
-  - value: 8
-    weight: 4
-  - value: 10
-    weight: 2
-  rangedDistance: 0
-  possibleDirections:
-  - value: {x: 1, y: 0, z: 0}
-    weight: 1
-  - value: {x: 0, y: 0, z: 1}
-    weight: 1
-  - value: {x: -1, y: 0, z: 0}
-    weight: 1
-  - value: {x: 0, y: 0, z: -1}
-    weight: 1
-  - value: {x: 0, y: 1, z: 0}
-    weight: 1
-  logicalStructure: 1
-  branchChance: 0.2
-  switchChance: 0.4
-  amountDeviationMin: 0
-  amountDeviationMax: 0
 --- !u!4 &1654388072
 Transform:
   m_ObjectHideFlags: 0

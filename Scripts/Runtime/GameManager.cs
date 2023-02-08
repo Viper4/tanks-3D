@@ -29,6 +29,8 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     bool loadingScene = false;
 
+    Coroutine autoPlayRoutine;
+
     public Transform loadingScreen;
     public List<string> editorNames = new List<string>();
     public List<GameObject> editorPrefabs = new List<GameObject>();
@@ -116,7 +118,8 @@ public class GameManager : MonoBehaviourPunCallbacks
             {
                 UpdatePlayerWithSettings(null);
                 loadingScreen.gameObject.SetActive(false);
-                StartCoroutine(ResetAutoPlay(2.5f));
+                if(autoPlay)
+                    ResetAutoPlay(2.5f);
             }
             else
             {
@@ -517,7 +520,16 @@ public class GameManager : MonoBehaviourPunCallbacks
         extraLifePopup.gameObject.SetActive(false);
     }
 
-    public IEnumerator ResetAutoPlay(float startDelay = 0)
+    public void ResetAutoPlay(float startDelay = 0)
+    {
+        if(autoPlayRoutine != null)
+        {
+            StopCoroutine(autoPlayRoutine);
+        }
+        autoPlayRoutine = StartCoroutine(AutoPlay(startDelay));
+    }
+
+    private IEnumerator AutoPlay(float startDelay = 0)
     {
         yield return new WaitForEndOfFrame(); // Waiting for scripts and scene to fully load
 
@@ -526,10 +538,14 @@ public class GameManager : MonoBehaviourPunCallbacks
         LevelGenerator levelGenerator = FindObjectOfType<LevelGenerator>();
         if(levelGenerator != null)
         {
-            levelGenerator.GenerateLevel();
+            levelGenerator.Generate();
         }
+        TankManager.Instance.GenerateTanks();
         yield return new WaitForSecondsRealtime(startDelay);
         frozen = false;
+
+        yield return new WaitForSecondsRealtime(60);
+        ResetAutoPlay();
     }
 
     public void StartGame()

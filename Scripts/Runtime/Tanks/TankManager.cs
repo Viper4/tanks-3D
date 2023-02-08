@@ -139,14 +139,6 @@ public class TankManager : MonoBehaviourPunCallbacks
     public void SpawnTank(GameObject tank)
     {
         PhotonTankView PTV;
-        if(DataManager.roomSettings.fillLobby)
-        {
-            tankLimit = DataManager.roomSettings.playerLimit - CustomNetworkHandling.NonSpectatorList.Length;
-        }
-        else
-        {
-            tankLimit = DataManager.roomSettings.botLimit;
-        }
 
         if(tankParent.childCount < tankLimit)
         {
@@ -159,7 +151,7 @@ public class TankManager : MonoBehaviourPunCallbacks
             if (GameManager.Instance.inLobby)
             {
                 Quaternion randomRotation = Quaternion.AngleAxis(Random.Range(-180.0f, 180.0f), spawn.transform.up);
-                Instantiate(tank, CustomRandom.GetSpawnPointInCollider(spawn, -spawn.transform.up, ignoreLayerMask, tank.transform.Find("Body").GetComponent<BoxCollider>(), randomRotation), randomRotation, tankParent);
+                spawnedTanks.Add(Instantiate(tank, CustomRandom.GetSpawnPointInCollider(spawn, -spawn.transform.up, ignoreLayerMask, tank.transform.Find("Body").GetComponent<BoxCollider>(), randomRotation), randomRotation, tankParent));
             }
             else
             {
@@ -349,7 +341,7 @@ public class TankManager : MonoBehaviourPunCallbacks
                 {
                     Time.timeScale = 0.2f;
                     yield return new WaitForSecondsRealtime(4);
-                    StartCoroutine(GameManager.Instance.ResetAutoPlay(2.5f));
+                    GameManager.Instance.ResetAutoPlay(2.5f);
                 }
             }
             checking = false;

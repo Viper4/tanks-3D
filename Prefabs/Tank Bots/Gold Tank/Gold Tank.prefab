@@ -688,7 +688,7 @@ MonoBehaviour:
   - 45
   tankNoise: 1
   tankRotSpeed: 250
-  tankRotNoiseScale: 2
+  tankRotNoiseScale: 1.5
   tankRotNoiseSpeed: 0.5
   turretRotation: 1
   turretNoise: 0
@@ -897,7 +897,9 @@ MonoBehaviour:
   prefabIndex: 30
   thisRenderer: {fileID: 0}
   thisCollider: {fileID: 8215285775581512984}
-  overrideColliderHiding: 0
+  colliderVisibility: []
+  rendererVisibility: []
+  gameObjectVisibility: []
 --- !u!1 &5696586256643670383
 GameObject:
   m_ObjectHideFlags: 0

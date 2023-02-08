@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.43596905, g: 0.55358094, b: 0.5430385, a: 1}
+  m_IndirectSpecularColor: {r: 0.43494964, g: 0.552472, b: 0.5424881, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -12699,7 +12699,6 @@ GameObject:
   - component: {fileID: 1912058506}
   - component: {fileID: 1912058510}
   - component: {fileID: 1912058509}
-  - component: {fileID: 1912058508}
   - component: {fileID: 1912058507}
   m_Layer: 0
   m_Name: Triangle 2
@@ -12737,18 +12736,6 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 1377376433060346373, guid: 25e744005558c7d4d9064fd84e13ff44, type: 3}
---- !u!114 &1912058508
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1912058505}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0549988d5d52649489373fc266387c45, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!23 &1912058509
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -15065,18 +15052,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8668029525434961870}
   m_Mesh: {fileID: -946708481997747587, guid: 25e744005558c7d4d9064fd84e13ff44, type: 3}
---- !u!114 &540519993404815175
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7373210918861001005}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0549988d5d52649489373fc266387c45, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!65 &544920087846379874
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -15767,7 +15742,6 @@ GameObject:
   - component: {fileID: 4665706970159191015}
   - component: {fileID: 1044695079144727000}
   - component: {fileID: 8383613555276806595}
-  - component: {fileID: 1615152322758823858}
   - component: {fileID: 520187476}
   m_Layer: 0
   m_Name: Cylinder
@@ -15982,18 +15956,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &1234516163655453581
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7709930645785794061}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0549988d5d52649489373fc266387c45, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1261119497331372241
 GameObject:
   m_ObjectHideFlags: 0
@@ -16317,14 +16279,14 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6289655434623237149}
-  m_LocalRotation: {x: 0.5825634, y: -0.3237444, z: 0.27165374, w: 0.69427216}
+  m_LocalRotation: {x: 0.9630321, y: 0.031024238, z: -0.12678555, w: 0.23565257}
   m_LocalPosition: {x: 0, y: 3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2776129576737227586}
   m_RootOrder: 7
-  m_LocalEulerAnglesHint: {x: 80, y: -50, z: 0}
+  m_LocalEulerAnglesHint: {x: 152.5, y: 15, z: 0}
 --- !u!23 &1466020831924609954
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -16483,18 +16445,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &1561058711044251932
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7959886229830302876}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0549988d5d52649489373fc266387c45, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!23 &1588630808777769331
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -16605,18 +16555,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &1615152322758823858
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1173801453491040874}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0549988d5d52649489373fc266387c45, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!33 &1616908746524584988
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -17897,18 +17835,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &2343221085119442441
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2784571885398758353}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0549988d5d52649489373fc266387c45, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!23 &2358549761659563754
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -18623,7 +18549,6 @@ GameObject:
   - component: {fileID: 269233728207581221}
   - component: {fileID: 2864110949938253261}
   - component: {fileID: 4179705343705435424}
-  - component: {fileID: 5500650459861566779}
   - component: {fileID: 1299896985}
   m_Layer: 0
   m_Name: Arch
@@ -18773,7 +18698,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: -1, y: 1, z: 2, w: -2}
+  m_BoundingSphereOverride: {x: 1.02e-43, y: 0, z: 0, w: 1.014668e-22}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ShadowRadius: 0
@@ -18884,18 +18809,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &2739797823191203423
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6763134920147575775}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0549988d5d52649489373fc266387c45, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!4 &2776129576737227586
 Transform:
   m_ObjectHideFlags: 0
@@ -18932,7 +18845,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2776129576737227586}
-  - component: {fileID: 5972877645004239378}
   m_Layer: 0
   m_Name: Classic Template
   m_TagString: Untagged
@@ -18993,7 +18905,6 @@ GameObject:
   - component: {fileID: 8525609413996130908}
   - component: {fileID: 4076153418833789027}
   - component: {fileID: 4807156438239303800}
-  - component: {fileID: 2343221085119442441}
   - component: {fileID: 1413312899}
   m_Layer: 0
   m_Name: Cylinder
@@ -19140,18 +19051,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &2896482129614847589
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6047370975524758501}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0549988d5d52649489373fc266387c45, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &2899906791107513291
 GameObject:
   m_ObjectHideFlags: 0
@@ -19410,7 +19309,6 @@ GameObject:
   - component: {fileID: 3086352569036909709}
   - component: {fileID: 3086352570266273465}
   - component: {fileID: 3086352570266273462}
-  - component: {fileID: 5839516929429691191}
   - component: {fileID: 1841243257}
   m_Layer: 0
   m_Name: Triangle 2
@@ -20580,18 +20478,6 @@ Transform:
   m_Father: {fileID: 5874304149928359988}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
---- !u!114 &4036145399758498288
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5775891562426714010}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0549988d5d52649489373fc266387c45, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &4052772939098428179
 GameObject:
   m_ObjectHideFlags: 0
@@ -20847,7 +20733,6 @@ GameObject:
   - component: {fileID: 8965155651621635945}
   - component: {fileID: 5019330727224736410}
   - component: {fileID: 6627738793009786622}
-  - component: {fileID: 4426621658572130650}
   - component: {fileID: 1053151151}
   m_Layer: 0
   m_Name: TriangleWall 1 (3)
@@ -21150,18 +21035,6 @@ Transform:
   m_Father: {fileID: 6642241298066617246}
   m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: -32.6, z: 0}
---- !u!114 &4426621658572130650
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4217093295634216636}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0549988d5d52649489373fc266387c45, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!23 &4437291238586818765
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -21447,7 +21320,6 @@ GameObject:
   - component: {fileID: 4550469395840130208}
   - component: {fileID: 4550469394677675668}
   - component: {fileID: 4550469394677675675}
-  - component: {fileID: 4969809274161081114}
   - component: {fileID: 4969809274161081115}
   m_Layer: 0
   m_Name: Triangle 2
@@ -21926,18 +21798,6 @@ Transform:
   m_Father: {fileID: 5340289074359060658}
   m_RootOrder: 12
   m_LocalEulerAnglesHint: {x: 0, y: -69.36, z: 0}
---- !u!114 &4969809274161081114
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4550469394677675674}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0549988d5d52649489373fc266387c45, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!64 &4969809274161081115
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -22841,18 +22701,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &5500650459861566779
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2629379178265520977}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0549988d5d52649489373fc266387c45, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!33 &5503510660513334864
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -23246,7 +23094,6 @@ GameObject:
   - component: {fileID: 8640712299743550702}
   - component: {fileID: 6046686215978983686}
   - component: {fileID: 5644192811387494891}
-  - component: {fileID: 4036145399758498288}
   - component: {fileID: 983692130}
   m_Layer: 0
   m_Name: Arch
@@ -23371,18 +23218,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &5839516929429691191
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3086352570266273463}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0549988d5d52649489373fc266387c45, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &5841541298526446122
 GameObject:
   m_ObjectHideFlags: 0
@@ -23588,47 +23423,6 @@ Transform:
   m_Father: {fileID: 2776129576737227586}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &5972877645004239378
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2776129576737227645}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 92f2a0c1234d9594ea6006b7ea7a55c6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ignoreLayerMask:
-    serializedVersion: 2
-    m_Bits: 0
-  obstacleParent: {fileID: 0}
-  tankParent: {fileID: 0}
-  clearParent: {fileID: 0}
-  boundingCollider: {fileID: 0}
-  tankLimit: 5
-  tanks:
-  - {fileID: 6353959912858125971, guid: c9f541d7851ab9a47a33057f6c146edd, type: 3}
-  - {fileID: 4033695715270616719, guid: 8c192097c6438ea419f6b4c11af8dd65, type: 3}
-  - {fileID: 8152485418157340697, guid: a2089b8661e86fd4c99f5c815f926e03, type: 3}
-  obstacleLimit: 25
-  obstacles:
-  - {fileID: 1789137517761687661, guid: 716ebcd9db95e4540a052e5f9f478e48, type: 3}
-  - {fileID: 474112292520302916, guid: 966e4c9e2448c9846bfe93aec5074577, type: 3}
-  - {fileID: 6011413356270360582, guid: a1c3af60c2dd9f64083a6e9a8f1f54fc, type: 3}
-  - {fileID: 708377228804219519, guid: e1af1b370886ce746a86703c2b34645e, type: 3}
-  - {fileID: 8628183819059575296, guid: ff2520d73f903f148a067071ade7c29e, type: 3}
-  - {fileID: 2205347069199695584, guid: 08c863c87b398d64899bd19f648704b2, type: 3}
-  - {fileID: 4704265161098795565, guid: 4e6c37d9e3832a04dae61c1b644a9f38, type: 3}
-  possibleDistances: []
-  rangedDistance: 0
-  possibleDirections: []
-  logicalStructure: 0
-  branchChance: 0.5
-  switchChance: 0
-  amountDeviationMin: 0
-  amountDeviationMax: 0
 --- !u!33 &5983007872182872761
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -23821,7 +23615,6 @@ GameObject:
   - component: {fileID: 6047370976754387423}
   - component: {fileID: 6047370975524758507}
   - component: {fileID: 6047370975524758500}
-  - component: {fileID: 2896482129614847589}
   - component: {fileID: 1364575967}
   m_Layer: 0
   m_Name: Triangle 2
@@ -24965,7 +24758,6 @@ GameObject:
   - component: {fileID: 6763134921301379557}
   - component: {fileID: 6763134920147575761}
   - component: {fileID: 6763134920147575774}
-  - component: {fileID: 2739797823191203423}
   - component: {fileID: 1533738862}
   m_Layer: 0
   m_Name: Triangle 2
@@ -25875,7 +25667,6 @@ GameObject:
   - component: {fileID: 2679072241929055154}
   - component: {fileID: 1616908746524584988}
   - component: {fileID: 8664129194511389281}
-  - component: {fileID: 540519993404815175}
   - component: {fileID: 1838589343}
   m_Layer: 0
   m_Name: TriangleWall 1 (3)
@@ -26325,7 +26116,6 @@ GameObject:
   - component: {fileID: 7709930644623539255}
   - component: {fileID: 7709930645785794051}
   - component: {fileID: 7709930645785794060}
-  - component: {fileID: 1234516163655453581}
   - component: {fileID: 339635883}
   m_Layer: 0
   m_Name: Triangle 2
@@ -26716,7 +26506,6 @@ GameObject:
   - component: {fileID: 7959886228643649190}
   - component: {fileID: 7959886229830302866}
   - component: {fileID: 7959886229830302877}
-  - component: {fileID: 1561058711044251932}
   - component: {fileID: 1436705782}
   m_Layer: 0
   m_Name: Triangle 2
@@ -26860,7 +26649,6 @@ GameObject:
   - component: {fileID: 2373195304147718016}
   - component: {fileID: 7939604153510903231}
   - component: {fileID: 1443464526842488228}
-  - component: {fileID: 8519279082252358613}
   - component: {fileID: 349878513}
   m_Layer: 0
   m_Name: Cylinder (1)
@@ -27616,18 +27404,6 @@ Transform:
   m_Father: {fileID: 5340289074359060658}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: -32.6, z: 0}
---- !u!114 &8519279082252358613
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8077924433145441805}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0549988d5d52649489373fc266387c45, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!4 &8525609413996130908
 Transform:
   m_ObjectHideFlags: 0

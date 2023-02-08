@@ -4522,7 +4522,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2776129576525043054}
-  - component: {fileID: 5972877645074048062}
   m_Layer: 0
   m_Name: Regular Template
   m_TagString: Untagged
@@ -4555,47 +4554,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &5972877645074048062
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2776129576525043025}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 92f2a0c1234d9594ea6006b7ea7a55c6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ignoreLayerMask:
-    serializedVersion: 2
-    m_Bits: 0
-  obstacleParent: {fileID: 0}
-  tankParent: {fileID: 0}
-  clearParent: {fileID: 0}
-  boundingCollider: {fileID: 0}
-  tankLimit: 5
-  tanks:
-  - {fileID: 6353959912858125971, guid: c9f541d7851ab9a47a33057f6c146edd, type: 3}
-  - {fileID: 4033695715270616719, guid: 8c192097c6438ea419f6b4c11af8dd65, type: 3}
-  - {fileID: 8152485418157340697, guid: a2089b8661e86fd4c99f5c815f926e03, type: 3}
-  obstacleLimit: 25
-  obstacles:
-  - {fileID: 1789137517761687661, guid: 716ebcd9db95e4540a052e5f9f478e48, type: 3}
-  - {fileID: 474112292520302916, guid: 966e4c9e2448c9846bfe93aec5074577, type: 3}
-  - {fileID: 6011413356270360582, guid: a1c3af60c2dd9f64083a6e9a8f1f54fc, type: 3}
-  - {fileID: 708377228804219519, guid: e1af1b370886ce746a86703c2b34645e, type: 3}
-  - {fileID: 8628183819059575296, guid: ff2520d73f903f148a067071ade7c29e, type: 3}
-  - {fileID: 2205347069199695584, guid: 08c863c87b398d64899bd19f648704b2, type: 3}
-  - {fileID: 4704265161098795565, guid: 4e6c37d9e3832a04dae61c1b644a9f38, type: 3}
-  possibleDistances: []
-  rangedDistance: 0
-  possibleDirections: []
-  logicalStructure: 0
-  branchChance: 0.5
-  switchChance: 0
-  amountDeviationMin: 0
-  amountDeviationMax: 0
 --- !u!1 &2795062041733469523
 GameObject:
   m_ObjectHideFlags: 0
@@ -7072,7 +7030,6 @@ GameObject:
   - component: {fileID: 8965155651540324677}
   - component: {fileID: 5019330727296445622}
   - component: {fileID: 6627738793350232274}
-  - component: {fileID: 4426621658247585654}
   m_Layer: 2
   m_Name: TriangleWall 1 (3)
   m_TagString: Non Interactable
@@ -7145,18 +7102,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &4426621658247585654
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4217093295151423632}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0549988d5d52649489373fc266387c45, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &4217945378817627673
 GameObject:
   m_ObjectHideFlags: 0
@@ -11340,14 +11285,14 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6289655434425494065}
-  m_LocalRotation: {x: 0.5825634, y: -0.3237444, z: 0.27165374, w: 0.69427216}
+  m_LocalRotation: {x: 0.9630321, y: 0.031024238, z: -0.12678555, w: 0.23565257}
   m_LocalPosition: {x: 0, y: 3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2776129576525043054}
   m_RootOrder: 7
-  m_LocalEulerAnglesHint: {x: 80, y: -50, z: 0}
+  m_LocalEulerAnglesHint: {x: 152.5, y: 15, z: 0}
 --- !u!108 &2657269636287671016
 Light:
   m_ObjectHideFlags: 0
@@ -11405,7 +11350,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
+  m_BoundingSphereOverride: {x: 6.9e-44, y: 3.466e-41, z: 1.02e-43, w: -101.74042}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ShadowRadius: 0
@@ -12935,7 +12880,6 @@ GameObject:
   - component: {fileID: 2679072241581407646}
   - component: {fileID: 1616908746578606640}
   - component: {fileID: 8664129194565469261}
-  - component: {fileID: 540519993058009451}
   m_Layer: 2
   m_Name: TriangleWall 1 (3)
   m_TagString: Non Interactable
@@ -13008,18 +12952,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &540519993058009451
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7373210919056574209}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0549988d5d52649489373fc266387c45, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &7375147987874342736
 GameObject:
   m_ObjectHideFlags: 0

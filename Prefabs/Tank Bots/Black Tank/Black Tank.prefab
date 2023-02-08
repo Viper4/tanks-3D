@@ -606,7 +606,7 @@ MonoBehaviour:
   maxSlopeAngle: 40
   stationary: 0
   obstacleAvoidance: 1
-  normalSpeed: 6.5
+  normalSpeed: 6
   avoidSpeed: 3.25
   useGravity: 1
   gravity: 8
@@ -770,7 +770,9 @@ MonoBehaviour:
   prefabIndex: 26
   thisRenderer: {fileID: 0}
   thisCollider: {fileID: 4125845277540636573}
-  overrideColliderHiding: 0
+  colliderVisibility: []
+  rendererVisibility: []
+  gameObjectVisibility: []
 --- !u!1 &5751771638733195478
 GameObject:
   m_ObjectHideFlags: 0

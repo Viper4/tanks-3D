@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 9004569037126099130}
   - component: {fileID: 5429507448604913437}
-  - component: {fileID: 4324177249481429917}
   - component: {fileID: 1443000624442374266}
   - component: {fileID: 5054585337696253612}
   - component: {fileID: 5827100020062103074}
@@ -49,6 +48,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 903597137734f0249a51d13d579f2a6d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  destructableID: 0
   particles: {fileID: 1443000624442374266}
   destroyResistance: 1
   overlapLayerMask:
@@ -59,18 +59,6 @@ MonoBehaviour:
   pitchRange:
   - 0.9
   - 1.1
---- !u!114 &4324177249481429917
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8628183819059575296}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0549988d5d52649489373fc266387c45, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!198 &1443000624442374266
 ParticleSystem:
   m_ObjectHideFlags: 0
@@ -4933,7 +4921,9 @@ MonoBehaviour:
   prefabIndex: 5
   thisRenderer: {fileID: 8898020677601311465}
   thisCollider: {fileID: 8898020677601311464}
-  overrideColliderHiding: 0
+  colliderVisibility: []
+  rendererVisibility: []
+  gameObjectVisibility: []
 --- !u!1 &8898020677601311466
 GameObject:
   m_ObjectHideFlags: 0

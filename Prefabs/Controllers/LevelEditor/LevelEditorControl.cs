@@ -462,9 +462,14 @@ public class LevelEditorControl : MonoBehaviour
 
     void UpdatePreviewObject(bool leftShiftDown)
     {
-        if (!leftShiftDown && Physics.Raycast(transform.position, transform.forward, out hit, Mathf.Infinity, ~ignoreLayers))
+        if(!leftShiftDown && Physics.Raycast(transform.position, transform.forward, out hit, Mathf.Infinity, ~ignoreLayers))
         {
-            hitGridPoint = WorldToGrid(hit.point.Round(2) + hit.normal.Multiply(previewCollider.bounds.extents));
+            if (previewObject.name != "Hole")
+                hit.normal.Scale(previewCollider.bounds.extents);
+            else
+                hit.normal *= -1;
+
+            hitGridPoint = WorldToGrid(hit.point.Round(2) + hit.normal);
             if (hit.normal == Vector3.forward || hit.normal == Vector3.back)
             {
                 hitUp = Vector3.Cross(hit.normal, Vector3.right);
@@ -491,7 +496,10 @@ public class LevelEditorControl : MonoBehaviour
             previewRenderer.material.color = Color.green;
         }
 
-        previewObject.position = hitGridPoint;
+        if (previewObject.name == "Hole")
+            previewObject.position = hitGridPoint - hit.normal * 0.01f;
+        else
+            previewObject.position = hitGridPoint;
     }
 
     void DestroySolidCircle(Vector3 center, List<Vector3Int> destroyedCells, int evenOffset)

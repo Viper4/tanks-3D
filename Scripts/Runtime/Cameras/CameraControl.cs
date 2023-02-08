@@ -213,7 +213,7 @@ public class CameraControl : MonoBehaviour
             // Prevent clipping of camera
             if (Physics.Raycast(target.position, -transform.forward, out RaycastHit clippingHit, dstFromTarget, ~cameraIgnoreLayers))
             {
-                transform.position = clippingHit.point;
+                transform.position = clippingHit.point + transform.forward * 0.1f;
             }
             else
             {

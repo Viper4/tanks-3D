@@ -152,7 +152,7 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
             }
         }
         Player player = CustomNetworkHandling.FindPlayerWithUsername(username);
-        if (player != null)
+        if(player != null)
         {
             return player.UserId;
         }
@@ -165,7 +165,7 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
 
     public void ConnectToPhotonChat()
     {
-        if (string.IsNullOrEmpty(DataManager.chatSettings.username))
+        if(string.IsNullOrEmpty(DataManager.chatSettings.username))
         {
             IDUsernamePair.AddOrReplace(PhotonNetwork.LocalPlayer.UserId, PhotonNetwork.LocalPlayer.UserId);
         }
@@ -614,11 +614,11 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
         {
             string[] splitNames = channelName.Split(new char[] { ':' });
             string senderName = splitNames[0];
-            if (!sender.Equals(senderName, StringComparison.OrdinalIgnoreCase))
+            if(!sender.Equals(senderName, StringComparison.OrdinalIgnoreCase))
             {
-                if (message.GetType() == typeof(string))
+                if(message.GetType() == typeof(string))
                 {
-                    if (!DataManager.chatSettings.muteList.Contains(sender))
+                    if(!DataManager.chatSettings.muteList.Contains(sender))
                     {
                         CreateMessage($"{GetUsername(sender)} -> me: {message}", Color.grey);
                         replyRecipient = sender;
@@ -628,15 +628,15 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
                 {
                     object[] messageData = (object[])message;
                     int messageType = (int)messageData[0];
-                    if (messageType == 0)
+                    if(messageType == 0)
                     {
                         IDUsernamePair.AddOrReplace((string)messageData[1], (string)messageData[2]);
-                        if ((bool)messageData[3])
+                        if((bool)messageData[3])
                         {
                             SendPrivateUserUpdate(sender);
                         }
                     }
-                    else if (messageType == 1)
+                    else if(messageType == 1)
                     {
                         IDUsernamePair.Remove(sender);
                     }
@@ -655,7 +655,7 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
         for(int i = 0; i < channels.Length; i++)
         {
             SendPublicUserUpdate(channels[i], true);
-            if (channels[i] != "RegionLobby")
+            if(channels[i] != "RegionLobby")
             {
                 CreateMessage("Joined " + channels[i], Color.yellow);
             }
@@ -666,7 +666,7 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
     {
         for(int i = 0; i < channels.Length; i++)
         {
-            if (channels[i] != "RegionLobby")
+            if(channels[i] != "RegionLobby")
             {
                 CreateMessage("Left " + channels[i], Color.yellow);
             }

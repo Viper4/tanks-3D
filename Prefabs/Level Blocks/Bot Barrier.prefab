@@ -63,7 +63,10 @@ MonoBehaviour:
   prefabIndex: 16
   thisRenderer: {fileID: 2531885943734153657}
   thisCollider: {fileID: 6058096961507094619}
-  overrideColliderHiding: 0
+  colliderVisibility:
+  - {fileID: 6058096961507094619}
+  rendererVisibility: []
+  componentVisibility: []
 --- !u!33 &4537963788691764564
 MeshFilter:
   m_ObjectHideFlags: 0

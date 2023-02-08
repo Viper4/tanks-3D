@@ -30,12 +30,5 @@ public class SetSkybox : EditorWindow
                 EditorSceneManager.SaveScene(SceneManager.GetSceneByPath(scenePath));
             }
         }
-        else if (GUILayout.Button("Close All Scenes"))
-        {
-            while (SceneManager.sceneCount > 1)
-            {
-                EditorSceneManager.CloseScene(SceneManager.GetSceneAt(1), true);
-            }
-        }
     }
 }

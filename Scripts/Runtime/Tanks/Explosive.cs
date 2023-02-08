@@ -13,6 +13,7 @@ public class Explosive : MonoBehaviourPun
     [SerializeField] LayerMask overlapInteract;
     public float explosionForce = 12f;
     public float explosionRadius = 7f;
+    [SerializeField] float upwardsModifier = 2.5f;
 
     void KillTank(Transform tank)
     {
@@ -149,7 +150,7 @@ public class Explosive : MonoBehaviourPun
             // Applying explosion force to rigid bodies of hit colliders
             if(collider.TryGetComponent<Rigidbody>(out var rb))
             {
-                rb.AddExplosionForce(explosionForce, transform.position, explosionRadius, 3);
+                rb.AddExplosionForce(explosionForce, transform.position, explosionRadius, upwardsModifier);
             }
         }
 

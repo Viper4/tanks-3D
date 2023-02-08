@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 6376292913493182307}
   - component: {fileID: 2475343862008340344}
   - component: {fileID: 6125535622542423817}
-  - component: {fileID: 4641109252242467081}
   - component: {fileID: 2475343862008340346}
   - component: {fileID: 2475343862008340347}
   - component: {fileID: 8415724909497097798}
@@ -103,18 +102,6 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 2534964839176971238, guid: 25e744005558c7d4d9064fd84e13ff44, type: 3}
---- !u!114 &4641109252242467081
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5064449579881370833}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0549988d5d52649489373fc266387c45, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &2475343862008340346
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -164,7 +151,10 @@ MonoBehaviour:
   prefabIndex: 9
   thisRenderer: {fileID: 2475343862008340344}
   thisCollider: {fileID: 6125535622542423817}
-  overrideColliderHiding: 0
+  colliderVisibility:
+  - {fileID: 6125535622542423817}
+  rendererVisibility: []
+  gameObjectVisibility: []
 --- !u!1 &6400315969129813059
 GameObject:
   m_ObjectHideFlags: 0

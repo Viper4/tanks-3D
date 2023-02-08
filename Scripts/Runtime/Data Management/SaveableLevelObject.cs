@@ -8,8 +8,10 @@ public class SaveableLevelObject : MonoBehaviour
     public int prefabIndex;
     public MeshRenderer thisRenderer;
     public Collider thisCollider;
-    [SerializeField] bool overrideColliderHiding = false;
     TransformInfo originalTransform;
+    [SerializeField] Collider[] colliderVisibility;
+    [SerializeField] Renderer[] rendererVisibility;
+    [SerializeField] GameObject[] gameObjectVisibility;
 
     private void Start()
     {
@@ -30,8 +32,47 @@ public class SaveableLevelObject : MonoBehaviour
 
     private void LateUpdate()
     {
-        if (GameManager.Instance.editing && !overrideColliderHiding && !GameManager.Instance.playMode && thisRenderer != null)
-            thisCollider.enabled = thisRenderer.isVisible;
+        
+    }
+
+    private void OnBecameInvisible()
+    {
+        if(GameManager.Instance.editing && !GameManager.Instance.playMode)
+        {
+            foreach (Collider collider in colliderVisibility)
+            {
+                collider.enabled = false;
+            }
+        }
+
+        foreach(Renderer renderer in rendererVisibility)
+        {
+            renderer.enabled = false;
+        }
+        foreach(GameObject GO in gameObjectVisibility)
+        {
+            GO.SetActive(false);
+        }
+    }
+     
+    private void OnBecameVisible()
+    {
+        if (GameManager.Instance.editing && !GameManager.Instance.playMode)
+        {
+            foreach (Collider collider in colliderVisibility)
+            {
+                collider.enabled = true;
+            }
+        }
+
+        foreach(Renderer renderer in rendererVisibility)
+        {
+            renderer.enabled = true;
+        }
+        foreach(GameObject GO in gameObjectVisibility)
+        {
+            GO.SetActive(true);
+        }
     }
 
     public void ResetTransform()

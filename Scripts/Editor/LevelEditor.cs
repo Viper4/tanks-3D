@@ -77,10 +77,8 @@ public class LevelEditor : EditorWindow
 
         if (GUILayout.Button("Generate Random"))
         {
-            var selection = Selection.gameObjects;
-
             LevelGenerator levelGenerator = FindObjectOfType<LevelGenerator>();
-            levelGenerator.GenerateObstacles(selection[0].GetComponent<ObstacleGeneration>());
+            levelGenerator.Generate();
         }
 
         GUI.enabled = false;

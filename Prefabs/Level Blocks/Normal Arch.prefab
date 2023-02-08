@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 4794886546605571249}
   - component: {fileID: 6860334143931448412}
   - component: {fileID: 5850302818818305569}
-  - component: {fileID: 2982432025010140231}
   - component: {fileID: -1084130353260897735}
   m_Layer: 0
   m_Name: Normal Arch
@@ -100,18 +99,6 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: -1
   m_Mesh: {fileID: 1960654409700015248, guid: 25e744005558c7d4d9064fd84e13ff44, type: 3}
---- !u!114 &2982432025010140231
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4704265161098795565}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0549988d5d52649489373fc266387c45, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &-1084130353260897735
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -127,4 +114,7 @@ MonoBehaviour:
   prefabIndex: 3
   thisRenderer: {fileID: 6860334143931448412}
   thisCollider: {fileID: 5850302818818305569}
-  overrideColliderHiding: 0
+  colliderVisibility:
+  - {fileID: 5850302818818305569}
+  rendererVisibility: []
+  gameObjectVisibility: []
