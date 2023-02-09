@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.1733874, g: 0.21673934, b: 0.29880834, a: 1}
+  m_IndirectSpecularColor: {r: 0.43494964, g: 0.552472, b: 0.5424881, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -6373,7 +6373,6 @@ GameObject:
   - component: {fileID: 2519894287547228445}
   - component: {fileID: 860034537045105842}
   - component: {fileID: 150023479452741446}
-  - component: {fileID: 5754044508561800000}
   m_Layer: 0
   m_Name: Cube 1
   m_TagString: Untagged
@@ -6393,7 +6392,6 @@ GameObject:
   - component: {fileID: 2519894287655152767}
   - component: {fileID: 860034537073496528}
   - component: {fileID: 150023479562789412}
-  - component: {fileID: 5754044508609033762}
   m_Layer: 0
   m_Name: Cube 1 (1)
   m_TagString: Untagged
@@ -6582,42 +6580,6 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: -6761514606630693377, guid: 25e744005558c7d4d9064fd84e13ff44, type: 3}
---- !u!114 &5518643621962901326
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6667253344716762665}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0549988d5d52649489373fc266387c45, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &5754044508561800000
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4262111332965005855}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0549988d5d52649489373fc266387c45, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &5754044508609033762
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4262111333014239101}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0549988d5d52649489373fc266387c45, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!4 &6326721002546984083
 Transform:
   m_ObjectHideFlags: 0
@@ -6855,7 +6817,6 @@ GameObject:
   - component: {fileID: 6945356217319422774}
   - component: {fileID: 5153855097155817468}
   - component: {fileID: 6945356217319422773}
-  - component: {fileID: 5518643621962901326}
   m_Layer: 0
   m_Name: Triangle 1 (2)
   m_TagString: Untagged
@@ -6885,30 +6846,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6667253344716762665}
   m_Mesh: {fileID: -5409063766139145518, guid: 25e744005558c7d4d9064fd84e13ff44, type: 3}
---- !u!114 &6957620069250231704
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8115082055273653503}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0549988d5d52649489373fc266387c45, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &6957620070971334346
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8115082055650219949}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0549988d5d52649489373fc266387c45, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!4 &7126420638028628186
 Transform:
   m_ObjectHideFlags: 0
@@ -7170,7 +7107,6 @@ GameObject:
   - component: {fileID: 5510887638183506400}
   - component: {fileID: 7754754708041106730}
   - component: {fileID: 5510887638183506403}
-  - component: {fileID: 6957620069250231704}
   m_Layer: 0
   m_Name: Triangle 1 (1)
   m_TagString: Untagged
@@ -7190,7 +7126,6 @@ GameObject:
   - component: {fileID: 5510887636699628210}
   - component: {fileID: 7754754709507946104}
   - component: {fileID: 5510887636699628209}
-  - component: {fileID: 6957620070971334346}
   m_Layer: 0
   m_Name: Triangle 1
   m_TagString: Untagged

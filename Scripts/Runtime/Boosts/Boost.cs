@@ -243,6 +243,7 @@ public class Boost : MonoBehaviourPun, IPunInstantiateMagicCallback
                     player.GetComponent<BulletBoost>().ApplyBulletBoost(effectDuration, 3, 14.0f, 0, 0, 5.0f);
                 }
 
+                yield return new WaitForSeconds(4); // Wait for particles to finish playing
                 break;
             case BoostType.Invisibility:
                 if(!PhotonNetwork.OfflineMode && player.TryGetComponent(out playerPV))

@@ -39,15 +39,14 @@ public class FindMissingScripts : EditorWindow
         {
             gameObjectCount = 0;
             missingCount = 0;
-            string scenePath = SceneManager.GetActiveScene().path;
             for (int i = 0; i < SceneManager.sceneCountInBuildSettings; i++)
             {
-                scenePath = SceneUtility.GetScenePathByBuildIndex(i);
+                string scenePath = SceneUtility.GetScenePathByBuildIndex(i);
                 EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);
                 FindInScene(true);
                 EditorSceneManager.SaveScene(SceneManager.GetSceneByPath(scenePath));
             }
-            Debug.Log($"Searched {gameObjectCount} GameObjects in {scenePath}, found and removed {missingCount} missing");
+            Debug.Log($"Searched {gameObjectCount} GameObjects in all scenes, found and removed {missingCount} missing");
         }
     }
 

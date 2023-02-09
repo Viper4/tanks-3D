@@ -71,7 +71,9 @@ public class LevelEditorControl : MonoBehaviour
 
     Dictionary<Vector3Int, GameObject> placedSpawnpoints = new Dictionary<Vector3Int, GameObject>();
     Dictionary<Vector3Int, GameObject> placedBlocks = new Dictionary<Vector3Int, GameObject>();
+    Dictionary<Vector3Int, GameObject> placedHoles = new Dictionary<Vector3Int, GameObject>();
     Dictionary<Vector3Int, CellInfo> destroyedBlocks = new Dictionary<Vector3Int, CellInfo>();
+    Dictionary<Vector3Int, CellInfo> destroyedHoles = new Dictionary<Vector3Int, CellInfo>();
     float destroyHoldTimer = 0.75f;
     float placeHoldTimer = 0.75f;
 
@@ -215,9 +217,11 @@ public class LevelEditorControl : MonoBehaviour
                 }
                 else if (Input.GetKeyDown(KeyCode.C))
                 {
-                    List<Vector3Int> placedBlocksList = placedBlocks.Keys.ToList();
-                    AddUndoAction(UndoAction.Clear, new object[] { placedBlocksList });
-                    foreach (Vector3Int cell in placedBlocksList)
+                    List<Vector3Int> placedCells = placedBlocks.Keys.ToList();
+                    placedCells.AddRange(placedHoles.Keys.ToList());
+
+                    AddUndoAction(UndoAction.Clear, new object[] { placedCells });
+                    foreach (Vector3Int cell in placedCells)
                     {
                         DestroyCell(cell);
                     }
@@ -333,9 +337,12 @@ public class LevelEditorControl : MonoBehaviour
                                         break;
                                     case UndoAction.Clear:
                                         cells = (List<Vector3Int>)undoData[0];
-                                        foreach (Vector3Int cell in cells)
+                                        foreach(Vector3Int cell in cells)
                                         {
-                                            CellInfo cellInfo = destroyedBlocks[cell];
+                                            if (!destroyedBlocks.TryGetValue(cell, out CellInfo cellInfo))
+                                            {
+                                                destroyedHoles.TryGetValue(cell, out cellInfo);
+                                            }
                                             FillCell(cell, prefabDictionary[cellInfo.name], cellInfo.eulerAngles);
                                         }
                                         AddRedoAction(UndoAction.Clear, new object[] { cells });
@@ -386,7 +393,10 @@ public class LevelEditorControl : MonoBehaviour
                                         List<Vector3Int> cells = (List<Vector3Int>)redoData[0];
                                         foreach (Vector3Int cell in cells)
                                         {
-                                            CellInfo cellInfo = destroyedBlocks[cell];
+                                            if (!destroyedBlocks.TryGetValue(cell, out CellInfo cellInfo))
+                                            {
+                                                destroyedHoles.TryGetValue(cell, out cellInfo);
+                                            }
                                             FillCell(cell, prefabDictionary[cellInfo.name], cellInfo.eulerAngles);
                                         }
                                         AddUndoAction(UndoAction.Fill, new object[] { cells });
@@ -462,44 +472,47 @@ public class LevelEditorControl : MonoBehaviour
 
     void UpdatePreviewObject(bool leftShiftDown)
     {
-        if(!leftShiftDown && Physics.Raycast(transform.position, transform.forward, out hit, Mathf.Infinity, ~ignoreLayers))
+        if(previewObject != null)
         {
-            if (previewObject.name != "Hole")
-                hit.normal.Scale(previewCollider.bounds.extents);
-            else
-                hit.normal *= -1;
-
-            hitGridPoint = WorldToGrid(hit.point.Round(2) + hit.normal);
-            if (hit.normal == Vector3.forward || hit.normal == Vector3.back)
+            if (!leftShiftDown && Physics.Raycast(transform.position, transform.forward, out hit, Mathf.Infinity, ~ignoreLayers))
             {
-                hitUp = Vector3.Cross(hit.normal, Vector3.right);
+                if (previewObject.name != "Hole")
+                    hit.normal.Scale(previewCollider.bounds.extents);
+                else
+                    hit.normal *= -1;
+
+                hitGridPoint = WorldToGrid(hit.point.Round(2) + hit.normal);
+                if (hit.normal == Vector3.forward || hit.normal == Vector3.back)
+                {
+                    hitUp = Vector3.Cross(hit.normal, Vector3.right);
+                }
+                else
+                {
+                    hitUp = Vector3.Cross(hit.normal, Vector3.forward);
+                }
+                hitRight = Vector3.Cross(hit.normal, hitUp);
             }
             else
             {
-                hitUp = Vector3.Cross(hit.normal, Vector3.forward);
+                hitGridPoint = WorldToGrid(transform.position + transform.forward * previewDistance);
+                hit.normal = transform.forward;
+                hitRight = transform.right;
+                hitUp = transform.up;
             }
-            hitRight = Vector3.Cross(hit.normal, hitUp);
-        }
-        else
-        {
-            hitGridPoint = WorldToGrid(transform.position + transform.forward * previewDistance);
-            hit.normal = transform.forward;
-            hitRight = transform.right;
-            hitUp = transform.up;
-        }
-        if (placedBlocks.ContainsKey(hitGridPoint))
-        {
-            previewRenderer.material.color = Color.red;
-        }
-        else
-        {
-            previewRenderer.material.color = Color.green;
-        }
 
-        if (previewObject.name == "Hole")
-            previewObject.position = hitGridPoint - hit.normal * 0.01f;
-        else
-            previewObject.position = hitGridPoint;
+            if (!previewObject.CompareTag("Spawnpoint"))
+            {
+                if (placedBlocks.ContainsKey(hitGridPoint))
+                {
+                    previewRenderer.material.color = Color.red;
+                }
+                else
+                {
+                    previewRenderer.material.color = Color.green;
+                }
+            }
+            previewObject.position = previewObject.name == "Hole" ? new Vector3(hitGridPoint.x, hitGridPoint.y + 0.01f, hitGridPoint.z) : hitGridPoint;
+        }
     }
 
     void DestroySolidCircle(Vector3 center, List<Vector3Int> destroyedCells, int evenOffset)
@@ -728,12 +741,16 @@ public class LevelEditorControl : MonoBehaviour
                     break;
             }
         }
-        else if(hit.transform != null)
+        else if(hit.transform != null && hit.transform.name != "Floor")
         {
-
             Vector3Int hitCell = WorldToGrid(hit.transform.position);
             if (DestroyCell(hitCell))
                 destroyedCells.Add(hitCell);
+        }
+        else
+        {
+            if (DestroyCell(hitGridPoint))
+                destroyedCells.Add(hitGridPoint);
         }
 
         if (destroyedCells.Count > 0)
@@ -1010,9 +1027,7 @@ public class LevelEditorControl : MonoBehaviour
         else
         {
             if (DestroyCell(gridPosition))
-            {
                 destroyedCells.Add(gridPosition);
-            }
         }
     }
 
@@ -1035,7 +1050,14 @@ public class LevelEditorControl : MonoBehaviour
 
     private bool DestroyCell(Vector3Int gridPosition)
     {
-        if (placedBlocks.TryGetValue(gridPosition, out GameObject placedBlock))
+        if(placedHoles.TryGetValue(gridPosition, out GameObject placedHole))
+        {
+            destroyedHoles.Add(gridPosition, new CellInfo() { name = placedHole.name, eulerAngles = placedHole.transform.eulerAngles });
+            Destroy(placedHole);
+            placedHoles.Remove(gridPosition);
+            return true;
+        }
+        else if(placedBlocks.TryGetValue(gridPosition, out GameObject placedBlock))
         {
             if (placedBlock.GetComponentInChildren<Rigidbody>() != null && placedBlock.TryGetComponent<SaveableLevelObject>(out var saveableLevelObject))
             {
@@ -1045,71 +1067,109 @@ public class LevelEditorControl : MonoBehaviour
             {
                 destructables.Remove(destructableScript);
             }
-            
+
             destroyedBlocks.Add(gridPosition, new CellInfo() { name = placedBlock.name, eulerAngles = placedBlock.transform.eulerAngles });
             Destroy(placedBlock);
             placedBlocks.Remove(gridPosition);
             return true;
         }
-        
+
         return false;
     }
 
     private bool FillCell(Vector3Int gridPosition, GameObject withObject)
     {
-        if(!placedBlocks.ContainsKey(gridPosition))
+        if(withObject.name == "CylinderHole" || withObject.name == "Hole")
         {
-            GameObject newObject = Instantiate(withObject, gridPosition, Quaternion.identity);
-            newObject.transform.rotation = previewObject.rotation;
-            newObject.name = previewObject.name;
-            Rigidbody newRigidbody = newObject.GetComponentInChildren<Rigidbody>();
-            if (newRigidbody != null)
+            if (!placedHoles.ContainsKey(gridPosition))
             {
-                if (!GameManager.Instance.playMode)
-                    newRigidbody.isKinematic = true;
+                GameObject newObject = Instantiate(withObject, new Vector3(gridPosition.x, gridPosition.y + 0.01f, gridPosition.z), Quaternion.identity);
+                newObject.transform.rotation = previewObject.rotation;
+                if(newObject.TryGetComponent<SaveableLevelObject>(out var saveableLevelObject))
+                {
+                    newObject.name = GameManager.Instance.editorNames[saveableLevelObject.prefabIndex];
+                }
+                placedHoles.Add(gridPosition, newObject);
+                destroyedHoles.Remove(gridPosition);
+                return true;
+            }
+        }
+        else
+        {
+            if (!placedBlocks.ContainsKey(gridPosition))
+            {
+                GameObject newObject = Instantiate(withObject, gridPosition, Quaternion.identity);
+                newObject.transform.rotation = previewObject.rotation;
                 if (newObject.TryGetComponent<SaveableLevelObject>(out var saveableLevelObject))
                 {
+                    newObject.name = GameManager.Instance.editorNames[saveableLevelObject.prefabIndex];
+                }
+                Rigidbody newRigidbody = newObject.GetComponentInChildren<Rigidbody>();
+                if (newRigidbody != null)
+                {
+                    if (!GameManager.Instance.playMode)
+                        newRigidbody.isKinematic = true;
                     dynamicObjects.Add(saveableLevelObject);
                 }
+                if (newObject.TryGetComponent<DestructableObject>(out var destructableScript))
+                {
+                    destructables.Add(destructableScript);
+                }
+
+                placedBlocks.Add(gridPosition, newObject);
+                destroyedBlocks.Remove(gridPosition);
+                return true;
             }
-            if (newObject.TryGetComponent<DestructableObject>(out var destructableScript))
-            {
-                destructables.Add(destructableScript);
-            }
-            
-            placedBlocks.Add(gridPosition, newObject);
-            destroyedBlocks.Remove(gridPosition);
-            return true;
         }
+
         return false;
     }
 
     private bool FillCell(Vector3Int gridPosition, GameObject withObject, Vector3 eulerAngles)
     {
-        if (!placedBlocks.ContainsKey(gridPosition))
+        if (withObject.name == "CylinderHole" || withObject.name == "Hole")
         {
-            GameObject newObject = Instantiate(withObject, gridPosition, Quaternion.identity);
-            newObject.transform.eulerAngles = eulerAngles;
-            newObject.name = previewObject.name;
-            Rigidbody newRigidbody = newObject.GetComponentInChildren<Rigidbody>();
-            if (newRigidbody != null)
+            if (!placedHoles.ContainsKey(gridPosition))
             {
-                if (!GameManager.Instance.playMode)
-                    newRigidbody.isKinematic = true;
+                GameObject newObject = Instantiate(withObject, new Vector3(gridPosition.x, gridPosition.y + 0.01f, gridPosition.z), Quaternion.identity);
+                newObject.transform.eulerAngles = eulerAngles;
                 if (newObject.TryGetComponent<SaveableLevelObject>(out var saveableLevelObject))
                 {
+                    newObject.name = GameManager.Instance.editorNames[saveableLevelObject.prefabIndex];
+                }
+                placedHoles.Add(gridPosition, newObject);
+                destroyedHoles.Remove(gridPosition);
+                return true;
+            }
+        }
+        else
+        {
+            if (!placedBlocks.ContainsKey(gridPosition))
+            {
+                GameObject newObject = Instantiate(withObject, gridPosition, Quaternion.identity);
+                if (newObject.TryGetComponent<SaveableLevelObject>(out var saveableLevelObject))
+                {
+                    newObject.name = GameManager.Instance.editorNames[saveableLevelObject.prefabIndex];
+                }
+                newObject.transform.eulerAngles = eulerAngles;
+                Rigidbody newRigidbody = newObject.GetComponentInChildren<Rigidbody>();
+                if (newRigidbody != null)
+                {
+                    if (!GameManager.Instance.playMode)
+                        newRigidbody.isKinematic = true;
                     dynamicObjects.Add(saveableLevelObject);
                 }
-            }
-            if (newObject.TryGetComponent<DestructableObject>(out var destructableScript))
-            {
-                destructables.Add(destructableScript);
-            }
+                if (newObject.TryGetComponent<DestructableObject>(out var destructableScript))
+                {
+                    destructables.Add(destructableScript);
+                }
 
-            placedBlocks.Add(gridPosition, newObject);
-            destroyedBlocks.Remove(gridPosition);
-            return true;
+                placedBlocks.Add(gridPosition, newObject);
+                destroyedBlocks.Remove(gridPosition);
+                return true;
+            }
         }
+
         return false;
     }
 
@@ -1273,15 +1333,20 @@ public class LevelEditorControl : MonoBehaviour
     {
         if(selectedLevelSlot != null)
         {
-            foreach(Vector3Int cell in placedBlocks.Keys.ToList())
+            foreach (Vector3Int hole in placedHoles.Keys.ToList())
             {
-                DestroyCell(cell);
+                DestroyCell(hole);
+            }
+            foreach (Vector3Int block in placedBlocks.Keys.ToList())
+            {
+                DestroyCell(block);
             }
             foreach(Vector3Int spawnpoint in placedSpawnpoints.Keys.ToList())
             {
                 DestroySpawnpoint(spawnpoint);
             }
             destroyedBlocks.Clear();
+            destroyedHoles.Clear();
             undoActions.Clear();
             undoObjects.Clear();
             redoActions.Clear();
@@ -1326,22 +1391,28 @@ public class LevelEditorControl : MonoBehaviour
                 }
                 else
                 {
-                    if (levelObject.TryGetComponent<DestructableObject>(out var destructableScript))
+                    if(levelObjectInfo.name == "CylinderHole" || levelObjectInfo.name == "Hole")
                     {
-                        destructables.Add(destructableScript);
+                        placedHoles.Add(WorldToGrid(levelObjectPosition), levelObject);
                     }
-                    Rigidbody attachedRigidbody = levelObject.GetComponentInChildren<Rigidbody>();
-                    if (attachedRigidbody != null)
+                    else
                     {
-                        if (!GameManager.Instance.playMode)
-                            attachedRigidbody.isKinematic = true;
-                        if (attachedRigidbody.TryGetComponent<SaveableLevelObject>(out var saveableLevelObject))
+                        if (levelObject.TryGetComponent<DestructableObject>(out var destructableScript))
                         {
-                            dynamicObjects.Add(saveableLevelObject);
+                            destructables.Add(destructableScript);
                         }
+                        Rigidbody attachedRigidbody = levelObject.GetComponentInChildren<Rigidbody>();
+                        if (attachedRigidbody != null)
+                        {
+                            if (!GameManager.Instance.playMode)
+                                attachedRigidbody.isKinematic = true;
+                            if (attachedRigidbody.TryGetComponent<SaveableLevelObject>(out var saveableLevelObject))
+                            {
+                                dynamicObjects.Add(saveableLevelObject);
+                            }
+                        }
+                        placedBlocks.Add(WorldToGrid(levelObjectPosition), levelObject);
                     }
-
-                    placedBlocks.Add(WorldToGrid(levelObjectPosition), levelObject);
                 }
             }
             Resume();
@@ -1405,7 +1476,8 @@ public class LevelEditorControl : MonoBehaviour
 
         if (previewRenderer != null)
         {
-            previewRenderer.material.color = Color.green;
+            if(!previewObject.CompareTag("Spawnpoint"))
+                previewRenderer.material.color = Color.green;
             previewRenderer.gameObject.layer = 2;
         }
 
