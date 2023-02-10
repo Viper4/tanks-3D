@@ -28,7 +28,6 @@ public class BaseTankLogic : MonoBehaviour
     public float normalSpeed = 5;
     [SerializeField] float avoidSpeed = 2.5f;
     public bool useGravity = true;
-    public float gravity = 8;
     public float velocityLimit = 25;
     float speed = 5;
     float velocityY = 0;
@@ -242,7 +241,7 @@ public class BaseTankLogic : MonoBehaviour
 
                     if(useGravity)
                     {
-                        velocityY = !IsGrounded() ? velocityY - Time.deltaTime * gravity : 0;
+                        velocityY = !IsGrounded() ? velocityY + Time.deltaTime * Physics.gravity.y : 0;
                         velocityY = Mathf.Clamp(velocityY, -velocityLimit, velocityLimit);
 
                         rb.velocity = stationary ? Vector3.up * velocityY : velocityDirection * speed + Vector3.up * velocityY;

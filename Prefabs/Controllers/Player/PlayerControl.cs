@@ -78,7 +78,7 @@ public class PlayerControl : MonoBehaviourPunCallbacks
 
                     Vector3 velocity = currentSpeed * velocityDir;
 
-                    velocityY = !baseTankLogic.IsGrounded() && baseTankLogic.useGravity ? velocityY - Time.deltaTime * baseTankLogic.gravity : 0;
+                    velocityY = !baseTankLogic.IsGrounded() && baseTankLogic.useGravity ? velocityY + Time.deltaTime * Physics.gravity.y : 0;
                     velocityY = Mathf.Clamp(velocityY, -baseTankLogic.velocityLimit, baseTankLogic.velocityLimit);
 
                     RB.velocity = velocity + Vector3.up * velocityY;

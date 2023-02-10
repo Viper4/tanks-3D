@@ -65,6 +65,7 @@ public class LevelEditorControl : MonoBehaviour
     {
         public string name;
         public Vector3 eulerAngles;
+        public Vector3 scale;
     }
 
     Dictionary<string, GameObject> prefabDictionary = new Dictionary<string, GameObject>();
@@ -87,7 +88,6 @@ public class LevelEditorControl : MonoBehaviour
         Team4,
     }
     SpawnpointType spawnpointType = SpawnpointType.Players;
-    Vector3 spawnpointScale;
 
     enum UndoAction
     {
@@ -96,6 +96,9 @@ public class LevelEditorControl : MonoBehaviour
         Instantiate,
         DestroySpawnpoint,
     }
+
+    Vector3 objectScale;
+    Vector3 objectRotation;
 
     List<UndoAction> undoActions = new List<UndoAction>();
     List<object[]> undoObjects = new List<object[]>();
@@ -120,9 +123,9 @@ public class LevelEditorControl : MonoBehaviour
         levelSlotTemplate.gameObject.SetActive(false);
         levelDescription = "A custom level by " + PhotonNetwork.NickName + ".";
 
-        spawnpointScale = cellSize;
+        objectScale = cellSize;
 
-        for(int i = 0; i < GameManager.Instance.editorPrefabs.Count; i++)
+        for (int i = 0; i < GameManager.Instance.editorPrefabs.Count; i++)
         {
             prefabDictionary.Add(GameManager.Instance.editorNames[i], GameManager.Instance.editorPrefabs[i]);
         }
@@ -202,6 +205,7 @@ public class LevelEditorControl : MonoBehaviour
                 else if (Input.GetKeyDown(KeyCode.R) && previewObject != null)
                 {
                     previewObject.Rotate(rotationAxis, 90);
+                    objectRotation = previewObject.eulerAngles;
                 }
                 else if (Input.GetKeyDown(KeyCode.X))
                 {
@@ -343,7 +347,7 @@ public class LevelEditorControl : MonoBehaviour
                                             {
                                                 destroyedHoles.TryGetValue(cell, out cellInfo);
                                             }
-                                            FillCell(cell, prefabDictionary[cellInfo.name], cellInfo.eulerAngles);
+                                            FillCell(cell, prefabDictionary[cellInfo.name], cellInfo);
                                         }
                                         AddRedoAction(UndoAction.Clear, new object[] { cells });
                                         break;
@@ -397,7 +401,7 @@ public class LevelEditorControl : MonoBehaviour
                                             {
                                                 destroyedHoles.TryGetValue(cell, out cellInfo);
                                             }
-                                            FillCell(cell, prefabDictionary[cellInfo.name], cellInfo.eulerAngles);
+                                            FillCell(cell, prefabDictionary[cellInfo.name], cellInfo);
                                         }
                                         AddUndoAction(UndoAction.Fill, new object[] { cells });
                                         break;
@@ -476,12 +480,10 @@ public class LevelEditorControl : MonoBehaviour
         {
             if (!leftShiftDown && Physics.Raycast(transform.position, transform.forward, out hit, Mathf.Infinity, ~ignoreLayers))
             {
-                if (previewObject.name != "Hole")
-                    hit.normal.Scale(previewCollider.bounds.extents);
-                else
-                    hit.normal *= -1;
+                hit.normal = previewObject.name == "Hole" ? -hit.normal : hit.normal.Multiply(previewCollider.bounds.extents);
 
                 hitGridPoint = WorldToGrid(hit.point.Round(2) + hit.normal);
+
                 if (hit.normal == Vector3.forward || hit.normal == Vector3.back)
                 {
                     hitUp = Vector3.Cross(hit.normal, Vector3.right);
@@ -500,24 +502,43 @@ public class LevelEditorControl : MonoBehaviour
                 hitUp = transform.up;
             }
 
-            if (!previewObject.CompareTag("Spawnpoint"))
+            if(previewObject.name == "Hole")
             {
-                if (placedBlocks.ContainsKey(hitGridPoint))
+                if (!previewObject.CompareTag("Spawnpoint"))
                 {
-                    previewRenderer.material.color = Color.red;
+                    if (placedHoles.ContainsKey(hitGridPoint))
+                    {
+                        previewRenderer.material.color = Color.red;
+                    }
+                    else
+                    {
+                        previewRenderer.material.color = Color.green;
+                    }
                 }
-                else
-                {
-                    previewRenderer.material.color = Color.green;
-                }
+                previewObject.position = new Vector3(hitGridPoint.x, hitGridPoint.y + 0.01f, hitGridPoint.z);
             }
-            previewObject.position = previewObject.name == "Hole" ? new Vector3(hitGridPoint.x, hitGridPoint.y + 0.01f, hitGridPoint.z) : hitGridPoint;
+            else
+            {
+                if (!previewObject.CompareTag("Spawnpoint"))
+                {
+                    if (placedBlocks.ContainsKey(hitGridPoint))
+                    {
+                        previewRenderer.material.color = Color.red;
+                    }
+                    else
+                    {
+                        previewRenderer.material.color = Color.green;
+                    }
+                }
+                previewObject.position = hitGridPoint;
+            }
         }
     }
 
     void DestroySolidCircle(Vector3 center, List<Vector3Int> destroyedCells, int evenOffset)
     {
-        float offsetRight, offsetUp;
+        float radius = brushSize * 0.5f * cellSize.x;
+        int offsetRight, offsetUp;
         for (int i = -halfBrushSize; i <= halfBrushSize; i++)
         {
             offsetRight = i * cellSize.x;
@@ -526,7 +547,7 @@ public class LevelEditorControl : MonoBehaviour
             {
                 offsetUp = j * cellSize.y;
                 Vector3Int gridPosition = WorldToGrid(center + offsetRight * hitRight.ToNormal() + offsetUp * hitUp.ToNormal());
-                if (Vector3.Distance(center + (0.5f * evenOffset * (Vector3)cellSize - hit.normal), gridPosition) <= brushSize)
+                if (Vector3.Distance(center + (0.5f * evenOffset * (Vector3)cellSize - hit.normal), gridPosition) <= radius)
                 {
                     RaycastDestroyCell(gridPosition, hit.normal, destroyedCells);
                 }
@@ -536,6 +557,7 @@ public class LevelEditorControl : MonoBehaviour
 
     void DestroyHollowCircle(Vector3 center, List<Vector3Int> destroyedCells, int evenOffset)
     {
+        float radius = brushSize * 0.5f * cellSize.x;
         int offsetRight, offsetUp;
         for (int i = -halfBrushSize; i <= halfBrushSize; i++)
         {
@@ -546,7 +568,7 @@ public class LevelEditorControl : MonoBehaviour
                 offsetUp = j * cellSize.y;
                 Vector3Int gridPosition = WorldToGrid(center + offsetRight * hitRight.ToNormal() + offsetUp * hitUp.ToNormal());
                 float dst = Vector3.Distance(center + (0.5f * evenOffset * (Vector3)cellSize - hit.normal), gridPosition);
-                if (dst <= brushSize && dst > brushSize - cellSize.x)
+                if (dst <= radius && dst > radius - cellSize.x)
                 {
                     RaycastDestroyCell(gridPosition, hit.normal, destroyedCells);
                 }
@@ -608,6 +630,7 @@ public class LevelEditorControl : MonoBehaviour
                     }
                     break;
                 case BrushType.Sphere:
+                    float radius = brushSize * 0.5f * cellSize.x;
                     if (hollowBrush)
                     {
                         for (int i = -halfBrushSize + evenOffset; i <= halfBrushSize; i++)
@@ -621,7 +644,7 @@ public class LevelEditorControl : MonoBehaviour
                                     z = hitGridPoint.z + (k * cellSize.z);
                                     Vector3Int gridPosition = new Vector3Int(x, y, z);
                                     float dst = Vector3.Distance(hitGridPoint + (0.5f * evenOffset * (Vector3)cellSize), gridPosition);
-                                    if (dst <= brushSize && dst > brushSize - cellSize.x)
+                                    if (dst <= radius && dst > radius - cellSize.x)
                                     {
                                         RaycastDestroyCell(gridPosition, hit.normal, destroyedCells);
                                     }
@@ -641,7 +664,7 @@ public class LevelEditorControl : MonoBehaviour
                                 {
                                     z = hitGridPoint.z + (k * cellSize.z);
                                     Vector3Int gridPosition = new Vector3Int(x, y, z);
-                                    if (Vector3.Distance(hitGridPoint + (0.5f * evenOffset * (Vector3)cellSize), gridPosition) <= brushSize)
+                                    if (Vector3.Distance(hitGridPoint + (0.5f * evenOffset * (Vector3)cellSize), gridPosition) <= radius)
                                     {
                                         RaycastDestroyCell(gridPosition, hit.normal, destroyedCells);
                                     }
@@ -705,38 +728,11 @@ public class LevelEditorControl : MonoBehaviour
                 case BrushType.Circle:
                     if (hollowBrush)
                     {
-                        for (int i = -halfBrushSize + evenOffset; i <= halfBrushSize; i++)
-                        {
-                            offsetRight = i * cellSize.x;
-
-                            for (int j = -halfBrushSize + evenOffset; j <= halfBrushSize; j++)
-                            {
-                                offsetUp = j * cellSize.y;
-                                Vector3Int gridPosition = WorldToGrid(hitGridPoint + offsetRight * hitRight.ToNormal() + offsetUp * hitUp.ToNormal());
-                                float dst = Vector3.Distance(hitGridPoint + (0.5f * evenOffset * (Vector3)cellSize), gridPosition);
-                                if (dst <= brushSize && dst > brushSize - cellSize.x)
-                                {
-                                    RaycastDestroyCell(gridPosition, hit.normal, destroyedCells);
-                                }
-                            }
-                        }
+                        DestroyHollowCircle(hitGridPoint, destroyedCells, evenOffset);
                     }
                     else
                     {
-                        for (int i = -halfBrushSize + evenOffset; i <= halfBrushSize; i++)
-                        {
-                            offsetRight = i * cellSize.x;
-
-                            for (int j = -halfBrushSize + evenOffset; j <= halfBrushSize; j++)
-                            {
-                                offsetUp = j * cellSize.y;
-                                Vector3Int gridPosition = WorldToGrid(hitGridPoint + offsetRight * hitRight.ToNormal() + offsetUp * hitUp.ToNormal());
-                                if (Vector3.Distance(hitGridPoint + (0.5f * evenOffset * (Vector3)cellSize), gridPosition) <= brushSize)
-                                {
-                                    RaycastDestroyCell(gridPosition, hit.normal, destroyedCells);
-                                }
-                            }
-                        }
+                        DestroySolidCircle(hitGridPoint, destroyedCells, evenOffset);
                     }
                     break;
             }
@@ -761,6 +757,7 @@ public class LevelEditorControl : MonoBehaviour
 
     void FillSolidCircle(Vector3 center, List<Vector3Int> filledCells, int evenOffset)
     {
+        float radius = brushSize * 0.5f * cellSize.x;
         float offsetRight, offsetUp;
         for (int i = -halfBrushSize; i <= halfBrushSize; i++)
         {
@@ -770,7 +767,7 @@ public class LevelEditorControl : MonoBehaviour
             {
                 offsetUp = j * cellSize.y;
                 Vector3Int gridPosition = WorldToGrid(center + offsetRight * hitRight.ToNormal() + offsetUp * hitUp.ToNormal());
-                if (Vector3.Distance(center + (0.5f * evenOffset * (Vector3)cellSize - hit.normal), gridPosition) <= brushSize)
+                if (Vector3.Distance(center + (0.5f * evenOffset * (Vector3)cellSize - hit.normal), gridPosition) <= radius)
                 {
                     RaycastFillCell(gridPosition, filledCells);
                 }
@@ -780,6 +777,7 @@ public class LevelEditorControl : MonoBehaviour
 
     void FillHollowCircle(Vector3 center, List<Vector3Int> filledCells, int evenOffset)
     {
+        float radius = brushSize * 0.5f * cellSize.x;
         int offsetRight, offsetUp;
         for (int i = -halfBrushSize; i <= halfBrushSize; i++)
         {
@@ -790,7 +788,7 @@ public class LevelEditorControl : MonoBehaviour
                 offsetUp = j * cellSize.y;
                 Vector3Int gridPosition = WorldToGrid(center + offsetRight * hitRight.ToNormal() + offsetUp * hitUp.ToNormal());
                 float dst = Vector3.Distance(center + (0.5f * evenOffset * (Vector3)cellSize - hit.normal), gridPosition);
-                if (dst <= brushSize && dst > brushSize - cellSize.x)
+                if (dst <= radius && dst > radius - cellSize.x)
                 {
                     RaycastFillCell(gridPosition, filledCells);
                 }
@@ -819,7 +817,7 @@ public class LevelEditorControl : MonoBehaviour
                 }
                 newSpawnpoint.transform.rotation = previewObject.rotation;
                 newSpawnpoint.name = spawnpointType.ToString();
-                newSpawnpoint.transform.localScale = spawnpointScale;
+                newSpawnpoint.transform.localScale = objectScale;
                 MeshRenderer newRenderer = newSpawnpoint.GetComponentInChildren<MeshRenderer>();
                 newRenderer.material.color = previewRenderer.material.color;
                 newRenderer.material.SetColor("_EmissionColor", previewRenderer.material.color);
@@ -882,6 +880,7 @@ public class LevelEditorControl : MonoBehaviour
                         }
                         break;
                     case BrushType.Sphere:
+                        float radius = brushSize * 0.5f * cellSize.x;
                         if (hollowBrush)
                         {
                             for (int i = -halfBrushSize + evenOffset; i <= halfBrushSize; i++)
@@ -895,7 +894,7 @@ public class LevelEditorControl : MonoBehaviour
                                         z = hitGridPoint.z + (k * cellSize.z);
                                         Vector3Int gridPosition = new Vector3Int(x, y, z);
                                         float dst = Vector3.Distance(hitGridPoint + (0.5f * evenOffset * (Vector3)cellSize), gridPosition);
-                                        if (dst <= brushSize && dst >= brushSize - cellSize.x)
+                                        if (dst <= radius && dst >= radius - cellSize.x)
                                         {
                                             RaycastFillCell(gridPosition, filledCells);
                                         }
@@ -915,7 +914,7 @@ public class LevelEditorControl : MonoBehaviour
                                     {
                                         z = hitGridPoint.z + (k * cellSize.z);
                                         Vector3Int gridPosition = new Vector3Int(x, y, z);
-                                        if (Vector3.Distance(hitGridPoint + (0.5f * evenOffset * (Vector3)cellSize), gridPosition) <= brushSize)
+                                        if (Vector3.Distance(hitGridPoint + (0.5f * evenOffset * (Vector3)cellSize), gridPosition) <= radius)
                                         {
                                             RaycastFillCell(gridPosition, filledCells);
                                         }
@@ -1014,7 +1013,7 @@ public class LevelEditorControl : MonoBehaviour
 
     private Vector3Int WorldToGrid(Vector3 worldPosition)
     {
-        return new Vector3Int(Mathf.FloorToInt(worldPosition.x / cellSize.x) * cellSize.x, Mathf.FloorToInt(worldPosition.y / cellSize.y) * cellSize.y, Mathf.FloorToInt(worldPosition.z / cellSize.z) * cellSize.z) + Vector3Int.one;
+        return new Vector3Int(Mathf.FloorToInt(worldPosition.x / cellSize.x) * cellSize.x, Mathf.FloorToInt(worldPosition.y / cellSize.y) * cellSize.y, Mathf.FloorToInt(worldPosition.z / cellSize.z) * cellSize.z) + (cellSize / 2);
     }
 
     void RaycastDestroyCell(Vector3Int gridPosition, Vector3 normal, List<Vector3Int> destroyedCells)
@@ -1052,7 +1051,7 @@ public class LevelEditorControl : MonoBehaviour
     {
         if(placedHoles.TryGetValue(gridPosition, out GameObject placedHole))
         {
-            destroyedHoles.Add(gridPosition, new CellInfo() { name = placedHole.name, eulerAngles = placedHole.transform.eulerAngles });
+            destroyedHoles.Add(gridPosition, new CellInfo() { name = placedHole.name, eulerAngles = placedHole.transform.eulerAngles, scale = placedHole.transform.localScale });
             Destroy(placedHole);
             placedHoles.Remove(gridPosition);
             return true;
@@ -1068,7 +1067,7 @@ public class LevelEditorControl : MonoBehaviour
                 destructables.Remove(destructableScript);
             }
 
-            destroyedBlocks.Add(gridPosition, new CellInfo() { name = placedBlock.name, eulerAngles = placedBlock.transform.eulerAngles });
+            destroyedBlocks.Add(gridPosition, new CellInfo() { name = placedBlock.name, eulerAngles = placedBlock.transform.eulerAngles, scale = placedBlock.transform.localScale });
             Destroy(placedBlock);
             placedBlocks.Remove(gridPosition);
             return true;
@@ -1085,6 +1084,7 @@ public class LevelEditorControl : MonoBehaviour
             {
                 GameObject newObject = Instantiate(withObject, new Vector3(gridPosition.x, gridPosition.y + 0.01f, gridPosition.z), Quaternion.identity);
                 newObject.transform.rotation = previewObject.rotation;
+                newObject.transform.localScale = objectScale;
                 if(newObject.TryGetComponent<SaveableLevelObject>(out var saveableLevelObject))
                 {
                     newObject.name = GameManager.Instance.editorNames[saveableLevelObject.prefabIndex];
@@ -1100,6 +1100,7 @@ public class LevelEditorControl : MonoBehaviour
             {
                 GameObject newObject = Instantiate(withObject, gridPosition, Quaternion.identity);
                 newObject.transform.rotation = previewObject.rotation;
+                newObject.transform.localScale = objectScale;
                 if (newObject.TryGetComponent<SaveableLevelObject>(out var saveableLevelObject))
                 {
                     newObject.name = GameManager.Instance.editorNames[saveableLevelObject.prefabIndex];
@@ -1125,14 +1126,15 @@ public class LevelEditorControl : MonoBehaviour
         return false;
     }
 
-    private bool FillCell(Vector3Int gridPosition, GameObject withObject, Vector3 eulerAngles)
+    private bool FillCell(Vector3Int gridPosition, GameObject withObject, CellInfo cellInfo)
     {
         if (withObject.name == "CylinderHole" || withObject.name == "Hole")
         {
             if (!placedHoles.ContainsKey(gridPosition))
             {
                 GameObject newObject = Instantiate(withObject, new Vector3(gridPosition.x, gridPosition.y + 0.01f, gridPosition.z), Quaternion.identity);
-                newObject.transform.eulerAngles = eulerAngles;
+                newObject.transform.eulerAngles = cellInfo.eulerAngles;
+                newObject.transform.localScale = cellInfo.scale;
                 if (newObject.TryGetComponent<SaveableLevelObject>(out var saveableLevelObject))
                 {
                     newObject.name = GameManager.Instance.editorNames[saveableLevelObject.prefabIndex];
@@ -1151,7 +1153,8 @@ public class LevelEditorControl : MonoBehaviour
                 {
                     newObject.name = GameManager.Instance.editorNames[saveableLevelObject.prefabIndex];
                 }
-                newObject.transform.eulerAngles = eulerAngles;
+                newObject.transform.eulerAngles = cellInfo.eulerAngles;
+                newObject.transform.localScale = cellInfo.scale;
                 Rigidbody newRigidbody = newObject.GetComponentInChildren<Rigidbody>();
                 if (newRigidbody != null)
                 {
@@ -1442,6 +1445,7 @@ public class LevelEditorControl : MonoBehaviour
         }
         previewObject = Instantiate(prefabDictionary[button.name], Vector3.zero, Quaternion.identity).transform;
         previewObject.name = button.name;
+        previewObject.eulerAngles = objectRotation;
 
         if (previewObject.TryGetComponent<SaveableLevelObject>(out var saveableLevelObject))
         {
@@ -1481,42 +1485,45 @@ public class LevelEditorControl : MonoBehaviour
             previewRenderer.gameObject.layer = 2;
         }
 
-        if (previewObject.CompareTag("Spawnpoint"))
+        if (previewObject.CompareTag("Tank"))
         {
-            previewObject.localScale = spawnpointScale;
-            switch (spawnpointType)
-            {
-                case SpawnpointType.Players:
-                    previewRenderer.material.color = Color.magenta;
-                    previewRenderer.material.SetColor("_EmissionColor", Color.magenta);
-                    break;
-                case SpawnpointType.Bots:
-                    previewRenderer.material.color = Color.cyan;
-                    previewRenderer.material.SetColor("_EmissionColor", Color.cyan);
-                    break;
-                case SpawnpointType.Team1:
-                    previewRenderer.material.color = Color.red;
-                    previewRenderer.material.SetColor("_EmissionColor", Color.red);
-                    break;
-                case SpawnpointType.Team2:
-                    previewRenderer.material.color = Color.green;
-                    previewRenderer.material.SetColor("_EmissionColor", Color.green);
-                    break;
-                case SpawnpointType.Team3:
-                    previewRenderer.material.color = Color.blue;
-                    previewRenderer.material.SetColor("_EmissionColor", Color.blue);
-                    break;
-                case SpawnpointType.Team4:
-                    previewRenderer.material.color = Color.yellow;
-                    previewRenderer.material.SetColor("_EmissionColor", Color.yellow);
-                    break;
-            }
-        }
-        else if (previewObject.CompareTag("Tank"))
-        {
-            foreach(Transform child in previewObject)
+            foreach (Transform child in previewObject)
             {
                 child.gameObject.layer = 2;
+            }
+        }
+        else
+        {
+            previewObject.localScale = objectScale;
+            if (previewObject.CompareTag("Spawnpoint"))
+            {
+                switch (spawnpointType)
+                {
+                    case SpawnpointType.Players:
+                        previewRenderer.material.color = Color.magenta;
+                        previewRenderer.material.SetColor("_EmissionColor", Color.magenta);
+                        break;
+                    case SpawnpointType.Bots:
+                        previewRenderer.material.color = Color.cyan;
+                        previewRenderer.material.SetColor("_EmissionColor", Color.cyan);
+                        break;
+                    case SpawnpointType.Team1:
+                        previewRenderer.material.color = Color.red;
+                        previewRenderer.material.SetColor("_EmissionColor", Color.red);
+                        break;
+                    case SpawnpointType.Team2:
+                        previewRenderer.material.color = Color.green;
+                        previewRenderer.material.SetColor("_EmissionColor", Color.green);
+                        break;
+                    case SpawnpointType.Team3:
+                        previewRenderer.material.color = Color.blue;
+                        previewRenderer.material.SetColor("_EmissionColor", Color.blue);
+                        break;
+                    case SpawnpointType.Team4:
+                        previewRenderer.material.color = Color.yellow;
+                        previewRenderer.material.SetColor("_EmissionColor", Color.yellow);
+                        break;
+                }
             }
         }
         UpdatePreviewObject(false);
@@ -1600,51 +1607,111 @@ public class LevelEditorControl : MonoBehaviour
         }
     }
 
-    void UpdateSpawnpointScale()
+    void UpdateObjectScale()
     {
-        if (previewObject != null && previewObject.CompareTag("Spawnpoint"))
+        if (previewObject != null && !previewObject.CompareTag("Tank"))
         {
-            previewObject.localScale = spawnpointScale;
+            previewObject.localScale = objectScale;
         }
+        cellSize = Vector3Int.FloorToInt(objectScale);
     }
 
-    public void SetSpawnScaleX(TMP_InputField inputField)
+    public void SetObjectScaleX(TMP_InputField inputField)
     {
         if (string.IsNullOrEmpty(inputField.text))
         {
-            spawnpointScale.x = 2;
+            objectScale.x = 2;
         }
         else
         {
-            float.TryParse(inputField.text, out spawnpointScale.x);
+            float.TryParse(inputField.text, out objectScale.x);
+            objectScale.x = Mathf.Clamp(objectScale.x, 0f, 100f);
+            inputField.SetTextWithoutNotify(objectScale.x.ToString());
         }
-        UpdateSpawnpointScale();
+        UpdateObjectScale();
     }
 
-    public void SetSpawnScaleY(TMP_InputField inputField)
+    public void SetObjectScaleY(TMP_InputField inputField)
     {
         if (string.IsNullOrEmpty(inputField.text))
         {
-            spawnpointScale.y = 2;
+            objectScale.y = 2;
         }
         else
         {
-            float.TryParse(inputField.text, out spawnpointScale.y);
+            float.TryParse(inputField.text, out objectScale.y);
+            objectScale.y = Mathf.Clamp(objectScale.y, 0f, 100f);
+            inputField.SetTextWithoutNotify(objectScale.y.ToString());
         }
-        UpdateSpawnpointScale();
+        UpdateObjectScale();
     }
 
-    public void SetSpawnScaleZ(TMP_InputField inputField)
+    public void SetObjectScaleZ(TMP_InputField inputField)
     {
         if (string.IsNullOrEmpty(inputField.text))
         {
-            spawnpointScale.z = 2;
+            objectScale.z = 2;
         }
         else
         {
-            float.TryParse(inputField.text, out spawnpointScale.z);
+            float.TryParse(inputField.text, out objectScale.z);
+            objectScale.z = Mathf.Clamp(objectScale.z, 0f, 100f);
+            inputField.SetTextWithoutNotify(objectScale.z.ToString());
         }
-        UpdateSpawnpointScale();
+        UpdateObjectScale();
+    }
+
+    void UpdateRotation()
+    {
+        if (previewObject != null && !previewObject.CompareTag("Tank"))
+        {
+            previewObject.eulerAngles = objectRotation;
+        }
+    }
+
+    public void SetRotationX(TMP_InputField inputField)
+    {
+        if (string.IsNullOrEmpty(inputField.text))
+        {
+            objectRotation.x = 0;
+        }
+        else
+        {
+            float.TryParse(inputField.text, out objectRotation.x);
+            objectRotation.x = Mathf.Clamp(objectRotation.x, -180f, 180f);
+            inputField.SetTextWithoutNotify(objectRotation.x.ToString());
+        }
+        UpdateRotation();
+    }
+
+    public void SetRotationY(TMP_InputField inputField)
+    {
+        if (string.IsNullOrEmpty(inputField.text))
+        {
+            objectRotation.y = 0;
+        }
+        else
+        {
+            float.TryParse(inputField.text, out objectRotation.y);
+            objectRotation.y = Mathf.Clamp(objectRotation.y, -180f, 180f);
+            inputField.SetTextWithoutNotify(objectRotation.y.ToString());
+        }
+        UpdateRotation();
+    }
+
+    public void SetRotationZ(TMP_InputField inputField)
+    {
+        if (string.IsNullOrEmpty(inputField.text))
+        {
+            objectRotation.z = 0;
+        }
+        else
+        {
+            float.TryParse(inputField.text, out objectRotation.z);
+            objectRotation.z = Mathf.Clamp(objectRotation.z, -180f, 180f);
+            inputField.SetTextWithoutNotify(objectRotation.z.ToString());
+        }
+        UpdateRotation();
     }
 
     public void ChangePlayMode(TMP_Dropdown dropdown)
