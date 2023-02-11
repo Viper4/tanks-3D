@@ -188,6 +188,8 @@ public class PlayerControl : MonoBehaviourPunCallbacks
             {
                 DataManager.playerData.deaths++;
                 PhotonHashtable playerProperties = new PhotonHashtable();
+                if(DataManager.roomSettings.mode == "Co-Op")
+                    GameManager.Instance.canSpawn = false;
                 playerProperties.Add("deaths", DataManager.playerData.deaths);
                 PhotonNetwork.LocalPlayer.SetCustomProperties(playerProperties);
             }

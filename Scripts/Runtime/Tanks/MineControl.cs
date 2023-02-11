@@ -71,6 +71,7 @@ public class MineControl : MonoBehaviourPun
             mineBehaviour.owner = transform;
             mineBehaviour.ownerPV = photonView;
             explosive.owner = transform;
+            explosive.initiator = transform;
             explosive.ownerPV = photonView;
             explosive.explosionRadius = explosionRadius;
             if(!PhotonNetwork.OfflineMode && !GameManager.Instance.inLobby)

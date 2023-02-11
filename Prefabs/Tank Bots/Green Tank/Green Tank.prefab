@@ -620,7 +620,6 @@ MonoBehaviour:
   normalSpeed: 0
   avoidSpeed: 2.5
   useGravity: 0
-  gravity: 8
   velocityLimit: 25
   flipAngleThreshold: 25
   restrictRotation: 0
@@ -699,7 +698,7 @@ MonoBehaviour:
   maxVerticalAngle:
   - -20
   - 20
-  selectionMode: 5
+  selectionMode: 0
 --- !u!54 &-1444549703756494348
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -806,7 +805,9 @@ MonoBehaviour:
   prefabIndex: 23
   thisRenderer: {fileID: 0}
   thisCollider: {fileID: 8230862371154514773}
-  overrideColliderHiding: 0
+  colliderVisibility: []
+  rendererVisibility: []
+  gameObjectVisibility: []
 --- !u!1 &4443979950712613720
 GameObject:
   m_ObjectHideFlags: 0

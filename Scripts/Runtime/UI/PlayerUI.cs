@@ -45,13 +45,13 @@ public class PlayerUI : MonoBehaviour
 
         bulletsLeftParent = baseUI.UIElements["HUD"].Find("Bullets Left");
         minesLeftParent = baseUI.UIElements["HUD"].Find("Mines Left");
-        PhotonChatController.Instance.Resume();
-        Resume();
+        PhotonChatController.Instance.Resume(false);
+        Resume(false);
     }
 
     private void LateUpdate()
     {
-        if(PhotonNetwork.OfflineMode || playerControl.photonView.IsMine)
+        if(!GameManager.Instance.loadingScreen.gameObject.activeSelf && (PhotonNetwork.OfflineMode || playerControl.photonView.IsMine))
         {
             if(Input.GetKeyDown(KeyCode.Escape))
             {
@@ -182,7 +182,7 @@ public class PlayerUI : MonoBehaviour
         }
     }
 
-    public void Resume()
+    public void Resume(bool changeCursor = true)
     {
         GameManager.Instance.paused = false;
         baseUI.UIElements["PauseMenu"].gameObject.SetActive(false);
@@ -194,15 +194,21 @@ public class PlayerUI : MonoBehaviour
         if(!PhotonNetwork.OfflineMode)
         {
             baseUI.UIElements["InGame"].gameObject.SetActive(true);
-            Cursor.visible = false;
-            Cursor.lockState = CursorLockMode.Locked;
+            if (changeCursor)
+            {
+                Cursor.visible = false;
+                Cursor.lockState = CursorLockMode.Locked;
+            }
         }
         else if (!GameManager.Instance.loadingScreen.gameObject.activeSelf)
         {
             Time.timeScale = 1;
             baseUI.UIElements["InGame"].gameObject.SetActive(true);
-            Cursor.visible = false;
-            Cursor.lockState = CursorLockMode.Locked;
+            if (changeCursor)
+            {
+                Cursor.visible = false;
+                Cursor.lockState = CursorLockMode.Locked;
+            }
         }
     }
 

@@ -12,8 +12,6 @@ using MyUnityAddons.CustomPhoton;
 
 public class TeamSwitching : MonoBehaviourPunCallbacks
 {
-    readonly byte UpdateTeamsCode = 1;
-
     [SerializeField] List<string> rosterContentNames = new List<string>();
     [SerializeField] List<Transform> rosterContents = new List<Transform>();
 
@@ -49,7 +47,7 @@ public class TeamSwitching : MonoBehaviourPunCallbacks
 
     void OnEvent(EventData eventData)
     {
-        if(eventData.Code == UpdateTeamsCode)
+        if(eventData.Code == EventCodes.UpdateTeams)
         {
             PhotonHashtable parameters = (PhotonHashtable)eventData.Parameters[ParameterCode.Data];
             Invoke(nameof(UpdateRosters),(float)parameters["delay"]);
@@ -110,20 +108,29 @@ public class TeamSwitching : MonoBehaviourPunCallbacks
                             case "Teams":
                                 if(currentTeam != null && currentTeam.Name != "Spectators")
                                 {
-                                    PhotonNetwork.Destroy(transform.parent.gameObject);
-                                    PlayerManager.Instance.SpawnInLocalPlayer(team);
+                                    if (GameManager.Instance.canSpawn)
+                                    {
+                                        PhotonNetwork.Destroy(transform.parent.gameObject);
+                                        PlayerManager.Instance.SpawnInLocalPlayer(team);
+                                    }
                                 }
                                 else
                                 {
-                                    PlayerManager.Instance.SpawnInLocalPlayer(team);
-                                    Destroy(transform.parent.gameObject);
+                                    if (GameManager.Instance.canSpawn)
+                                    {
+                                        PlayerManager.Instance.SpawnInLocalPlayer(team);
+                                        Destroy(transform.parent.gameObject);
+                                    }
                                 }
                                 break;
                             default:
                                 if(currentTeam == null || currentTeam.Name == "Spectators")
                                 {
-                                    PlayerManager.Instance.SpawnInLocalPlayer(team);
-                                    Destroy(transform.parent.gameObject);
+                                    if (GameManager.Instance.canSpawn)
+                                    {
+                                        PlayerManager.Instance.SpawnInLocalPlayer(team);
+                                        Destroy(transform.parent.gameObject);
+                                    }
                                 }
                                 break;
                         }
@@ -136,7 +143,7 @@ public class TeamSwitching : MonoBehaviourPunCallbacks
 
     public void MasterUpdateRosters()
     {
-        PhotonNetwork.RaiseEvent(UpdateTeamsCode, new PhotonHashtable() { { "delay", 0.15f } }, RaiseEventOptions.Default, SendOptions.SendUnreliable);
+        PhotonNetwork.RaiseEvent(EventCodes.UpdateTeams, new PhotonHashtable() { { "delay", 0.15f } }, RaiseEventOptions.Default, SendOptions.SendUnreliable);
         Invoke(nameof(UpdateRosters), 0.15f);
     }
 

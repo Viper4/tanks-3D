@@ -3746,7 +3746,6 @@ MonoBehaviour:
   normalSpeed: 12
   avoidSpeed: 2.5
   useGravity: 1
-  gravity: 8
   velocityLimit: 25
   flipAngleThreshold: 25
   restrictRotation: 0
@@ -4108,16 +4107,16 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 2416473536947869279}
-        m_TargetAssemblyTypeName: PlayerUIHandler, Assembly-CSharp
+        m_TargetAssemblyTypeName: PlayerUI, Assembly-CSharp
         m_MethodName: Resume
-        m_Mode: 1
+        m_Mode: 6
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
-          m_BoolArgument: 0
+          m_BoolArgument: 1
         m_CallState: 2
 --- !u!1 &9052787209535177042
 GameObject:
@@ -4367,7 +4366,7 @@ Camera:
     width: 1
     height: 1
   near clip plane: 0.3
-  far clip plane: 100
+  far clip plane: 400
   field of view: 60
   orthographic: 0
   orthographic size: 25

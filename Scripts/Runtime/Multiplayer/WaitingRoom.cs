@@ -140,6 +140,7 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
                 {
                     DataManager.roomSettings.map = "Classic 1";
                 }
+                DataManager.roomSettings.customMap = false;
             }
             else
             {
@@ -147,6 +148,7 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
                 {
                     DataManager.roomSettings.map = "Classic";
                 }
+                DataManager.roomSettings.customMap = false;
             }
             UpdateRoomSettingsProperty();
 

@@ -25,6 +25,7 @@ public class AquamarineBot : MonoBehaviour
     Vector3 shootPosition;
     Vector3 lookDirection;
     int lookIndex = 0;
+    bool getNewShootPosition = true;
 
     Transform nearbyMine = null;
     Transform nearbyBullet = null;
@@ -70,7 +71,7 @@ public class AquamarineBot : MonoBehaviour
 
             if(nearbyBullet == null && nearbyMine == null)
             {
-                if(bulletRicochet.shootPositions.Count > 0)
+                if(bulletRicochet.shootPositions.Count > 0 && !getNewShootPosition)
                 {
                     baseTankLogic.targetTurretDir = shootPosition - turret.position;
 
@@ -151,13 +152,10 @@ public class AquamarineBot : MonoBehaviour
 
             if(bulletRicochet.shootPositions.Count > 0)
             {
-                shootPosition = bulletRicochet.SelectShootPosition(barrel, RicochetCalculation.SelectionMode.Closest);
+                shootPosition = bulletRicochet.SelectShootPosition(barrel, bulletRicochet.selectionMode);
                 predictedPos = targetSystem.PredictedTargetPosition(bulletRicochet.shootPositions[shootPosition] / fireControl.bulletSettings.speed);
                 bulletRicochet.CalculateBulletRicochets(barrel, predictedPos);
-                if(bulletRicochet.shootPositions.Count > 0)
-                {
-                    shootPosition = bulletRicochet.SelectShootPosition(barrel, RicochetCalculation.SelectionMode.Closest);
-                }
+                getNewShootPosition = false;
             }
         }
     }
@@ -216,9 +214,9 @@ public class AquamarineBot : MonoBehaviour
         yield return new WaitForSeconds(Random.Range(fireDelay[0], fireDelay[1]));
         StartCoroutine(fireControl.Shoot());
         baseTankLogic.stationary = false;
-        bulletRicochet.SelectShootPosition(barrel, bulletRicochet.selectionMode);
 
         shooting = false;
+        getNewShootPosition = true;
     }
 
     IEnumerator SwitchLookIndex()

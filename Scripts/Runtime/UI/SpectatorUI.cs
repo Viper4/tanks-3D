@@ -25,8 +25,8 @@ public class SpectatorUI : MonoBehaviour
                 baseUI.UIElements["PauseMenu"].Find("LabelBackground").GetChild(0).GetComponent<Text>().text = "Paused\n" + PhotonNetwork.CurrentRoom.Name + "\n" + GameManager.Instance.currentScene.name;
             }
         }
-        PhotonChatController.Instance.Resume();
-        Resume();
+        PhotonChatController.Instance.Resume(false);
+        Resume(false);
     }
 
     private void Update()
@@ -51,15 +51,18 @@ public class SpectatorUI : MonoBehaviour
         }
     }
 
-    public void Resume()
+    public void Resume(bool changeCursor = true)
     {
         baseUI.UIElements["PauseMenu"].gameObject.SetActive(false);
         baseUI.UIElements["Settings"].gameObject.SetActive(false);
         baseUI.UIElements["Change Teams"].gameObject.SetActive(false);
         GameManager.Instance.paused = false;
 
-        Cursor.visible = false;
-        Cursor.lockState = CursorLockMode.Locked;
+        if (changeCursor)
+        {
+            Cursor.visible = false;
+            Cursor.lockState = CursorLockMode.Locked;
+        }
     }
 
     public void Pause()

@@ -92,11 +92,11 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
         }
     }
 
-    public void Resume()
+    public void Resume(bool changeCursor = true)
     {
         chatBoxActive = false;
         GameManager.Instance.paused = false;
-        if(!GameManager.Instance.inLobby)
+        if(changeCursor && !GameManager.Instance.inLobby)
         {
             Cursor.visible = false;
             Cursor.lockState = CursorLockMode.Locked;

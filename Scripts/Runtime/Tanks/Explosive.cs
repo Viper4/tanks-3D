@@ -6,6 +6,7 @@ using PhotonHashtable = ExitGames.Client.Photon.Hashtable;
 
 public class Explosive : MonoBehaviourPun
 {
+    public Transform initiator { get; set; } // tank/player that exploded this
     public Transform owner { get; set; }
     public PhotonView ownerPV { get; set; }
 
@@ -29,9 +30,9 @@ public class Explosive : MonoBehaviourPun
             tank.GetComponent<BaseTankLogic>().ExplodeTank();
         }
 
-        if(owner != null && owner != tank)
+        if(initiator != null && initiator != tank)
         {
-            if(owner.CompareTag("Player"))
+            if(initiator.CompareTag("Player"))
             {
                 if(PhotonNetwork.OfflineMode)
                 {
@@ -47,7 +48,7 @@ public class Explosive : MonoBehaviourPun
                     {
                         if(tank.name.Contains("Team"))
                         {
-                            if(tank.name != owner.name)
+                            if(tank.name != initiator.name)
                             {
                                 DataManager.playerData.kills++;
                             }
@@ -59,7 +60,7 @@ public class Explosive : MonoBehaviourPun
                     }
                 }
             }
-            else if(owner.CompareTag("AI Tank"))
+            else if(initiator.CompareTag("AI Tank"))
             {
                 GeneticAlgorithmBot bot = owner.GetComponent<GeneticAlgorithmBot>();
                 bot.Kills++;
@@ -140,7 +141,9 @@ public class Explosive : MonoBehaviourPun
                         // Explode other mines not in mine chain
                         if(!chain.Contains(collider.transform.parent))
                         {
-                            collider.transform.parent.GetComponent<Explosive>().Explode(chain);
+                            Explosive otherExplosive = collider.transform.parent.GetComponent<Explosive>();
+                            otherExplosive.initiator = initiator;
+                            otherExplosive.Explode(chain);
                             collider.transform.parent.GetComponent<MineBehaviour>().DestroyMine();
                         }
                         break;

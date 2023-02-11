@@ -321,7 +321,9 @@ public class BulletBehaviour : MonoBehaviourPunCallbacks
                         //Destroy(other.gameObject); // Other bullet also gets triggered so use destroy instead of normal or safe destroy to prevent excessive calls
                         break;
                     case "Mine":
-                        other.transform.parent.GetComponent<Explosive>().Explode(new List<Transform>());
+                        Explosive otherExplosive = other.transform.parent.GetComponent<Explosive>();
+                        otherExplosive.initiator = owner;
+                        otherExplosive.Explode(new List<Transform>());
                         other.transform.parent.GetComponent<MineBehaviour>().DestroyMine();
 
                         SilentDestroy();
@@ -375,62 +377,65 @@ public class BulletBehaviour : MonoBehaviourPunCallbacks
 
     void KillTarget(Transform target)
     {
-        if(!PhotonNetwork.OfflineMode && !GameManager.Instance.inLobby)
+        if(target != null)
         {
-            if(ownerPV != null && ownerPV.IsMine)
+            if (!PhotonNetwork.OfflineMode && !GameManager.Instance.inLobby)
             {
-                target.GetComponent<PhotonView>().RPC("ExplodeTank", RpcTarget.All);
+                if (ownerPV != null && ownerPV.IsMine)
+                {
+                    target.GetComponent<PhotonView>().RPC("ExplodeTank", RpcTarget.All);
+                    NormalDestroy();
+                }
+            }
+            else
+            {
+                if (target.TryGetComponent<BaseTankLogic>(out var baseTankLogic))
+                {
+                    baseTankLogic.ExplodeTank();
+                }
                 NormalDestroy();
             }
-        }
-        else
-        {
-            if(target.TryGetComponent<BaseTankLogic>(out var baseTankLogic))
-            {
-                baseTankLogic.ExplodeTank();
-            }
-            NormalDestroy();
-        }
 
-        if(owner != null && owner != target)
-        {
-            if(owner.CompareTag("Player"))
+            if (owner != null && owner != target)
             {
-                if(PhotonNetwork.OfflineMode)
+                if (owner.CompareTag("Player"))
                 {
-                    DataManager.playerData.kills++;
-                }
-                else
-                {
-                    if(target.CompareTag("Tank"))
+                    if (PhotonNetwork.OfflineMode)
                     {
                         DataManager.playerData.kills++;
                     }
-                    else if(target.CompareTag("Player"))
+                    else
                     {
-                        if(target.name.Contains("Team"))
+                        if (target.CompareTag("Tank"))
                         {
-                            if(target.name != owner.name)
+                            DataManager.playerData.kills++;
+                        }
+                        else if (target.CompareTag("Player"))
+                        {
+                            if (target.name.Contains("Team"))
+                            {
+                                if (target.name != owner.name)
+                                {
+                                    DataManager.playerData.kills++;
+                                }
+                            }
+                            else
                             {
                                 DataManager.playerData.kills++;
                             }
                         }
-                        else
-                        {
-                            DataManager.playerData.kills++;
-                        }
-                    }
-                    PhotonHashtable playerProperties = new PhotonHashtable
+                        PhotonHashtable playerProperties = new PhotonHashtable
                     {
                         { "kills", DataManager.playerData.kills }
                     };
-                    PhotonNetwork.LocalPlayer.SetCustomProperties(playerProperties);
+                        PhotonNetwork.LocalPlayer.SetCustomProperties(playerProperties);
+                    }
                 }
-            }
-            else if(owner.CompareTag("AI Tank"))
-            {
-                GeneticAlgorithmBot bot = owner.GetComponent<GeneticAlgorithmBot>();
-                bot.Kills++;
+                else if (owner.CompareTag("AI Tank"))
+                {
+                    GeneticAlgorithmBot bot = owner.GetComponent<GeneticAlgorithmBot>();
+                    bot.Kills++;
+                }
             }
         }
     }

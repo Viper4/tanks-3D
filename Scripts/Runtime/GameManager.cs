@@ -45,6 +45,7 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     PhotonView playerPV;
     BaseUI baseUI;
+    public bool canSpawn = true; 
 
     public Scene currentScene;
 
@@ -53,6 +54,8 @@ public class GameManager : MonoBehaviourPunCallbacks
     public int totalLives = -1;
     int readyPlayers = 0;
     bool ready = false;
+
+    public List<int> destroyedTanks = new List<int>();
 
     void Start()
     {
@@ -106,6 +109,7 @@ public class GameManager : MonoBehaviourPunCallbacks
         loadingScene = false;
         currentScene = SceneManager.GetActiveScene();
         Time.timeScale = 1;
+        canSpawn = true;
 
         if (!editing)
         {
@@ -188,6 +192,8 @@ public class GameManager : MonoBehaviourPunCallbacks
                             levelIndex--;
                             Time.timeScale = 0;
                             frozen = true;
+                            Cursor.visible = true;
+                            Cursor.lockState = CursorLockMode.None;
 
                             loadingScreen.gameObject.SetActive(true);
                             progressBar.gameObject.SetActive(false);
@@ -245,7 +251,7 @@ public class GameManager : MonoBehaviourPunCallbacks
                                 reachedLastLevel = true;
                                 label.Find("Level").GetComponent<Text>().text = "Final " + Regex.Match(currentScene.name, @"(.*?)[ ][0-9]+$").Groups[1] + " Mission";
                             }
-                            label.Find("EnemyTanks").GetComponent<Text>().text = "Enemy tanks: " + GameObject.Find("Tanks").transform.childCount;
+                            label.Find("EnemyTanks").GetComponent<Text>().text = "Enemy tanks: " + (GameObject.Find("Tanks").transform.childCount - destroyedTanks.Count);
                             DataManager.playerData.previousSceneIndex = currentScene.buildIndex;
                         }
                         break;

@@ -356,6 +356,8 @@ public class BaseTankLogic : MonoBehaviour
                 else
                 {
                     TankManager.Instance.StartCheckTankCount();
+                    if(!GameManager.Instance.inLobby && (PhotonNetwork.OfflineMode || DataManager.roomSettings.mode == "Co-Op"))
+                        GameManager.Instance.destroyedTanks.Add(TankManager.Instance.tankIndices[gameObject]);
 
                     Transform trackMarks = tankOrigin.Find("TrackMarks");
 

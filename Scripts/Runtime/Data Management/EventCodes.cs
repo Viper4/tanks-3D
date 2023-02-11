@@ -12,13 +12,14 @@ public static class EventCodes
     // General
     public static readonly byte Destroy = 4;
     public static readonly byte ResetData = 5;
+    public static readonly byte UpdateTeams = 6;
 
     // Waiting room
-    public static readonly byte UpdateUI = 6;
-    public static readonly byte LeaveWaitingRoom = 7;
-    public static readonly byte LevelObjectUpload = 8;
-    public static readonly byte ReadyToLeave = 9;
+    public static readonly byte UpdateUI = 7;
+    public static readonly byte LeaveWaitingRoom = 8;
+    public static readonly byte LevelObjectUpload = 9;
+    public static readonly byte ReadyToLeave = 10;
 
     // Boosts
-    public static readonly byte SpawnNewBoost = 10;
+    public static readonly byte SpawnNewBoost = 11;
 }

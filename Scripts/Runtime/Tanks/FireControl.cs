@@ -114,6 +114,7 @@ public class FireControl : MonoBehaviourPun
             if(bullet.TryGetComponent<Explosive>(out var explosive))
             {
                 explosive.owner = transform;
+                explosive.initiator = transform;
                 explosive.ownerPV = photonView;
                 explosive.explosionRadius = bulletSettings.explosionRadius;
             }

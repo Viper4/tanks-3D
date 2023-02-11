@@ -79,7 +79,7 @@ public class CameraControl : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if((PhotonNetwork.OfflineMode || playerControl.photonView.IsMine))
+        if(PhotonNetwork.OfflineMode || playerControl.photonView.IsMine)
         {
             if (!GameManager.Instance.paused)
             {
@@ -141,10 +141,6 @@ public class CameraControl : MonoBehaviour
 
                     reticle.gameObject.SetActive(true);
                     Cursor.visible = false;
-                    if (alternateCamera)
-                    {
-                        transform.position = new Vector3(0, dstFromTarget, 0);
-                    }
 
                     if (dstFromTarget == 0 && !alternateCamera)
                     {

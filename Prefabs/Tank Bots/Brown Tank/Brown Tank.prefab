@@ -556,7 +556,6 @@ MonoBehaviour:
   normalSpeed: 0
   avoidSpeed: 2.5
   useGravity: 0
-  gravity: 8
   velocityLimit: 25
   flipAngleThreshold: 25
   restrictRotation: 0
@@ -692,7 +691,9 @@ MonoBehaviour:
   prefabIndex: 18
   thisRenderer: {fileID: 0}
   thisCollider: {fileID: 4330461154244121929}
-  overrideColliderHiding: 0
+  colliderVisibility: []
+  rendererVisibility: []
+  gameObjectVisibility: []
 --- !u!1 &6473996178172189060
 GameObject:
   m_ObjectHideFlags: 0

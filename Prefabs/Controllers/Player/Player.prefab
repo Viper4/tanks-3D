@@ -1206,16 +1206,16 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 4408866083808743071}
-        m_TargetAssemblyTypeName: PlayerUIHandler, Assembly-CSharp
+        m_TargetAssemblyTypeName: PlayerUI, Assembly-CSharp
         m_MethodName: Resume
-        m_Mode: 1
+        m_Mode: 6
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
-          m_BoolArgument: 0
+          m_BoolArgument: 1
         m_CallState: 2
 --- !u!1 &4997258887544159513
 GameObject:
@@ -1688,7 +1688,7 @@ Camera:
     width: 1
     height: 1
   near clip plane: 0.3
-  far clip plane: 100
+  far clip plane: 200
   field of view: 60
   orthographic: 0
   orthographic size: 25
@@ -2120,7 +2120,6 @@ MonoBehaviour:
   normalSpeed: 13
   avoidSpeed: 2.5
   useGravity: 1
-  gravity: 8
   velocityLimit: 25
   flipAngleThreshold: 25
   restrictRotation: 0
@@ -3208,6 +3207,10 @@ PrefabInstance:
     - target: {fileID: 7162959390580416520, guid: 8c4f1a850c4e3ca4fb46cd97bbac48de, type: 3}
       propertyPath: m_SizeDelta.y
       value: 543
+      objectReference: {fileID: 0}
+    - target: {fileID: 7464119753163312666, guid: 8c4f1a850c4e3ca4fb46cd97bbac48de, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7523557919255940726, guid: 8c4f1a850c4e3ca4fb46cd97bbac48de, type: 3}
       propertyPath: m_SortingOrder

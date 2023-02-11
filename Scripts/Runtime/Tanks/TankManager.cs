@@ -32,6 +32,8 @@ public class TankManager : MonoBehaviourPunCallbacks
 
     [SerializeField] bool autoInit = true;
 
+    public Dictionary<GameObject, int> tankIndices = new Dictionary<GameObject, int>();
+
     private void Start()
     {
         Instance = this;
@@ -48,14 +50,22 @@ public class TankManager : MonoBehaviourPunCallbacks
         }
 
         resetInfoDictionary.Clear();
+        int i = 0;
         foreach(Transform tank in tankParent)
         {
             resetInfoDictionary.Add(tank, new SaveableLevelObject.TransformInfo() { position = tank.position, rotation = tank.rotation });
+            tankIndices.Add(tank.gameObject, i);
+            i++;
         }
 
-        if (GameManager.Instance.editing || (!PhotonNetwork.OfflineMode && !GameManager.Instance.inLobby))
+        foreach(int index in GameManager.Instance.destroyedTanks)
         {
-            if (DataManager.roomSettings.fillLobby)
+            Destroy(tankParent.GetChild(index).gameObject);
+        }
+
+        if(GameManager.Instance.editing || (!PhotonNetwork.OfflineMode && !GameManager.Instance.inLobby))
+        {
+            if(DataManager.roomSettings.fillLobby)
             {
                 tankLimit = DataManager.roomSettings.playerLimit - CustomNetworkHandling.NonSpectatorList.Length;
             }
@@ -64,13 +74,13 @@ public class TankManager : MonoBehaviourPunCallbacks
                 tankLimit = DataManager.roomSettings.botLimit;
             }
 
-            if (DataManager.roomSettings.mode != "Co-Op")
+            if(DataManager.roomSettings.mode != "Co-Op")
             {
-                if (PhotonNetwork.IsMasterClient && DataManager.roomSettings.botLimit > 0)
+                if(PhotonNetwork.IsMasterClient && DataManager.roomSettings.botLimit > 0)
                 {
-                    foreach (GameObject tank in tanks.ToList())
+                    foreach(GameObject tank in tanks.ToList())
                     {
-                        if (!DataManager.roomSettings.bots.Contains(tank.name))
+                        if(!DataManager.roomSettings.bots.Contains(tank.name))
                         {
                             tanks.Remove(tank);
                         }
@@ -82,7 +92,7 @@ public class TankManager : MonoBehaviourPunCallbacks
                 }
             }
 
-            if (!PhotonNetwork.OfflineMode && PhotonNetwork.IsMasterClient)
+            if(!PhotonNetwork.OfflineMode && PhotonNetwork.IsMasterClient)
             {
                 AllocateOwnershipOfTanks();
             }
@@ -113,7 +123,8 @@ public class TankManager : MonoBehaviourPunCallbacks
             }
             for(int j = 0; j < tankAmount; j++)
             {
-                tankParent.GetChild(j + sum).GetComponent<PhotonView>().TransferOwnership(players[i]);
+                if(!GameManager.Instance.destroyedTanks.Contains(j + sum))
+                    tankParent.GetChild(j + sum).GetComponent<PhotonView>().TransferOwnership(players[i]);
             }
             sum += tankAmount;
         }
@@ -268,7 +279,8 @@ public class TankManager : MonoBehaviourPunCallbacks
 
                     if(PhotonNetwork.OfflineMode)
                     {
-                        if(lastCampaignScene)
+                        GameManager.Instance.destroyedTanks.Clear();
+                        if (lastCampaignScene)
                         {
                             GameManager.Instance.LoadScene("End Scene", 3, true);
                         }
@@ -281,6 +293,7 @@ public class TankManager : MonoBehaviourPunCallbacks
                     {
                         if(DataManager.roomSettings.mode == "Co-Op")
                         {
+                            GameManager.Instance.destroyedTanks.Clear();
                             GameManager.Instance.frozen = true;
 
                             PlayerManager.Instance.StopCoroutines();

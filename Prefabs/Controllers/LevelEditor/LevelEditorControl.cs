@@ -132,8 +132,8 @@ public class LevelEditorControl : MonoBehaviour
         rotationAxis = Vector3.up;
 
         InvokeRepeating(nameof(MouseHoldLoop), 0, 0.125f);
-        PhotonChatController.Instance.Resume();
-        Resume();
+        PhotonChatController.Instance.Resume(false);
+        Resume(false);
     }
 
     // Update is called once per frame
@@ -1259,7 +1259,7 @@ public class LevelEditorControl : MonoBehaviour
         }
     }
 
-    public void Resume()
+    public void Resume(bool changeCursor = true)
     {
         foreach(Transform element in baseUI.UIElements.Values)
         {
@@ -1267,8 +1267,11 @@ public class LevelEditorControl : MonoBehaviour
         }
 
         GameManager.Instance.paused = false;
-        Cursor.visible = false;
-        Cursor.lockState = CursorLockMode.Locked;
+        if (changeCursor)
+        {
+            Cursor.visible = false;
+            Cursor.lockState = CursorLockMode.Locked;
+        }
     }
 
     public void Pause()

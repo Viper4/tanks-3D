@@ -26,6 +26,7 @@ public class GreenBot : MonoBehaviour
     Vector3 lookDirection;
     int lookIndex = 0;
     Vector3 lastPosition;
+    bool getNewShootPosition = true;
 
     // Start is called before the first frame Update
     void Start()
@@ -52,11 +53,14 @@ public class GreenBot : MonoBehaviour
         {
             if(bulletRicochet.shootPositions.Count > 0)
             {
-                baseTankLogic.targetTurretDir = shootPosition - turret.position;
-
-                if(!shooting && fireControl.canFire && Vector3.Angle(barrel.forward, baseTankLogic.targetTurretDir) < maxShootAngle)
+                if (!getNewShootPosition)
                 {
-                    StartCoroutine(Shoot());
+                    baseTankLogic.targetTurretDir = shootPosition - turret.position;
+
+                    if (!shooting && fireControl.canFire && Vector3.Angle(barrel.forward, baseTankLogic.targetTurretDir) < maxShootAngle)
+                    {
+                        StartCoroutine(Shoot());
+                    }
                 }
             }
             else if(bulletRicochet.lookPositions.Count > 0)
@@ -88,15 +92,12 @@ public class GreenBot : MonoBehaviour
             Vector3 predictedPos = targetSystem.PredictedTargetPosition(CustomMath.TravelTime(turret.position, targetSystem.currentTarget.position, fireControl.bulletSettings.speed * predictionScale));
             bulletRicochet.CalculateBulletRicochets(barrel, predictedPos);
 
-            if(bulletRicochet.shootPositions.Count > 0)
+            if(bulletRicochet.shootPositions.Count > 0 && getNewShootPosition)
             {
-                shootPosition = bulletRicochet.SelectShootPosition(barrel, RicochetCalculation.SelectionMode.Closest);
+                shootPosition = bulletRicochet.SelectShootPosition(barrel, bulletRicochet.selectionMode);
                 predictedPos = targetSystem.PredictedTargetPosition(bulletRicochet.shootPositions[shootPosition] / fireControl.bulletSettings.speed);
                 bulletRicochet.CalculateBulletRicochets(barrel, predictedPos);
-                if(bulletRicochet.shootPositions.Count > 0)
-                {
-                    shootPosition = bulletRicochet.SelectShootPosition(barrel, RicochetCalculation.SelectionMode.Closest);
-                }
+                getNewShootPosition = false;
             }
         }
     }
@@ -106,9 +107,9 @@ public class GreenBot : MonoBehaviour
         shooting = true;
         yield return new WaitForSeconds(Random.Range(fireDelay[0], fireDelay[1]));
         StartCoroutine(fireControl.Shoot());
-        bulletRicochet.SelectShootPosition(barrel, bulletRicochet.selectionMode);
 
         shooting = false;
+        getNewShootPosition = true;
     }
 
     IEnumerator SwitchLookIndex()

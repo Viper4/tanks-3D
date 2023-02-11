@@ -52,6 +52,7 @@ public class RoomCustomization : MonoBehaviour
             {
                 DataManager.roomSettings.map = "Classic 1";
             }
+            DataManager.roomSettings.customMap = false;
         }
         else
         {
@@ -62,6 +63,7 @@ public class RoomCustomization : MonoBehaviour
             if(DataManager.roomSettings.map == "Classic 1" || DataManager.roomSettings.map == "Regular 1")
             {
                 DataManager.roomSettings.map = "Classic";
+                DataManager.roomSettings.customMap = false;
             }
         }
     }

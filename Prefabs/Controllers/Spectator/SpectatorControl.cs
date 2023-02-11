@@ -40,6 +40,8 @@ public class SpectatorControl : MonoBehaviour
     {
         if(!GameManager.Instance.paused && Time.timeScale != 0)
         {
+            Cursor.visible = false;
+            Cursor.lockState = CursorLockMode.Locked;
             float zoomRate = Input.GetKey(KeyCode.LeftShift) ? DataManager.playerSettings.slowZoomSpeed : DataManager.playerSettings.fastZoomSpeed;
 
             Vector3 inputDir = new Vector3(GetInputAxis("x"), GetInputAxis("y"), GetInputAxis("z")).normalized;
