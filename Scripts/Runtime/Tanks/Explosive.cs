@@ -34,7 +34,7 @@ public class Explosive : MonoBehaviourPun
         {
             if(initiator.CompareTag("Player"))
             {
-                if(PhotonNetwork.OfflineMode)
+                if (PhotonNetwork.OfflineMode)
                 {
                     DataManager.playerData.kills++;
                 }
@@ -88,7 +88,7 @@ public class Explosive : MonoBehaviourPun
                         KillTank(collider.transform);
                         break;
                     case "Player":
-                        if(PhotonNetwork.OfflineMode || ownerPV.IsMine)
+                        if(PhotonNetwork.OfflineMode || initiator.GetComponent<PhotonView>().IsMine)
                         {
                             Transform otherPlayer = collider.transform.parent;
 

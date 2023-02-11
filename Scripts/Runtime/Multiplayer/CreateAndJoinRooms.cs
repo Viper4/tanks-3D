@@ -127,7 +127,6 @@ public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
         PhotonNetwork.NickName = DataManager.chatSettings.username = GetUniqueUsername(usernameInput.text);
         SaveSystem.SaveChatSettings(DataManager.chatSettings, "ChatSettings");
         PhotonNetwork.LocalPlayer.AllocatePlayerToTeam();
-        PhotonChatController.Instance.SendPublicUserUpdate();
         PhotonChatController.Instance.SubscribeToChannel(PhotonNetwork.CurrentRoom.Name, 60, true, true);
 
         if(PhotonNetwork.IsMasterClient)

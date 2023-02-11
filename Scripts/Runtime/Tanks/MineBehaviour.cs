@@ -144,14 +144,11 @@ public class MineBehaviour : MonoBehaviourPunCallbacks
     {
         if(owner != null)
         {
-            if(ownerPV != null && ownerPV.IsMine)
+            PhotonHashtable parameters = new PhotonHashtable()
             {
-                PhotonHashtable parameters = new PhotonHashtable()
-                {
-                    { "ID", mineID }
-                };
-                PhotonNetwork.RaiseEvent(EventCodes.Destroy, parameters, RaiseEventOptions.Default, SendOptions.SendUnreliable);
-            }
+                { "ID", mineID }
+            };
+            PhotonNetwork.RaiseEvent(EventCodes.Destroy, parameters, RaiseEventOptions.Default, SendOptions.SendUnreliable);
             owner.GetComponent<MineControl>().laidMines.Remove(transform);
         }
 

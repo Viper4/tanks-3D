@@ -569,6 +569,7 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
 
     public void OnDisconnected()
     {
+        timeSinceLastMessage = chatVanishTime;
         isConnected = false;
         inputParent.SetActive(false);
         chatParent.SetActive(false);
