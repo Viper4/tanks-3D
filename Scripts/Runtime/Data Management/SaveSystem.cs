@@ -27,6 +27,8 @@ public static class SaveSystem
             { "Left", KeyCode.A },
             { "Backward", KeyCode.S },
             { "Right", KeyCode.D },
+            { "Up", KeyCode.Space },
+            { "Down", KeyCode.LeftControl },
             { "Shoot", KeyCode.Mouse0 },
             { "Lay Mine", KeyCode.Space },
             { "Lock Turret", KeyCode.LeftControl },

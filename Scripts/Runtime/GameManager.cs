@@ -661,7 +661,6 @@ public class GameManager : MonoBehaviourPunCallbacks
         }
         else if(eventData.Code == EventCodes.ResetData)
         {
-            PhotonHashtable parameters = (PhotonHashtable)eventData.Parameters[ParameterCode.Data];
             DataManager.playerData = SaveSystem.defaultPlayerData.Copy(new PlayerData());
         }
         else if(eventData.Code == EventCodes.LoadScene)
