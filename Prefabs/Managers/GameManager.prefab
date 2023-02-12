@@ -1088,6 +1088,7 @@ MonoBehaviour:
   reachedLastLevel: 0
   editing: 0
   playMode: 0
+  paused: 0
   loadingScreen: {fileID: 3149388286652276417}
   editorNames:
   - Normal Cube
@@ -1191,9 +1192,11 @@ MonoBehaviour:
   - {fileID: 6709687364018734019, guid: 2220efec37758f344a23034c03fdafd2, type: 3}
   - {fileID: 6709687364018734019, guid: 7717faa009f3d054380c51af691c19e1, type: 3}
   - {fileID: 6709687364018734019, guid: 853d0a8e73a7d164287374125f43d003, type: 3}
+  canSpawn: 1
   currentScene:
     m_Handle: 0
   totalLives: -1
+  destroyedTanks: 
 --- !u!114 &2801430073492525547
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2306,6 +2309,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 3149388286793973794}
     m_Modifications:
+    - target: {fileID: 3277718313414111026, guid: 86598a599b5090141a6c94adc736dbe8, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 3277718314055284762, guid: 86598a599b5090141a6c94adc736dbe8, type: 3}
       propertyPath: m_Name
       value: Master Overlay
@@ -2446,7 +2453,8 @@ PrefabInstance:
       propertyPath: m_Color.g
       value: 0.8584906
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 3277718314055284763, guid: 86598a599b5090141a6c94adc736dbe8, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: 86598a599b5090141a6c94adc736dbe8, type: 3}
 --- !u!1 &1368820452845836283 stripped
 GameObject:

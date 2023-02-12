@@ -12,7 +12,6 @@ public class PlayerSettings
     public int targetFramerate;
     public bool silhouettes;
     public float masterVolume;
-    public string crosshairFileName;
     public int crosshairColorIndex;
     public float crosshairScale;
     public float slowZoomSpeed;

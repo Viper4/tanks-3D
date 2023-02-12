@@ -72,7 +72,7 @@ public class SettingsUI : MonoBehaviour
 
     public void ChangeTargetFramerate(Slider slider)
     {
-        Application.targetFrameRate = DataManager.playerSettings.targetFramerate =(int)slider.value;
+        Application.targetFrameRate = DataManager.playerSettings.targetFramerate = (int)slider.value;
         if(slider.value <= 300)
         {
             slider.transform.Find("Value Text").GetComponent<Text>().text = slider.value.ToString();
@@ -97,11 +97,6 @@ public class SettingsUI : MonoBehaviour
         }
     }
 
-    public void SetCustomCrosshair(InputField input)
-    {
-        DataManager.playerSettings.crosshairFileName = input.text;
-    }
-
     public void SetCrosshairScale(InputField input)
     {
         DataManager.playerSettings.crosshairScale = float.Parse(input.text);
@@ -120,19 +115,6 @@ public class SettingsUI : MonoBehaviour
     public void ChangeFastZoomSpeed(InputField inputField)
     {
         float.TryParse(inputField.text, out DataManager.playerSettings.fastZoomSpeed);
-    }
-
-    public void SaveSettings(string fileName)
-    {
-        DataManager.playerSettings.SavePlayerSettings(fileName);
-    }
-
-    public void LoadSettings(string fileName)
-    {
-        DataManager.playerSettings = SaveSystem.LoadPlayerSettings(fileName);
-        GameManager.Instance.UpdatePlayerWithSettings(player);
-
-        UpdateSettingsUI();
     }
 
     public void ResetSettings()
@@ -194,9 +176,6 @@ public class SettingsUI : MonoBehaviour
                                 break;
                             case "Silhouettes":
                                 setting.GetComponent<Toggle>().isOn = DataManager.playerSettings.silhouettes;
-                                break;
-                            case "Custom Crosshair":
-                                setting.Find("InputField").GetComponent<InputField>().text = DataManager.playerSettings.crosshairFileName;
                                 break;
                             case "Crosshair Color":
                                 setting.Find("Dropdown").GetComponent<Dropdown>().value = DataManager.playerSettings.crosshairColorIndex;

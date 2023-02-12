@@ -56,7 +56,7 @@ public class DebugDisplay : MonoBehaviour
     {
         if(debugMenu.activeInHierarchy)
         {
-            versionText.text = $"<mark={textHighlightHexCode}>Tanks 3D {Application.version}</mark>";
+            versionText.text = $"<mark={textHighlightHexCode}>Tanks 3D (Web) {Application.version}</mark>";
             unityVersionText.text = $"<mark={textHighlightHexCode}>Unity {Application.unityVersion}</mark>";
             punVersionText.text = $"<mark={textHighlightHexCode}>PUN {PhotonNetwork.PunVersion}</mark>";
 

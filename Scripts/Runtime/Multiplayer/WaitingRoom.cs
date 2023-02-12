@@ -8,7 +8,6 @@ using Photon.Realtime;
 using UnityEngine.UI;
 using Photon.Pun.UtilityScripts;
 using MyUnityAddons.CustomPhoton;
-using System.Text.RegularExpressions;
 using TMPro;
 
 public class WaitingRoom : MonoBehaviourPunCallbacks
@@ -29,20 +28,18 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
     [SerializeField] Slider customLoadingProgressBar;
     [SerializeField] TextMeshProUGUI progressBarText;
 
-    LevelInfo tempLevelInfo;
-
     int currentPacket;
     int totalPackets;
 
     // Start is called before the first frame update
     IEnumerator Start()
     {
-        tempLevelInfo = new LevelInfo()
+        DataManager.tempLevelInfo = new LevelInfo()
         {
-            levelObjects = new List<LevelObjectInfo>(),
+            levelObjects = new List<LevelObjectInfo>()
         };
 
-        if(!PhotonNetwork.IsMasterClient)
+        if (!PhotonNetwork.IsMasterClient)
         {
             foreach(GameObject UIElement in ownerElements)
             {
@@ -67,15 +64,14 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
     {
         if(DataManager.roomSettings.mode == "Co-Op")
         {
-            string campaign = Regex.Match(DataManager.roomSettings.map, @"(.*?)[ ][0-9]+$").Groups[1].ToString();
-            DataManager.playerData = SaveSystem.ResetPlayerData(campaign + "PlayerData");
+            DataManager.playerData = SaveSystem.ResetPlayerData(DataManager.playerData);
         }
         else
         {
             DataManager.playerData = SaveSystem.defaultPlayerData.Copy(new PlayerData());
         }
 
-        if(DataManager.roomSettings.customMap)
+        if(DataManager.roomSettings.customMap && DataManager.tempLevelInfo != null)
         {
             customLoadingScreen.SetActive(true);
             customLoadingLabel.text = "Uploading Map...";
@@ -94,17 +90,16 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
             }
             else
             {
-                LevelInfo levelInfo = SaveSystem.LoadLevel(DataManager.roomSettings.map);
                 int packetSize = 5;
-                for (int i = 0; i < levelInfo.levelObjects.Count; i += packetSize)
+                for (int i = 0; i < DataManager.tempLevelInfo.levelObjects.Count; i += packetSize)
                 {
                     PhotonHashtable parameters = new PhotonHashtable()
                     {
-                        { "packet", levelInfo.levelObjects.GetRange(i, Mathf.Min(packetSize, levelInfo.levelObjects.Count - i)) }
+                        { "packet", DataManager.tempLevelInfo.levelObjects.GetRange(i, Mathf.Min(packetSize, DataManager.tempLevelInfo.levelObjects.Count - i)) }
                     };
                     if (i == 0)
                     {
-                        parameters.Add("start", Mathf.CeilToInt(levelInfo.levelObjects.Count / (float)packetSize));
+                        parameters.Add("start", Mathf.CeilToInt(DataManager.tempLevelInfo.levelObjects.Count / (float)packetSize));
                     }
 
                     PhotonNetwork.RaiseEvent(EventCodes.LevelObjectUpload, parameters, RaiseEventOptions.Default, SendOptions.SendReliable);
@@ -213,8 +208,7 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
 
             if(DataManager.roomSettings.mode == "Co-Op")
             {
-                string campaign = Regex.Match(DataManager.roomSettings.map, @"(.*?)[ ][0-9]+$").Groups[1].ToString();
-                DataManager.playerData = SaveSystem.ResetPlayerData(campaign + "PlayerData");
+                DataManager.playerData = SaveSystem.ResetPlayerData(DataManager.playerData);
             }
             else
             {
@@ -242,12 +236,12 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
             List<LevelObjectInfo> packet = (List<LevelObjectInfo>)parameters["packet"];
             foreach(LevelObjectInfo levelObjectInfo in packet)
             {
-                tempLevelInfo.levelObjects.Add(levelObjectInfo);
+                DataManager.tempLevelInfo.levelObjects.Add(levelObjectInfo);
             }
             if(currentPacket >= totalPackets)
             {
                 customLoadingLabel.text = "Waiting On Others...";
-                SaveSystem.SaveTempLevel(tempLevelInfo);
+                
                 PhotonNetwork.RaiseEvent(EventCodes.ReadyToLeave, null, RaiseEventOptions.Default, SendOptions.SendUnreliable);
             }
             float progress = currentPacket / (float)totalPackets;

@@ -10,9 +10,8 @@ public class CrosshairManager : MonoBehaviour
 
     public static readonly Color[] crosshairColors = { Color.white, Color.black, Color.gray, Color.red, Color.green, Color.blue, Color.yellow, Color.cyan, Color.magenta };
 
-    public void UpdateReticleSprite(Sprite newSprite, int colorIndex, float scale)
+    public void UpdateReticleSprite(int colorIndex, float scale)
     {
-        reticleImage.sprite = newSprite;
         reticleImage.color = crosshairColors[colorIndex];
         transform.localScale = new Vector3(scale, scale, scale);
     }

@@ -362,7 +362,6 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
                             {
                                 if(DataManager.chatSettings.blacklist.TryAdd(userID))
                                 {
-                                    SaveSystem.SaveChatSettings(DataManager.chatSettings, "ChatSettings");
                                     Player player = CustomNetworkHandling.FindPlayerWithUsername(username);
                                     if(player != null)
                                     {
@@ -394,7 +393,6 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
                             {
                                 if(DataManager.chatSettings.blacklist.Remove(userID))
                                 {
-                                    SaveSystem.SaveChatSettings(DataManager.chatSettings, "ChatSettings");
                                     CreateMessage("Unbanned " + username, Color.white);
                                 }
                                 else
@@ -420,7 +418,6 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
                             if(mode == "clear")
                             {
                                 DataManager.chatSettings.whitelist.Clear();
-                                SaveSystem.SaveChatSettings(DataManager.chatSettings, "ChatSettings");
                                 CreateMessage("Cleared the whitelist", Color.white);
                             }
                             else if(mode == "list")
@@ -451,13 +448,11 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
                             else if(mode == "on")
                             {
                                 DataManager.chatSettings.whitelistActive = true;
-                                SaveSystem.SaveChatSettings(DataManager.chatSettings, "ChatSettings");
                                 CreateMessage("Whitelist on", Color.white);
                             }
                             else if(mode == "off")
                             {
                                 DataManager.chatSettings.whitelistActive = false;
-                                SaveSystem.SaveChatSettings(DataManager.chatSettings, "ChatSettings");
                                 CreateMessage("Whitelist off", Color.white);
                             }
                             else
@@ -470,7 +465,6 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
                                     {
                                         if(DataManager.chatSettings.whitelist.TryAdd(userID))
                                         {
-                                            SaveSystem.SaveChatSettings(DataManager.chatSettings, "ChatSettings");
                                             CreateMessage("Added " + target + " to the whitelist", Color.white);
                                         }
                                         else
@@ -482,7 +476,6 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
                                     {
                                         if(DataManager.chatSettings.whitelist.Remove(userID))
                                         {
-                                            SaveSystem.SaveChatSettings(DataManager.chatSettings, "ChatSettings");
                                             CreateMessage("Removed " + target + " from the whitelist", Color.white);
                                         }
                                         else

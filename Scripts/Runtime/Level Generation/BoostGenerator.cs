@@ -78,21 +78,24 @@ public class BoostGenerator : MonoBehaviourPunCallbacks
 
     public void SpawnNewBoost()
     {
-        GameObject newBoost = boosts[Random.Range(0, boosts.Count)];
-        if(PhotonNetwork.OfflineMode)
+        if(boosts.Count > 0)
         {
-            spawnedBoosts.Add(Instantiate(newBoost, CustomRandom.GetSpawnPointInCollider(spawnCollider, Vector3.down, ignoreLayers, newBoost.GetComponent<BoxCollider>(), newBoost.transform.rotation, true), Quaternion.AngleAxis(Random.Range(-180.0f, 180.0f), Vector3.up), transform));
-        }
-        else
-        {
-            if(PhotonNetwork.IsMasterClient)
+            GameObject newBoost = boosts[Random.Range(0, boosts.Count)];
+            if (PhotonNetwork.OfflineMode)
             {
-                Boost boostScript = newBoost.GetComponent<Boost>();
-                spawnedBoosts.Add(PhotonNetwork.InstantiateRoomObject(newBoost.name, CustomRandom.GetSpawnPointInCollider(spawnCollider, Vector3.down, ignoreLayers, newBoost.GetComponent<BoxCollider>(), newBoost.transform.rotation, true), Quaternion.AngleAxis(Random.Range(-180.0f, 180.0f), Vector3.up), 0, new object[] { Random.Range(boostScript.duration[0], boostScript.duration[1]) }));
+                spawnedBoosts.Add(Instantiate(newBoost, CustomRandom.GetSpawnPointInCollider(spawnCollider, Vector3.down, ignoreLayers, newBoost.GetComponent<BoxCollider>(), newBoost.transform.rotation, true), Quaternion.AngleAxis(Random.Range(-180.0f, 180.0f), Vector3.up), transform));
             }
             else
             {
-                PhotonNetwork.RaiseEvent(EventCodes.SpawnNewBoost, null, RaiseEventOptions.Default, SendOptions.SendUnreliable);
+                if (PhotonNetwork.IsMasterClient)
+                {
+                    Boost boostScript = newBoost.GetComponent<Boost>();
+                    spawnedBoosts.Add(PhotonNetwork.InstantiateRoomObject(newBoost.name, CustomRandom.GetSpawnPointInCollider(spawnCollider, Vector3.down, ignoreLayers, newBoost.GetComponent<BoxCollider>(), newBoost.transform.rotation, true), Quaternion.AngleAxis(Random.Range(-180.0f, 180.0f), Vector3.up), 0, new object[] { Random.Range(boostScript.duration[0], boostScript.duration[1]) }));
+                }
+                else
+                {
+                    PhotonNetwork.RaiseEvent(EventCodes.SpawnNewBoost, null, RaiseEventOptions.Default, SendOptions.SendUnreliable);
+                }
             }
         }
     }

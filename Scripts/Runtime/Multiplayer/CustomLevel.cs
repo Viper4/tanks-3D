@@ -11,16 +11,7 @@ public class CustomLevel : MonoBehaviourPunCallbacks
     // Start is called before the first frame update
     void Start()
     {
-        LevelInfo levelInfo;
-        if (PhotonNetwork.IsMasterClient)
-        {
-            levelInfo = SaveSystem.LoadLevel(DataManager.roomSettings.map);
-        }
-        else
-        {
-            levelInfo = SaveSystem.LoadTempLevel();
-        }
-        LoadLevel(levelInfo);
+        LoadLevel(DataManager.tempLevelInfo);
         playerManager.Init();
     }
 

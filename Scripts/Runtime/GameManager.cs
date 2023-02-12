@@ -49,7 +49,7 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     public Scene currentScene;
 
-    public readonly int multiplayerSceneIndexEnd = 7;
+    public readonly int multiplayerSceneIndexEnd = 6;
 
     public int totalLives = -1;
     int readyPlayers = 0;
@@ -62,7 +62,6 @@ public class GameManager : MonoBehaviourPunCallbacks
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
         
-        SaveSystem.Init();
         PhotonNetwork.SendRate = 30;
         PhotonNetwork.SerializationRate = 10;
         if(Instance == null)
@@ -271,8 +270,6 @@ public class GameManager : MonoBehaviourPunCallbacks
 
             if(player.CompareTag("Player"))
             {
-                string crosshairFilePath = SaveSystem.CROSSHAIR_FOLDER + DataManager.playerSettings.crosshairFileName + ".png";
-                Sprite crosshair = CustomMath.ImageToSprite(crosshairFilePath);
                 Transform playerUI = player.Find("Player UI");
                 if(playerUI != null)
                 {
@@ -280,7 +277,7 @@ public class GameManager : MonoBehaviourPunCallbacks
                     if(baseUI != null && baseUI.UIElements.ContainsKey("InGame"))
                     {
                         Transform reticle = baseUI.UIElements["InGame"].Find("Reticle");
-                        reticle.GetComponent<CrosshairManager>().UpdateReticleSprite(crosshair, DataManager.playerSettings.crosshairColorIndex, DataManager.playerSettings.crosshairScale);
+                        reticle.GetComponent<CrosshairManager>().UpdateReticleSprite(DataManager.playerSettings.crosshairColorIndex, DataManager.playerSettings.crosshairScale);
                     }
                 }
             }
@@ -394,7 +391,6 @@ public class GameManager : MonoBehaviourPunCallbacks
             {
                 string campaign = Regex.Match(currentScene.name, @"(.*?)[ ][0-9]+$").Groups[1].ToString();
                 DataManager.playerData.sceneIndex = sceneIndex;
-                DataManager.playerData.SavePlayerData(campaign + "PlayerData", sceneIndex == SceneManager.sceneCountInBuildSettings - 1 && reachedLastLevel);
             }
 
             yield return new WaitForSecondsRealtime(delay);
@@ -464,7 +460,6 @@ public class GameManager : MonoBehaviourPunCallbacks
             {
                 string campaign = Regex.Match(currentScene.name, @"(.*?)[ ][0-9]+$").Groups[1].ToString();
                 DataManager.playerData.sceneIndex = SceneManager.GetSceneByName(sceneName).buildIndex;
-                DataManager.playerData.SavePlayerData(campaign + "PlayerData", sceneName == "End Scene" && reachedLastLevel);
             }
 
             yield return new WaitForSecondsRealtime(delay);
@@ -667,7 +662,7 @@ public class GameManager : MonoBehaviourPunCallbacks
         else if(eventData.Code == EventCodes.ResetData)
         {
             PhotonHashtable parameters = (PhotonHashtable)eventData.Parameters[ParameterCode.Data];
-            DataManager.playerData = SaveSystem.ResetPlayerData((string)parameters["fileName"]);
+            DataManager.playerData = SaveSystem.defaultPlayerData.Copy(new PlayerData());
         }
         else if(eventData.Code == EventCodes.LoadScene)
         {

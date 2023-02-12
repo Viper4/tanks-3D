@@ -137,14 +137,6 @@ public class RoomCustomization : MonoBehaviour
                     setting.GetComponent<Toggle>().isOn = DataManager.roomSettings.isPublic;
                     break;
                 case "Map Dropdown":
-                    Dropdown settingDropdown = setting.GetComponent<Dropdown>();
-                    settingDropdown.options.RemoveRange(2, settingDropdown.options.Count - 2);
-                    List<Dropdown.OptionData> customMaps = new List<Dropdown.OptionData>();
-                    foreach(string level in SaveSystem.FilesInSaveFolder(false, ".level"))
-                    {
-                        customMaps.Add(new Dropdown.OptionData() { text = level });
-                    }
-                    settingDropdown.AddOptions(customMaps);
                     SetValueToOption(setting.GetComponent<Dropdown>(), DataManager.roomSettings.map);
                     break;
                 case "Map Preview":

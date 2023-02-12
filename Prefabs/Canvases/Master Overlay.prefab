@@ -995,7 +995,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 3277718314055284763}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: CameraScreenshotting, Assembly-CSharp
         m_MethodName: OpenScreenshotFolder
         m_Mode: 1
@@ -1035,7 +1035,6 @@ GameObject:
   - component: {fileID: 3277718314055284766}
   - component: {fileID: 945907929180202244}
   - component: {fileID: 3277718314055284764}
-  - component: {fileID: 3277718314055284763}
   - component: {fileID: 3828716106391367869}
   - component: {fileID: 7155394091068068817}
   m_Layer: 5
@@ -1129,19 +1128,6 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
---- !u!114 &3277718314055284763
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3277718314055284762}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 18dfb3ca5558c0b4a96bdf46e1ae839a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  screenshotPopup: {fileID: 3277718313414111024}
 --- !u!114 &3828716106391367869
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1183,6 +1169,7 @@ MonoBehaviour:
   chatContent: {fileID: 3292879942164455916}
   chatMessageTemplate: {fileID: 179203058890062007, guid: abe9f4d7d7c95f7409b8951918d4a304, type: 3}
   chatVanishTime: 5
+  chatBoxActive: 0
 --- !u!1 &3556684112153806476
 GameObject:
   m_ObjectHideFlags: 0

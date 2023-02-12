@@ -67,7 +67,6 @@ public class PlayerManager : MonoBehaviourPunCallbacks
                 {
                     Time.timeScale = 1;
                     GameManager.Instance.loadingScreen.gameObject.SetActive(false);
-                    DataManager.playerSettings = SaveSystem.LoadPlayerSettings("PlayerSettings");
                     GameManager.Instance.UpdatePlayerWithSettings(SpawnSpectator(new Vector3(0, 6, 0), Quaternion.identity));
                 }
                 else
@@ -83,7 +82,6 @@ public class PlayerManager : MonoBehaviourPunCallbacks
                 if ((playerTeam != null && playerTeam.Name == "Spectators") || CustomNetworkHandling.NonSpectatorList.Length > DataManager.roomSettings.playerLimit)
                 {
                     GameManager.Instance.loadingScreen.gameObject.SetActive(false);
-                    DataManager.playerSettings = SaveSystem.LoadPlayerSettings("PlayerSettings");
                     GameManager.Instance.UpdatePlayerWithSettings(SpawnSpectator(new Vector3(0, 6, 0), Quaternion.identity));
                 }
                 else
@@ -121,12 +119,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks
                 newPhotonView = newPlayer.GetComponent<PhotonView>();
                 playerProperties.Add("ViewID", newPhotonView.ViewID);
                 GameManager.Instance.UpdatePlayerVariables(newPhotonView);
-                DataManager.playerSettings = SaveSystem.LoadPlayerSettings("PlayerSettings");
                 GameManager.Instance.UpdatePlayerWithSettings(newPlayer.transform);
-            }
-            else
-            {
-                DataManager.playerSettings = SaveSystem.LoadPlayerSettings("PlayerSettings");
             }
 
             PhotonNetwork.LocalPlayer.SetCustomProperties(playerProperties);
@@ -181,7 +174,6 @@ public class PlayerManager : MonoBehaviourPunCallbacks
             newPhotonView = newPlayer.GetComponent<PhotonView>();
             playerProperties.Add("ViewID", newPhotonView.ViewID);
             GameManager.Instance.UpdatePlayerVariables(newPhotonView);
-            DataManager.playerSettings = SaveSystem.LoadPlayerSettings("PlayerSettings");
             GameManager.Instance.UpdatePlayerWithSettings(newPlayer.transform);
         }
 
