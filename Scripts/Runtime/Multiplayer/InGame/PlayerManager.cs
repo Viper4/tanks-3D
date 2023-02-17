@@ -26,11 +26,14 @@ public class PlayerManager : MonoBehaviourPunCallbacks
 
     [SerializeField] bool autoInit = true;
 
+    BoxCollider playerSpawnCollider;
+
     private void Start()
     {
         Instance = this;
+        playerSpawnCollider = playerPrefab.Find("Tank Origin").Find("Body").GetComponent<BoxCollider>();
 
-        if(autoInit)
+        if (autoInit)
             Init();
     }
 
@@ -135,7 +138,6 @@ public class PlayerManager : MonoBehaviourPunCallbacks
 
     public GameObject SpawnInLocalPlayer(PhotonTeam team)
     {
-        BoxCollider playerSpawnCollider = playerPrefab.Find("Tank Origin").Find("Body").GetComponent<BoxCollider>();
         Collider spawn = null;
         if(defaultSpawns.Count > 0)
         {
@@ -253,7 +255,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks
                 switch (DataManager.roomSettings.mode)
                 {
                     case "FFA":
-                        tankOrigin.SetPositionAndRotation(CustomRandom.GetSpawnPointInCollider(spawn, Vector3.down, ignoreLayerMask), Quaternion.AngleAxis(Random.Range(-180, 180), Vector3.up));
+                        tankOrigin.SetPositionAndRotation(CustomRandom.GetSpawnPointInCollider(spawn, Vector3.down, ignoreLayerMask, playerSpawnCollider), Quaternion.AngleAxis(Random.Range(-180, 180), Vector3.up));
                         break;
                     case "Teams":
                         int teamSpawnIndex = -1;
@@ -266,10 +268,10 @@ public class PlayerManager : MonoBehaviourPunCallbacks
                             }
                         }
 
-                        tankOrigin.SetPositionAndRotation(CustomRandom.GetSpawnPointInCollider(teamSpawns[teamSpawnIndex], Vector3.down, ignoreLayerMask), teamSpawns[teamSpawnIndex].transform.rotation);
+                        tankOrigin.SetPositionAndRotation(CustomRandom.GetSpawnPointInCollider(teamSpawns[teamSpawnIndex], Vector3.down, ignoreLayerMask, playerSpawnCollider), teamSpawns[teamSpawnIndex].transform.rotation);
                         break;
-                    default: // PvE
-                        tankOrigin.SetPositionAndRotation(CustomRandom.GetSpawnPointInCollider(spawn, Vector3.down, ignoreLayerMask), spawn.transform.rotation);
+                    default:
+                        tankOrigin.SetPositionAndRotation(CustomRandom.GetSpawnPointInCollider(spawn, Vector3.down, ignoreLayerMask, playerSpawnCollider), spawn.transform.rotation);
                         break;
                 }
                 PhotonView PV = tankOrigin.parent.GetComponent<PhotonView>();

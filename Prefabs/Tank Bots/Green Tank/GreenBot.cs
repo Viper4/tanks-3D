@@ -25,7 +25,7 @@ public class GreenBot : MonoBehaviour
     Vector3 shootPosition;
     Vector3 lookDirection;
     int lookIndex = 0;
-    Vector3 lastPosition;
+    Vector3 previousPosition;
     bool getNewShootPosition = true;
 
     // Start is called before the first frame Update
@@ -40,7 +40,7 @@ public class GreenBot : MonoBehaviour
         turret = transform.Find("Turret");
         barrel = transform.Find("Barrel");
 
-        lastPosition = transform.position + transform.forward;
+        previousPosition = transform.position + transform.forward;
 
         InvokeRepeating(nameof(Loop), 0.1f, updateDelay);
         StartCoroutine(SwitchLookIndex());
@@ -83,9 +83,9 @@ public class GreenBot : MonoBehaviour
     {
         if(!GameManager.Instance.frozen && Time.timeScale != 0 && targetSystem.currentTarget != null && !baseTankLogic.disabled)
         {
-            if((lastPosition - transform.position).sqrMagnitude > 0.099f)
+            if((previousPosition - transform.position).sqrMagnitude > 0.099f)
             {
-                lastPosition = transform.position;
+                previousPosition = transform.position;
                 bulletRicochet.ScanArea(turret.position);
             }
 

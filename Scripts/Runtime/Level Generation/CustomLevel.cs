@@ -21,7 +21,6 @@ public class CustomLevel : MonoBehaviourPunCallbacks
             levelInfo = SaveSystem.LoadTempLevel();
         }
         LoadLevel(levelInfo);
-        playerManager.Init();
     }
 
     // Update is called once per frame

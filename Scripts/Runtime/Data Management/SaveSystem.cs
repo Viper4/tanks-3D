@@ -337,6 +337,7 @@ public static class SaveSystem
 
         formatter.Serialize(stream, levelInfo);
         stream.Close();
+        GameManager.Instance.ShowPopup("Saved to " + LEVELS_FOLDER + levelName + ".level", Color.yellow, new Color(1, 0.92f, 0.016f, 0.5f), 2.5f);
     }
 
     public static LevelInfo LoadTempLevel()
@@ -370,10 +371,12 @@ public static class SaveSystem
 
             levelInfo = (LevelInfo)formatter.Deserialize(stream);
             stream.Close();
+            GameManager.Instance.ShowPopup("Loaded from " + LEVELS_FOLDER + fileName + ".level", Color.yellow, new Color(1, 0.92f, 0.016f, 0.5f), 2.5f);
         }
         else
         {
             Debug.LogWarning("Could not find file '" + filePath + "'.");
+            GameManager.Instance.ShowPopup("Could not find file " + LEVELS_FOLDER + fileName + ".level", Color.red, new Color(1, 0.675f, 0.675f, 0.5f), 2.5f);
         }
 
         return levelInfo;

@@ -104,7 +104,7 @@ public class BaseTankLogic : MonoBehaviour
 
             if(slopeAlignment)
             {
-                if(Physics.Raycast(tankCollider.bounds.center - (tankCollider.transform.up * colliderExtentsY), Vector3.down, out RaycastHit hit, 0.25f, slopeLayers))
+                if(Physics.Raycast(tankCollider.bounds.center, Vector3.down, out RaycastHit hit, colliderExtentsY + 0.25f, slopeLayers))
                 {
                     // Rotating to align with slope
                     Quaternion alignedRotation = Quaternion.FromToRotation(tankOrigin.up, hit.normal);

@@ -205,10 +205,11 @@ namespace MyUnityAddons
                                 {
                                     Vector3 testPosition = hit.point - direction * (spawnCollider.size.y + 0.01f);
 
-                                    Debug.DrawLine(testPosition, origin, Color.red, 10f);
+                                    Debug.DrawLine(testPosition, origin, Color.red, 5f);
                                     Quaternion rotation = spawnRotation == null ? spawnCollider.transform.rotation : (Quaternion)spawnRotation;
-                                    if (!Physics.CheckBox(testPosition, spawnCollider.size * 0.5f, rotation, ~ignoreLayers))
+                                    if (!Physics.CheckBox(testPosition, spawnCollider.size * 0.49f, rotation, ~ignoreLayers, QueryTriggerInteraction.Collide))
                                     {
+                                        Debug.DrawLine(testPosition, origin, Color.green, 15f);
                                         if (onTopOfPoint)
                                         {
                                             return testPosition;
@@ -227,7 +228,8 @@ namespace MyUnityAddons
                         }
                     }
 
-                    Debug.LogWarning("No valid spawn point found in " + collider.name + ", returning Vector3.zero.");
+                    Debug.LogWarning("No valid spawn point found in " + collider.name + ", returning collider center.");
+                    return collider.bounds.center;
                 }
                 else
                 {
@@ -735,7 +737,7 @@ namespace MyUnityAddons
             {
                 get
                 {
-                    return PhotonNetwork.PlayerList.Where((x) => x.CustomProperties.ContainsKey("spectator") &&(bool)x.CustomProperties["spectator"]).ToArray();
+                    return PhotonNetwork.PlayerList.Where((x) => x.CustomProperties.ContainsKey("spectator") && (bool)x.CustomProperties["spectator"]).ToArray();
                 }
             }
 
@@ -913,7 +915,7 @@ namespace MyUnityAddons
                             }
                         }
                         break;
-                    default: // FFA, PvE, Co-Op
+                    default: // FFA, Co-Op
                         if(PhotonTeamsManager.Instance.GetTeamMembersCount("Players") < roomSettings.playerLimit)
                         {
                             if(currentTeam != null)

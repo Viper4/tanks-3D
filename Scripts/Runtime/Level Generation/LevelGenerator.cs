@@ -16,7 +16,7 @@ public class LevelGenerator : MonoBehaviour
     [SerializeField] Cell[] cellsToInstantiate;
 
     [SerializeField] Transform toClearParent;
-
+    [SerializeField] bool autoGenerate = false;
     [Serializable]
     struct Cell
     {
@@ -31,7 +31,8 @@ public class LevelGenerator : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-
+        if (autoGenerate)
+            Generate();
     }
 
     // Update is called once per frame

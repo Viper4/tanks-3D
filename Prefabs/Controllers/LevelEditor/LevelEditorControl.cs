@@ -133,7 +133,7 @@ public class LevelEditorControl : MonoBehaviour
 
         InvokeRepeating(nameof(MouseHoldLoop), 0, 0.125f);
         PhotonChatController.Instance.Resume(false);
-        Resume(false);
+        Resume();
     }
 
     // Update is called once per frame
@@ -519,7 +519,7 @@ public class LevelEditorControl : MonoBehaviour
             }
             else
             {
-                if (!previewObject.CompareTag("Spawnpoint"))
+                if (!previewObject.CompareTag("Spawnpoint") && !previewObject.CompareTag("Tank"))
                 {
                     if (placedBlocks.ContainsKey(hitGridPoint))
                     {

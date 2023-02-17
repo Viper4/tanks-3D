@@ -1088,6 +1088,7 @@ MonoBehaviour:
   reachedLastLevel: 0
   editing: 0
   playMode: 0
+  paused: 0
   loadingScreen: {fileID: 3149388286652276417}
   editorNames:
   - Normal Cube
@@ -1122,6 +1123,7 @@ MonoBehaviour:
   - Orange Tank
   - Gold Tank
   - Aquamarine Tank
+  - Silver Tank
   editorPrefabs:
   - {fileID: 1789137517761687661, guid: 716ebcd9db95e4540a052e5f9f478e48, type: 3}
   - {fileID: 6011413356270360582, guid: a1c3af60c2dd9f64083a6e9a8f1f54fc, type: 3}
@@ -1155,12 +1157,15 @@ MonoBehaviour:
   - {fileID: 5691383199726689912, guid: 1ae9f2a095504fe4392926e601b04037, type: 3}
   - {fileID: 5691383199726689912, guid: 7619ee5bf5490a0469ecf1254334414b, type: 3}
   - {fileID: 4033695715270616719, guid: 53f802116a3414f48bc745248268985f, type: 3}
+  - {fileID: 4033695715270616719, guid: c482dba4c82e55c42976432b751685a1, type: 3}
   progressBar: {fileID: 4560589372626774468}
   label: {fileID: 2423318918443738718}
   extraLifePopup: {fileID: 7693391558634966756}
   startButton: {fileID: 7825370536258997069}
   readyButton: {fileID: 3998579669134604594}
   readyPlayersCounter: {fileID: 3184159590657871444}
+  popup: {fileID: 995750868557946492}
+  popupText: {fileID: 2876658983559837160}
   customPhotonPrefabPool:
   - {fileID: 2926516457120658954, guid: d6e16f75477571b40b324c322517d95b, type: 3}
   - {fileID: 2738467188748950692, guid: ac2279b4992ccb44b9449e4c7c036da0, type: 3}
@@ -1181,6 +1186,7 @@ MonoBehaviour:
   - {fileID: 5691383199726689912, guid: 7619ee5bf5490a0469ecf1254334414b, type: 3}
   - {fileID: 8152485418157340697, guid: 586794c7bf9033e4985021cc8d6a5e52, type: 3}
   - {fileID: 4033695715270616719, guid: 53f802116a3414f48bc745248268985f, type: 3}
+  - {fileID: 4033695715270616719, guid: c482dba4c82e55c42976432b751685a1, type: 3}
   - {fileID: 2786163878658153271, guid: 9c9cd6bc48c2e7542a6afecb5ef1d8ec, type: 3}
   - {fileID: 1483529471583367534, guid: 385359a4397638445a3c2f0d9badc78a, type: 3}
   - {fileID: 5769820011260211252, guid: 3691f6bfcfbe29f46b3c15a420abb685, type: 3}
@@ -1191,9 +1197,11 @@ MonoBehaviour:
   - {fileID: 6709687364018734019, guid: 2220efec37758f344a23034c03fdafd2, type: 3}
   - {fileID: 6709687364018734019, guid: 7717faa009f3d054380c51af691c19e1, type: 3}
   - {fileID: 6709687364018734019, guid: 853d0a8e73a7d164287374125f43d003, type: 3}
+  canSpawn: 1
   currentScene:
     m_Handle: 0
   totalLives: -1
+  destroyedTanks: 
 --- !u!114 &2801430073492525547
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2448,11 +2456,27 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 86598a599b5090141a6c94adc736dbe8, type: 3}
+--- !u!1 &995750868557946492 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4843160447559767538, guid: 86598a599b5090141a6c94adc736dbe8, type: 3}
+  m_PrefabInstance: {fileID: 5685727356101806990}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1368820452845836283 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6636269644917316725, guid: 86598a599b5090141a6c94adc736dbe8, type: 3}
   m_PrefabInstance: {fileID: 5685727356101806990}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &2876658983559837160 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7569478937981386342, guid: 86598a599b5090141a6c94adc736dbe8, type: 3}
+  m_PrefabInstance: {fileID: 5685727356101806990}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!224 &7177340976114299793 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 3277718314055284767, guid: 86598a599b5090141a6c94adc736dbe8, type: 3}

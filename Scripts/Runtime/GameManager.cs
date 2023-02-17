@@ -40,6 +40,8 @@ public class GameManager : MonoBehaviourPunCallbacks
     [SerializeField] Transform startButton;
     [SerializeField] Transform readyButton;
     [SerializeField] TextMeshProUGUI readyPlayersCounter;
+    [SerializeField] GameObject popup;
+    [SerializeField] TextMeshProUGUI popupText;
 
     [SerializeField] GameObject[] customPhotonPrefabPool;
 
@@ -49,7 +51,7 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     public Scene currentScene;
 
-    public readonly int multiplayerSceneIndexEnd = 7;
+    public readonly int multiplayerSceneIndexEnd = 8;
 
     public int totalLives = -1;
     int readyPlayers = 0;
@@ -120,6 +122,7 @@ public class GameManager : MonoBehaviourPunCallbacks
 
             if (inLobby)
             {
+                destroyedTanks.Clear();
                 UpdatePlayerWithSettings(null);
                 loadingScreen.gameObject.SetActive(false);
                 if(autoPlay)
@@ -242,22 +245,26 @@ public class GameManager : MonoBehaviourPunCallbacks
                                 }
                             }
 
-                            if (TankManager.Instance == null || !TankManager.Instance.lastCampaignScene)
-                            {
-                                label.Find("Level").GetComponent<Text>().text = currentScene.name;
-                            }
-                            else
-                            {
-                                reachedLastLevel = true;
-                                label.Find("Level").GetComponent<Text>().text = "Final " + Regex.Match(currentScene.name, @"(.*?)[ ][0-9]+$").Groups[1] + " Mission";
-                            }
-                            label.Find("EnemyTanks").GetComponent<Text>().text = "Enemy tanks: " + (GameObject.Find("Tanks").transform.childCount - destroyedTanks.Count);
                             DataManager.playerData.previousSceneIndex = currentScene.buildIndex;
                         }
                         break;
                 }
             }
         }
+    }
+
+    public void TankManagerUpdate(bool lastCampaignLevel)
+    {
+        if (!lastCampaignLevel)
+        {
+            label.Find("Level").GetComponent<Text>().text = currentScene.name;
+        }
+        else
+        {
+            reachedLastLevel = true;
+            label.Find("Level").GetComponent<Text>().text = "Final " + Regex.Match(currentScene.name, @"(.*?)[ ][0-9]+$").Groups[1] + " Mission";
+        }
+        label.Find("EnemyTanks").GetComponent<Text>().text = "Enemy tanks: " + (TankManager.Instance.tankParent.childCount - destroyedTanks.Count);
     }
 
     public void UpdatePlayerWithSettings(Transform player)
@@ -631,6 +638,24 @@ public class GameManager : MonoBehaviourPunCallbacks
         {
             PhotonNetwork.Disconnect();
         }
+    }
+
+    public void ShowPopup(string text, Color textColor, Color backgroundColor, float time)
+    {
+        if (!popup.activeSelf)
+        {
+            StartCoroutine(Popup(text, textColor, backgroundColor, time));
+        }
+    }
+
+    IEnumerator Popup(string text, Color textColor, Color backgroundColor, float time)
+    {
+        popup.SetActive(true);
+        popupText.text = text;
+        popupText.color = textColor;
+        popup.GetComponent<Image>().color = backgroundColor;
+        yield return new WaitForSecondsRealtime(time);
+        popup.SetActive(false);
     }
 
     public override void OnEnable()

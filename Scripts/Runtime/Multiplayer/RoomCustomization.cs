@@ -9,7 +9,6 @@ public class RoomCustomization : MonoBehaviour
     [SerializeField] RectTransform mapSelection;
     [SerializeField] RectTransform FFASettings;
     [SerializeField] RectTransform teamSettings;
-    [SerializeField] RectTransform PVESettings;
     [SerializeField] RectTransform CoOpSettings;
 
     private void Start()
@@ -25,7 +24,7 @@ public class RoomCustomization : MonoBehaviour
     public void ChangeMap(Dropdown dropdown)
     {
         DataManager.roomSettings.map = dropdown.options[dropdown.value].text;
-        DataManager.roomSettings.customMap = dropdown.value > 1;
+        DataManager.roomSettings.customMap = dropdown.value > 2;
     }
 
     public void ChangeCampaign(Dropdown dropdown)
@@ -39,7 +38,6 @@ public class RoomCustomization : MonoBehaviour
         DataManager.roomSettings.mode = option;
 
         FFASettings.gameObject.SetActive(option == "FFA" || option == "Teams");
-        PVESettings.gameObject.SetActive(option == "PvE");
         teamSettings.gameObject.SetActive(option == "Teams");
 
         if(option == "Co-Op")
@@ -138,7 +136,7 @@ public class RoomCustomization : MonoBehaviour
                     break;
                 case "Map Dropdown":
                     Dropdown settingDropdown = setting.GetComponent<Dropdown>();
-                    settingDropdown.options.RemoveRange(2, settingDropdown.options.Count - 2);
+                    settingDropdown.options.RemoveRange(3, settingDropdown.options.Count - 3);
                     List<Dropdown.OptionData> customMaps = new List<Dropdown.OptionData>();
                     foreach(string level in SaveSystem.FilesInSaveFolder(false, ".level"))
                     {
@@ -146,9 +144,6 @@ public class RoomCustomization : MonoBehaviour
                     }
                     settingDropdown.AddOptions(customMaps);
                     SetValueToOption(setting.GetComponent<Dropdown>(), DataManager.roomSettings.map);
-                    break;
-                case "Map Preview":
-
                     break;
                 case "Mode Dropdown":
                     SetValueToOption(setting.GetComponent<Dropdown>(), DataManager.roomSettings.mode);

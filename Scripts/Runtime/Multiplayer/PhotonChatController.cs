@@ -35,6 +35,8 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
 
     public bool chatBoxActive = false;
 
+    int resetVote = 0;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -217,6 +219,17 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
         }
     }
 
+    private void SendMapReset()
+    {
+        if(chatClient.PublicChannels.Count > 0)
+        {
+            foreach(string channel in chatClient.PublicChannels.Keys)
+            {
+                chatClient.PublishMessage(channel, new object[] { 2 });
+            }
+        }
+    }
+
     private void SendPublicMessage(string inputText)
     {
         CreateMessage($"{DataManager.chatSettings.username}: {inputText}", Color.white);
@@ -272,6 +285,9 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
                 string command = Regex.Match(inputText, "[/][^ ]*").ToString();
                 switch(command)
                 {
+                    case "/help":
+                        CreateMessage("List of commands: /msg {username}\n /w {username}\n /tell {username}\n /r\n /reply\n /mute {username}\n /unmute {username}\n /promote {username}\n /kick {username}\n /ban {username}\n /unban {username}\n /whitelist list|on|off|add|remove\n /reset", Color.yellow);
+                        break;
                     case "/msg":
                         SendDirectMessage(inputText);
                         break;
@@ -506,8 +522,33 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
                             CreateMessage("You are not the owner", Color.red);
                         }
                         break;
+                    case "/reset":
+                        if(!GameManager.Instance.inLobby && GameManager.Instance.currentScene.buildIndex <= GameManager.Instance.multiplayerSceneIndexEnd)
+                        {
+                            Player thisPlayer = PhotonNetwork.LocalPlayer;
+                            if(!thisPlayer.CustomProperties.ContainsKey("spectator") || !(bool)thisPlayer.CustomProperties["spectator"])
+                            {
+                                SendMapReset();
+                                resetVote++;
+                                int totalCount = CustomNetworkHandling.NonSpectatorList.Length;
+                                if (resetVote == totalCount)
+                                {
+                                    CreateMessage(resetVote + "/" + totalCount + " votes to reset the map. Resetting...", Color.white);
+                                    if (PhotonNetwork.IsMasterClient)
+                                    {
+                                        GameManager.Instance.PhotonLoadScene(-1);
+                                    }
+                                    resetVote = 0;
+                                }
+                                else
+                                {
+                                    CreateMessage(resetVote + "/" + totalCount + " votes to reset the map.", Color.white);
+                                }
+                            }
+                        }
+                        break;
                     default:
-                        CreateMessage($"Unknown command \"{command}\"", Color.red);
+                        CreateMessage($"Unknown command \"{command}\". Type \"/help\" for a list of commands.", Color.red);
                         break;
                 }
             }
@@ -591,7 +632,7 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
                 else
                 {
                     object[] messageData = (object[])messages[i];
-                    int messageType = (int)messageData[0];
+                    byte messageType = (byte)messageData[0];
                     if (messageType == 0)
                     {
                         IDUsernamePair.AddOrReplace((string)messageData[1], (string)messageData[2]);
@@ -603,6 +644,24 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
                     else if (messageType == 1)
                     {
                         IDUsernamePair.Remove(senders[i]);
+                    }
+                    else if (messageType == 2)
+                    {
+                        resetVote++;
+                        int totalCount = CustomNetworkHandling.NonSpectatorList.Length;
+                        if (resetVote == totalCount)
+                        {
+                            CreateMessage(resetVote + "/" + totalCount + " votes to reset the map. Resetting...", Color.white);
+                            if (PhotonNetwork.IsMasterClient)
+                            {
+                                GameManager.Instance.PhotonLoadScene(-1);
+                            }
+                            resetVote = 0;
+                        }
+                        else
+                        {
+                            CreateMessage(resetVote + "/" + totalCount + " votes to reset the map.", Color.white);
+                        }
                     }
                 }
             }

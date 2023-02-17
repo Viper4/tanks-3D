@@ -226,7 +226,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 205979620}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0.001, z: 0}
   m_LocalScale: {x: 50, y: 1, z: 50}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -455,10 +455,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 8806413667145251663, guid: 0e556c1cb7d74124c9251069c4e6fb5f, type: 3}
-      propertyPath: autoInit
-      value: 0
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 0e556c1cb7d74124c9251069c4e6fb5f, type: 3}
 --- !u!114 &577184773 stripped
@@ -584,7 +580,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8698615684007924165, guid: 85a5b7f330200974ebf4d3e1f9d4b23d, type: 3}
       propertyPath: autoPlay
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8698615684007924165, guid: 85a5b7f330200974ebf4d3e1f9d4b23d, type: 3}
       propertyPath: editingMode
@@ -1096,10 +1092,6 @@ PrefabInstance:
     - target: {fileID: 379256979323330293, guid: b150f59555af8be4ebb778272b194c08, type: 3}
       propertyPath: m_IsActive
       value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 379256979323330296, guid: b150f59555af8be4ebb778272b194c08, type: 3}
-      propertyPath: autoInit
-      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 379256979323330298, guid: b150f59555af8be4ebb778272b194c08, type: 3}
       propertyPath: m_RootOrder

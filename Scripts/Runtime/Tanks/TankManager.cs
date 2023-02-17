@@ -40,6 +40,8 @@ public class TankManager : MonoBehaviourPunCallbacks
 
         if (autoInit && !GameManager.Instance.editing)
             Init();
+
+        GameManager.Instance.TankManagerUpdate(lastCampaignScene);
     }
 
     public void Init()
@@ -76,15 +78,16 @@ public class TankManager : MonoBehaviourPunCallbacks
 
             if(DataManager.roomSettings.mode != "Co-Op")
             {
-                if(PhotonNetwork.IsMasterClient && DataManager.roomSettings.botLimit > 0)
+                if(PhotonNetwork.IsMasterClient && tankLimit > 0)
                 {
-                    foreach(GameObject tank in tanks.ToList())
+                    foreach (GameObject tank in tanks.ToList())
                     {
                         if(!DataManager.roomSettings.bots.Contains(tank.name))
                         {
                             tanks.Remove(tank);
                         }
                     }
+
                     if (tanks.Count > 0 && spawns.Count > 0)
                     {
                         GenerateTanks();
@@ -152,11 +155,12 @@ public class TankManager : MonoBehaviourPunCallbacks
         if(tankParent.childCount < tankLimit)
         {
             Collider spawn = spawns[Random.Range(0, spawns.Count)];
+            BoxCollider tankCollider = tank.transform.Find("Body").GetComponent<BoxCollider>();
 
             if (GameManager.Instance.inLobby)
             {
                 Quaternion randomRotation = Quaternion.AngleAxis(Random.Range(-180.0f, 180.0f), spawn.transform.up);
-                spawnedTanks.Add(Instantiate(tank, CustomRandom.GetSpawnPointInCollider(spawn, -spawn.transform.up, ignoreLayerMask, tank.transform.Find("Body").GetComponent<BoxCollider>(), randomRotation), randomRotation, tankParent));
+                spawnedTanks.Add(Instantiate(tank, CustomRandom.GetSpawnPointInCollider(spawn, -spawn.transform.up, ignoreLayerMask, tankCollider, randomRotation), randomRotation, tankParent));
             }
             else
             {
@@ -169,23 +173,23 @@ public class TankManager : MonoBehaviourPunCallbacks
                         Quaternion randomRotation = Quaternion.AngleAxis(Random.Range(-180.0f, 180.0f), spawn.transform.up);
                         if (PhotonNetwork.OfflineMode)
                         {
-                            newTank = Instantiate(tank, CustomRandom.GetSpawnPointInCollider(spawn, -spawn.transform.up, ignoreLayerMask, tank.transform.Find("Body").GetComponent<BoxCollider>(), randomRotation), randomRotation, tankParent);
+                            newTank = Instantiate(tank, CustomRandom.GetSpawnPointInCollider(spawn, -spawn.transform.up, ignoreLayerMask, tankCollider, randomRotation), randomRotation, tankParent);
                         }
                         else
                         {
-                            newTank = PhotonNetwork.InstantiateRoomObject(tank.name, CustomRandom.GetSpawnPointInCollider(spawn, -spawn.transform.up, ignoreLayerMask, tank.transform.Find("Body").GetComponent<BoxCollider>(), randomRotation), randomRotation, 0, new object[] { true, true });
+                            newTank = PhotonNetwork.InstantiateRoomObject(tank.name, CustomRandom.GetSpawnPointInCollider(spawn, -spawn.transform.up, ignoreLayerMask, tankCollider, randomRotation), randomRotation, 0, new object[] { true, true });
                         }
                         break;
                     case "Teams":
                         spawn = PlayerManager.Instance.teamSpawnParent.GetChild(teamIndex).GetComponent<Collider>();
                         if (PhotonNetwork.OfflineMode)
                         {
-                            newTank = Instantiate(tank, CustomRandom.GetSpawnPointInCollider(spawn, -spawn.transform.up, ignoreLayerMask, tank.transform.Find("Body").GetComponent<BoxCollider>(), spawn.transform.rotation), spawn.transform.rotation, tankParent);
+                            newTank = Instantiate(tank, CustomRandom.GetSpawnPointInCollider(spawn, -spawn.transform.up, ignoreLayerMask, tankCollider, spawn.transform.rotation), spawn.transform.rotation, tankParent);
                             PTV = newTank.GetComponent<PhotonTankView>();
                         }
                         else
                         {
-                            newTank = PhotonNetwork.InstantiateRoomObject(tank.name, CustomRandom.GetSpawnPointInCollider(spawn, -spawn.transform.up, ignoreLayerMask, tank.transform.Find("Body").GetComponent<BoxCollider>(), spawn.transform.rotation), spawn.transform.rotation, 0, new object[] { true, false });
+                            newTank = PhotonNetwork.InstantiateRoomObject(tank.name, CustomRandom.GetSpawnPointInCollider(spawn, -spawn.transform.up, ignoreLayerMask, tankCollider, spawn.transform.rotation), spawn.transform.rotation, 0, new object[] { true, false });
                             PTV = newTank.GetComponent<PhotonTankView>();
                         }
                         PTV.teamName = spawn.name;
@@ -198,16 +202,16 @@ public class TankManager : MonoBehaviourPunCallbacks
                     default:
                         if (PhotonNetwork.OfflineMode)
                         {
-                            newTank = Instantiate(tank, CustomRandom.GetSpawnPointInCollider(spawn, -spawn.transform.up, ignoreLayerMask, tank.transform.Find("Body").GetComponent<BoxCollider>(), spawn.transform.rotation), spawn.transform.rotation, tankParent);
+                            newTank = Instantiate(tank, CustomRandom.GetSpawnPointInCollider(spawn, -spawn.transform.up, ignoreLayerMask, tankCollider, spawn.transform.rotation), spawn.transform.rotation, tankParent);
                             PTV = newTank.GetComponent<PhotonTankView>();
                         }
                         else
                         {
-                            newTank = PhotonNetwork.InstantiateRoomObject(tank.name, CustomRandom.GetSpawnPointInCollider(spawn, -spawn.transform.up, ignoreLayerMask, tank.transform.Find("Body").GetComponent<BoxCollider>(), spawn.transform.rotation), spawn.transform.rotation, 0, new object[] { true, false });
+                            newTank = PhotonNetwork.InstantiateRoomObject(tank.name, CustomRandom.GetSpawnPointInCollider(spawn, -spawn.transform.up, ignoreLayerMask, tankCollider, spawn.transform.rotation), spawn.transform.rotation, 0, new object[] { true, false });
                             spawnedTanks.Add(newTank);
                             PTV = newTank.GetComponent<PhotonTankView>();
                         }
-                        PTV.teamName = "PVE Bots";
+                        PTV.teamName = "Bots";
                         break;
                 }
 
@@ -225,11 +229,12 @@ public class TankManager : MonoBehaviourPunCallbacks
     {
         yield return new WaitForSecondsRealtime(delay);
 
+        BoxCollider tankCollider = tankOrigin.Find("Body").GetComponent<BoxCollider>();
         Collider spawn = spawns[Random.Range(0, spawns.Count)];
         switch (DataManager.roomSettings.mode)
         {
             case "FFA":
-                tankOrigin.SetPositionAndRotation(CustomRandom.GetSpawnPointInCollider(spawn, Vector3.down, ignoreLayerMask), Quaternion.AngleAxis(Random.Range(-180, 180), Vector3.up));
+                tankOrigin.SetPositionAndRotation(CustomRandom.GetSpawnPointInCollider(spawn, Vector3.down, ignoreLayerMask, tankCollider), Quaternion.AngleAxis(Random.Range(-180, 180), Vector3.up));
                 break;
             case "Teams":
                 int teamSpawnCount = PlayerManager.Instance.teamSpawnParent.childCount;
@@ -245,10 +250,10 @@ public class TankManager : MonoBehaviourPunCallbacks
                     }
                 }
 
-                tankOrigin.SetPositionAndRotation(CustomRandom.GetSpawnPointInCollider(spawn, Vector3.down, ignoreLayerMask), spawn.transform.rotation);
+                tankOrigin.SetPositionAndRotation(CustomRandom.GetSpawnPointInCollider(spawn, Vector3.down, ignoreLayerMask, tankCollider), spawn.transform.rotation);
                 break;
             default:
-                tankOrigin.SetPositionAndRotation(CustomRandom.GetSpawnPointInCollider(spawn, Vector3.down, ignoreLayerMask), spawn.transform.rotation);
+                tankOrigin.SetPositionAndRotation(CustomRandom.GetSpawnPointInCollider(spawn, Vector3.down, ignoreLayerMask, tankCollider), spawn.transform.rotation);
                 break;
         }
 

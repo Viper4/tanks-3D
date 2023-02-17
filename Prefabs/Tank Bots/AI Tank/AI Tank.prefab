@@ -542,16 +542,15 @@ MonoBehaviour:
   normalSpeed: 0
   avoidSpeed: 3.5
   useGravity: 1
-  gravity: 8
   velocityLimit: 25
   flipAngleThreshold: 25
-  restrictRotation: 0
+  restrictRotation: 1
   pitchRange:
-  - -45
-  - 45
+  - -40
+  - 40
   rollRange:
-  - -45
-  - 45
+  - -40
+  - 40
   tankNoise: 0
   tankRotSpeed: 450
   tankRotNoiseScale: 1
@@ -710,9 +709,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 115c28a99863dae43902bdb19990c000, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  prefabName: AI Tank
+  prefabIndex: 0
   thisRenderer: {fileID: 0}
   thisCollider: {fileID: 4125845277540636573}
+  colliderVisibility: []
+  rendererVisibility: []
+  gameObjectVisibility: []
 --- !u!1 &5751771638733195478
 GameObject:
   m_ObjectHideFlags: 0

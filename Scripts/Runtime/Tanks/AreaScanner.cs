@@ -11,7 +11,7 @@ public class AreaScanner : MonoBehaviour
     [SerializeField] float viewDistance = 50;
     [SerializeField] bool showRays = false;
     [SerializeField] float drawDuration = 2.5f;
-    [SerializeField] LayerMask obstructLayerMask;
+    public LayerMask obstructLayerMask;
 
     [SerializeField] enum SelectionMode
     {
@@ -39,10 +39,9 @@ public class AreaScanner : MonoBehaviour
         {
             if(Mathf.Abs(collider.bounds.min.y - origin.position.y) < heightLimit)
             {
-                Vector3[] vertices = collider.GetComponent<MeshFilter>().sharedMesh.vertices;
-                foreach(Vector3 vertex in vertices)
+                foreach (Vector3 vertex in collider.Vertices())
                 {
-                    if(Physics.Raycast(origin.position, vertex - origin.position, out RaycastHit hit, viewDistance, objectLayerMask))
+                    if (Physics.Raycast(origin.position, vertex - origin.position, out RaycastHit hit, viewDistance, objectLayerMask | obstructLayerMask))
                     {
                         if(hit.transform == collider.transform)
                         {
@@ -64,6 +63,31 @@ public class AreaScanner : MonoBehaviour
         return visibleObjects;
     }
 
+    public List<Transform> GetVisibleObjectsFast(Transform origin, LayerMask objectLayerMask)
+    {
+        List<Transform> visibleObjects = new List<Transform>();
+        Collider[] overlappingColliders = Physics.OverlapSphere(origin.position, viewDistance, objectLayerMask);
+        foreach (Collider collider in overlappingColliders)
+        {
+            if (Mathf.Abs(collider.bounds.min.y - origin.position.y) < heightLimit && Physics.Raycast(origin.position, collider.bounds.center - origin.position, out RaycastHit hit, viewDistance, objectLayerMask | obstructLayerMask))
+            {
+                if (hit.transform == collider.transform)
+                {
+                    if (showRays)
+                    {
+                        Debug.DrawLine(origin.position, hit.point, Color.magenta, drawDuration);
+                    }
+                    visibleObjects.Add(hit.transform);
+                }
+                else if (showRays)
+                {
+                    Debug.DrawLine(origin.position, hit.point, Color.red, drawDuration);
+                }
+            }
+        }
+        return visibleObjects;
+    }
+
     public List<Transform> GetVisibleObjectsNotNear(Transform origin, LayerMask objectLayerMask, LayerMask nearLayerMask, float nearRadius)
     {
         List<Transform> visibleObjects = new List<Transform>();
@@ -72,8 +96,6 @@ public class AreaScanner : MonoBehaviour
         {
             if(!Physics.CheckSphere(collider.bounds.center, nearRadius, nearLayerMask) && Mathf.Abs(collider.bounds.min.y - origin.position.y) < heightLimit)
             {
-                Debug.Log(collider.GetType());
-
                 foreach(Vector3 vertex in collider.Vertices())
                 {
                     if(Physics.Raycast(origin.position, vertex - origin.position, out RaycastHit hit, viewDistance, objectLayerMask | obstructLayerMask))

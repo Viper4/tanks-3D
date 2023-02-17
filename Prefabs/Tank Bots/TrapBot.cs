@@ -27,8 +27,8 @@ public class TrapBot : MonoBehaviour
     [SerializeField] float maxShootAngle = 5;
     [SerializeField] float maxRicochetAngle = 90;
 
-    [Tooltip("Threshold to start rotating to target")][SerializeField] float maxTargetAngle = 100;
-    [Tooltip("Threshold to start rotating away from target")][SerializeField] float minTargetAngle = 20;
+    [Tooltip("Threshold to start rotating to target")] [SerializeField] float maxTargetAngle = 100;
+    [Tooltip("Threshold to start rotating away from target")] [SerializeField] float minTargetAngle = 20;
 
     FireControl fireControl;
     MineControl mineControl;

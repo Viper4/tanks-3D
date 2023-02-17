@@ -230,13 +230,7 @@ public class GoldBot : MonoBehaviour
                     }
                     break;
                 case "Bullet":
-                    if(other.TryGetComponent<BulletBehaviour>(out var bulletBehaviour))
-                    {
-                        if(bulletBehaviour.owner != null && bulletBehaviour.owner != transform)
-                        {
-                            nearbyBullet = other.transform;
-                        }
-                    }
+                    nearbyBullet = other.transform;
                     break;
             }
         }

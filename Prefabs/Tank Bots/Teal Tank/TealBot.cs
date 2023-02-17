@@ -84,7 +84,7 @@ public class TealBot : MonoBehaviour
         baseTankLogic.stationary = true;
         // Stops moving and delay in firing
         yield return new WaitForSeconds(Random.Range(fireDelay[0], fireDelay[1]));
-        StartCoroutine(GetComponent<FireControl>().Shoot());
+        StartCoroutine(fireControl.Shoot());
 
         shooting = false;
         baseTankLogic.stationary = false;

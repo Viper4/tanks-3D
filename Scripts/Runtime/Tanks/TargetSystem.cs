@@ -31,7 +31,14 @@ public class TargetSystem : MonoBehaviour
         {
             if(primaryTarget == null)
             {
-                primaryTarget = GameObject.Find("Player").transform.Find("Tank Origin").Find(preferredTargetArea);
+                if(preferredTargetArea == "Tank Origin")
+                {
+                    primaryTarget = GameObject.Find("Player").transform.Find("Tank Origin");
+                }
+                else
+                {
+                    primaryTarget = GameObject.Find("Player").transform.Find("Tank Origin").Find(preferredTargetArea);
+                }
             }
 
             currentTarget = primaryTarget;
@@ -52,9 +59,6 @@ public class TargetSystem : MonoBehaviour
                         enemyParents.Add(PlayerManager.Instance.playerParent);
                         break;
                     case "Co-Op":
-                        enemyParents.Add(PlayerManager.Instance.playerParent);
-                        break;
-                    case "PvE":
                         enemyParents.Add(PlayerManager.Instance.playerParent);
                         break;
                     case "Teams":
@@ -83,14 +87,19 @@ public class TargetSystem : MonoBehaviour
                         Transform enemyParent = enemyParents[i];
                         foreach(Transform tank in enemyParent)
                         {
-                            if(tank != transform && (myPTV.teamName == "FFA" || tank.GetComponent<PhotonTankView>().teamName != myPTV.teamName))
+                            if (tank.CompareTag("Player") && tank.GetComponent<PlayerControl>().Dead)
+                            {
+                                continue;
+                            }
+
+                            if (tank != transform && (myPTV.teamName == "FFA" || tank.GetComponent<PhotonTankView>().teamName != myPTV.teamName))
                             {
                                 Transform target = GetTargetArea(tank);
 
                                 allTargets.Add(target);
-                                if(Physics.Raycast(turret.position, target.position - turret.position, out RaycastHit hit, Mathf.Infinity, ~ignoreLayerMask, QueryTriggerInteraction.Ignore))
+                                if (Physics.Raycast(turret.position, target.position - turret.position, out RaycastHit hit, Mathf.Infinity, ~ignoreLayerMask, QueryTriggerInteraction.Ignore))
                                 {
-                                    if(hit.transform.CompareTag(target.tag))
+                                    if (hit.transform.CompareTag(target.tag))
                                     {
                                         visibleTargets.Add(target);
                                     }
@@ -129,11 +138,11 @@ public class TargetSystem : MonoBehaviour
         Transform targetArea;
         if(target.CompareTag("Player"))
         {
-            targetArea = target.Find("Tank Origin").Find(preferredTargetArea);
+            targetArea = preferredTargetArea == "Tank Origin" ? target.Find("Tank Origin") : target.Find("Tank Origin").Find(preferredTargetArea);
         }
         else
         {
-            targetArea = target.Find(preferredTargetArea);
+            targetArea = preferredTargetArea == "Tank Origin" ? target : target.Find(preferredTargetArea);
         }
         return targetArea;
     }
@@ -158,13 +167,13 @@ public class TargetSystem : MonoBehaviour
 
     public Vector3 PredictedTargetPosition(float seconds)
     {
-        if(currentTarget.parent != null && currentTarget.parent.TryGetComponent<Rigidbody>(out var rigidbody))
+        if(currentTarget.TryGetComponent<Rigidbody>(out var rigidbody) || currentTarget.parent.TryGetComponent<Rigidbody>(out rigidbody))
         {
             Vector3 futurePosition = CustomMath.FuturePosition(currentTarget.position, rigidbody, seconds);
             Vector3 futureDirection = futurePosition - currentTarget.position;
             if(Physics.Raycast(currentTarget.position, futureDirection, out RaycastHit hit, Vector3.Distance(currentTarget.position, futurePosition)))
             {
-                return hit.point - futureDirection * 0.05f; // subtracting so the point returned isn't inside a collider
+                return hit.point - futureDirection * 0.1f; // subtracting so the point returned isn't inside a collider
             }
             else
             {

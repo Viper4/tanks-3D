@@ -139,6 +139,10 @@ public class TeamSwitching : MonoBehaviourPunCallbacks
                 MasterUpdateRosters();
             }
         }
+        else
+        {
+            GameManager.Instance.ShowPopup("Cannot join " + teamName + ", the team is full!", Color.red, new Color(1, 0.675f, 0.675f, 0.5f), 2.5f);
+        }
     }
 
     public void MasterUpdateRosters()
