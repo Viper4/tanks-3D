@@ -195,7 +195,7 @@ public class SilverBot : MonoBehaviour
         List<Vector3> validPositions = new List<Vector3>();
         List<Vector3> passivePositions = new List<Vector3>();
 
-        foreach (Transform visibleObject in visibleObjects)
+        foreach(Transform visibleObject in visibleObjects)
         {
             Collider visibleCollider = visibleObject.GetComponent<Collider>();
             Vector3 position = visibleCollider.ClosestPoint(targetSystem.currentTarget.position);
@@ -204,11 +204,11 @@ public class SilverBot : MonoBehaviour
             {
                 if(CustomMath.SqrDistance(hit.point, transform.position) > squareExplosionRadius * 2)
                 {
-                    if (passiveMissileLayers == (passiveMissileLayers | (1 << hit.transform.gameObject.layer)))
+                    if(passiveMissileLayers == (passiveMissileLayers | (1 << hit.transform.gameObject.layer)))
                     {
                         passivePositions.Add(position);
                     }
-                    if (CustomMath.SqrDistance(hit.point, targetSystem.currentTarget.position) < squareExplosionRadius || CustomMath.SqrDistance(hit.point, predictedTargetPosition) < squareExplosionRadius)
+                    if(CustomMath.SqrDistance(hit.point, targetSystem.currentTarget.position) < squareExplosionRadius || CustomMath.SqrDistance(hit.point, predictedTargetPosition) < squareExplosionRadius)
                     {
                         validPositions.Add(position);
                     }
