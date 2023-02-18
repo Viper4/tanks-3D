@@ -35,10 +35,14 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
 
     public bool chatBoxActive = false;
 
+    int resetVote = 0;
+
+    private TouchScreenKeyboard keyboard;
+
     // Start is called before the first frame update
     void Start()
     {
-        if(Instance == null)
+        if (Instance == null)
         {
             Instance = this;
             chatClient = new ChatClient(this);
@@ -56,23 +60,23 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
 
         if (isConnected)
         {
-            if(!inputParent.activeSelf)
+            if (!inputParent.activeSelf)
             {
-                if(Input.GetKeyDown(DataManager.playerSettings.keyBinds["Chat"]))
+                if (Input.GetKeyDown(DataManager.playerSettings.keyBinds["Chat"]))
                 {
                     Pause();
                 }
                 else
                 {
-                    if(timeSinceLastMessage < chatVanishTime)
+                    if (timeSinceLastMessage < chatVanishTime)
                     {
                         timeSinceLastMessage += Time.unscaledDeltaTime;
-                        if(!chatParent.activeSelf)
+                        if (!chatParent.activeSelf)
                         {
                             chatParent.SetActive(true);
                         }
                     }
-                    else if(chatParent.activeSelf)
+                    else if (chatParent.activeSelf)
                     {
                         chatParent.SetActive(false);
                     }
@@ -80,23 +84,39 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
             }
             else
             {
-                if(Input.GetKeyDown(KeyCode.Return))
+                if (Application.isMobilePlatform)
                 {
-                    SendMessage(chatInput);
+                    if (keyboard != null && keyboard.status == TouchScreenKeyboard.Status.Done)
+                    {
+                        chatInput.SetTextWithoutNotify(keyboard.text);
+                    }
                 }
-                else if(GameManager.Instance.inLobby && Input.GetKeyDown(KeyCode.Escape))
+                else
                 {
-                    Resume();
+                    if (Input.GetKeyDown(KeyCode.Return))
+                    {
+                        SendMessage(chatInput);
+                    }
+                    else if (GameManager.Instance.inLobby && Input.GetKeyDown(KeyCode.Escape))
+                    {
+                        Resume();
+                    }
                 }
             }
         }
+    }
+
+    public void OpenMobileKeyboard()
+    {
+        if(Application.isMobilePlatform)
+            keyboard = TouchScreenKeyboard.Open("", TouchScreenKeyboardType.Default, false, false, false, true);
     }
 
     public void Resume(bool changeCursor = true)
     {
         chatBoxActive = false;
         GameManager.Instance.paused = false;
-        if(changeCursor && !GameManager.Instance.inLobby)
+        if (changeCursor && !GameManager.Instance.inLobby)
         {
             Cursor.visible = false;
             Cursor.lockState = CursorLockMode.Locked;
@@ -106,6 +126,8 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
         inputParent.SetActive(false);
         chatParent.SetActive(false);
         chatCanvasGroup.enabled = true;
+        if (Application.isMobilePlatform && !GameManager.Instance.inLobby)
+            MobileWebAppHandler.Instance.ActivateJoystick();
     }
 
     public void Pause()
@@ -118,18 +140,20 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
         chatParent.SetActive(true);
         inputParent.SetActive(true);
         chatCanvasGroup.enabled = false;
+        if (Application.isMobilePlatform)
+            MobileWebAppHandler.Instance.DeactivateJoystick();
     }
 
     string GetUsername(string userID)
     {
-        if(IDUsernamePair.TryGetValue(userID, out string username))
+        if (IDUsernamePair.TryGetValue(userID, out string username))
         {
             return username;
         }
         else
         {
             Player player = CustomNetworkHandling.FindPlayerWithUsername(username);
-            if(player != null)
+            if (player != null)
             {
                 IDUsernamePair.AddOrReplace(userID, player.NickName);
                 return player.NickName;
@@ -144,7 +168,7 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
 
     string GetUserID(string username)
     {
-        foreach(string userID in IDUsernamePair.Keys)
+        foreach (string userID in IDUsernamePair.Keys)
         {
             if (IDUsernamePair[userID] == username)
             {
@@ -152,7 +176,7 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
             }
         }
         Player player = CustomNetworkHandling.FindPlayerWithUsername(username);
-        if(player != null)
+        if (player != null)
         {
             return player.UserId;
         }
@@ -165,14 +189,14 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
 
     public void ConnectToPhotonChat()
     {
-        if(string.IsNullOrEmpty(DataManager.chatSettings.username))
+        if (string.IsNullOrEmpty(DataManager.chatSettings.username))
         {
             IDUsernamePair.AddOrReplace(PhotonNetwork.LocalPlayer.UserId, PhotonNetwork.LocalPlayer.UserId);
         }
         else
         {
             IDUsernamePair.AddOrReplace(PhotonNetwork.LocalPlayer.UserId, DataManager.chatSettings.username);
-        } 
+        }
         chatClient.AuthValues = new Photon.Chat.AuthenticationValues(PhotonNetwork.LocalPlayer.UserId);
         chatClient.Connect(PhotonNetwork.PhotonServerSettings.AppSettings.AppIdChat, PhotonNetwork.AppVersion, new Photon.Chat.AuthenticationValues(PhotonNetwork.LocalPlayer.UserId));
     }
@@ -217,12 +241,23 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
         }
     }
 
+    private void SendMapReset()
+    {
+        if (chatClient.PublicChannels.Count > 0)
+        {
+            foreach (string channel in chatClient.PublicChannels.Keys)
+            {
+                chatClient.PublishMessage(channel, new object[] { 2 });
+            }
+        }
+    }
+
     private void SendPublicMessage(string inputText)
     {
         CreateMessage($"{DataManager.chatSettings.username}: {inputText}", Color.white);
-        if(chatClient.PublicChannels.Count > 0)
+        if (chatClient.PublicChannels.Count > 0)
         {
-            foreach(string channel in chatClient.PublicChannels.Keys)
+            foreach (string channel in chatClient.PublicChannels.Keys)
             {
                 chatClient.PublishMessage(channel, inputText);
             }
@@ -236,7 +271,7 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
         string message = match.Groups[2].ToString();
         string userID = GetUserID(recipientUsername);
 
-        if(userID != recipientUsername)
+        if (userID != recipientUsername)
         {
             CreateMessage($"me -> {recipientUsername}: {message}", Color.grey);
             chatClient.SendPrivateMessage(userID, message);
@@ -249,7 +284,7 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
 
     private void SendReplyMessage(string inputText)
     {
-        if(string.IsNullOrEmpty(replyRecipient))
+        if (string.IsNullOrEmpty(replyRecipient))
         {
             CreateMessage("No one to reply to", Color.red);
         }
@@ -265,13 +300,16 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
     public void SendMessage(TMP_InputField inputField)
     {
         string inputText = inputField.text;
-        if(!string.IsNullOrEmpty(inputText))
+        if (!string.IsNullOrEmpty(inputText))
         {
-            if(inputText[0] == '/')
+            if (inputText[0] == '/')
             {
                 string command = Regex.Match(inputText, "[/][^ ]*").ToString();
-                switch(command)
+                switch (command)
                 {
+                    case "/help":
+                        CreateMessage("List of commands: /msg {username}\n /w {username}\n /tell {username}\n /r\n /reply\n /mute {username}\n /unmute {username}\n /promote {username}\n /kick {username}\n /ban {username}\n /unban {username}\n /whitelist list|on|off|add|remove\n /reset", Color.yellow);
+                        break;
                     case "/msg":
                         SendDirectMessage(inputText);
                         break;
@@ -290,7 +328,7 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
                     case "/mute":
                         string username = Regex.Replace(inputText, "[/][^ ]* ", "");
                         string userID = GetUserID(username);
-                        if(userID != username)
+                        if (userID != username)
                         {
                             DataManager.chatSettings.muteList.TryAdd(userID);
                             CreateMessage("Muted " + username, Color.white);
@@ -303,7 +341,7 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
                     case "/unmute":
                         username = Regex.Replace(inputText, "[/][^ ]* ", "");
                         userID = GetUserID(username);
-                        if(userID != username)
+                        if (userID != username)
                         {
                             DataManager.chatSettings.muteList.Remove(userID);
                             CreateMessage("Unmuted " + username, Color.white);
@@ -314,11 +352,11 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
                         }
                         break;
                     case "/promote":
-                        if(PhotonNetwork.IsMasterClient)
+                        if (PhotonNetwork.IsMasterClient)
                         {
                             username = Regex.Replace(inputText, "[/][^ ]* ", "");
                             Player player = CustomNetworkHandling.FindPlayerWithUsername(username);
-                            if(player != null)
+                            if (player != null)
                             {
                                 PhotonNetwork.SetMasterClient(player);
                                 CreateMessage("Promoted " + username, Color.white);
@@ -334,11 +372,11 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
                         }
                         break;
                     case "/kick":
-                        if(PhotonNetwork.IsMasterClient)
+                        if (PhotonNetwork.IsMasterClient)
                         {
                             username = Regex.Replace(inputText, "[/][^ ]* ", "");
                             Player player = CustomNetworkHandling.FindPlayerWithUsername(username);
-                            if(player != null)
+                            if (player != null)
                             {
                                 PhotonNetwork.CloseConnection(player);
                                 CreateMessage("Kicked " + username, Color.white);
@@ -354,16 +392,16 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
                         }
                         break;
                     case "/ban":
-                        if(PhotonNetwork.IsMasterClient)
+                        if (PhotonNetwork.IsMasterClient)
                         {
                             username = Regex.Replace(inputText, "[/][^ ]* ", "");
                             userID = GetUserID(username);
-                            if(userID != username)
+                            if (userID != username)
                             {
-                                if(DataManager.chatSettings.blacklist.TryAdd(userID))
+                                if (DataManager.chatSettings.blacklist.TryAdd(userID))
                                 {
                                     Player player = CustomNetworkHandling.FindPlayerWithUsername(username);
-                                    if(player != null)
+                                    if (player != null)
                                     {
                                         PhotonNetwork.CloseConnection(player);
                                     }
@@ -385,13 +423,13 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
                         }
                         break;
                     case "/unban":
-                        if(PhotonNetwork.IsMasterClient)
+                        if (PhotonNetwork.IsMasterClient)
                         {
                             username = Regex.Replace(inputText, "[/][^ ]* ", "");
                             userID = GetUserID(username);
-                            if(userID != username)
+                            if (userID != username)
                             {
-                                if(DataManager.chatSettings.blacklist.Remove(userID))
+                                if (DataManager.chatSettings.blacklist.Remove(userID))
                                 {
                                     CreateMessage("Unbanned " + username, Color.white);
                                 }
@@ -411,25 +449,25 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
                         }
                         break;
                     case "/whitelist":
-                        if(PhotonNetwork.IsMasterClient)
+                        if (PhotonNetwork.IsMasterClient)
                         {
                             Match match = Regex.Match(inputText, "[/][^ ]* ([^ ]*)");
                             string mode = match.Groups[1].ToString();
-                            if(mode == "clear")
+                            if (mode == "clear")
                             {
                                 DataManager.chatSettings.whitelist.Clear();
                                 CreateMessage("Cleared the whitelist", Color.white);
                             }
-                            else if(mode == "list")
+                            else if (mode == "list")
                             {
                                 int whitelistCount = DataManager.chatSettings.whitelist.Count;
-                                if(whitelistCount > 0)
+                                if (whitelistCount > 0)
                                 {
                                     string usernameList = "Whitelist: ";
-                                    for(int i = 0; i < whitelistCount; i++)
+                                    for (int i = 0; i < whitelistCount; i++)
                                     {
                                         string user = DataManager.chatSettings.whitelist[i];
-                                        if(i < whitelistCount - 1)
+                                        if (i < whitelistCount - 1)
                                         {
                                             usernameList += GetUsername(user) + ", ";
                                         }
@@ -445,12 +483,12 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
                                     CreateMessage("Whitelist is empty", Color.white);
                                 }
                             }
-                            else if(mode == "on")
+                            else if (mode == "on")
                             {
                                 DataManager.chatSettings.whitelistActive = true;
                                 CreateMessage("Whitelist on", Color.white);
                             }
-                            else if(mode == "off")
+                            else if (mode == "off")
                             {
                                 DataManager.chatSettings.whitelistActive = false;
                                 CreateMessage("Whitelist off", Color.white);
@@ -459,11 +497,11 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
                             {
                                 string target = Regex.Replace(inputText, "[/][^ ]* [^ ]* ", "");
                                 userID = GetUserID(target);
-                                if(userID != target)
+                                if (userID != target)
                                 {
-                                    if(mode == "add")
+                                    if (mode == "add")
                                     {
-                                        if(DataManager.chatSettings.whitelist.TryAdd(userID))
+                                        if (DataManager.chatSettings.whitelist.TryAdd(userID))
                                         {
                                             CreateMessage("Added " + target + " to the whitelist", Color.white);
                                         }
@@ -472,9 +510,9 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
                                             CreateMessage(target + " is already on the whitelist", Color.white);
                                         }
                                     }
-                                    else if(mode == "remove")
+                                    else if (mode == "remove")
                                     {
-                                        if(DataManager.chatSettings.whitelist.Remove(userID))
+                                        if (DataManager.chatSettings.whitelist.Remove(userID))
                                         {
                                             CreateMessage("Removed " + target + " from the whitelist", Color.white);
                                         }
@@ -499,8 +537,33 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
                             CreateMessage("You are not the owner", Color.red);
                         }
                         break;
+                    case "/reset":
+                        if (!GameManager.Instance.inLobby && GameManager.Instance.currentScene.buildIndex <= GameManager.Instance.multiplayerSceneIndexEnd)
+                        {
+                            Player thisPlayer = PhotonNetwork.LocalPlayer;
+                            if (!thisPlayer.CustomProperties.ContainsKey("spectator") || !(bool)thisPlayer.CustomProperties["spectator"])
+                            {
+                                SendMapReset();
+                                resetVote++;
+                                int totalCount = CustomNetworkHandling.NonSpectatorList.Length;
+                                if (resetVote == totalCount)
+                                {
+                                    CreateMessage(resetVote + "/" + totalCount + " votes to reset the map. Resetting...", Color.white);
+                                    if (PhotonNetwork.IsMasterClient)
+                                    {
+                                        GameManager.Instance.PhotonLoadScene(-1);
+                                    }
+                                    resetVote = 0;
+                                }
+                                else
+                                {
+                                    CreateMessage(resetVote + "/" + totalCount + " votes to reset the map.", Color.white);
+                                }
+                            }
+                        }
+                        break;
                     default:
-                        CreateMessage($"Unknown command \"{command}\"", Color.red);
+                        CreateMessage($"Unknown command \"{command}\". Type \"/help\" for a list of commands.", Color.red);
                         break;
                 }
             }
@@ -517,7 +580,7 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
         StartCoroutine(WaitToSubscribe(channel, maxSubscribers, publishSubscribers));
         if (room)
         {
-            chatClient.Unsubscribe(new string[] {"RegionLobby"});
+            chatClient.Unsubscribe(new string[] { "RegionLobby" });
             roomChannel = channel;
         }
     }
@@ -547,12 +610,12 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
 
     public void DebugReturn(DebugLevel level, string message)
     {
-        
+
     }
 
     public void OnChatStateChange(ChatState state)
     {
-        
+
     }
 
     public void OnConnected()
@@ -584,7 +647,7 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
                 else
                 {
                     object[] messageData = (object[])messages[i];
-                    int messageType = (int)messageData[0];
+                    byte messageType = (byte)messageData[0];
                     if (messageType == 0)
                     {
                         IDUsernamePair.AddOrReplace((string)messageData[1], (string)messageData[2]);
@@ -597,6 +660,24 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
                     {
                         IDUsernamePair.Remove(senders[i]);
                     }
+                    else if (messageType == 2)
+                    {
+                        resetVote++;
+                        int totalCount = CustomNetworkHandling.NonSpectatorList.Length;
+                        if (resetVote == totalCount)
+                        {
+                            CreateMessage(resetVote + "/" + totalCount + " votes to reset the map. Resetting...", Color.white);
+                            if (PhotonNetwork.IsMasterClient)
+                            {
+                                GameManager.Instance.PhotonLoadScene(-1);
+                            }
+                            resetVote = 0;
+                        }
+                        else
+                        {
+                            CreateMessage(resetVote + "/" + totalCount + " votes to reset the map.", Color.white);
+                        }
+                    }
                 }
             }
         }
@@ -604,15 +685,15 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
 
     public void OnPrivateMessage(string sender, object message, string channelName)
     {
-        if(!string.IsNullOrEmpty(message.ToString()))
+        if (!string.IsNullOrEmpty(message.ToString()))
         {
             string[] splitNames = channelName.Split(new char[] { ':' });
             string senderName = splitNames[0];
-            if(!sender.Equals(senderName, StringComparison.OrdinalIgnoreCase))
+            if (!sender.Equals(senderName, StringComparison.OrdinalIgnoreCase))
             {
-                if(message.GetType() == typeof(string))
+                if (message.GetType() == typeof(string))
                 {
-                    if(!DataManager.chatSettings.muteList.Contains(sender))
+                    if (!DataManager.chatSettings.muteList.Contains(sender))
                     {
                         CreateMessage($"{GetUsername(sender)} -> me: {message}", Color.grey);
                         replyRecipient = sender;
@@ -622,15 +703,15 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
                 {
                     object[] messageData = (object[])message;
                     int messageType = (int)messageData[0];
-                    if(messageType == 0)
+                    if (messageType == 0)
                     {
                         IDUsernamePair.AddOrReplace((string)messageData[1], (string)messageData[2]);
-                        if((bool)messageData[3])
+                        if ((bool)messageData[3])
                         {
                             SendPrivateUserUpdate(sender);
                         }
                     }
-                    else if(messageType == 1)
+                    else if (messageType == 1)
                     {
                         IDUsernamePair.Remove(sender);
                     }
@@ -641,15 +722,15 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
 
     public void OnStatusUpdate(string user, int status, bool gotMessage, object message)
     {
-        
+
     }
 
     public void OnSubscribed(string[] channels, bool[] results)
     {
-        for(int i = 0; i < channels.Length; i++)
+        for (int i = 0; i < channels.Length; i++)
         {
             SendPublicUserUpdate(channels[i], true);
-            if(channels[i] != "RegionLobby")
+            if (channels[i] != "RegionLobby")
             {
                 CreateMessage("Joined " + channels[i], Color.yellow);
             }
@@ -658,9 +739,9 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
 
     public void OnUnsubscribed(string[] channels)
     {
-        for(int i = 0; i < channels.Length; i++)
+        for (int i = 0; i < channels.Length; i++)
         {
-            if(channels[i] != "RegionLobby")
+            if (channels[i] != "RegionLobby")
             {
                 CreateMessage("Left " + channels[i], Color.yellow);
             }

@@ -23,7 +23,7 @@ public class PlayerUI : MonoBehaviour
 
         if(!PhotonNetwork.OfflineMode)
         {
-            if(playerControl.photonView.IsMine)
+            if(playerControl.GetComponent<PhotonView>().IsMine)
             {
                 if(DataManager.roomSettings.mode != "Co-Op")
                 {
@@ -51,7 +51,7 @@ public class PlayerUI : MonoBehaviour
 
     private void LateUpdate()
     {
-        if(!GameManager.Instance.loadingScreen.gameObject.activeSelf && (PhotonNetwork.OfflineMode || playerControl.photonView.IsMine))
+        if(!GameManager.Instance.loadingScreen.gameObject.activeSelf && (PhotonNetwork.OfflineMode || playerControl.GetComponent<PhotonView>().IsMine))
         {
             if(Input.GetKeyDown(KeyCode.Escape))
             {
@@ -210,6 +210,8 @@ public class PlayerUI : MonoBehaviour
                 Cursor.lockState = CursorLockMode.Locked;
             }
         }
+        if (Application.isMobilePlatform)
+            MobileWebAppHandler.Instance.ActivateJoystick();
     }
 
     public void Pause()
@@ -223,6 +225,8 @@ public class PlayerUI : MonoBehaviour
         baseUI.UIElements["PauseMenu"].gameObject.SetActive(true);
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
+        if (Application.isMobilePlatform)
+            MobileWebAppHandler.Instance.DeactivateJoystick();
     }
 
     public void Leave()

@@ -678,13 +678,13 @@ MonoBehaviour:
   useGravity: 1
   velocityLimit: 25
   flipAngleThreshold: 25
-  restrictRotation: 0
+  restrictRotation: 1
   pitchRange:
-  - -45
-  - 45
+  - -40
+  - 40
   rollRange:
-  - -45
-  - 45
+  - -40
+  - 40
   tankNoise: 1
   tankRotSpeed: 250
   tankRotNoiseScale: 1.5
@@ -734,7 +734,7 @@ MonoBehaviour:
   - 0.6
   highTierTanks:
     serializedVersion: 2
-    m_Bits: 21954560
+    m_Bits: 1095696384
   mineLayerMask:
     serializedVersion: 2
     m_Bits: 256

@@ -632,16 +632,15 @@ MonoBehaviour:
   normalSpeed: 3
   avoidSpeed: 2
   useGravity: 1
-  gravity: 8
   velocityLimit: 25
   flipAngleThreshold: 25
-  restrictRotation: 0
+  restrictRotation: 1
   pitchRange:
-  - -45
-  - 45
+  - -40
+  - 40
   rollRange:
-  - -45
-  - 45
+  - -40
+  - 40
   tankNoise: 1
   tankRotSpeed: 200
   tankRotNoiseScale: 4
@@ -785,7 +784,9 @@ MonoBehaviour:
   prefabIndex: 19
   thisRenderer: {fileID: 0}
   thisCollider: {fileID: 3191546759937279623}
-  overrideColliderHiding: 0
+  colliderVisibility: []
+  rendererVisibility: []
+  gameObjectVisibility: []
 --- !u!1 &5288833942699506504
 GameObject:
   m_ObjectHideFlags: 0

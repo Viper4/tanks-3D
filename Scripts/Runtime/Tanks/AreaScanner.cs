@@ -11,7 +11,7 @@ public class AreaScanner : MonoBehaviour
     [SerializeField] float viewDistance = 50;
     [SerializeField] bool showRays = false;
     [SerializeField] float drawDuration = 2.5f;
-    [SerializeField] LayerMask obstructLayerMask;
+    public LayerMask obstructLayerMask;
 
     [SerializeField] enum SelectionMode
     {
@@ -72,8 +72,6 @@ public class AreaScanner : MonoBehaviour
         {
             if(!Physics.CheckSphere(collider.bounds.center, nearRadius, nearLayerMask) && Mathf.Abs(collider.bounds.min.y - origin.position.y) < heightLimit)
             {
-                Debug.Log(collider.GetType());
-
                 foreach(Vector3 vertex in collider.Vertices())
                 {
                     if(Physics.Raycast(origin.position, vertex - origin.position, out RaycastHit hit, viewDistance, objectLayerMask | obstructLayerMask))

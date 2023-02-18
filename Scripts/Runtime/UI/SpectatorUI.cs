@@ -63,6 +63,8 @@ public class SpectatorUI : MonoBehaviour
             Cursor.visible = false;
             Cursor.lockState = CursorLockMode.Locked;
         }
+        if (Application.isMobilePlatform)
+            MobileWebAppHandler.Instance.ActivateJoystick();
     }
 
     public void Pause()
@@ -72,6 +74,8 @@ public class SpectatorUI : MonoBehaviour
 
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
+        if (Application.isMobilePlatform)
+            MobileWebAppHandler.Instance.DeactivateJoystick();
     }
 
     public void Leave()

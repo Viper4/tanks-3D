@@ -913,7 +913,7 @@ namespace MyUnityAddons
                             }
                         }
                         break;
-                    default: // FFA, PvE, Co-Op
+                    default: // FFA, Co-Op
                         if(PhotonTeamsManager.Instance.GetTeamMembersCount("Players") < roomSettings.playerLimit)
                         {
                             if(currentTeam != null)

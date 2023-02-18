@@ -39,7 +39,6 @@ public class RoomCustomization : MonoBehaviour
         DataManager.roomSettings.mode = option;
 
         FFASettings.gameObject.SetActive(option == "FFA" || option == "Teams");
-        PVESettings.gameObject.SetActive(option == "PvE");
         teamSettings.gameObject.SetActive(option == "Teams");
 
         if(option == "Co-Op")

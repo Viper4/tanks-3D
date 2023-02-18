@@ -1,6 +1,7 @@
 using UnityEngine;
 using MyUnityAddons.Calculations;
 using Photon.Pun;
+using UnityEngine.EventSystems;
 
 public class CameraControl : MonoBehaviour
 {
@@ -46,7 +47,7 @@ public class CameraControl : MonoBehaviour
     // Start is called before the first frame Update
     void Start()
     {
-        if(PhotonNetwork.OfflineMode || playerControl.photonView.IsMine)
+        if(PhotonNetwork.OfflineMode || playerControl.GetComponent<PhotonView>().IsMine)
         {
             thisCamera = GetComponent<Camera>();
 
@@ -79,7 +80,7 @@ public class CameraControl : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(PhotonNetwork.OfflineMode || playerControl.photonView.IsMine)
+        if(PhotonNetwork.OfflineMode || playerControl.GetComponent<PhotonView>().IsMine)
         {
             if (!GameManager.Instance.paused)
             {
@@ -187,9 +188,27 @@ public class CameraControl : MonoBehaviour
                 {
                     if (!lockCamera)
                     {
-                        // Translating inputs from mouse into smoothed rotation of camera
-                        yaw += Input.GetAxis("Mouse X") * DataManager.playerSettings.sensitivity / 4;
-                        pitch -= Input.GetAxis("Mouse Y") * DataManager.playerSettings.sensitivity / 4;
+                        if (Application.isMobilePlatform)
+                        {
+                            if (Input.touchCount > 0)
+                            {
+                                foreach (Touch touch in Input.touches)
+                                {
+                                    if (!EventSystem.current.IsPointerOverGameObject(touch.fingerId) && touch.phase == TouchPhase.Moved)
+                                    {
+                                        yaw -= touch.deltaPosition.x * DataManager.playerSettings.sensitivity / 8;
+                                        pitch += touch.deltaPosition.y * DataManager.playerSettings.sensitivity / 8;
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            // Translating inputs from mouse into smoothed rotation of camera
+                            yaw += Input.GetAxis("Mouse X") * DataManager.playerSettings.sensitivity / 8;
+                            pitch -= Input.GetAxis("Mouse Y") * DataManager.playerSettings.sensitivity / 8;
+                        }
+
                         pitch = Mathf.Clamp(pitch, pitchMinMax.x, pitchMinMax.y);
 
                         if (DataManager.playerSettings.cameraSmoothing)
@@ -220,19 +239,66 @@ public class CameraControl : MonoBehaviour
 
     void RotateToMousePoint()
     {
-        Ray mouseRay = thisCamera.ScreenPointToRay(Input.mousePosition);
-
-        if(Physics.Raycast(mouseRay, out RaycastHit mouseHit, Mathf.Infinity, ~mouseIgnoreLayers))
+        if (Application.isMobilePlatform)
         {
-            Debug.DrawLine(transform.position, mouseHit.point, Color.green, 0.1f);
-            // Rotating turret and barrel towards the mouseHit point
-            barrel.rotation = turret.rotation = Quaternion.LookRotation(mouseHit.point - target.position, tankOrigin.up);
+            if (Input.touchCount > 0)
+            {
+                foreach (Touch touch in Input.touches)
+                {
+                    if (!EventSystem.current.IsPointerOverGameObject(touch.fingerId))
+                    {
+                        Ray mouseRay = thisCamera.ScreenPointToRay(touch.position);
+
+                        if (Physics.Raycast(mouseRay, out RaycastHit mouseHit, Mathf.Infinity, ~mouseIgnoreLayers))
+                        {
+                            Debug.DrawLine(transform.position, mouseHit.point, Color.green, 0.1f);
+                            // Rotating turret and barrel towards the mouseHit point
+                            barrel.rotation = turret.rotation = Quaternion.LookRotation(mouseHit.point - target.position, tankOrigin.up);
+                        }
+                        else
+                        {
+                            Debug.DrawRay(transform.position, mouseRay.direction * 5, Color.red, 0.1f);
+                            barrel.rotation = turret.rotation = Quaternion.LookRotation(mouseRay.direction, tankOrigin.up);
+                        }
+                        reticle.position = touch.position;
+                        break;
+                    }
+                }
+            }
         }
         else
         {
-            Debug.DrawRay(transform.position, mouseRay.direction * 5, Color.red, 0.1f);
-            barrel.rotation = turret.rotation = Quaternion.LookRotation(mouseRay.direction, tankOrigin.up);
+            Ray mouseRay = thisCamera.ScreenPointToRay(Input.mousePosition);
+
+            if (Physics.Raycast(mouseRay, out RaycastHit mouseHit, Mathf.Infinity, ~mouseIgnoreLayers))
+            {
+                Debug.DrawLine(transform.position, mouseHit.point, Color.green, 0.1f);
+                // Rotating turret and barrel towards the mouseHit point
+                barrel.rotation = turret.rotation = Quaternion.LookRotation(mouseHit.point - target.position, tankOrigin.up);
+            }
+            else
+            {
+                Debug.DrawRay(transform.position, mouseRay.direction * 5, Color.red, 0.1f);
+                barrel.rotation = turret.rotation = Quaternion.LookRotation(mouseRay.direction, tankOrigin.up);
+            }
+            reticle.position = Input.mousePosition;
         }
-        reticle.position = Input.mousePosition;
+    }
+
+    public void SwitchToAltCamera()
+    {
+        alternateCamera = true;
+        lockCamera = false;
+
+        dstFromTarget = Mathf.Clamp(dstFromTarget, altTargetDstMinMax.x, altTargetDstMinMax.y);
+        transform.eulerAngles = new Vector3(90, 0, 0);
+    }
+
+    public void SetDstFromTarget(float dst)
+    {
+        alternateCamera = false;
+        lockCamera = false;
+
+        dstFromTarget = Mathf.Clamp(dst, targetDstMinMax.x, targetDstMinMax.y);
     }
 }

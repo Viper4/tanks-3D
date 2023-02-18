@@ -156,6 +156,45 @@ MonoBehaviour:
       restoreCamera: 1
       offset: {x: 0, y: 0, z: 0, w: 0}
       cameraFieldOfView: 60
+--- !u!114 &-3397565146903784683
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b3d386ba5cd94485973aee1479b272e, type: 3}
+  m_Name: Silver Tank Hidden
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  settings:
+    passTag: Silver Tank Hidden
+    Event: 300
+    filterSettings:
+      RenderQueueType: 0
+      LayerMask:
+        serializedVersion: 2
+        m_Bits: 1073741824
+      PassNames: []
+    overrideMaterial: {fileID: 2100000, guid: baec9b262719e3849b5cd447e751f70d, type: 2}
+    overrideMaterialPassIndex: 0
+    overrideDepthState: 1
+    depthCompareFunction: 5
+    enableWrite: 0
+    stencilSettings:
+      overrideStencilState: 0
+      stencilReference: 0
+      stencilCompareFunction: 8
+      passOperation: 0
+      failOperation: 0
+      zFailOperation: 0
+    cameraSettings:
+      overrideCamera: 0
+      restoreCamera: 1
+      offset: {x: 0, y: 0, z: 0, w: 0}
+      cameraFieldOfView: 60
 --- !u!114 &-1749398730071828732
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -176,7 +215,7 @@ MonoBehaviour:
       RenderQueueType: 0
       LayerMask:
         serializedVersion: 2
-        m_Bits: 30406856
+        m_Bits: 1104148680
       PassNames: []
     overrideMaterial: {fileID: 0}
     overrideMaterialPassIndex: 0
@@ -225,8 +264,9 @@ MonoBehaviour:
   - {fileID: 4730404742690974145}
   - {fileID: 1891826586733291449}
   - {fileID: 1183262141439236652}
+  - {fileID: -3397565146903784683}
   - {fileID: -1749398730071828732}
-  m_RendererFeatureMap: 91b47e604afe3a745995e2873889aab4b18c3aec650a7096fe94e632b0d140114c988ba57da8d076d9846d90a498ca714cfe8caf16daf778e20e6301e0ce77c84d3f39332d886e1469b0906615e51d0c51327d21510ec5937f5aa03b3e56f83fc129ebfb0cc6a541b9a7e0de411e411a2c5aa700a6ca6b1004978cab1fe3b8e7
+  m_RendererFeatureMap: 91b47e604afe3a745995e2873889aab4b18c3aec650a7096fe94e632b0d140114c988ba57da8d076d9846d90a498ca714cfe8caf16daf778e20e6301e0ce77c84d3f39332d886e1469b0906615e51d0c51327d21510ec5937f5aa03b3e56f83fc129ebfb0cc6a541b9a7e0de411e411a2c5aa700a6ca6b1015538dfd7f6cd9d004978cab1fe3b8e7
   m_UseNativeRenderPass: 0
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}
@@ -242,7 +282,7 @@ MonoBehaviour:
     coreBlitColorAndDepthPS: {fileID: 4800000, guid: d104b2fc1ca6445babb8e90b0758136b, type: 3}
     cameraMotionVector: {fileID: 4800000, guid: c56b7e0d4c7cb484e959caeeedae9bbf, type: 3}
     objectMotionVector: {fileID: 4800000, guid: 7b3ede40266cd49a395def176e1bc486, type: 3}
-  m_AssetVersion: 1
+  m_AssetVersion: 2
   m_OpaqueLayerMask:
     serializedVersion: 2
     m_Bits: 2147483647
@@ -259,6 +299,7 @@ MonoBehaviour:
   m_ShadowTransparentReceive: 1
   m_RenderingMode: 0
   m_DepthPrimingMode: 0
+  m_CopyDepthMode: 0
   m_AccurateGbufferNormals: 0
   m_ClusteredRendering: 0
   m_TileSize: 32

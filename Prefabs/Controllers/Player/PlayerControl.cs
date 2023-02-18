@@ -2,18 +2,19 @@ using System.Collections;
 using UnityEngine;
 using Photon.Pun;
 using PhotonHashtable = ExitGames.Client.Photon.Hashtable;
-using ExitGames.Client.Photon;
-using Photon.Realtime;
+using UnityEngine.EventSystems;
 
-public class PlayerControl : MonoBehaviourPunCallbacks
+public class PlayerControl : MonoBehaviour
 {
     public ClientManager clientManager;
 
+    MobileInput mobileInput;
     [SerializeField] Rigidbody RB;
     [SerializeField] BaseTankLogic baseTankLogic;
     [SerializeField] Transform mainCamera;
-
     [SerializeField] Transform tankOrigin;
+    FireControl fireControl;
+    MineControl mineControl;
 
     [SerializeField] bool cheats = false;
     public bool godMode = false;
@@ -30,8 +31,17 @@ public class PlayerControl : MonoBehaviourPunCallbacks
 
     [SerializeField] LayerMask ignoreLayerMasks;
 
+    private void Awake()
+    {
+        mobileInput = new MobileInput();
+    }
+
     private void Start()
     {
+        fireControl = GetComponent<FireControl>();
+        mineControl = GetComponent<MineControl>();
+        if(Application.isMobilePlatform)
+            MobileWebAppHandler.Instance.EnablePlayerMode(this);
         GameManager.Instance.UpdatePlayerWithSettings(transform);
     }
 
@@ -48,23 +58,39 @@ public class PlayerControl : MonoBehaviourPunCallbacks
 
                     if(!GameManager.Instance.paused)
                     {
-                        if(Input.GetKeyDown(DataManager.playerSettings.keyBinds["Shoot"]))
+                        if (Application.isMobilePlatform)
                         {
-                            StartCoroutine(GetComponent<FireControl>().Shoot());
+                            if(Input.touchCount > 0)
+                            {
+                                foreach(Touch touch in Input.touches)
+                                {
+                                    if (!EventSystem.current.IsPointerOverGameObject(touch.fingerId) && touch.phase == TouchPhase.Began)
+                                    {
+                                        StartCoroutine(fireControl.Shoot());
+                                    }
+                                }
+                            }
+                            inputDir = mobileInput.Player.Move.ReadValue<Vector2>();
                         }
-                        else if(Input.GetKeyDown(DataManager.playerSettings.keyBinds["Lay Mine"]) && baseTankLogic.IsGrounded())
+                        else
                         {
-                            StartCoroutine(GetComponent<MineControl>().LayMine());
+                            if (Input.GetKeyDown(DataManager.playerSettings.keyBinds["Shoot"]))
+                            {
+                                StartCoroutine(fireControl.Shoot());
+                            }
+                            else if (Input.GetKeyDown(DataManager.playerSettings.keyBinds["Lay Mine"]) && baseTankLogic.IsGrounded())
+                            {
+                                StartCoroutine(mineControl.LayMine());
+                            }
+                            else if (Input.GetKeyDown(DataManager.playerSettings.keyBinds["Toggle HUD"]))
+                            {
+                                showHUD = !showHUD;
+                            }
+                            inputDir = new Vector2(GetInputAxis("Horizontal"), GetInputAxis("Vertical")).normalized;
                         }
-                        else if(Input.GetKeyDown(DataManager.playerSettings.keyBinds["Toggle HUD"]))
-                        {
-                            showHUD = !showHUD;
-                        }
-                        inputDir = new Vector2(GetInputAxis("Horizontal"), GetInputAxis("Vertical")).normalized;
                     }
 
                     // Moving the tank with player input
-
                     float targetSpeed = baseTankLogic.normalSpeed * 0.5f * inputDir.magnitude;
 
                     currentSpeed = Mathf.SmoothDamp(currentSpeed, targetSpeed, ref speedSmoothVelocity, GetModifiedSmoothTime(speedSmoothTime));
@@ -139,6 +165,26 @@ public class PlayerControl : MonoBehaviourPunCallbacks
         }
     }
 
+    private void OnEnable()
+    {
+        mobileInput.Enable();
+    }
+
+    private void OnDisable()
+    {
+        if (Application.isMobilePlatform)
+            MobileWebAppHandler.Instance.DisablePlayerMode();
+        mobileInput.Disable();
+    }
+
+    public void LayMine()
+    {
+        if ((PhotonNetwork.OfflineMode || clientManager.photonView.IsMine) && !Dead && !GameManager.Instance.frozen && Time.timeScale != 0 && !GameManager.Instance.paused && baseTankLogic.IsGrounded())
+        {
+            StartCoroutine(mineControl.LayMine());
+        }
+    }
+
     float GetModifiedSmoothTime(float smoothTime)
     {
         if(baseTankLogic.IsGrounded())
@@ -151,26 +197,26 @@ public class PlayerControl : MonoBehaviourPunCallbacks
 
     private float GetInputAxis(string axis)
     {
-        switch(axis)
+        switch (axis)
         {
             case "Horizontal":
                 float horizontal = 0;
-                if(Input.GetKey(DataManager.playerSettings.keyBinds["Right"]))
+                if (Input.GetKey(DataManager.playerSettings.keyBinds["Right"]))
                 {
                     horizontal += 1;
                 }
-                if(Input.GetKey(DataManager.playerSettings.keyBinds["Left"]))
+                if (Input.GetKey(DataManager.playerSettings.keyBinds["Left"]))
                 {
                     horizontal -= 1;
                 }
                 return horizontal;
             case "Vertical":
                 float vertical = 0;
-                if(Input.GetKey(DataManager.playerSettings.keyBinds["Forward"]))
+                if (Input.GetKey(DataManager.playerSettings.keyBinds["Forward"]))
                 {
                     vertical += 1;
                 }
-                if(Input.GetKey(DataManager.playerSettings.keyBinds["Backward"]))
+                if (Input.GetKey(DataManager.playerSettings.keyBinds["Backward"]))
                 {
                     vertical -= 1;
                 }
@@ -184,7 +230,7 @@ public class PlayerControl : MonoBehaviourPunCallbacks
     {
         if(!PhotonNetwork.OfflineMode)
         {
-            if(photonView.IsMine)
+            if(GetComponent<PhotonView>().IsMine)
             {
                 DataManager.playerData.deaths++;
                 PhotonHashtable playerProperties = new PhotonHashtable();
