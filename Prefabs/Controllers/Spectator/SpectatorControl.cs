@@ -191,8 +191,8 @@ public class SpectatorControl : MonoBehaviour
     private void MouseCameraRotation()
     {
         // Translating inputs from mouse into smoothed rotation of camera
-        yaw += Input.GetAxis("Mouse X") * DataManager.playerSettings.sensitivity / 4;
-        pitch -= Input.GetAxis("Mouse Y") * DataManager.playerSettings.sensitivity / 4;
+        yaw += Input.GetAxis("Mouse X") * DataManager.playerSettings.sensitivity / 8;
+        pitch -= Input.GetAxis("Mouse Y") * DataManager.playerSettings.sensitivity / 8;
         pitch = Mathf.Clamp(pitch, -90, 90);
 
         if (DataManager.playerSettings.cameraSmoothing)
