@@ -101,11 +101,6 @@ public class BaseUI : MonoBehaviour
         GameManager.Instance.MainMenu();
     }
 
-    public void Exit()
-    {
-        Application.Quit();
-    }
-
     public void ActivateElement(Transform element)
     {
         element.gameObject.SetActive(true);

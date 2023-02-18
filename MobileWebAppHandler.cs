@@ -123,7 +123,7 @@ public class MobileWebAppHandler : MonoBehaviour
     public void ToggleView()
     {
         cameraView++;
-        if(cameraView > 2)
+        if(cameraView > 1)
         {
             cameraView = 0;
         }
@@ -131,13 +131,13 @@ public class MobileWebAppHandler : MonoBehaviour
         {
             switch (cameraView)
             {
-                case 0:
+                /*case 0:
                     cameraControl.SetDstFromTarget(0);
-                    break;
-                case 1:
+                    break;*/
+                case 0:
                     cameraControl.SetDstFromTarget(6);
                     break;
-                case 2:
+                case 1:
                     cameraControl.SwitchToAltCamera();
                     break;
             }
