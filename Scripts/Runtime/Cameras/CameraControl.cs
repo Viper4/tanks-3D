@@ -245,7 +245,7 @@ public class CameraControl : MonoBehaviour
             {
                 foreach (Touch touch in Input.touches)
                 {
-                    if (!EventSystem.current.IsPointerOverGameObject(touch.fingerId))
+                    if (!EventSystem.current.IsPointerOverGameObject(touch.fingerId) && touch.phase != TouchPhase.Ended)
                     {
                         Ray mouseRay = thisCamera.ScreenPointToRay(touch.position);
 

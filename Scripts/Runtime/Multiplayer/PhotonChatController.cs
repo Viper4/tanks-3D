@@ -127,7 +127,7 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
         chatParent.SetActive(false);
         chatCanvasGroup.enabled = true;
         if (Application.isMobilePlatform && !GameManager.Instance.inLobby)
-            MobileWebAppHandler.Instance.ActivateJoystick();
+            MobileWebAppHandler.Instance.Resume();
     }
 
     public void Pause()
@@ -141,7 +141,7 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
         inputParent.SetActive(true);
         chatCanvasGroup.enabled = false;
         if (Application.isMobilePlatform)
-            MobileWebAppHandler.Instance.DeactivateJoystick();
+            MobileWebAppHandler.Instance.Pause();
     }
 
     string GetUsername(string userID)

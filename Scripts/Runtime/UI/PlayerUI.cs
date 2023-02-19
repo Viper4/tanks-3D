@@ -211,7 +211,7 @@ public class PlayerUI : MonoBehaviour
             }
         }
         if (Application.isMobilePlatform)
-            MobileWebAppHandler.Instance.ActivateJoystick();
+            MobileWebAppHandler.Instance.Resume();
     }
 
     public void Pause()
@@ -226,7 +226,7 @@ public class PlayerUI : MonoBehaviour
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
         if (Application.isMobilePlatform)
-            MobileWebAppHandler.Instance.DeactivateJoystick();
+            MobileWebAppHandler.Instance.Pause();
     }
 
     public void Leave()

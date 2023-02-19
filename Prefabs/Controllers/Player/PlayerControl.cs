@@ -40,8 +40,10 @@ public class PlayerControl : MonoBehaviour
     {
         fireControl = GetComponent<FireControl>();
         mineControl = GetComponent<MineControl>();
-        if(Application.isMobilePlatform)
+        if (Application.isMobilePlatform)
+        {
             MobileWebAppHandler.Instance.EnablePlayerMode(this);
+        }
         GameManager.Instance.UpdatePlayerWithSettings(transform);
     }
 

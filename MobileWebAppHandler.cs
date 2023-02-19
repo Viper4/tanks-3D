@@ -34,14 +34,16 @@ public class MobileWebAppHandler : MonoBehaviour
         
     }
 
-    public void ActivateJoystick()
+    public void Resume()
     {
         joystick.SetActive(true);
+        mine.SetActive(true);
     }
 
-    public void DeactivateJoystick()
+    public void Pause()
     {
         joystick.SetActive(false);
+        mine.SetActive(false);
     }
 
     public void EnablePlayerMode(PlayerControl playerControl)
@@ -49,6 +51,7 @@ public class MobileWebAppHandler : MonoBehaviour
         this.playerControl = playerControl;
         mine.SetActive(true);
         joystick.SetActive(true);
+        UpdateView();
     }
 
     public void DisablePlayerMode()
@@ -127,6 +130,11 @@ public class MobileWebAppHandler : MonoBehaviour
         {
             cameraView = 0;
         }
+        UpdateView();
+    }
+
+    void UpdateView()
+    {
         if (Camera.main != null && Camera.main.TryGetComponent<CameraControl>(out var cameraControl))
         {
             switch (cameraView)
