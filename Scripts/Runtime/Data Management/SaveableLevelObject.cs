@@ -20,14 +20,11 @@ public class SaveableLevelObject : MonoBehaviour
             position = transform.position,
             rotation = transform.rotation,
         };
-        if (!GameManager.Instance.editing)
+        if (transform.CompareTag("Spawnpoint") || transform.CompareTag("Barrier"))
         {
-            if (transform.CompareTag("Spawnpoint") || transform.CompareTag("Barrier"))
-            {
-                thisRenderer.enabled = false;
-            }
-            Destroy(this);
+            thisRenderer.enabled = false;
         }
+        Destroy(this);
     }
 
     private void LateUpdate()
@@ -37,14 +34,6 @@ public class SaveableLevelObject : MonoBehaviour
 
     private void OnBecameInvisible()
     {
-        if(GameManager.Instance.editing && !GameManager.Instance.playMode)
-        {
-            foreach (Collider collider in colliderVisibility)
-            {
-                collider.enabled = false;
-            }
-        }
-
         foreach(Renderer renderer in rendererVisibility)
         {
             renderer.enabled = false;
@@ -57,14 +46,6 @@ public class SaveableLevelObject : MonoBehaviour
      
     private void OnBecameVisible()
     {
-        if (GameManager.Instance.editing && !GameManager.Instance.playMode)
-        {
-            foreach (Collider collider in colliderVisibility)
-            {
-                collider.enabled = true;
-            }
-        }
-
         foreach(Renderer renderer in rendererVisibility)
         {
             renderer.enabled = true;

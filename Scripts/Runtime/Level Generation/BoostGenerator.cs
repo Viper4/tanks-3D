@@ -22,8 +22,7 @@ public class BoostGenerator : MonoBehaviourPunCallbacks
     {
         Instance = this;
 
-        if (!GameManager.Instance.editing)
-            Init();
+        Init();
     }
 
     public override void OnEnable()

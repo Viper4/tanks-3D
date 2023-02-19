@@ -22,8 +22,6 @@ public class GameManager : MonoBehaviourPunCallbacks
     public bool autoPlay;
     public bool inLobby;
     public bool reachedLastLevel = false;
-    public bool editing = false;
-    public bool playMode = false;
 
     public bool paused = false;
 
@@ -79,7 +77,6 @@ public class GameManager : MonoBehaviourPunCallbacks
         {
             Instance.autoPlay = autoPlay;
             Instance.inLobby = inLobby;
-            Instance.editing = editing;
             Instance.frozen = frozen;
             Instance.OnSceneLoad();
 
@@ -112,142 +109,139 @@ public class GameManager : MonoBehaviourPunCallbacks
         Time.timeScale = 1;
         canSpawn = true;
 
-        if (!editing)
+        if (PhotonNetwork.OfflineMode)
         {
-            if (PhotonNetwork.OfflineMode)
-            {
-                baseUI = FindObjectOfType<BaseUI>();
-            }
+            baseUI = FindObjectOfType<BaseUI>();
+        }
 
-            if (inLobby)
+        if (inLobby)
+        {
+            destroyedTanks.Clear();
+            UpdatePlayerWithSettings(null);
+            loadingScreen.gameObject.SetActive(false);
+            if (autoPlay)
+                ResetAutoPlay(2.5f);
+        }
+        else
+        {
+            switch (currentScene.name)
             {
-                destroyedTanks.Clear();
-                UpdatePlayerWithSettings(null);
-                loadingScreen.gameObject.SetActive(false);
-                if (autoPlay)
-                    ResetAutoPlay(2.5f);
-            }
-            else
-            {
-                switch (currentScene.name)
-                {
-                    case "End Scene":
-                        baseUI = GameObject.Find("End UI").GetComponent<BaseUI>();
-                        Text labelText = baseUI.UIElements["EndMenu"].Find("LabelBackground").GetChild(0).GetComponent<Text>();
-                        Transform stats = baseUI.UIElements["StatsMenu"].Find("Stats");
-                        loadingScreen.gameObject.SetActive(false);
+                case "End Scene":
+                    baseUI = GameObject.Find("End UI").GetComponent<BaseUI>();
+                    Text labelText = baseUI.UIElements["EndMenu"].Find("LabelBackground").GetChild(0).GetComponent<Text>();
+                    Transform stats = baseUI.UIElements["StatsMenu"].Find("Stats");
+                    loadingScreen.gameObject.SetActive(false);
 
-                        if (!PhotonNetwork.OfflineMode && !PhotonNetwork.IsMasterClient)
+                    if (!PhotonNetwork.OfflineMode && !PhotonNetwork.IsMasterClient)
+                    {
+                        baseUI.UIElements["EndMenu"].Find("Restart").gameObject.SetActive(false);
+                    }
+
+                    labelText.text = "Game over";
+                    if (reachedLastLevel)
+                    {
+                        if (PhotonNetwork.OfflineMode)
                         {
-                            baseUI.UIElements["EndMenu"].Find("Restart").gameObject.SetActive(false);
-                        }
-
-                        labelText.text = "Game over";
-                        if (reachedLastLevel)
-                        {
-                            if (PhotonNetwork.OfflineMode)
-                            {
-                                if (DataManager.playerData.lives > 0)
-                                {
-                                    labelText.text = "Campaign complete!";
-                                }
-                            }
-                            else if ((int)PhotonNetwork.CurrentRoom.CustomProperties["totalLives"] > 0)
+                            if (DataManager.playerData.lives > 0)
                             {
                                 labelText.text = "Campaign complete!";
                             }
                         }
-
-                        stats.Find("Time").GetComponent<Text>().text = "Time: " + DataManager.playerData.time.FormattedTime();
-                        stats.Find("Best Time").GetComponent<Text>().text = "Best Time: " + DataManager.playerData.bestTime.FormattedTime();
-
-                        if (DataManager.playerData.kills > 0)
+                        else if ((int)PhotonNetwork.CurrentRoom.CustomProperties["totalLives"] > 0)
                         {
-                            float accuracy = 1;
-                            if (DataManager.playerData.shots != 0)
-                            {
-                                accuracy = Mathf.Clamp((float)DataManager.playerData.kills / DataManager.playerData.shots, 0, 1);
-                            }
-                            stats.Find("Accuracy").GetComponent<Text>().text = "Accuracy: " + (Mathf.Round(accuracy * 10000) / 100).ToString() + "%";
-                            stats.Find("Kills").GetComponent<Text>().text = "Kills: " + DataManager.playerData.kills;
-                            if (DataManager.playerData.deaths == 0)
-                            {
-                                stats.Find("KD Ratio").GetComponent<Text>().text = "KD Ratio: " + DataManager.playerData.kills.ToString();
-                            }
-                            else
-                            {
-                                stats.Find("KD Ratio").GetComponent<Text>().text = "KD Ratio: " + ((float)DataManager.playerData.kills / DataManager.playerData.deaths).ToString();
-                            }
+                            labelText.text = "Campaign complete!";
                         }
+                    }
 
-                        stats.Find("Deaths").GetComponent<Text>().text = "Deaths: " + DataManager.playerData.deaths;
-                        break;
-                    default:
-                        if (currentScene.buildIndex <= multiplayerSceneIndexEnd)
+                    stats.Find("Time").GetComponent<Text>().text = "Time: " + DataManager.playerData.time.FormattedTime();
+                    stats.Find("Best Time").GetComponent<Text>().text = "Best Time: " + DataManager.playerData.bestTime.FormattedTime();
+
+                    if (DataManager.playerData.kills > 0)
+                    {
+                        float accuracy = 1;
+                        if (DataManager.playerData.shots != 0)
                         {
-                            loadingScreen.gameObject.SetActive(false);
-                            frozen = false;
+                            accuracy = Mathf.Clamp((float)DataManager.playerData.kills / DataManager.playerData.shots, 0, 1);
+                        }
+                        stats.Find("Accuracy").GetComponent<Text>().text = "Accuracy: " + (Mathf.Round(accuracy * 10000) / 100).ToString() + "%";
+                        stats.Find("Kills").GetComponent<Text>().text = "Kills: " + DataManager.playerData.kills;
+                        if (DataManager.playerData.deaths == 0)
+                        {
+                            stats.Find("KD Ratio").GetComponent<Text>().text = "KD Ratio: " + DataManager.playerData.kills.ToString();
                         }
                         else
                         {
-                            int.TryParse(Regex.Match(currentScene.name, @"\d+").Value, out int levelIndex);
-                            levelIndex--;
-                            Time.timeScale = 0;
-                            frozen = true;
-                            Cursor.visible = true;
-                            Cursor.lockState = CursorLockMode.None;
+                            stats.Find("KD Ratio").GetComponent<Text>().text = "KD Ratio: " + ((float)DataManager.playerData.kills / DataManager.playerData.deaths).ToString();
+                        }
+                    }
 
-                            loadingScreen.gameObject.SetActive(true);
-                            progressBar.gameObject.SetActive(false);
-                            if (PhotonNetwork.OfflineMode)
+                    stats.Find("Deaths").GetComponent<Text>().text = "Deaths: " + DataManager.playerData.deaths;
+                    break;
+                default:
+                    if (currentScene.buildIndex <= multiplayerSceneIndexEnd)
+                    {
+                        loadingScreen.gameObject.SetActive(false);
+                        frozen = false;
+                    }
+                    else
+                    {
+                        int.TryParse(Regex.Match(currentScene.name, @"\d+").Value, out int levelIndex);
+                        levelIndex--;
+                        Time.timeScale = 0;
+                        frozen = true;
+                        Cursor.visible = true;
+                        Cursor.lockState = CursorLockMode.None;
+
+                        loadingScreen.gameObject.SetActive(true);
+                        progressBar.gameObject.SetActive(false);
+                        if (PhotonNetwork.OfflineMode)
+                        {
+                            startButton.gameObject.SetActive(true);
+                            readyButton.gameObject.SetActive(false);
+                            readyPlayersCounter.gameObject.SetActive(false);
+                            if (DataManager.playerData.previousSceneIndex != currentScene.buildIndex && levelIndex != 0 && levelIndex % 5 == 0)
                             {
-                                startButton.gameObject.SetActive(true);
-                                readyButton.gameObject.SetActive(false);
-                                readyPlayersCounter.gameObject.SetActive(false);
-                                if (DataManager.playerData.previousSceneIndex != currentScene.buildIndex && levelIndex != 0 && levelIndex % 5 == 0)
-                                {
-                                    DataManager.playerData.lives++;
-                                    StartCoroutine(PopupExtraLife(2.25f));
-                                }
+                                DataManager.playerData.lives++;
+                                StartCoroutine(PopupExtraLife(2.25f));
+                            }
 
-                                label.Find("Lives").GetComponent<Text>().text = "Lives: " + DataManager.playerData.lives;
+                            label.Find("Lives").GetComponent<Text>().text = "Lives: " + DataManager.playerData.lives;
+                        }
+                        else
+                        {
+                            PhotonHashtable roomProperties = new PhotonHashtable()
+                            {
+                                { "started", false }
+                            };
+                            startButton.gameObject.SetActive(false);
+                            readyButton.gameObject.SetActive(true);
+                            readyButton.GetComponent<Image>().color = Color.red;
+                            ready = false;
+                            readyPlayers = 0;
+                            readyPlayersCounter.text = "0 / " + CustomNetworkHandling.NonSpectatorList.Length;
+
+                            totalLives = (int)PhotonNetwork.CurrentRoom.CustomProperties["totalLives"];
+                            if (DataManager.playerData.previousSceneIndex != currentScene.buildIndex && levelIndex != 0 && levelIndex % 5 == 0)
+                            {
+                                totalLives++;
+                                StartCoroutine(PopupExtraLife(2.25f));
+
+                                label.Find("Lives").GetComponent<Text>().text = "Lives: " + totalLives;
+                                roomProperties.Add("Total Lives", totalLives);
                             }
                             else
                             {
-                                PhotonHashtable roomProperties = new PhotonHashtable()
-                                {
-                                    { "started", false }
-                                };
-                                startButton.gameObject.SetActive(false);
-                                readyButton.gameObject.SetActive(true);
-                                readyButton.GetComponent<Image>().color = Color.red;
-                                ready = false;
-                                readyPlayers = 0;
-                                readyPlayersCounter.text = "0 / " + CustomNetworkHandling.NonSpectatorList.Length;
-
-                                totalLives = (int)PhotonNetwork.CurrentRoom.CustomProperties["totalLives"];
-                                if (DataManager.playerData.previousSceneIndex != currentScene.buildIndex && levelIndex != 0 && levelIndex % 5 == 0)
-                                {
-                                    totalLives++;
-                                    StartCoroutine(PopupExtraLife(2.25f));
-
-                                    label.Find("Lives").GetComponent<Text>().text = "Lives: " + totalLives;
-                                    roomProperties.Add("Total Lives", totalLives);
-                                }
-                                else
-                                {
-                                    label.Find("Lives").GetComponent<Text>().text = "Lives: " + totalLives;
-                                }
-                                if (PhotonNetwork.IsMasterClient)
-                                {
-                                    PhotonNetwork.CurrentRoom.SetCustomProperties(roomProperties);
-                                }
+                                label.Find("Lives").GetComponent<Text>().text = "Lives: " + totalLives;
                             }
-
-                            DataManager.playerData.previousSceneIndex = currentScene.buildIndex;
+                            if (PhotonNetwork.IsMasterClient)
+                            {
+                                PhotonNetwork.CurrentRoom.SetCustomProperties(roomProperties);
+                            }
                         }
-                        break;
-                }
+
+                        DataManager.playerData.previousSceneIndex = currentScene.buildIndex;
+                    }
+                    break;
             }
         }
     }

@@ -44,8 +44,7 @@ public class RoomCustomization : MonoBehaviour
         if(option == "Co-Op")
         {
             CoOpSettings.gameObject.SetActive(true);
-            if (!GameManager.Instance.editing)
-                mapSelection.gameObject.SetActive(false);
+            mapSelection.gameObject.SetActive(false);
 
             if(DataManager.roomSettings.map != "Classic 1" && DataManager.roomSettings.map != "Regular 1")
             {
@@ -56,8 +55,7 @@ public class RoomCustomization : MonoBehaviour
         else
         {
             CoOpSettings.gameObject.SetActive(false);
-            if(!GameManager.Instance.editing)
-                mapSelection.gameObject.SetActive(true);
+            mapSelection.gameObject.SetActive(true);
 
             if(DataManager.roomSettings.map == "Classic 1" || DataManager.roomSettings.map == "Regular 1")
             {

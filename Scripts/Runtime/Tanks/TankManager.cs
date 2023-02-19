@@ -38,7 +38,7 @@ public class TankManager : MonoBehaviourPunCallbacks
     {
         Instance = this;
 
-        if (autoInit && !GameManager.Instance.editing)
+        if (autoInit)
             Init();
 
         GameManager.Instance.TankManagerUpdate(lastCampaignScene);
@@ -65,7 +65,7 @@ public class TankManager : MonoBehaviourPunCallbacks
             Destroy(tankParent.GetChild(index).gameObject);
         }
 
-        if (GameManager.Instance.editing || (!PhotonNetwork.OfflineMode && !GameManager.Instance.inLobby))
+        if (!PhotonNetwork.OfflineMode && !GameManager.Instance.inLobby)
         {
             if (DataManager.roomSettings.fillLobby)
             {
@@ -265,8 +265,7 @@ public class TankManager : MonoBehaviourPunCallbacks
 
     public void StartCheckTankCount()
     {
-        if (!GameManager.Instance.editing)
-            StartCoroutine(CheckTankCount());
+        StartCoroutine(CheckTankCount());
     }
 
     // Have to wait before checking childCount since mines can blow up multiple tanks simultaneously

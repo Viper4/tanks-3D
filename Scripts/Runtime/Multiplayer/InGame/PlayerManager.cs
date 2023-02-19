@@ -48,7 +48,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks
             teamSpawns.Add(child.GetComponent<Collider>());
         }
 
-        if (!GameManager.Instance.editing && !PhotonNetwork.OfflineMode)
+        if (!PhotonNetwork.OfflineMode)
         {
             PhotonTeam playerTeam = PhotonNetwork.LocalPlayer.GetPhotonTeam();
 
