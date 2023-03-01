@@ -25,7 +25,7 @@ public class RoomCustomization : MonoBehaviour
     public void ChangeMap(Dropdown dropdown)
     {
         DataManager.roomSettings.map = dropdown.options[dropdown.value].text;
-        DataManager.roomSettings.customMap = dropdown.value > 1;
+        DataManager.roomSettings.customMap = dropdown.value > 2;
     }
 
     public void ChangeCampaign(Dropdown dropdown)
