@@ -158,17 +158,11 @@ public class LevelEditorControl : MonoBehaviour
             {
                 if (Input.GetKeyDown(KeyCode.S))
                 {
-                    baseUI.UIElements["SaveMenu"].gameObject.SetActive(true);
-                    baseUI.UIElements["SaveMenu"].Find("Level Name").GetComponent<TMP_InputField>().SetTextWithoutNotify(levelName);
-                    baseUI.UIElements["SaveMenu"].Find("Level Description").GetComponent<TMP_InputField>().SetTextWithoutNotify(levelDescription);
-                    baseUI.UIElements["SaveMenu"].Find("Level Creators").GetComponent<TMP_InputField>().SetTextWithoutNotify(levelCreators);
-                    Pause();
+                    ShowSaveMenu();
                 }
                 else if (Input.GetKeyDown(KeyCode.L))
                 {
-                    RefreshLevelSlots();
-                    baseUI.UIElements["LoadMenu"].gameObject.SetActive(true);
-                    Pause();
+                    ShowLoadMenu();
                 }
                 else if (Input.GetKeyDown(KeyCode.P))
                 {
@@ -472,6 +466,22 @@ public class LevelEditorControl : MonoBehaviour
                 }
             }
         }
+    }
+
+    public void ShowSaveMenu()
+    {
+        baseUI.UIElements["SaveMenu"].gameObject.SetActive(true);
+        baseUI.UIElements["SaveMenu"].Find("Level Name").GetComponent<TMP_InputField>().SetTextWithoutNotify(levelName);
+        baseUI.UIElements["SaveMenu"].Find("Level Description").GetComponent<TMP_InputField>().SetTextWithoutNotify(levelDescription);
+        baseUI.UIElements["SaveMenu"].Find("Level Creators").GetComponent<TMP_InputField>().SetTextWithoutNotify(levelCreators);
+        Pause();
+    }
+
+    public void ShowLoadMenu()
+    {
+        RefreshLevelSlots();
+        baseUI.UIElements["LoadMenu"].gameObject.SetActive(true);
+        Pause();
     }
 
     void UpdatePreviewObject(bool leftShiftDown)
