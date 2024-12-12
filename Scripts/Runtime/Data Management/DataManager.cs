@@ -18,6 +18,7 @@ public class DataManager : MonoBehaviourPun
     {
         if(Instance == null)
         {
+            PhotonNetwork.PhotonServerSettings.AppSettings.FixedRegion = "us";
             chatSettings = SaveSystem.LoadChatSettings("ChatSettings");
             playerSettings = SaveSystem.LoadPlayerSettings("PlayerSettings");
             string latestRoomSettingsFile = SaveSystem.LatestFileInSaveFolder(false, ".roomsettings");
