@@ -774,7 +774,6 @@ MonoBehaviour:
   normalSpeed: 5
   avoidSpeed: 3
   useGravity: 1
-  gravity: 8
   velocityLimit: 25
   flipAngleThreshold: 25
   restrictRotation: 0
@@ -849,6 +848,11 @@ MonoBehaviour:
   defensePitch: 0.8
   disappearEffect: {fileID: 5384122212087700693, guid: 36c6a8771c7b842458562c3fc23b1d88, type: 3}
   circleEffect: {fileID: 3732310306430455072, guid: a88fa7b3b3d05f745885137d7d198915, type: 3}
+  engineSoundManager: {fileID: 1463264494746814847}
+  trapBot: {fileID: 4272147470362433532}
+  bodyRenderer: {fileID: 6795614070258741870}
+  turretRenderer: {fileID: 4653960954150488459}
+  barrelRenderer: {fileID: 5367608962587421964}
 --- !u!114 &1673415735734285976
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -986,7 +990,9 @@ MonoBehaviour:
   prefabIndex: 25
   thisRenderer: {fileID: 0}
   thisCollider: {fileID: 451881882180253765}
-  overrideColliderHiding: 0
+  colliderVisibility: []
+  rendererVisibility: []
+  gameObjectVisibility: []
 --- !u!1 &8330142916516434170
 GameObject:
   m_ObjectHideFlags: 0

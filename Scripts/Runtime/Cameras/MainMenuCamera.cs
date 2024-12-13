@@ -43,7 +43,20 @@ public class MainMenuCamera : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(target == null)
+        if (Input.GetKeyDown(KeyCode.F11))
+        {
+            Debug.Log("Here");
+            Screen.fullScreen = !Screen.fullScreen;
+            if (Screen.fullScreen)
+            {
+                Screen.fullScreenMode = FullScreenMode.ExclusiveFullScreen;
+            }
+            else
+            {
+                Screen.fullScreenMode = FullScreenMode.Windowed;
+            }
+        }
+        if (target == null)
         {
             targetDstLimit = targetDstMinMaxFar;
             targetIndex = -1;

@@ -4,6 +4,9 @@ using Photon.Pun;
 using PhotonHashtable = ExitGames.Client.Photon.Hashtable;
 using ExitGames.Client.Photon;
 using Photon.Realtime;
+using System.Collections.Generic;
+using UnityEngine.Rendering.Universal;
+using Photon.Pun.UtilityScripts;
 
 public class PlayerControl : MonoBehaviourPunCallbacks
 {

@@ -32,7 +32,7 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
     LevelInfo tempLevelInfo;
 
     int currentPacket;
-    int totalPackets;
+    int totalPackets = -1;
 
     // Start is called before the first frame update
     IEnumerator Start()
@@ -61,6 +61,32 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
         UpdateBasicUI();
         teamSwitcher.MasterUpdateRosters();
         loadingScreen.SetActive(false);
+    }
+
+    private IEnumerator SendCustomMap()
+    {
+        LevelInfo levelInfo = SaveSystem.LoadLevel(DataManager.roomSettings.map);
+        int packetSize = 250;
+        int cooldownPackets = 15;
+        int packetsSent = 0;
+        for (int i = 0; i < levelInfo.levelObjects.Count; i += packetSize)
+        {
+            PhotonHashtable parameters = new PhotonHashtable()
+            {
+                { "packet", levelInfo.levelObjects.GetRange(i, Mathf.Min(packetSize, levelInfo.levelObjects.Count - i)) }
+            };
+            if (i == 0)
+            {
+                parameters.Add("start", Mathf.CeilToInt(levelInfo.levelObjects.Count / (float)packetSize));
+            }
+
+            PhotonNetwork.RaiseEvent(EventCodes.LevelObjectUpload, parameters, RaiseEventOptions.Default, SendOptions.SendUnreliable);
+            packetsSent++;
+            if (packetsSent % cooldownPackets == 0)
+                yield return new WaitForSecondsRealtime(2f); // Prevent send buffer from overflowing
+        }
+
+        readyPlayers++;
     }
 
     public void StartGame() // Accessable only by MasterClient
@@ -94,23 +120,7 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
             }
             else
             {
-                LevelInfo levelInfo = SaveSystem.LoadLevel(DataManager.roomSettings.map);
-                int packetSize = 5;
-                for (int i = 0; i < levelInfo.levelObjects.Count; i += packetSize)
-                {
-                    PhotonHashtable parameters = new PhotonHashtable()
-                    {
-                        { "packet", levelInfo.levelObjects.GetRange(i, Mathf.Min(packetSize, levelInfo.levelObjects.Count - i)) }
-                    };
-                    if (i == 0)
-                    {
-                        parameters.Add("start", Mathf.CeilToInt(levelInfo.levelObjects.Count / (float)packetSize));
-                    }
-
-                    PhotonNetwork.RaiseEvent(EventCodes.LevelObjectUpload, parameters, RaiseEventOptions.Default, SendOptions.SendReliable);
-                }
-
-                readyPlayers++;
+                StartCoroutine(SendCustomMap());
             }
         }
         else
@@ -201,6 +211,12 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
         PhotonNetwork.NetworkingClient.EventReceived -= OnEvent;
     }
 
+    private IEnumerator SendReadyToLeaveDelayed()
+    {
+        yield return new WaitForSecondsRealtime(2f); // Wait for buffer to clear
+        PhotonNetwork.RaiseEvent(EventCodes.ReadyToLeave, null, RaiseEventOptions.Default, SendOptions.SendUnreliable);
+    }
+    
     void OnEvent(EventData eventData)
     {
         if(eventData.Code == EventCodes.UpdateUI)
@@ -244,15 +260,19 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
             {
                 tempLevelInfo.levelObjects.Add(levelObjectInfo);
             }
-            if(currentPacket >= totalPackets)
-            {
-                customLoadingLabel.text = "Waiting On Others...";
-                SaveSystem.SaveTempLevel(tempLevelInfo);
-                PhotonNetwork.RaiseEvent(EventCodes.ReadyToLeave, null, RaiseEventOptions.Default, SendOptions.SendUnreliable);
-            }
+
             float progress = currentPacket / (float)totalPackets;
             customLoadingProgressBar.SetValueWithoutNotify(progress);
             progressBarText.text = (Mathf.Round(progress * 10000) / 100) + "%";
+
+            if (totalPackets > -1 && currentPacket >= totalPackets)
+            {
+                customLoadingLabel.text = "Waiting On Others...";
+                SaveSystem.SaveTempLevel(tempLevelInfo);
+                StartCoroutine(SendReadyToLeaveDelayed());
+                //PhotonNetwork.RaiseEvent(EventCodes.ReadyToLeave, null, RaiseEventOptions.Default, SendOptions.SendUnreliable);
+                totalPackets = -1;
+            }
         }
         else if(eventData.Code == EventCodes.ReadyToLeave)
         {
@@ -266,6 +286,7 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
                 if (readyPlayers == totalPlayers)
                 {
                     PhotonNetwork.RaiseEvent(EventCodes.LeaveWaitingRoom, null, RaiseEventOptions.Default, SendOptions.SendUnreliable);
+                    //GameManager.Instance.PhotonLoadScene("Custom");
                     GameManager.Instance.LoadScene("Custom");
                 }
             }

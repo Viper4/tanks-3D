@@ -23,13 +23,23 @@ public class UsernameSystem : MonoBehaviour
 
     private void Update()
     {
-        if(cameraControl == null)
+        if (DataManager.playerSettings.silhouettes)
         {
-            UpdateTextMeshTo(mainCamera, false);
+            if (!textMesh.enabled)
+                textMesh.enabled = true;
+            if (cameraControl == null)
+            {
+                UpdateTextMeshTo(mainCamera, false);
+            }
+            else
+            {
+                UpdateTextMeshTo(mainCamera, cameraControl.alternateCamera);
+            }
         }
         else
         {
-            UpdateTextMeshTo(mainCamera, cameraControl.alternateCamera);
+            if(textMesh.enabled)
+                textMesh.enabled = false;
         }
     }
 

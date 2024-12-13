@@ -12,10 +12,10 @@ public class CameraControl : MonoBehaviour
     [SerializeField] PlayerControl playerControl;
     [SerializeField] BaseUI baseUI;
 
-    Transform tankOrigin;
-    Transform body;
-    Transform turret;
-    Transform barrel;
+    [SerializeField] private Transform tankOrigin;
+    [SerializeField] private Transform body;
+    [SerializeField] private Transform turret;
+    [SerializeField] private Transform barrel;
 
     Quaternion lastParentRotation;
 
@@ -56,11 +56,6 @@ public class CameraControl : MonoBehaviour
                 target = transform.parent;
             }
 
-            tankOrigin = transform.parent.Find("Tank Origin");
-            body = tankOrigin.Find("Body");
-            turret = tankOrigin.Find("Turret");
-            barrel = tankOrigin.Find("Barrel");
-
             Cursor.visible = true;
             Cursor.lockState = CursorLockMode.None;
 
@@ -81,6 +76,19 @@ public class CameraControl : MonoBehaviour
     {
         if(PhotonNetwork.OfflineMode || playerControl.photonView.IsMine)
         {
+            if (Input.GetKeyDown(KeyCode.F11))
+            {
+                Debug.Log("Here");
+                Screen.fullScreen = !Screen.fullScreen;
+                if (Screen.fullScreen)
+                {
+                    Screen.fullScreenMode = FullScreenMode.ExclusiveFullScreen;
+                }
+                else
+                {
+                    Screen.fullScreenMode = FullScreenMode.Windowed;
+                }
+            }
             if (!GameManager.Instance.paused)
             {
                 float zoomRate = Input.GetKey(DataManager.playerSettings.keyBinds["Zoom Control"]) ? DataManager.playerSettings.slowZoomSpeed : DataManager.playerSettings.fastZoomSpeed;
