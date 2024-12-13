@@ -60,6 +60,31 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
         loadingScreen.SetActive(false);
     }
 
+    private IEnumerator SendCustomMap(LevelInfo levelInfo)
+    {
+        int packetSize = 250;
+        int cooldownPackets = 15;
+        int packetsSent = 0;
+        for (int i = 0; i < levelInfo.levelObjects.Count; i += packetSize)
+        {
+            PhotonHashtable parameters = new PhotonHashtable()
+            {
+                { "packet", levelInfo.levelObjects.GetRange(i, Mathf.Min(packetSize, levelInfo.levelObjects.Count - i)) }
+            };
+            if (i == 0)
+            {
+                parameters.Add("start", Mathf.CeilToInt(levelInfo.levelObjects.Count / (float)packetSize));
+            }
+
+            PhotonNetwork.RaiseEvent(EventCodes.LevelObjectUpload, parameters, RaiseEventOptions.Default, SendOptions.SendUnreliable);
+            packetsSent++;
+            if (packetsSent % cooldownPackets == 0)
+                yield return new WaitForSecondsRealtime(2f); // Prevent send buffer from overflowing
+        }
+
+        readyPlayers++;
+    }
+
     public void StartGame() // Accessable only by MasterClient
     {
         if(DataManager.roomSettings.mode == "Co-Op")
@@ -90,22 +115,7 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
             }
             else
             {
-                int packetSize = 5;
-                for (int i = 0; i < DataManager.tempLevelInfo.levelObjects.Count; i += packetSize)
-                {
-                    PhotonHashtable parameters = new PhotonHashtable()
-                    {
-                        { "packet", DataManager.tempLevelInfo.levelObjects.GetRange(i, Mathf.Min(packetSize, DataManager.tempLevelInfo.levelObjects.Count - i)) }
-                    };
-                    if (i == 0)
-                    {
-                        parameters.Add("start", Mathf.CeilToInt(DataManager.tempLevelInfo.levelObjects.Count / (float)packetSize));
-                    }
-
-                    PhotonNetwork.RaiseEvent(EventCodes.LevelObjectUpload, parameters, RaiseEventOptions.Default, SendOptions.SendReliable);
-                }
-
-                readyPlayers++;
+                StartCoroutine(SendCustomMap(DataManager.tempLevelInfo));
             }
         }
         else
@@ -196,6 +206,12 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
         PhotonNetwork.NetworkingClient.EventReceived -= OnEvent;
     }
 
+    private IEnumerator SendReadyToLeaveDelayed()
+    {
+        yield return new WaitForSecondsRealtime(2f); // Wait for buffer to clear
+        PhotonNetwork.RaiseEvent(EventCodes.ReadyToLeave, null, RaiseEventOptions.Default, SendOptions.SendUnreliable);
+    }
+
     void OnEvent(EventData eventData)
     {
         if(eventData.Code == EventCodes.UpdateUI)
@@ -238,11 +254,11 @@ public class WaitingRoom : MonoBehaviourPunCallbacks
             {
                 DataManager.tempLevelInfo.levelObjects.Add(levelObjectInfo);
             }
-            if(currentPacket >= totalPackets)
+            if(currentPacket > -1 && currentPacket >= totalPackets)
             {
                 customLoadingLabel.text = "Waiting On Others...";
-                
-                PhotonNetwork.RaiseEvent(EventCodes.ReadyToLeave, null, RaiseEventOptions.Default, SendOptions.SendUnreliable);
+                StartCoroutine(SendReadyToLeaveDelayed());
+                totalPackets = -1;
             }
             float progress = currentPacket / (float)totalPackets;
             customLoadingProgressBar.SetValueWithoutNotify(progress);

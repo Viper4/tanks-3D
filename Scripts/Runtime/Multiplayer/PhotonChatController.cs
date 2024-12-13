@@ -647,7 +647,7 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
                 else
                 {
                     object[] messageData = (object[])messages[i];
-                    byte messageType = (byte)messageData[0];
+                    int messageType = (int)messageData[0];
                     if (messageType == 0)
                     {
                         IDUsernamePair.AddOrReplace((string)messageData[1], (string)messageData[2]);

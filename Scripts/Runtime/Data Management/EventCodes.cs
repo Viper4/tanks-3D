@@ -17,7 +17,7 @@ public static class EventCodes
     // Waiting room
     public static readonly byte UpdateUI = 7;
     public static readonly byte LeaveWaitingRoom = 8;
-    public static readonly byte LevelObjectUpload = 9;
+    public static readonly byte LevelObjectUpload = 12;
     public static readonly byte ReadyToLeave = 10;
 
     // Boosts
