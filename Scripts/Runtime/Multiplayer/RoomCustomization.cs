@@ -124,6 +124,11 @@ public class RoomCustomization : MonoBehaviour
         int.TryParse(input.text, out DataManager.roomSettings.totalLives);
     }
 
+    public void ChangeResetIfAllDie(Toggle toggle)
+    {
+        DataManager.roomSettings.resetIfAllDie = toggle.isOn;
+    }
+
     public void UpdateSettingsUI()
     {
         GameObject[] allUISettings = GameObject.FindGameObjectsWithTag("UI Setting");
@@ -175,6 +180,12 @@ public class RoomCustomization : MonoBehaviour
                     break;
                 case "Boost Limit":
                     setting.GetComponent<InputField>().text = DataManager.roomSettings.boostLimit.ToString();
+                    break;
+                case "Total Lives":
+                    setting.GetComponent<TMP_InputField>().text = DataManager.roomSettings.totalLives.ToString();
+                    break;
+                case "Reset If All Die":
+                    setting.GetComponent<Toggle>().isOn = DataManager.roomSettings.resetIfAllDie;
                     break;
             }
         }

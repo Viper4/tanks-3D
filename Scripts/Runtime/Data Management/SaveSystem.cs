@@ -78,6 +78,7 @@ public static class SaveSystem
         boosts = new List<string>(),
         boostLimit = 10,
         totalLives = 6,
+        resetIfAllDie = false,
     };
 
     public static readonly PlayerData defaultPlayerData = new PlayerData

@@ -28,6 +28,8 @@ public class PlayerManager : MonoBehaviourPunCallbacks
 
     BoxCollider playerSpawnCollider;
 
+    int deadPlayers = 0;
+
     private void Start()
     {
         Instance = this;
@@ -295,8 +297,8 @@ public class PlayerManager : MonoBehaviourPunCallbacks
     {
         if (DataManager.roomSettings.mode == "Co-Op")
         {
+            deadPlayers++;
             tankOrigin.parent.SetParent(null);
-
             GameManager.Instance.totalLives--;
             if (playerParent.childCount < 1)
             {
@@ -321,19 +323,33 @@ public class PlayerManager : MonoBehaviourPunCallbacks
 
     void RestartCoOpGame()
     {
-        PhotonHashtable roomProperties = new PhotonHashtable()
+        if (deadPlayers >= CustomNetworkHandling.SpectatorList.Length + CustomNetworkHandling.NonSpectatorList.Length && DataManager.roomSettings.resetIfAllDie)
         {
-            { "totalLives", GameManager.Instance.totalLives }
-        };
-        PhotonNetwork.CurrentRoom.SetCustomProperties(roomProperties);
-        if (GameManager.Instance.totalLives > 0 && CustomNetworkHandling.NonSpectatorList.Length > 0)
-        {
-            GameManager.Instance.PhotonLoadScene(-1, 3, true);
+            GameManager.Instance.totalLives = 0;
+            PhotonHashtable roomProperties = new PhotonHashtable()
+            {
+                { "totalLives", 0 }
+            };
+            PhotonNetwork.CurrentRoom.SetCustomProperties(roomProperties);
+            GameManager.Instance.PhotonLoadScene("End Scene", 3, true);
         }
         else
         {
-            GameManager.Instance.PhotonLoadScene("End Scene", 3, true);
+            PhotonHashtable roomProperties = new PhotonHashtable()
+            {
+                { "totalLives", GameManager.Instance.totalLives }
+            };
+            PhotonNetwork.CurrentRoom.SetCustomProperties(roomProperties);
+            if (GameManager.Instance.totalLives > 0 && CustomNetworkHandling.NonSpectatorList.Length > 0)
+            {
+                GameManager.Instance.PhotonLoadScene(-1, 3, true);
+            }
+            else
+            {
+                GameManager.Instance.PhotonLoadScene("End Scene", 3, true);
+            }
         }
+        deadPlayers = 0;
     }
 
     public override void OnPlayerLeftRoom(Player otherPlayer)

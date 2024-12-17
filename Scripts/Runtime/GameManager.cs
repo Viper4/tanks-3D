@@ -51,9 +51,9 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     public Scene currentScene;
 
-    public readonly int multiplayerSceneIndexEnd = 8;
+    public readonly int multiplayerSceneIndexEnd = 7;
 
-    public int totalLives = -1;
+    public int totalLives { get; set; } = -1;
     int readyPlayers = 0;
     bool ready = false;
 

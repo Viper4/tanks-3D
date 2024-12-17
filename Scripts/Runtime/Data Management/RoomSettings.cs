@@ -19,4 +19,5 @@ public class RoomSettings
     public List<string> boosts;
     public int boostLimit;
     public int totalLives;
+    public bool resetIfAllDie;
 }

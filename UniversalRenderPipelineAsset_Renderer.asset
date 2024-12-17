@@ -1,44 +1,5 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &-7798811438105152943
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6b3d386ba5cd94485973aee1479b272e, type: 3}
-  m_Name: White Tank Hidden
-  m_EditorClassIdentifier: 
-  m_Active: 1
-  settings:
-    passTag: White Tank Hidden
-    Event: 300
-    filterSettings:
-      RenderQueueType: 0
-      LayerMask:
-        serializedVersion: 2
-        m_Bits: 262144
-      PassNames: []
-    overrideMaterial: {fileID: 2100000, guid: f47c18e91dc37b940a862250a4189f80, type: 2}
-    overrideMaterialPassIndex: 0
-    overrideDepthState: 1
-    depthCompareFunction: 5
-    enableWrite: 0
-    stencilSettings:
-      overrideStencilState: 0
-      stencilReference: 0
-      stencilCompareFunction: 8
-      passOperation: 0
-      failOperation: 0
-      zFailOperation: 0
-    cameraSettings:
-      overrideCamera: 0
-      restoreCamera: 1
-      offset: {x: 0, y: 0, z: 0, w: 0}
-      cameraFieldOfView: 60
 --- !u!114 &-7606568337757533007
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -259,14 +220,13 @@ MonoBehaviour:
   - {fileID: -4001502282404131102}
   - {fileID: 1472263855911026509}
   - {fileID: 873105782857576553}
-  - {fileID: -7798811438105152943}
   - {fileID: 4609529043902028415}
   - {fileID: 4730404742690974145}
   - {fileID: 1891826586733291449}
   - {fileID: 1183262141439236652}
   - {fileID: -6559974409069650716}
   - {fileID: -1749398730071828732}
-  m_RendererFeatureMap: 91b47e604afe3a745995e2873889aab4b18c3aec650a7096fe94e632b0d140114c988ba57da8d076d9846d90a498ca714cfe8caf16daf778e20e6301e0ce77c84d3f39332d886e1469b0906615e51d0c51327d21510ec5937f5aa03b3e56f83fc129ebfb0cc6a541b9a7e0de411e411a2c5aa700a6ca6b10e41cc0fb074af6a404978cab1fe3b8e7
+  m_RendererFeatureMap: 91b47e604afe3a745995e2873889aab4b18c3aec650a7096fe94e632b0d140114c988ba57da8d076d9846d90a498ca714cfe8caf16daf778e20e6301e0ce77c84d3f39332d886e1469b0906615e51d0c7f5aa03b3e56f83fc129ebfb0cc6a541b9a7e0de411e411a2c5aa700a6ca6b10e41cc0fb074af6a404978cab1fe3b8e7
   m_UseNativeRenderPass: 0
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}

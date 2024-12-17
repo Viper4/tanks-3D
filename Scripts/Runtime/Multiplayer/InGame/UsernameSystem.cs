@@ -23,7 +23,7 @@ public class UsernameSystem : MonoBehaviour
 
     private void Update()
     {
-        if (DataManager.playerSettings.silhouettes)
+        if (DataManager.playerSettings.silhouettes || DataManager.roomSettings.mode == "Co-Op")
         {
             if (!textMesh.enabled)
                 textMesh.enabled = true;
